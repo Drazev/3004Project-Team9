@@ -35,9 +35,6 @@ build/
 ### MacOS ###
 .DS_Store
 
-### Maven ###
-.mvn
-
 # Compiled class file
 *.class
 
