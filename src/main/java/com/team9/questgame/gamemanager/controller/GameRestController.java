@@ -1,0 +1,90 @@
+package com.team9.questgame.gamemanager.controller;
+
+
+import com.team9.questgame.gamemanager.model.GameStartResponse;
+import com.team9.questgame.gamemanager.model.PlayersGetResponse;
+import com.team9.questgame.gamemanager.model.RegistrationRequest;
+import com.team9.questgame.gamemanager.model.RegistrationResponse;
+import com.team9.questgame.gamemanager.service.GameService;
+import com.team9.questgame.gamemanager.service.SessionService;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@RestController
+@RequestMapping("/api")
+public class GameRestController {
+    Logger LOG = LoggerFactory.getLogger(GameRestController.class);
+
+    @Autowired
+    SessionService sessionService;
+
+    @Autowired
+    GameService gameService;
+
+    /**
+     * Register a player to the game
+     * @param requestBody contains the information of the player to be registered
+     * @return a response containing the confirmation
+     */
+    @PostMapping("/register")
+    public RegistrationResponse handleRegister(@RequestBody RegistrationRequest requestBody) {
+        LOG.info(String.format("POST /api/register: requestBody = %s", requestBody));
+        boolean registrationConfirmed = sessionService.registerPlayer(requestBody.getName());
+        return new RegistrationResponse(registrationConfirmed, requestBody.getName());
+
+    }
+
+    /**
+     * De-register a player from the game
+     * @param requestBody contains the information of the player to be de-registered
+     * @return a response containing the confirmation
+     */
+    @DeleteMapping("/register")
+    public RegistrationResponse handleDeregister(@RequestBody RegistrationRequest requestBody) {
+        LOG.info(String.format("DELETE /api/register: requestBody = %s", requestBody));
+        boolean confirmed = sessionService.deregisterPlayer(requestBody.getName());
+        return new RegistrationResponse(confirmed, requestBody.getName());
+    }
+
+    /**
+     * Get all registered player
+     * @return a response containing the registered players
+     */
+    @GetMapping("/player")
+    public PlayersGetResponse handleGetPlayers() {
+        ArrayList<String> players = sessionService.getPlayers();
+
+        return new PlayersGetResponse(players);
+    }
+
+    /**
+     * Handle request to start the game from client
+     * @return a response containing the game status
+     */
+    @PostMapping("/start")
+    public GameStartResponse handleGameStart() {
+        LOG.info("POST /api/start-game");
+        boolean gameStarted = gameService.startGame();
+        return new GameStartResponse(gameStarted);
+    }
+
+    /**
+     * Handle get request for game status
+     * @return a response containing the game status
+     */
+    @GetMapping("/start")
+    public GameStartResponse handleGameStatus() {
+        LOG.info("GET /api/game-status");
+        boolean gameStarted = gameService.isGameStarted();
+        return new GameStartResponse(gameStarted);
+    }
+
+}

@@ -1,13 +1,16 @@
-package com.team9.questgame.Entities;
+package com.team9.questgame.gamemanager.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
+/**
+ * Request body for POST/DELETE /api/register
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Message {
+public class RegistrationRequest {
     private String name;
-    private String message;
 }
