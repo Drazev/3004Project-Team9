@@ -1,5 +1,6 @@
 import "./App.css";
 import Header from "./components/Header";
+import Card from "./components/Card";
 import ConnectForm from "./components/ConnectForm";
 import MessageForm from "./components/MessageForm";
 import Messages from "./components/Messages";
@@ -11,6 +12,7 @@ const App = () => {
   return (
     <div className="App">
       <Header />
+      <Card isInHand={true} isTurn={true} canGrow={true} />
       {connected ? (
         <>
           <MessageForm />
