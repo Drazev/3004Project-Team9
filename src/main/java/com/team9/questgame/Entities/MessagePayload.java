@@ -1,4 +1,4 @@
-package com.team9.questgame.payload;
+package com.team9.questgame.Entities;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

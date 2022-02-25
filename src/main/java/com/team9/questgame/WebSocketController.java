@@ -1,6 +1,6 @@
 package com.team9.questgame;
 
-import com.team9.questgame.payload.MessagePayload;
+import com.team9.questgame.Entities.MessagePayload;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
