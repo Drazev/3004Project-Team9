@@ -4,6 +4,7 @@ import ConnectForm from "./components/ConnectForm";
 import MessageForm from "./components/MessageForm";
 import Messages from "./components/Messages";
 import { useConnected } from "./Store";
+import WaitingRoom from "./components/WaitingRoom";
 
 const App = () => {
   const connected = useConnected();
@@ -13,7 +14,8 @@ const App = () => {
       <Header />
       {connected ? (
         <>
-          <MessageForm />
+        <WaitingRoom />
+          {/* <MessageForm /> */}
           <Messages />
         </>
       ) : (
