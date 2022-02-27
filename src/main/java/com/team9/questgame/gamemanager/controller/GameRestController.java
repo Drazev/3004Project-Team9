@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
+import java.util.Map;
 
 
 @AllArgsConstructor
@@ -58,7 +58,8 @@ public class GameRestController {
      * @return a response containing the registered players
      */
     @GetMapping("/player")
-    public PlayersGetResponse handleGetPlayers() {
+    public Map<String, String> handleGetPlayers() {
+        LOG.info("GET /api/register");
         return sessionService.getPlayers();
     }
 
@@ -79,7 +80,7 @@ public class GameRestController {
      */
     @GetMapping("/start")
     public GameStartResponse handleGameStatus() {
-        LOG.info("GET /api/game-status");
+        LOG.info("GET /api/start");
         boolean gameStarted = gameService.isGameStarted();
         return new GameStartResponse(gameStarted);
     }

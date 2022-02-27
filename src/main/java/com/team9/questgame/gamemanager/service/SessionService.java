@@ -1,15 +1,18 @@
 package com.team9.questgame.gamemanager.service;
 
-import com.team9.questgame.gamemanager.model.PlayersGetResponse;
+import lombok.Data;
 import lombok.ToString;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 
 @ToString
 @Service
+@Data
 public class SessionService {
 
     private final ConcurrentHashMap<String, String> sessionMap;
@@ -51,8 +54,8 @@ public class SessionService {
      * Get all players' information
      * @return all players' name and sessionId
      */
-    public PlayersGetResponse getPlayers() {
-        return new PlayersGetResponse(sessionMap);
+    public synchronized Map<String, String> getPlayers() {
+        return new HashMap<>(sessionMap);
     }
 
     /**
@@ -60,7 +63,7 @@ public class SessionService {
      * @param name name of the player
      * @return their sessionId
      */
-    public String getPlayerSessionId(String name) {
+    public synchronized String getPlayerSessionId(String name) {
         return sessionMap.getOrDefault(name, null);
     }
 
@@ -68,7 +71,7 @@ public class SessionService {
      * Get the number of player registered
      * @return the number of player registered
      */
-    public int getNumberOfPlayers() {
+    public synchronized int getNumberOfPlayers() {
         return sessionMap.size();
     }
 
@@ -77,7 +80,7 @@ public class SessionService {
      * @param name the name of the player
      * @return the player information if the player exists, else return null
      */
-    private String getPlayer(String name) {
+    private synchronized String getPlayer(String name) {
         return sessionMap.getOrDefault(name, null);
     }
 }
