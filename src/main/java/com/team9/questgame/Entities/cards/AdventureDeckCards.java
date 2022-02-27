@@ -1,6 +1,6 @@
 package com.team9.questgame.Entities.cards;
 
-public enum AdventureDeckCards implements DeckCards {
+public enum AdventureDeckCards implements AllCardCodes, TargetableCardCodes {
     EXCALIBUR(CardTypes.WEAPON),
     LANCE(CardTypes.WEAPON),
     BATTLE_AX(CardTypes.WEAPON),

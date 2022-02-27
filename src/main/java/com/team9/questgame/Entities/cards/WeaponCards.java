@@ -1,10 +1,10 @@
 package com.team9.questgame.Entities.cards;
 
-public class WeaponCards extends Cards implements AdventureCards {
+public class WeaponCards extends AdventureCards {
     private final int bonusBp;
 
-    WeaponCards(String activeAbilityDescription, String cardName, CardTypes subType, String imageFileName, AdventureDeckCards cardCode, int bonusBp) {
-        super(activeAbilityDescription, cardName, subType, imageFileName, cardCode);
+    WeaponCards(Decks assignedDeck,String activeAbilityDescription, String cardName, CardTypes subType, String imgSrc, AdventureDeckCards cardCode, int bonusBp) {
+        super(assignedDeck,activeAbilityDescription, cardName, subType, imgSrc, cardCode);
         this.bonusBp = bonusBp;
     }
 

@@ -1,6 +1,6 @@
 package com.team9.questgame.Entities.cards;
 
-public enum StoryDeckCards implements DeckCards {
+public enum StoryDeckCards implements AllCardCodes {
     CHIVALROUS_DEED(CardTypes.EVENT),
     POX(CardTypes.EVENT),
     PLAGUE(CardTypes.EVENT),

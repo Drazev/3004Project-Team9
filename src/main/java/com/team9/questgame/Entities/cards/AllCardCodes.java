@@ -1,4 +1,4 @@
 package com.team9.questgame.Entities.cards;
 
-public interface DeckCards {
+public interface AllCardCodes {
 }
