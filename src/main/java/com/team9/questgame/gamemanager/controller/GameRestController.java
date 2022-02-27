@@ -1,10 +1,7 @@
 package com.team9.questgame.gamemanager.controller;
 
 
-import com.team9.questgame.gamemanager.model.GameStartResponse;
-import com.team9.questgame.gamemanager.model.PlayersGetResponse;
-import com.team9.questgame.gamemanager.model.RegistrationRequest;
-import com.team9.questgame.gamemanager.model.RegistrationResponse;
+import com.team9.questgame.gamemanager.model.*;
 import com.team9.questgame.gamemanager.service.GameService;
 import com.team9.questgame.gamemanager.service.SessionService;
 import lombok.AllArgsConstructor;
@@ -16,10 +13,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 
+
 @AllArgsConstructor
 @NoArgsConstructor
 @RestController
 @RequestMapping("/api")
+@CrossOrigin(origins = "http://localhost:3000")
 public class GameRestController {
     Logger LOG = LoggerFactory.getLogger(GameRestController.class);
 
@@ -60,9 +59,7 @@ public class GameRestController {
      */
     @GetMapping("/player")
     public PlayersGetResponse handleGetPlayers() {
-        ArrayList<String> players = sessionService.getPlayers();
-
-        return new PlayersGetResponse(players);
+        return sessionService.getPlayers();
     }
 
     /**
