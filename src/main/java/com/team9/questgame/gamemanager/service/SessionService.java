@@ -1,21 +1,22 @@
 package com.team9.questgame.gamemanager.service;
 
-import lombok.AllArgsConstructor;
+import com.team9.questgame.gamemanager.model.PlayersGetResponse;
 import lombok.ToString;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 
 @ToString
-@AllArgsConstructor
 @Service
 public class SessionService {
-    @Autowired
-    private ConcurrentHashMap<String, String> sessionMap;
+
+    private final ConcurrentHashMap<String, String> sessionMap;
+
+    public SessionService() {
+        this.sessionMap = new ConcurrentHashMap<>();
+    }
 
     /**
      * Register a new player
@@ -26,7 +27,8 @@ public class SessionService {
         if (sessionMap.containsKey(name)) {
             return false;
         } else {
-            sessionMap.put(name, "");
+            String randomId = UUID.randomUUID().toString();
+            sessionMap.put(name, randomId);
             return true;
         }
     }
@@ -47,16 +49,19 @@ public class SessionService {
 
     /**
      * Get all players' information
-     * @return all players' name
+     * @return all players' name and sessionId
      */
-    public ArrayList<String> getPlayers() {
-        ArrayList<String> players = new ArrayList<>();
+    public PlayersGetResponse getPlayers() {
+        return new PlayersGetResponse(sessionMap);
+    }
 
-        for (String name: sessionMap.keySet()) {
-            players.add(name);
-        }
-
-        return players;
+    /**
+     * Get a player's session ID
+     * @param name name of the player
+     * @return their sessionId
+     */
+    public String getPlayerSessionId(String name) {
+        return sessionMap.getOrDefault(name, null);
     }
 
     /**
