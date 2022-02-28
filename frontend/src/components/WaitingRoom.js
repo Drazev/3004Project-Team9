@@ -12,7 +12,7 @@ const WaitingRoom = () => {
     };
     return (
         <div className="WaitingRoom">
-            <t2>Welcome to the pregame lobby, {name}</t2>
+            <h2>Welcome to the pregame lobby, {name}</h2>
             {players.length >= 2 ? (
                 <>
                 <p>There Are Enough Players to Begin</p>
@@ -28,7 +28,7 @@ const WaitingRoom = () => {
                     <>
                     <p> Not Enough Players! only {players.length} / 4</p>
                     <button
-                    disabled="true"
+                    disabled={true}
                     onClick={test}
                     className="btn btn-primary"
                     >Ready
