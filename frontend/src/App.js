@@ -2,6 +2,7 @@ import "./App.css";
 import Header from "./components/Header";
 import Card from "./components/Card";
 import ConnectForm from "./components/ConnectForm";
+import GameBoard from "./components/GameBoard";
 import MessageForm from "./components/MessageForm";
 import Messages from "./components/Messages";
 import { useConnected } from "./Store";
@@ -10,13 +11,11 @@ const App = () => {
   const connected = useConnected();
 
   return (
-    <div className="App">
+    <div className="App" style={{width:1000,height:1000}}>
       <Header />
-      <Card isInHand={true} isTurn={true} canGrow={true} />
       {connected ? (
         <>
-          <MessageForm />
-          <Messages />
+          <GameBoard />
         </>
       ) : (
         <ConnectForm />

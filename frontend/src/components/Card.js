@@ -12,8 +12,8 @@ function Card(props){
 
     //add border around card when selected
     let borderSize;
-    if(isSelected){
-        borderSize = "1px solid #e9eb6e";
+    if(isSelected && props.selectedAllowed){
+        borderSize = "2px solid #e9eb6e";
     }else{
         borderSize = "";
     }
@@ -21,33 +21,36 @@ function Card(props){
     //increase size of card when hovering over it and it is allowed to grow
     let size;
     if(isBig && props.canGrow){
-        size = {width: "80px", height: "120px"};
+        size = {width: "70px", height: "94px"};
     }else{
-        size = {width: "70px", height: "105px"};
+        size = {width: "50px", height: "68px"};
     }
 
     //Actual Card component
     return (
         <div 
-            style={{height:120,width:100,margin:"0 auto"}} 
-            onMouseLeave={() => {setIsBig(!isBig); if(isSelected) setSelected(!isSelected);}}
+            id="CardSection"
+            style={{height:68,width:73,margin:"0 auto",float:"left",marginBottom:10,marginRight:-13}} 
+            onMouseLeave={() => {setIsBig(false); if(isSelected) setSelected(false);}}
         >
           <img 
-            src={CardImages.Foe_RobberKnight} 
+            id="CardImage"
+            src={props.cardImage} 
             style={{
                 width:size.width,
                 height:size.height,
                 border:borderSize,
                 borderRadius:10,
             }}
-            onMouseOver={() => setIsBig(!isBig)} 
+            onMouseOver={() => setIsBig(true)} 
             onClick={() => setSelected(!isSelected)} 
             alt="ohno"
-            />
+          />
          <div style={{marginTop:-12,}}>
-            {isSelected && props.isInHand && props.isTurn &&
+            {isSelected && props.selectedAllowed &&
                 <>
                     <Button
+                        id="DiscardButton"
                         style={{
                             width: 30,
                             height: 10,
@@ -62,9 +65,10 @@ function Card(props){
                     >Discard</Button>{' '}
                 </>
             }
-            {isSelected && props.isInHand && props.isTurn &&
+            {isSelected && props.selectedAllowed &&
                 <>
                     <Button 
+                        id="PlayButton"
                         style={{
                             width: 30,
                             height: 10,
