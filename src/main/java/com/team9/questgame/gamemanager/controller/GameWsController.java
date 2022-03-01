@@ -1,15 +1,18 @@
-package com.team9.questgame;
+package com.team9.questgame.gamemanager.controller;
 
-import com.team9.questgame.Entities.MessagePayload;
+import com.team9.questgame.gamemanager.model.Message;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 
+
 @Controller
-public class WebSocketController {
+public class GameWsController {
+
     @MessageMapping("/message")
     @SendTo("/topic/message")
-    public MessagePayload clientLogin(MessagePayload payload) {
+    public Message clientLogin(final Message payload) {
         return payload;
     }
+
 }

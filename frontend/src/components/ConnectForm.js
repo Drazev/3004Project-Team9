@@ -22,7 +22,9 @@ const ConnectForm = () => {
       alert("Please enter your name");
       return;
     }
-    connect(setConnected, addNewMessage);
+    if (connect(setConnected, addNewMessage, name) === false) {
+      alert("Name already taken, please choose a different one")
+    }
   };
 
   return (
