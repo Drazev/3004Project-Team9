@@ -26,7 +26,7 @@ const ConnectForm = () => {
   };
 
   return (
-    <form className="m-3" onSubmit={handleSubmit}>
+    <form className="m-2" onSubmit={handleSubmit}>
       <div className="input-group mb-2 mt-4">
         <input
           type="text"

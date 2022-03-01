@@ -5,13 +5,15 @@ const Messages = () => {
   const messages = useMessages();
 
   return (
-    <ul className="list-group list-group-flush">
+    <div className="Chat">
+    <ul className="list-group">
       {messages.map((message, index) => (
         <li key={index} className="list-group-item">
           {message.name} says: {message.message}
         </li>
       ))}
     </ul>
+    </div>
   );
 };
 

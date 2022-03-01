@@ -36,3 +36,27 @@
     transform: rotate(360deg);
   }
 }
+
+.Chat {
+  position:relative;
+  top: 100;
+  left: 0;
+  height: 200px;
+  width: 300px;
+  resize: horizontal;
+  overflow-y: scroll;
+  background-color: black;
+  background-color: hsla(106, 76%, 63%, 0.5);
+  /* opacity: 0.5; */
+}
+
+.list-group-item {
+  background-color: blue;
+  background-color: hsla(54, 78%, 51%, 0.5);
+}
+
+.m-3 {
+  position:absolute;
+  bottom:0px;
+  width: 300px;
+}
