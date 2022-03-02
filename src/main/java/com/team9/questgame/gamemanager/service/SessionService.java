@@ -8,11 +8,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-
+/**
+ * Manage all session related services
+ */
 @ToString
-@Service
 @Data
+@Service
 public class SessionService {
 
     private final ConcurrentHashMap<String, String> sessionMap;
