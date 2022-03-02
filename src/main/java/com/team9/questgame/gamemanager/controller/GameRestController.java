@@ -90,13 +90,7 @@ public class GameRestController {
     @PostMapping("/start")
     public GameStartResponse handleGameStart() {
         LOG.info("POST /api/start");
-        boolean isGameAlreadyStarted = gameService.isGameStarted();
         boolean gameStarted = gameService.startGame();
-
-        if (!isGameAlreadyStarted && gameStarted) {
-            // Game just started the first time
-            gameService.broadcastGameStart();
-        }
 
         return new GameStartResponse(gameStarted);
     }

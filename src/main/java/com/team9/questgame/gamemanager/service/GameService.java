@@ -1,5 +1,6 @@
 package com.team9.questgame.gamemanager.service;
 
+import com.team9.questgame.gamemanager.model.CardEvent;
 import com.team9.questgame.gamemanager.model.EmptyJsonReponse;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -35,7 +36,12 @@ public class GameService {
         if (!isGameStarted()) {
             // Attempt to start the game
             if (sessionService.getNumberOfPlayers() >= MIN_PLAYER) {
-                setGameStarted(true);
+                boolean isGameAlreadyStarted = isGameStarted();
+                if (!isGameAlreadyStarted) {
+                    setGameStarted(true);
+                    // broadcast only the first time that the game is started
+                    broadcastGameStart();
+                }
                 return true;
             } else {
                 return false;
@@ -44,6 +50,21 @@ public class GameService {
             return true;
         }
     }
+
+    public synchronized void playerDrawCard(CardEvent cardEvent) {
+        // Do some business logic
+
+        // Broadcast (optional - other internal objects can directly call the broadcast function)
+        // broadcastPlayerDrawCard(cardEvent);
+    }
+
+    public synchronized void playerDiscardCard(CardEvent cardEvent) {
+        // Do some business logic
+
+        // Broadcast (optional - other internal objects can directly call the broadcast function)
+        // broadcastPlayerDiscardCard(cardEvent);
+    }
+
 
     /**
      * Broadcast player-draw-connect event
@@ -73,20 +94,19 @@ public class GameService {
 
     /**
      * Broadcast player-draw-card event
-     * @param payload included payload
+     * @param cardEvent the CardEvent payload
      */
-    public void broadcastPlayerDrawCard(Object payload) {
-        // @TODO: add payload to include the cardId and card holder's name
-        this.sendToAllPlayers("/topic/general/player-draw-card", payload);
+    public void broadcastPlayerDrawCard(CardEvent cardEvent) {
+        this.sendToAllPlayers("/topic/general/player-draw-card", cardEvent);
     }
 
     /**
      * Broadcast player-discard-card event
-     * @param payload included payload
+     * @param cardEvent the CardEvent payload
      */
-    public void broadcastPlayerDiscardCard(Object payload) {
+    public void broadcastPlayerDiscardCard(CardEvent cardEvent) {
         // @TODO: add payload to include the cardId and card holder's name
-        this.sendToAllPlayers("/topic/general/player-discard-card", payload);
+        this.sendToAllPlayers("/topic/general/player-discard-card", cardEvent);
     }
 
     private void sendToPlayer(String topic, String name, Object payload) {
