@@ -39,8 +39,8 @@ const WaitingRoom = () => {
                 
                 ) : (
                     <>
-                    <p> Not Enough Players! only {players2.length} / 4</p>
-                    
+
+                    <p> Not Enough Players! only {players2.length} / 4</p>               
                     <button
                     disabled={true}
                     onClick={test}
