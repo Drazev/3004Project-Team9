@@ -1,11 +1,14 @@
 package com.team9.questgame.Entities.cards;
 
+import org.springframework.stereotype.Service;
+
 import java.util.HashMap;
 import java.util.Map;
 
-public class StoryDecks extends Decks {
+@Service
+public class StoryDecks extends Decks<StoryCards> {
     public StoryDecks() {
-        super();
+        super(StoryDecks.class);
     }
 
     @Override

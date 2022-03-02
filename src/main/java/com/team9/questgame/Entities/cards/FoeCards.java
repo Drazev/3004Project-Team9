@@ -5,7 +5,16 @@ public class FoeCards extends AdventureCards {
     private final int boostedBpValue;
     private boolean isBoosted;
 
-    public FoeCards(Decks assignedDeck,String activeAbilityDescription, String cardName, CardTypes subType, String imageFileName, AdventureDeckCards cardCode, int battlePointValue) {
+    @Override
+    public String toString() {
+        return super.toString()+", FoeCards{" +
+                "bpValue=" + bpValue +
+                ", boostedBpValue=" + boostedBpValue +
+                ", isBoosted=" + isBoosted +
+                '}';
+    }
+
+    public FoeCards(Decks assignedDeck, String activeAbilityDescription, String cardName, CardTypes subType, String imageFileName, AdventureDeckCards cardCode, int battlePointValue) {
         this(assignedDeck,activeAbilityDescription, cardName, subType, imageFileName, cardCode,battlePointValue,0);
     }
     public FoeCards(Decks assignedDeck,String activeAbilityDescription, String cardName, CardTypes subType, String imageFileName, AdventureDeckCards cardCode, int battlePointValue, int boostedBattlePointValue) {

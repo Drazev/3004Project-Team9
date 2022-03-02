@@ -12,6 +12,13 @@ import com.team9.questgame.Entities.Effects.Effects;
 public class EventCards extends StoryCards {
     final Effects activeEffect;
 
+    @Override
+    public String toString() {
+        return super.toString()+", EventCards{" +
+                "activeEffect=" + activeEffect +
+                '}';
+    }
+
     /**
      *
      * @param activeAbilityDescription A description text to appear at the bottom of a card with an active or conditional effect.

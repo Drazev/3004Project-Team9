@@ -1,12 +1,16 @@
 package com.team9.questgame.Entities.cards;
 
+import org.springframework.stereotype.Service;
+
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
-public class AdventureDecks extends Decks{
+@Service
+public class AdventureDecks extends Decks<AdventureCards>{
 
     protected AdventureDecks() {
-         super();
+         super(AdventureDecks.class);
     }
 
     @Override

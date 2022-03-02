@@ -6,4 +6,9 @@ public abstract class AdventureCards extends Cards {
     }
 
     abstract void playCard();
+
+    @Override
+    public String toString() {
+        return super.toString()+", AdventureCards{}";
+    }
 }

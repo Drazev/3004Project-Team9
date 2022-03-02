@@ -31,6 +31,23 @@ public abstract class Cards {
         return cardID == cards.cardID && cardCode==cards.cardCode;
     }
 
+    public long getCardID() {
+        return cardID;
+    }
+
+    @Override
+    public String toString() {
+        return "Cards{" +
+                "assignedDeck=" + assignedDeck +
+                ", activeAbilityDescription='" + activeAbilityDescription + '\'' +
+                ", cardName='" + cardName + '\'' +
+                ", cardID=" + cardID +
+                ", subType=" + subType +
+                ", imgSrc='" + imgSrc + '\'' +
+                ", cardCode=" + cardCode +
+                '}';
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(cardID);

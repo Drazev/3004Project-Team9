@@ -1,12 +1,16 @@
 package com.team9.questgame.Entities.cards;
 
+import com.team9.questgame.exception.IllegalCardStateException;
+import com.team9.questgame.gamemanager.controller.GameRestController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-@Component
 public abstract class  Decks<T extends Cards> {
+    private Logger LOG;
     protected HashSet<T> cardsInDeck;
     private Stack<T> drawDeck;
     private ArrayList<T> discardPile;
@@ -15,7 +19,8 @@ public abstract class  Decks<T extends Cards> {
 
 
 
-    protected Decks() {
+    protected Decks(Class cType) {
+        LOG=LoggerFactory.getLogger(cType);
         this.cardsInDeck=new HashSet<>();
         this.drawDeck = new Stack<>();
         this.discardPile = new ArrayList<>();
@@ -40,14 +45,28 @@ public abstract class  Decks<T extends Cards> {
         discardPile.add(card);
     }
 
+    /**
+     *Draws a card
+     *
+     * @param area The card area that where the CardArea::recieveCard() methiod will be triggered with given card.
+     */
     public T drawCard(CardArea area) {
+        T card=null;
+
         if(drawDeck.size()==0)
         {
             shuffleDeck();
         }
 
-        T card = drawDeck.pop();
+        if(drawDeck.size()<1) {
+            LOG.error("Decks::drawCard has zero cards after shuffling in discard pile");
+            throw new IllegalCardStateException();
+        }
+
+        card = drawDeck.pop();
         cardLocation.put(card,area);
+
+        area.receiveCard(card);
         return card;
     }
 
@@ -66,7 +85,7 @@ public abstract class  Decks<T extends Cards> {
         Collections.shuffle(shuffledDeck);
         drawDeck.addAll(shuffledDeck);
 
-        //TODO: Notify deck shuffled
+        LOG.debug("Deck Shuffled.");
     }
 
     //TODO: Function that notifies observers or sends event to GameManager with new deck

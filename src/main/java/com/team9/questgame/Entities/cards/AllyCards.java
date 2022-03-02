@@ -30,6 +30,18 @@ public class AllyCards <T extends Enum<T> & AllCardCodes> extends AdventureCards
         this(assignedDeck,activeAbilityDescription, cardName, subType, imgSrc, cardCode,bonusBp,bids,0,0,null);
     }
 
+    @Override
+    public String toString() {
+        return super.toString() + ", AllyCards{" +
+                "bonusBp=" + bonusBp +
+                ", bids=" + bids +
+                ", boostBonusBp=" + boostBonusBp +
+                ", boostBids=" + boostBids +
+                ", isBoosted=" + isBoosted +
+                ", boostCardCode=" + boostCardCode +
+                '}';
+    }
+
     /**
      *
      * @param activeAbilityDescription A description text to appear at the bottom of a card with an active or conditional effect.
