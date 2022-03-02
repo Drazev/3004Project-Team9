@@ -14,7 +14,7 @@ const App = () => {
       <Header />
       {connected ? (
         <>
-        <WaitingRoom />
+          <WaitingRoom />
           {/* <MessageForm /> */}
           <Messages />
         </>
