@@ -9,6 +9,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class CardEvent {
-    String name;
-    String cardId;
+    private String name;
+    private String cardId;
 }

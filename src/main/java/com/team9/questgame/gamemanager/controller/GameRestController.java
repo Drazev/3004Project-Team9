@@ -22,13 +22,13 @@ import java.util.Optional;
 @RequestMapping("/api")
 @CrossOrigin(origins = "http://localhost:3000")
 public class GameRestController {
-    Logger LOG = LoggerFactory.getLogger(GameRestController.class);
+    private Logger LOG = LoggerFactory.getLogger(GameRestController.class);
 
     @Autowired
-    SessionService sessionService;
+    private SessionService sessionService;
 
     @Autowired
-    GameService gameService;
+    private GameService gameService;
 
     /**
      * Register a player to the game

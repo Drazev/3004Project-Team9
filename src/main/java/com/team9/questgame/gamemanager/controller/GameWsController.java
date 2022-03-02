@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 public class GameWsController {
 
     @Autowired
-    GameService gameService;
+    private GameService gameService;
 
     @MessageMapping("/general/player-draw-card")
     public void handlePlayerDrawCard(CardEvent cardEvent) {
