@@ -1,6 +1,7 @@
 package com.team9.questgame.gamemanager.controller;
 
 
+import com.team9.questgame.exception.BadRequestException;
 import com.team9.questgame.gamemanager.model.*;
 import com.team9.questgame.gamemanager.service.GameService;
 import com.team9.questgame.gamemanager.service.SessionService;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Optional;
 
 
 @AllArgsConstructor
@@ -37,8 +39,10 @@ public class GameRestController {
     public RegistrationResponse handleRegister(@RequestBody RegistrationRequest requestBody) {
         LOG.info(String.format("POST /api/register: requestBody = %s", requestBody));
         boolean registrationConfirmed = sessionService.registerPlayer(requestBody.getName());
+        if (registrationConfirmed) {
+            gameService.broadcastPlayerConnect();
+        }
         return new RegistrationResponse(registrationConfirmed, requestBody.getName());
-
     }
 
     /**
@@ -47,10 +51,26 @@ public class GameRestController {
      * @return a response containing the confirmation
      */
     @DeleteMapping("/register")
-    public RegistrationResponse handleDeregister(@RequestBody RegistrationRequest requestBody) {
-        LOG.info(String.format("DELETE /api/register: requestBody = %s", requestBody));
-        boolean confirmed = sessionService.deregisterPlayer(requestBody.getName());
-        return new RegistrationResponse(confirmed, requestBody.getName());
+    public RegistrationResponse handleDeregister(@RequestBody Optional<RegistrationRequest> requestBody, @RequestParam Optional<String> name) {
+        LOG.info(String.format("DELETE /api/register: requestBody = %s, requestParams = %s", requestBody, name));
+
+        boolean confirmed;
+        String requestName;
+        if (name.isPresent()) {
+            requestName = name.get();
+        } else if (requestBody.isPresent()) {
+            requestName = requestBody.get().getName();
+        } else {
+            throw new BadRequestException("No name included in De-registration request");
+        }
+
+        confirmed = sessionService.deregisterPlayer(requestName);
+
+        if (confirmed) {
+            gameService.broadcastPlayerDisconnect();
+        }
+
+        return new RegistrationResponse(confirmed, requestName);
     }
 
     /**
@@ -59,7 +79,7 @@ public class GameRestController {
      */
     @GetMapping("/player")
     public Map<String, String> handleGetPlayers() {
-        LOG.info("GET /api/register");
+        LOG.info("GET /api/player");
         return sessionService.getPlayers();
     }
 
@@ -69,8 +89,15 @@ public class GameRestController {
      */
     @PostMapping("/start")
     public GameStartResponse handleGameStart() {
-        LOG.info("POST /api/start-game");
+        LOG.info("POST /api/start");
+        boolean isGameAlreadyStarted = gameService.isGameStarted();
         boolean gameStarted = gameService.startGame();
+
+        if (!isGameAlreadyStarted && gameStarted) {
+            // Game just started the first time
+            gameService.broadcastGameStart();
+        }
+
         return new GameStartResponse(gameStarted);
     }
 
