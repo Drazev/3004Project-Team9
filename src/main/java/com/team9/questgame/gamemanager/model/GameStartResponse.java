@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 public class GameStartResponse {
     private boolean gameStarted;
 }

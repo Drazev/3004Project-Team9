@@ -22,13 +22,13 @@ import java.util.Optional;
 @RequestMapping("/api")
 @CrossOrigin(origins = "http://localhost:3000")
 public class GameRestController {
-    Logger LOG = LoggerFactory.getLogger(GameRestController.class);
+    private Logger LOG = LoggerFactory.getLogger(GameRestController.class);
 
     @Autowired
-    SessionService sessionService;
+    private SessionService sessionService;
 
     @Autowired
-    GameService gameService;
+    private GameService gameService;
 
     /**
      * Register a player to the game
@@ -90,13 +90,7 @@ public class GameRestController {
     @PostMapping("/start")
     public GameStartResponse handleGameStart() {
         LOG.info("POST /api/start");
-        boolean isGameAlreadyStarted = gameService.isGameStarted();
         boolean gameStarted = gameService.startGame();
-
-        if (!isGameAlreadyStarted && gameStarted) {
-            // Game just started the first time
-            gameService.broadcastGameStart();
-        }
 
         return new GameStartResponse(gameStarted);
     }
