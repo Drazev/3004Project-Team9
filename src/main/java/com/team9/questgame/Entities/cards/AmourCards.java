@@ -14,7 +14,16 @@ public class AmourCards extends AdventureCards {
                 AdventureDeckCards.AMOUR
         );
     }
-    AmourCards(Decks assignedDeck,String activeAbilityDescription, String cardName, CardTypes subType, String imgSrc, AdventureDeckCards cardCode) {
+
+    @Override
+    public String toString() {
+        return super.toString()+", AmourCards{" +
+                "bonusBp=" + bonusBp +
+                ", bids=" + bids +
+                '}';
+    }
+
+    AmourCards(Decks assignedDeck, String activeAbilityDescription, String cardName, CardTypes subType, String imgSrc, AdventureDeckCards cardCode) {
         super(assignedDeck,activeAbilityDescription, cardName, subType, imgSrc, cardCode);
     }
 

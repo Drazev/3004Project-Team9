@@ -14,7 +14,15 @@ public class QuestCards<T extends Enum<T> & TargetableCardCodes> extends StoryCa
         this(assignedDeck,activeAbilityDescription, cardName, subType, imgSrc, cardCode,stages,null);
     }
 
-    public QuestCards(Decks assignedDeck,String activeAbilityDescription, String cardName, CardTypes subType, String imgSrc, StoryDeckCards cardCode, int stages, T foeBoosted) {
+    @Override
+    public String toString() {
+        return super.toString()+", QuestCards{" +
+                "stages=" + stages +
+                ", boostedFoe=" + boostedFoe +
+                '}';
+    }
+
+    public QuestCards(Decks assignedDeck, String activeAbilityDescription, String cardName, CardTypes subType, String imgSrc, StoryDeckCards cardCode, int stages, T foeBoosted) {
         super(assignedDeck,activeAbilityDescription, cardName, subType, imgSrc, cardCode);
         this.stages = stages;
         this.boostedFoe = foeBoosted;
