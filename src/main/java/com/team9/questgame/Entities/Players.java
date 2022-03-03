@@ -1,5 +1,6 @@
 package com.team9.questgame.Entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.team9.questgame.Entities.cards.AdventureCards;
 import com.team9.questgame.Entities.cards.CardArea;
 import com.team9.questgame.exception.IllegalCardStateException;
@@ -20,6 +21,7 @@ import java.util.HashSet;
  * This class owns a PlayerArea and contains a hand;
  */
 public class Players implements CardArea<AdventureCards> {
+    @JsonIgnore
     private Logger LOG;
     private final long playerId; //Unique to player game session. Does not persist between games.
     private String name;
@@ -27,9 +29,15 @@ public class Players implements CardArea<AdventureCards> {
     private int battlePoints;
     private int shields;
     private boolean isHandOversize;
+
+    @JsonIgnore
     private static long nextId=0;
+
+    @JsonIgnore
     static public final int MAX_HAND_SIZE = 12;
     private HashSet<AdventureCards> hand;
+
+    @JsonIgnore
     private HashMap<Long,AdventureCards> cardIdMap;
 
     public Players(String playerName)
@@ -147,7 +155,8 @@ public class Players implements CardArea<AdventureCards> {
 
     @Override
     public void onGameReset() {
-        this.battlePoints=0;
+        this.rank=PlayerRanks.SQUIRE;
+        this.battlePoints=rank.getRankBattlePointValue();
         this.shields=0;
         this.isHandOversize=false;
         this.hand = new HashSet<>();

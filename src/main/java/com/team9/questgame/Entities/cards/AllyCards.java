@@ -26,8 +26,8 @@ public class AllyCards <T extends Enum<T> & AllCardCodes> extends AdventureCards
      * @param bonusBp The battlepoints this ally contributes
      * @param bids The bids this ally contributes
      */
-    public AllyCards(Decks assignedDeck,String activeAbilityDescription, String cardName, CardTypes subType, String imgSrc, AdventureDeckCards cardCode, int bonusBp, int bids) {
-        this(assignedDeck,activeAbilityDescription, cardName, subType, imgSrc, cardCode,bonusBp,bids,0,0,null);
+    public AllyCards(Decks assignedDeck,String activeAbilityDescription, String cardName, CardTypes subType, String fileName, AdventureDeckCards cardCode, int bonusBp, int bids) {
+        this(assignedDeck,activeAbilityDescription, cardName, subType, fileName, cardCode,bonusBp,bids,0,0,null);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class AllyCards <T extends Enum<T> & AllCardCodes> extends AdventureCards
      * @param activeAbilityDescription A description text to appear at the bottom of a card with an active or conditional effect.
      * @param cardName The title of the card, appearing at the top.
      * @param subType The subtype of card within it's deck type. This is generally Foe,Ally,etc..
-     * @param imgSrc The uri path where the image representing the card can be found from the client.
+     * @param fileName The uri path where the image representing the card can be found from the client.
      * @param cardCode An enumeration cardCode that helps identify which unique card this instance represents. Many cards will have multiple copies in a deck.
      * @param bonusBp The battlepoints this ally contributes
      * @param bids The bids this ally contributes
@@ -55,8 +55,8 @@ public class AllyCards <T extends Enum<T> & AllCardCodes> extends AdventureCards
      * @param boostBids The total number of bids this ally contributes if the boost condition was met.
      * @param boostCardCode The target card that will trigger this ally's boost effect.
      */
-    public AllyCards(Decks assignedDeck,String activeAbilityDescription, String cardName, CardTypes subType, String imgSrc, AdventureDeckCards cardCode, int bonusBp, int bids, int boostBonusBp, int boostBids,T boostCardCode) {
-        super(assignedDeck,activeAbilityDescription, cardName, subType, imgSrc, cardCode);
+    public AllyCards(Decks assignedDeck,String activeAbilityDescription, String cardName, CardTypes subType, String fileName, AdventureDeckCards cardCode, int bonusBp, int bids, int boostBonusBp, int boostBids,T boostCardCode) {
+        super(assignedDeck,activeAbilityDescription, cardName, subType, fileName, cardCode);
         this.bonusBp = bonusBp;
         this.bids = bids;
         this.boostBonusBp = boostBonusBp;
