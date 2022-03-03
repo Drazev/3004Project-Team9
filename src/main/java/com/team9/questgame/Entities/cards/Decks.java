@@ -1,11 +1,8 @@
 package com.team9.questgame.Entities.cards;
 
 import com.team9.questgame.exception.IllegalCardStateException;
-import com.team9.questgame.gamemanager.controller.GameRestController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.*;
 
@@ -87,6 +84,15 @@ public abstract class  Decks<T extends Cards> {
 
         LOG.debug("Deck Shuffled.");
     }
+
+    public void onGameReset() {
+        drawDeck.clear();
+        discardPile.clear();
+        shuffleDeck();
+        notifyDeckChanged();
+    }
+
+    abstract public void notifyDeckChanged();
 
     //TODO: Function that notifies observers or sends event to GameManager with new deck
 

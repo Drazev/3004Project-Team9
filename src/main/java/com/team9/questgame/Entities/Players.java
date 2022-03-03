@@ -67,6 +67,10 @@ public class Players implements CardArea<AdventureCards> {
         return battlePoints;
     }
 
+    public PlayerRanks getRank() {
+        return rank;
+    }
+
     private void updateBattlePoints()
     {
         battlePoints=rank.getRankBattlePointValue(); //TODO: Modify to include bp value of cards in play

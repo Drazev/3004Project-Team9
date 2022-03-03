@@ -76,4 +76,9 @@ public class AdventureDecks extends Decks<AdventureCards>{
             }
         }
     }
+
+    @Override
+    public void notifyDeckChanged() {
+
+    }
 }
