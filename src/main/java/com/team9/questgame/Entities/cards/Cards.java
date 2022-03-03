@@ -23,6 +23,22 @@ public abstract class Cards {
         this.cardCode = cardCode;
     }
 
+    public String getCardName() {
+        return cardName;
+    }
+
+    public CardTypes getSubType() {
+        return subType;
+    }
+
+    public String getImgSrc() {
+        return imgSrc;
+    }
+
+    public AllCardCodes getCardCode() {
+        return cardCode;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

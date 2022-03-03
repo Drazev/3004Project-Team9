@@ -59,5 +59,10 @@ public class StoryDecks extends Decks<StoryCards> {
             }
         }
     }
+
+    @Override
+    public void notifyDeckChanged() {
+
+    }
 }
 
