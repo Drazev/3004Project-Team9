@@ -1,9 +1,13 @@
 package com.team9.questgame.Entities.cards;
 
+import com.team9.questgame.Data.CardData;
+import com.team9.questgame.Entities.Effects.Effects;
+
 public class FoeCards extends AdventureCards {
     private final int bpValue;
     private final int boostedBpValue;
     private boolean isBoosted;
+    private Effects activeEffect; //TODO: Modify for Effect implementation
 
     @Override
     public String toString() {
@@ -22,6 +26,7 @@ public class FoeCards extends AdventureCards {
         this.bpValue=battlePointValue;
         this.boostedBpValue=boostedBattlePointValue;
         this.isBoosted=false;
+        this.activeEffect=null; //TODO: Change when Effects Implemented
     }
 
 
@@ -29,5 +34,21 @@ public class FoeCards extends AdventureCards {
     public void playCard()
     {
 
+    }
+
+    @Override
+    public CardData generateCardData() {
+        CardData data = new CardData(
+                cardID,
+                cardCode,
+                cardName,
+                subType,
+                imgSrc,
+                0,
+                isBoosted ? bpValue : boostedBpValue,
+                activeAbilityDescription,
+                activeEffect!=null
+        );
+        return data;
     }
 }

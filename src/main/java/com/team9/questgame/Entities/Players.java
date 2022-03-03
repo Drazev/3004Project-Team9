@@ -1,12 +1,16 @@
 package com.team9.questgame.Entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.team9.questgame.Data.CardData;
+import com.team9.questgame.Data.PlayerData;
 import com.team9.questgame.Entities.cards.AdventureCards;
 import com.team9.questgame.Entities.cards.CardArea;
+import com.team9.questgame.Entities.cards.Cards;
 import com.team9.questgame.exception.IllegalCardStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -222,5 +226,22 @@ public class Players implements CardArea<AdventureCards> {
 
     public void notifyPlayerRankUP() {
         //TODO: Notify game and player of a Rank Up event. Game will check victory condition, and player UI must be updated
+    }
+
+    public PlayerData generatePlayerData() {
+        ArrayList<CardData> handCards = new ArrayList<>();
+        for(Cards card : hand) {
+            handCards.add(card.generateCardData());
+        }
+        PlayerData data = new PlayerData(
+        playerId,
+        name,
+        rank,
+        battlePoints,
+        shields,
+        isHandOversize,
+        handCards
+        );
+        return data;
     }
 }

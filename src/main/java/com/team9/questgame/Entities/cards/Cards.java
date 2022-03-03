@@ -1,5 +1,7 @@
 package com.team9.questgame.Entities.cards;
 
+import com.team9.questgame.Data.CardData;
+
 import java.util.Objects;
 
 public abstract class Cards {
@@ -78,5 +80,7 @@ public abstract class Cards {
 
         return rc;
     }
+
+    abstract public CardData generateCardData();
 
 }

@@ -8,17 +8,25 @@ public class PlayerJoinException extends RuntimeException {
     Logger LOG = LoggerFactory.getLogger(Players.class);
     static String defaultMsg="Player failed to join game.";
     Players player;
+    PlayerJoinExceptionReasonCodes reasonCode;
 
-    public PlayerJoinException(String message,Players player) {
-        super(defaultMsg+" Player{ name: "+player.getPlayerId()+", id: "+player.getPlayerId()+"}, Reason: "+message);
-        LOG.error(defaultMsg+" Player{ name: "+player.getPlayerId()+", id: "+player.getPlayerId()+"}, Reason: "+message);
-        this.player=player;
+    public enum PlayerJoinExceptionReasonCodes {
+        GAME_FULL,
+        GAME_IN_PROGRESS
     }
 
-    public PlayerJoinException(String message, Throwable cause,Players player) {
-        super(defaultMsg+" Player{ name: "+player.getPlayerId()+", id: "+player.getPlayerId()+"}, Reason: "+message,cause);
-        LOG.error(defaultMsg+" Player{ name: "+player.getPlayerId()+", id: "+player.getPlayerId()+"}, Reason: "+message);
+    public PlayerJoinException(Players player,PlayerJoinExceptionReasonCodes reasonCode) {
+        super(defaultMsg+" Player{ name: "+player.getPlayerId()+", id: "+player.getPlayerId()+"}, Reason: "+reasonCode);
+        LOG.error(defaultMsg+" Player{ name: "+player.getPlayerId()+", id: "+player.getPlayerId()+"}, Reason: "+reasonCode);
         this.player=player;
+        this.reasonCode=reasonCode;
+    }
+
+    public PlayerJoinException(Throwable cause,Players player,PlayerJoinExceptionReasonCodes reasonCode) {
+        super(defaultMsg+" Player{ name: "+player.getPlayerId()+", id: "+player.getPlayerId()+"}, Reason: "+reasonCode,cause);
+        LOG.error(defaultMsg+" Player{ name: "+player.getPlayerId()+", id: "+player.getPlayerId()+"}, Reason: "+reasonCode);
+        this.player=player;
+        this.reasonCode=reasonCode;
     }
 
     Players getPlayer() {

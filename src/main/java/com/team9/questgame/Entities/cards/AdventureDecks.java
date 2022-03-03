@@ -6,10 +6,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-@Service
 public class AdventureDecks extends Decks<AdventureCards>{
 
-    protected AdventureDecks() {
+    public AdventureDecks() {
          super(AdventureDecks.class);
     }
 

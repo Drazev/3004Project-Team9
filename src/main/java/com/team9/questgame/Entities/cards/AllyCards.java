@@ -1,5 +1,8 @@
 package com.team9.questgame.Entities.cards;
 
+import com.team9.questgame.Data.CardData;
+import com.team9.questgame.Entities.Effects.Effects;
+
 /**
  * Entity representing an Ally card within the game.
  *
@@ -15,13 +18,14 @@ public class AllyCards <T extends Enum<T> & AllCardCodes> extends AdventureCards
     private final int boostBids;
     boolean isBoosted;
     private final T boostCardCode;
+    private Effects activeEffect; //TODO: Modify for Effect implementation
 
     /**
      *
      * @param activeAbilityDescription A description text to appear at the bottom of a card with an active or conditional effect.
      * @param cardName The title of the card, appearing at the top.
      * @param subType The subtype of card within it's deck type. This is generally Foe,Ally,etc..
-     * @param imgSrc The uri path where the image representing the card can be found from the client.
+     * @param fileName The uri path where the image representing the card can be found from the client.
      * @param cardCode An enumeration cardCode that helps identify which unique card this instance represents. Many cards will have multiple copies in a deck.
      * @param bonusBp The battlepoints this ally contributes
      * @param bids The bids this ally contributes
@@ -63,10 +67,28 @@ public class AllyCards <T extends Enum<T> & AllCardCodes> extends AdventureCards
         this.boostBids=boostBids;
         this.isBoosted=false;
         this.boostCardCode = boostCardCode;
+        this.activeEffect=null; //TODO: Change when Effects implemented
+
     }
 
     @Override
     public void playCard() {
 
+    }
+
+    @Override
+    public CardData generateCardData() {
+        CardData data = new CardData(
+                cardID,
+                cardCode,
+                cardName,
+                subType,
+                imgSrc,
+                isBoosted ? bids : boostBids,
+                isBoosted ? bonusBp : boostBonusBp,
+                activeAbilityDescription,
+                activeEffect!=null
+        );
+        return data;
     }
 }

@@ -1,5 +1,9 @@
 package com.team9.questgame;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team9.questgame.Data.CardData;
+import com.team9.questgame.Data.PlayerData;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.exception.PlayerJoinException;
 import com.team9.questgame.gamemanager.controller.GameRestController;
@@ -13,7 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,6 +30,10 @@ class QuestGameControllerTest {
 
     @Autowired
     GameService gameService;
+
+    @Autowired
+    ObjectMapper objMap;
+
     Logger LOG;
 
     @BeforeEach
@@ -40,10 +50,12 @@ class QuestGameControllerTest {
 
     @AfterEach
     void tearDown() {
+
     }
 
     @Test
     void startGame() {
+
     }
 
     @Test
@@ -70,6 +82,20 @@ class QuestGameControllerTest {
 
     @Test
     void removePlayer() {
+        for(int i=0;i<game.MAX_PLAYERS;++i) {
+            game.playerJoin(players.get(i));
+        }
+
+        PlayerJoinException error = null;
+        try {
+            game.playerJoin(players.get(4)); //This should trigger a PlayerJoinException
+        }
+        catch (PlayerJoinException e){
+            error=e;
+        }
+        finally {
+            assert(error!=null);
+        }
     }
 
     @Test
@@ -86,5 +112,55 @@ class QuestGameControllerTest {
 
     @Test
     void onGameReset() {
+    }
+
+    @Test
+    void testGeneratePlayerData_AsJSON() throws JsonProcessingException {
+
+        for(int i=0;i<game.MAX_PLAYERS;++i) {
+            game.playerJoin(players.get(i));
+        }
+
+        System.out.println("DRAWING CARDS");
+        System.out.println();
+        //Deal card to each player up to max hand size
+        for(int i=0;i<Players.MAX_HAND_SIZE;++i) {
+            for (Players p : players) {
+                game.dealCard(p);
+            }
+        }
+
+
+        //generate Player data
+        HashMap<Players,PlayerData> pData = new HashMap<>();
+        for(Players p : players) {
+            PlayerData pd = p.generatePlayerData();
+            pData.put(p,pd);
+            System.out.println("Player as Json data");
+            System.out.println(objMap.writeValueAsString(p));
+
+            System.out.println("\nPlayerData as Json");
+            System.out.println(objMap.writeValueAsString(pd));
+            System.out.println();
+        }
+
+        System.out.println("DISCARDING CARDS");
+        System.out.println();
+        //Discard all cards
+        for( Map.Entry<Players,PlayerData> entry : pData.entrySet()) {
+                for(CardData cd : entry.getValue().hand()) {
+                    entry.getKey().actionDiscardCard(cd.cardID());
+                }
+        }
+
+        for(Players p : players) {
+            PlayerData pd = p.generatePlayerData();
+            System.out.println("Player as Json data");
+            System.out.println(objMap.writeValueAsString(p));
+
+            System.out.println("\nPlayerData as Json");
+            System.out.println(objMap.writeValueAsString(pd));
+            System.out.println();
+        }
     }
 }

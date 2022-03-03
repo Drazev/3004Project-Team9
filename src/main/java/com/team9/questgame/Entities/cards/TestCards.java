@@ -1,5 +1,7 @@
 package com.team9.questgame.Entities.cards;
 
+import com.team9.questgame.Data.CardData;
+
 public class TestCards extends AdventureCards {
     private final int minimumBids;
     private final int boostedMinBids;
@@ -32,4 +34,21 @@ public class TestCards extends AdventureCards {
     public void playCard() {
 
     }
+
+    @Override
+    public CardData generateCardData() {
+        CardData data = new CardData(
+                cardID,
+                cardCode,
+                cardName,
+                subType,
+                imgSrc,
+                isBoosted ? minimumBids: boostedMinBids,
+                0,
+                activeAbilityDescription,
+                false
+        );
+        return data;
+    }
+
 }
