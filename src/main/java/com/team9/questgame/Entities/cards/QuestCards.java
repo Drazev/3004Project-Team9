@@ -10,8 +10,8 @@ public class QuestCards<T extends Enum<T> & TargetableCardCodes> extends StoryCa
     final int stages;
     final T boostedFoe;
 
-    public QuestCards(Decks assignedDeck,String activeAbilityDescription, String cardName, CardTypes subType, String imgSrc, StoryDeckCards cardCode, int stages) {
-        this(assignedDeck,activeAbilityDescription, cardName, subType, imgSrc, cardCode,stages,null);
+    public QuestCards(Decks assignedDeck,String activeAbilityDescription, String cardName, CardTypes subType, String fileName, StoryDeckCards cardCode, int stages) {
+        this(assignedDeck,activeAbilityDescription, cardName, subType, fileName, cardCode,stages,null);
     }
 
     @Override
@@ -22,8 +22,8 @@ public class QuestCards<T extends Enum<T> & TargetableCardCodes> extends StoryCa
                 '}';
     }
 
-    public QuestCards(Decks assignedDeck, String activeAbilityDescription, String cardName, CardTypes subType, String imgSrc, StoryDeckCards cardCode, int stages, T foeBoosted) {
-        super(assignedDeck,activeAbilityDescription, cardName, subType, imgSrc, cardCode);
+    public QuestCards(Decks assignedDeck, String activeAbilityDescription, String cardName, CardTypes subType, String fileName, StoryDeckCards cardCode, int stages, T foeBoosted) {
+        super(assignedDeck,activeAbilityDescription, cardName, subType, fileName, cardCode);
         this.stages = stages;
         this.boostedFoe = foeBoosted;
     }

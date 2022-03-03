@@ -10,8 +10,8 @@ public class TournamentCards extends StoryCards {
                 '}';
     }
 
-    public TournamentCards(Decks assignedDeck, String activeAbilityDescription, String cardName, CardTypes subType, String imgSrc, StoryDeckCards cardCode, int bonusShields) {
-        super(assignedDeck,activeAbilityDescription, cardName, subType, imgSrc, cardCode);
+    public TournamentCards(Decks assignedDeck, String activeAbilityDescription, String cardName, CardTypes subType, String fileName, StoryDeckCards cardCode, int bonusShields) {
+        super(assignedDeck,activeAbilityDescription, cardName, subType, fileName, cardCode);
         this.bonusShields = bonusShields;
     }
 }

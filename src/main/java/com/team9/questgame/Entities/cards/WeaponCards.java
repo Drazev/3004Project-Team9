@@ -10,8 +10,8 @@ public class WeaponCards extends AdventureCards {
                 '}';
     }
 
-    WeaponCards(Decks assignedDeck, String activeAbilityDescription, String cardName, CardTypes subType, String imgSrc, AdventureDeckCards cardCode, int bonusBp) {
-        super(assignedDeck,activeAbilityDescription, cardName, subType, imgSrc, cardCode);
+    WeaponCards(Decks assignedDeck, String activeAbilityDescription, String cardName, CardTypes subType, String fileName, AdventureDeckCards cardCode, int bonusBp) {
+        super(assignedDeck,activeAbilityDescription, cardName, subType, fileName, cardCode);
         this.bonusBp = bonusBp;
     }
 

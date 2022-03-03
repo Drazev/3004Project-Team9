@@ -23,8 +23,8 @@ public class AmourCards extends AdventureCards {
                 '}';
     }
 
-    AmourCards(Decks assignedDeck, String activeAbilityDescription, String cardName, CardTypes subType, String imgSrc, AdventureDeckCards cardCode) {
-        super(assignedDeck,activeAbilityDescription, cardName, subType, imgSrc, cardCode);
+    AmourCards(Decks assignedDeck, String activeAbilityDescription, String cardName, CardTypes subType, String fileName, AdventureDeckCards cardCode) {
+        super(assignedDeck,activeAbilityDescription, cardName, subType, fileName, cardCode);
     }
 
     @Override
