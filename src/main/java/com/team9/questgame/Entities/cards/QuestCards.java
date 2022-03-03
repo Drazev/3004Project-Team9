@@ -1,5 +1,11 @@
 package com.team9.questgame.Entities.cards;
 
+import com.team9.questgame.Entities.Players;
+import com.team9.questgame.GamePhases.GamePhases;
+import com.team9.questgame.QuestGameController;
+
+import java.util.ArrayList;
+
 /**
  * Entity class representing an instance of a Quest Card type
  *
@@ -22,6 +28,12 @@ public class QuestCards<T extends Enum<T> & TargetableCardCodes> extends StoryCa
                 '}';
     }
 
+    @Override
+    public GamePhases generateGamePhase(ArrayList<Players> players, QuestGameController gameInstance) {
+        return null;
+    }
+
+
     public QuestCards(Decks assignedDeck, String activeAbilityDescription, String cardName, CardTypes subType, String fileName, StoryDeckCards cardCode, int stages, T foeBoosted) {
         super(assignedDeck,activeAbilityDescription, cardName, subType, fileName, cardCode);
         this.stages = stages;
@@ -35,4 +47,5 @@ public class QuestCards<T extends Enum<T> & TargetableCardCodes> extends StoryCa
     public T getBoostedFoe() {
         return boostedFoe;
     }
+
 }

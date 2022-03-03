@@ -1,5 +1,7 @@
 package com.team9.questgame.Entities.cards;
 
+import com.team9.questgame.Data.CardData;
+
 public class WeaponCards extends AdventureCards {
     private final int bonusBp;
 
@@ -22,5 +24,21 @@ public class WeaponCards extends AdventureCards {
     @Override
     public void playCard() {
 
+    }
+
+    @Override
+    public CardData generateCardData() {
+        CardData data = new CardData(
+                cardID,
+                cardCode,
+                cardName,
+                subType,
+                imgSrc,
+                0,
+                bonusBp,
+                activeAbilityDescription,
+                false
+        );
+        return data;
     }
 }

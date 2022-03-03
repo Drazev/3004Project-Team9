@@ -1,5 +1,7 @@
 package com.team9.questgame.Entities.cards;
 
+import com.team9.questgame.Data.CardData;
+
 public class AmourCards extends AdventureCards {
     private final int bonusBp=10;
     private final int bids=1;
@@ -30,5 +32,21 @@ public class AmourCards extends AdventureCards {
     @Override
     public void playCard() {
 
+    }
+
+    @Override
+    public CardData generateCardData() {
+        CardData data = new CardData(
+                cardID,
+                cardCode,
+                cardName,
+                subType,
+                imgSrc,
+                0,
+                0,
+                activeAbilityDescription,
+                false
+        );
+        return data;
     }
 }

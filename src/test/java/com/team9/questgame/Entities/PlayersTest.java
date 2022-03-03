@@ -20,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class PlayersTest {
 
-    @Autowired
     AdventureDecks deck;
 
     Players p1;
@@ -31,6 +30,7 @@ class PlayersTest {
     void setUp() {
         p1 = new Players("Player 1");
         LOG = LoggerFactory.getLogger(PlayersTest.class);
+        deck = new AdventureDecks();
     }
 
     @AfterEach

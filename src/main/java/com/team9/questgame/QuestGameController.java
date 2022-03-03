@@ -7,11 +7,11 @@ import com.team9.questgame.Entities.cards.AdventureDecks;
 import com.team9.questgame.Entities.cards.CardArea;
 import com.team9.questgame.Entities.cards.StoryCards;
 import com.team9.questgame.Entities.cards.StoryDecks;
+import com.team9.questgame.GamePhases.GamePhases;
 import com.team9.questgame.exception.IllegalGameRequest;
 import com.team9.questgame.exception.IllegalGameStateException;
 import com.team9.questgame.exception.PlayerJoinException;
 import com.team9.questgame.exception.PlayerNotFoundException;
-import com.team9.questgame.gamemanager.controller.GameRestController;
 import com.team9.questgame.gamemanager.service.GameService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,29 +28,30 @@ public class QuestGameController implements CardArea<StoryCards> {
     private ArrayList<Players> winners;
     private final GameService gameService;
     private GameStates currentState;
-    private Players currPlayer;
+    private Players activePlayer;
     private StoryCards storyCard;
     private Iterator<Players> turnSequence;
+    private GamePhases activePhase;
 
-    @Autowired
     private AdventureDecks aDeck;
-
-    @Autowired
     private StoryDecks sDeck;
 
     public QuestGameController(GameService gameService) {
-        this(new ArrayList<>(),gameService,PlayerRanks.KNIGHT_OF_ROUND_TABLE);
+        this(gameService,PlayerRanks.KNIGHT_OF_ROUND_TABLE);
     }
 
-    public QuestGameController(ArrayList<Players> players, GameService gameService,PlayerRanks victoryRank) {
+    public QuestGameController(GameService gameService,PlayerRanks victoryRank) {
         LOG = LoggerFactory.getLogger(QuestGameController.class);
-        this.players = players;
+        this.players = new ArrayList<>();
         this.gameService = gameService;
         this.currentState=GameStates.SETUP_OPEN;
-        this.currPlayer=null;
+        this.activePlayer =null;
         this.victoryCondtion=victoryRank;
         this.winners=new ArrayList<>();
         turnSequence=null;
+        activePhase=null;
+        aDeck = new AdventureDecks();
+        sDeck = new StoryDecks();
     }
 
     public boolean startGame() {
@@ -62,33 +63,33 @@ public class QuestGameController implements CardArea<StoryCards> {
             throw new IllegalGameStateException("Game Controller has too many players. Players must be removed until there are at most "+MAX_PLAYERS+" players.");
         }
 
-        aDeck.onGameReset();
-        sDeck.onGameReset();
-        for(Players p : players) {
-            p.onGameReset();
-        }
-
-        Collections.shuffle(players);
-        winners.clear();
+        onGameReset();
 
         runGame();
 
         return true;
     }
 
-
+    /**
+     * This function registers a new player to the game.
+     *
+     * It must be the ONLY way for a player to join the game
+     * and acts as a gatekeeper enforcing the player limits.
+     *
+     * @param player The player wishing to join the game
+     * @throws PlayerJoinException An error that is thrown when a player is unable to join the game. It includes a reason.
+     */
     void playerJoin(Players player) throws PlayerJoinException {
         if(players.contains(player)) {
             return; //Duplicate join request
         }
-        else if(currentState!=GameStates.SETUP_OPEN) {
-            throw new PlayerJoinException("Declined->Incorrect Game State",player);
-        }
-        else if(players.size()>=MAX_PLAYERS)
+        else if(currentState==GameStates.SETUP_FULL)
         {
-            throw new PlayerJoinException("Declined->Game Full",player);
+            throw new PlayerJoinException(player, PlayerJoinException.PlayerJoinExceptionReasonCodes.GAME_FULL);
         }
-
+        else if(currentState!=GameStates.SETUP_OPEN) {
+            throw new PlayerJoinException(player, PlayerJoinException.PlayerJoinExceptionReasonCodes.GAME_IN_PROGRESS);
+        }
 
         LOG.info("Player {name: "+player.getName()+", playerId: "+player.getPlayerId()+"} requested to join. Result: SUCCESS");
         players.add(player);
@@ -107,11 +108,21 @@ public class QuestGameController implements CardArea<StoryCards> {
         }
         LOG.info("Player {name: "+player.getName()+", playerId: "+player.getPlayerId()+"} requested to disconnect. Result: SUCCESS");
         players.remove(player);
-        currentState= GameStates.SETUP_OPEN;
+
+        //A past version allowed players to be passed via constructor.
+        //This guard ensures that if the players registered exeeded the max players by more than one, the game state will still be full
+        currentState = players.size()>=MAX_PLAYERS ? GameStates.SETUP_FULL : GameStates.SETUP_OPEN;
     }
 
     private void runGame() {
         currentState = GameStates.RUNNING;
+
+        //Deal card to each player up to max hand size
+        for(int i=0;i<Players.MAX_HAND_SIZE;++i) {
+            for(Players p : players) {
+                dealCard(p);
+            }
+        }
 
         //Main game loop
         while(currentState==GameStates.RUNNING) {
@@ -119,41 +130,21 @@ public class QuestGameController implements CardArea<StoryCards> {
 
             //Draw Story Card
             sDeck.drawCard(this);
-            PlayerRewardData awards=null; //returned from Game Phase once its done
 
-            switch(storyCard.getSubType()) {
+            playCard(storyCard); //set's quest phase
+            activePhase.startPhase();
 
-                case QUEST :
-                    LOG.info("Quest Card Drawn");
-                    break;
-                case TEST:
-                    LOG.info("Test Card Drawn");
-
-                    break;
-
-                case TOURNAMENT:
-                    LOG.info("Tournament Card Drawn");
-
-                    break;
-
-                case EVENT:
-                    LOG.info("Event Card Drawn");
-
-                    break;
-
-                default:
-                    throw new IllegalGameStateException();
-            }
-
-            //Play area discards
+            //Play area discards. We do this here instead of phase since we always discard down to Allies regardless of phase
             endOfRoundDiscardPhase();
 
+            PlayerRewardData awards=activePhase.getRewards();
             if(awards!=null) {
                 issueRewards(awards);
             }
 
-            //Check Victory Conditions
             discardCard(storyCard);
+
+            //Check Victory Conditions
             if(checkVictoryConditions()) {
                 //If victory condition, is there a tie?
                 if(currentState==GameStates.FINISHED_CONTESTED)
@@ -171,7 +162,7 @@ public class QuestGameController implements CardArea<StoryCards> {
             turnSequence=players.iterator();
         }
 
-        currPlayer=turnSequence.next();
+        activePlayer =turnSequence.next();
         //TODO:Notify client new turn has begun
     }
 
@@ -183,16 +174,41 @@ public class QuestGameController implements CardArea<StoryCards> {
 
     @Override
     public void discardCard(StoryCards card) {
-        card.discardCard();
+        if(card!=null) {
+            card.discardCard();
+        }
     }
 
+    /**
+     * Set's the active gamePhase based on drawn card.
+     *
+     * @param card The story card drawn by the player
+     */
     @Override
     public void playCard(StoryCards card) {
-
+        activePhase=card.generateGamePhase(players,this);
+        if(activePhase==null)
+        {
+            throw new IllegalGameStateException("Game Phase not generated by Story Card: "+card.getCardCode());
+        }
     }
 
     @Override
     public void onGameReset() {
+        aDeck.onGameReset();
+        sDeck.onGameReset();
+        for(Players p : players) {
+            p.onGameReset();
+        }
+
+        Collections.shuffle(players);
+        winners.clear();
+
+        activePlayer =null;
+        storyCard=null;
+        turnSequence=null;
+
+        currentState = players.size()>=MAX_PLAYERS ? GameStates.SETUP_FULL : GameStates.SETUP_OPEN;
 
     }
 
@@ -223,5 +239,10 @@ public class QuestGameController implements CardArea<StoryCards> {
 
     }
 
+    //TODO: Remove after Iteration 1 test
+    public void dealCard(Players player)
+    {
+        aDeck.drawCard(player);
+    }
 
 }

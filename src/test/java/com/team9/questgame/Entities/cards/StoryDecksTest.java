@@ -1,17 +1,19 @@
 package com.team9.questgame.Entities.cards;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+
 class StoryDecksTest {
-    @Autowired
+
     private StoryDecks deck;
+
+    @BeforeEach
+    void setUp() {
+        deck = new StoryDecks();
+    }
 
     @Test
     void createDeck() {
