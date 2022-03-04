@@ -1,7 +1,7 @@
 package com.team9.questgame.gamemanager.controller;
 
-import com.team9.questgame.gamemanager.model.RegistrationRequest;
-import com.team9.questgame.gamemanager.service.GameService;
+import com.team9.questgame.gamemanager.record.rest.RegistrationRequest;
+import com.team9.questgame.gamemanager.service.InboundService;
 import com.team9.questgame.gamemanager.service.SessionService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ public class GameRestControllerTest {
     private SessionService sessionService;
 
     @Autowired
-    private GameService gameService;
+    private InboundService inboundService;
 
     @Test
     public void handleRegister() {
@@ -110,7 +110,7 @@ public class GameRestControllerTest {
 
         sessionService.getSessionMap().put("1", "");
         sessionService.getSessionMap().put("2", "");
-        gameService.startGame();
+        inboundService.startGame();
         assertThat(this.restTemplate.getForObject(String.format("http://localhost:%d/api/start", port), String.class))
                 .contains("{\"gameStarted\":true}");
 

@@ -2,7 +2,8 @@ package com.team9.questgame.Entities;
 
 import com.team9.questgame.Entities.cards.AdventureCards;
 import com.team9.questgame.Entities.cards.AdventureDecks;
-import com.team9.questgame.Entities.cards.Cards;
+import com.team9.questgame.gamemanager.service.InboundService;
+import com.team9.questgame.gamemanager.service.OutboundService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,11 +12,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Stack;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest
 class PlayersTest {

@@ -12,13 +12,13 @@ import com.team9.questgame.exception.IllegalGameRequest;
 import com.team9.questgame.exception.IllegalGameStateException;
 import com.team9.questgame.exception.PlayerJoinException;
 import com.team9.questgame.exception.PlayerNotFoundException;
-import com.team9.questgame.gamemanager.service.GameService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 
+@Component
 public class QuestGameController implements CardArea<StoryCards> {
     private Logger LOG;
     private final PlayerRanks victoryCondtion;
@@ -26,7 +26,6 @@ public class QuestGameController implements CardArea<StoryCards> {
     public static final int MIN_PLAYERS=2;
     private ArrayList<Players> players;
     private ArrayList<Players> winners;
-    private final GameService gameService;
     private GameStates currentState;
     private Players activePlayer;
     private StoryCards storyCard;
@@ -36,14 +35,13 @@ public class QuestGameController implements CardArea<StoryCards> {
     private AdventureDecks aDeck;
     private StoryDecks sDeck;
 
-    public QuestGameController(GameService gameService) {
-        this(gameService,PlayerRanks.KNIGHT_OF_ROUND_TABLE);
+    public QuestGameController() {
+        this(PlayerRanks.KNIGHT_OF_ROUND_TABLE);
     }
 
-    public QuestGameController(GameService gameService,PlayerRanks victoryRank) {
+    public QuestGameController(PlayerRanks victoryRank) {
         LOG = LoggerFactory.getLogger(QuestGameController.class);
         this.players = new ArrayList<>();
-        this.gameService = gameService;
         this.currentState=GameStates.SETUP_OPEN;
         this.activePlayer =null;
         this.victoryCondtion=victoryRank;
@@ -79,7 +77,7 @@ public class QuestGameController implements CardArea<StoryCards> {
      * @param player The player wishing to join the game
      * @throws PlayerJoinException An error that is thrown when a player is unable to join the game. It includes a reason.
      */
-    void playerJoin(Players player) throws PlayerJoinException {
+    public void playerJoin(Players player) throws PlayerJoinException {
         if(players.contains(player)) {
             return; //Duplicate join request
         }

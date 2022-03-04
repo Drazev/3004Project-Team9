@@ -6,8 +6,8 @@ import com.team9.questgame.Data.CardData;
 import com.team9.questgame.Data.PlayerData;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.exception.PlayerJoinException;
-import com.team9.questgame.gamemanager.controller.GameRestController;
-import com.team9.questgame.gamemanager.service.GameService;
+import com.team9.questgame.gamemanager.service.InboundService;
+import com.team9.questgame.gamemanager.service.OutboundService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,18 +18,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class QuestGameControllerTest {
     QuestGameController game;
     ArrayList<Players> players;
-
-    @Autowired
-    GameService gameService;
 
     @Autowired
     ObjectMapper objMap;
@@ -38,7 +32,7 @@ class QuestGameControllerTest {
 
     @BeforeEach
     void setUp() {
-        game = new QuestGameController(gameService);
+        game = new QuestGameController();
         LOG = LoggerFactory.getLogger(QuestGameControllerTest.class);
         players = new ArrayList<>();
         players.add(new Players("Player 1"));

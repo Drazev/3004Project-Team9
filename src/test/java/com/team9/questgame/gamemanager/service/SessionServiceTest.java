@@ -18,9 +18,13 @@ class SessionServiceTest {
     @Autowired
     SessionService sessionService;
 
+    @Autowired
+    OutboundService outboundService;
+
     @Test
     void contextLoad() {
         assertThat(sessionService).isNotNull();
+        assertThat(outboundService).isNotNull();
     }
 
     @Test
