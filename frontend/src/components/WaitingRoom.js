@@ -53,8 +53,8 @@ const WaitingRoom = () => {
                 )}
                 <h3>Players in lobby</h3>
                 <ul className="list-players">
-                    {players.map(player => (
-                        <li>
+                    {players.map((player, index) => (
+                        <li key={index}>
                             {player}
                         </li>
                     ))}
