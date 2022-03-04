@@ -10,7 +10,7 @@ const SOCK_SERVER = "http://localhost:8080/quest-game-websocket"
 const START_URL = "http://localhost:8080/api/start"
 
 
-export async function connect(setConnected,setGameStarted, addNewMessage, setPlayers, name) {
+export async function connect(setConnected,setGameStarted, addNewMessage, setPlayers, name, updateHand) {
   console.log("Attempt connection");
 
   // Register player name
@@ -55,8 +55,8 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
     });
     client.subscribe("/topic/player/hand-update", (message) => {
         let newHand = JSON.parse(message.body);
-        console.log("New Hand: " + message.body);
 //        updateHand(newHand.name,newHand.hand);
+        updateHand(newHand);
     });
     client.subscribe("/topic/general/player-connect", (players) => {
       let body = JSON.parse(players.body);
