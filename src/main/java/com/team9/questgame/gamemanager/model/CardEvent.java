@@ -2,12 +2,13 @@ package com.team9.questgame.gamemanager.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
+/**
+ * Payload for Card discard /
+ */
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
-public class Message {
+public class CardEvent {
     private String name;
-    private String message;
+    private String cardId;
 }
