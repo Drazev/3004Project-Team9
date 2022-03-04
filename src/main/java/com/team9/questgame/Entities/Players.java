@@ -8,7 +8,7 @@ import com.team9.questgame.Entities.cards.AdventureCards;
 import com.team9.questgame.Entities.cards.CardArea;
 import com.team9.questgame.Entities.cards.Cards;
 import com.team9.questgame.exception.IllegalCardStateException;
-import com.team9.questgame.game_manager.service.OutboundService;
+import com.team9.questgame.gamemanager.service.OutboundService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

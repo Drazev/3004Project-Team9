@@ -1,4 +1,4 @@
-package com.team9.questgame.game_manager.record.socket;
+package com.team9.questgame.gamemanager.record.socket;
 
 import com.team9.questgame.Data.CardData;
 

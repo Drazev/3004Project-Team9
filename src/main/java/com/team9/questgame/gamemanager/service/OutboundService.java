@@ -1,8 +1,8 @@
-package com.team9.questgame.game_manager.service;
+package com.team9.questgame.gamemanager.service;
 
 import com.team9.questgame.Data.PlayerData;
-import com.team9.questgame.game_manager.record.rest.EmptyJsonReponse;
-import com.team9.questgame.gamemanager.record.socket.HandUpdateOubound;
+import com.team9.questgame.gamemanager.record.rest.EmptyJsonReponse;
+import com.team9.questgame.gamemanager.record.socket.HandUpdateOutbound;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +51,7 @@ public class OutboundService {
     }
 
     public void broadcastPlayerHandUpdate(PlayerData playerData) {
-        HandUpdateOubound handUpdate = new HandUpdateOubound(playerData.name(), playerData.hand());
+        HandUpdateOutbound handUpdate = new HandUpdateOutbound(playerData.name(), playerData.hand());
         this.sendToAllPlayers("/topic/player/hand-update", handUpdate);
     }
 

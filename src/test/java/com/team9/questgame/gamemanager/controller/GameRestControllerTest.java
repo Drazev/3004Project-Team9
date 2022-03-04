@@ -1,8 +1,8 @@
-package com.team9.questgame.game_manager.controller;
+package com.team9.questgame.gamemanager.controller;
 
-import com.team9.questgame.game_manager.record.rest.RegistrationRequest;
-import com.team9.questgame.game_manager.service.InboundService;
-import com.team9.questgame.game_manager.service.SessionService;
+import com.team9.questgame.gamemanager.record.rest.RegistrationRequest;
+import com.team9.questgame.gamemanager.service.InboundService;
+import com.team9.questgame.gamemanager.service.SessionService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,7 +15,7 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class GameRestControllerTest {
     @LocalServerPort
     private int port;

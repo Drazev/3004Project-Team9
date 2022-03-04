@@ -1,4 +1,4 @@
-package com.team9.questgame.game_manager.service;
+package com.team9.questgame.gamemanager.service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -6,10 +6,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class InboundServiceTest {
 
     @Autowired
@@ -30,14 +31,13 @@ class InboundServiceTest {
         assertFalse(inboundService.startGame());
         assertFalse(inboundService.isGameStarted());
 
-        // @TODO: Find way to refresh the context
         // Enough player
         sessionService.registerPlayer("A");
         sessionService.registerPlayer("B");
         assertTrue(inboundService.startGame());
         assertTrue(inboundService.isGameStarted());
 
-//         Start the game the second time
+        // Start the game the second time
         assertTrue(inboundService.startGame());
         assertTrue(inboundService.isGameStarted());
 

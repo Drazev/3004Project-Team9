@@ -1,8 +1,8 @@
-package com.team9.questgame.game_manager.configuration;
+package com.team9.questgame.gamemanager.configuration;
 
 import com.sun.security.auth.UserPrincipal;
 import com.team9.questgame.exception.UnauthorizedException;
-import com.team9.questgame.game_manager.service.SessionService;
+import com.team9.questgame.gamemanager.service.SessionService;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.slf4j.Logger;

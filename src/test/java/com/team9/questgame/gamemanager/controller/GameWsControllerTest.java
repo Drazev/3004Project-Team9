@@ -1,11 +1,10 @@
-package com.team9.questgame.game_manager.controller;
+package com.team9.questgame.gamemanager.controller;
 
-import com.team9.questgame.game_manager.record.rest.EmptyJsonReponse;
-import com.team9.questgame.game_manager.record.socket.CardUpdateInbound;
-import com.team9.questgame.game_manager.record.socket.HandUpdateOutbound;
-import com.team9.questgame.game_manager.service.InboundService;
-import com.team9.questgame.game_manager.service.OutboundService;
-import com.team9.questgame.game_manager.service.SessionService;
+import com.team9.questgame.gamemanager.record.rest.EmptyJsonReponse;
+import com.team9.questgame.gamemanager.record.socket.CardUpdateInbound;
+import com.team9.questgame.gamemanager.record.socket.HandUpdateOutbound;
+import com.team9.questgame.gamemanager.service.InboundService;
+import com.team9.questgame.gamemanager.service.SessionService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
-import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;

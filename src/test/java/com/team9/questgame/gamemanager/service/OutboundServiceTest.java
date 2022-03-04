@@ -1,4 +1,4 @@
-package com.team9.questgame.game_manager.service;
+package com.team9.questgame.gamemanager.service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

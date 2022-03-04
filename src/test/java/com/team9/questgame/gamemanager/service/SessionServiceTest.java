@@ -1,4 +1,4 @@
-package com.team9.questgame.game_manager.service;
+package com.team9.questgame.gamemanager.service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +29,12 @@ class SessionServiceTest {
         int repetitions = 100;
         sessionService = new SessionService();
 
-        for (int i=0; i<repetitions; i++) {
+        for (int i = 0; i < repetitions; i++) {
             assertTrue(sessionService.registerPlayer(Integer.toString(i)));
         }
         assertEquals(sessionService.getSessionMap().size(), repetitions);
 
-        for (int i=0; i<repetitions; i++) {
+        for (int i = 0; i < repetitions; i++) {
             assertFalse(sessionService.registerPlayer(Integer.toString(i)));
         }
         assertEquals(sessionService.getSessionMap().size(), repetitions);
@@ -46,12 +46,12 @@ class SessionServiceTest {
         int repetitions = 100;
         sessionService = prepareSession();
 
-        for (int i=0; i<repetitions; i++) {
+        for (int i = 0; i < repetitions; i++) {
             assertFalse(sessionService.deregisterPlayer("lol" + i));
         }
         assertEquals(sessionService.getSessionMap().size(), repetitions);
 
-        for (int i=0; i<repetitions; i++) {
+        for (int i = 0; i < repetitions; i++) {
             assertTrue(sessionService.deregisterPlayer(Integer.toString(i)));
         }
         assertEquals(sessionService.getSessionMap().size(), 0);
@@ -69,7 +69,7 @@ class SessionServiceTest {
         int repetitions = 100;
         sessionService = prepareSession();
 
-        for (int i=0; i<repetitions; i++) {
+        for (int i = 0; i < repetitions; i++) {
             assertEquals(sessionService.getPlayerSessionId(Integer.toString(i)), "value" + i);
         }
     }
@@ -85,7 +85,7 @@ class SessionServiceTest {
     SessionService prepareSession() {
         int repetitions = 100;
         sessionService.getSessionMap().clear();
-        for (int i=0; i<repetitions; i++) {
+        for (int i = 0; i < repetitions; i++) {
             sessionService.getSessionMap().put(Integer.toString(i), "value" + i);
         }
         return sessionService;
