@@ -1,15 +1,15 @@
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import useStore, { useAddNewPlayer, useAddNewMessage } from "./Store";
+
 
 let client;
 
 const REGISTRATION_URL = "http://localhost:8080/api/register"
 const SOCK_SERVER = "http://localhost:8080/quest-game-websocket"
-const PLAYERS_URL = "http://localhost:8080/api/player"
+const START_URL = "http://localhost:8080/api/start"
 
 
-export async function connect(setConnected, addNewMessage, name) {
+export async function connect(setConnected, addNewMessage, setPlayers, name) {
   console.log("Attempt connection");
 
   // Register player name
@@ -48,6 +48,13 @@ export async function connect(setConnected, addNewMessage, name) {
       console.log(body);
       addNewMessage(body.name, body.message);
     });
+    client.subscribe("/topic/general/player-connect", (players) => {
+      let body = JSON.parse(players.body);
+      console.log("clientsocket players.body: " + players.body);
+      const bodyKeys = Object.keys(body);
+      console.log(bodyKeys);
+      setPlayers(bodyKeys);
+    })
   };
 
   client.onDisconnect = () => {
@@ -79,7 +86,7 @@ export function disconnect() {
 }
 
 export function startGame(){
-  fetch('http://localhost:8080/api/start',
+  fetch(START_URL,
   {method: "POST",
   headers: {
       "Content-Type": "application/json"

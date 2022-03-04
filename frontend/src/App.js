@@ -22,7 +22,7 @@ const App = () => {
           {/* <MessageForm /> */}
           <Messages />
 
-//          <GameBoard />
+          {/* <GameBoard /> */}
 
         </>
       ) : (

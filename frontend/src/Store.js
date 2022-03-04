@@ -5,7 +5,7 @@ const useStore = create((set) => ({
   connected: false,
   name: "",
   messages: [],
-  players: ["bob", "Joe"],
+  players: [],
   loadPlayers: async () => {await handleLoadPlayers(set)},
   setConnected: (connected) => set(() => ({ connected: connected })),
   setName: (name) => set(() => ({ name: name })),
@@ -14,7 +14,6 @@ const useStore = create((set) => ({
     set((current) => ({
       messages: [...current.messages, { name: name, message: message }],
     })),
-    addNewPlayer: (pnames) => set(() => ({players: pnames})),
 }));
 
 const handleLoadPlayers = async (setPlayers) => {
@@ -22,7 +21,6 @@ const handleLoadPlayers = async (setPlayers) => {
     .then(response => response.json())
       .then(players => {
         setPlayers({players: players})
-        // console.log(players) causes infinite loop!!!
       })
       .catch(error => {console.log("eror in handleLoadPlayers: " + error)})
 }
@@ -40,5 +38,7 @@ export const useSetName = () => useStore((state) => state.setName);
 export const useAddNewMessage = () => useStore((state) => state.addNewMessage);
 
 export const useSetPlayers = () => useStore((state) => state.setPlayers);
+
+export const useLoadPlayers = () => useStore((state) => state.loadPlayers);
 
 export default useStore;
