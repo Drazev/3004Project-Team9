@@ -1,31 +1,32 @@
 package com.team9.questgame.gamemanager.service;
 
+import com.team9.questgame.Entities.Players;
 import lombok.Data;
-import lombok.ToString;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Manage all session related services
  */
-@ToString
 @Data
 @Service
 public class SessionService {
 
     private final ConcurrentHashMap<String, String> sessionMap;
+    private final ConcurrentHashMap<String, Players> playerMap;
 
     public SessionService() {
         this.sessionMap = new ConcurrentHashMap<>();
+        this.playerMap = new ConcurrentHashMap<>();
     }
 
     /**
      * Register a new player
+     *
      * @param name name of the player
      * @return true if the name is successfully registered, false if name already exists
      */
@@ -35,12 +36,14 @@ public class SessionService {
         } else {
             String randomId = UUID.randomUUID().toString();
             sessionMap.put(name, randomId);
+            playerMap.put(name, new Players(name));
             return true;
         }
     }
 
     /**
      * Deregister a player
+     *
      * @param name name of the player
      * @return true if the player is de-registered successfully, false if the player doesn't exist
      */
@@ -49,12 +52,14 @@ public class SessionService {
             return false;
         } else {
             sessionMap.remove(name);
+            playerMap.remove(name);
             return true;
         }
     }
 
     /**
      * Get all players' information
+     *
      * @return all players' name and sessionId
      */
     public synchronized Map<String, String> getPlayers() {
@@ -63,6 +68,7 @@ public class SessionService {
 
     /**
      * Get a player's session ID
+     *
      * @param name name of the player
      * @return their sessionId
      */
@@ -72,6 +78,7 @@ public class SessionService {
 
     /**
      * Get the number of player registered
+     *
      * @return the number of player registered
      */
     public synchronized int getNumberOfPlayers() {
@@ -80,6 +87,7 @@ public class SessionService {
 
     /**
      * Get a player information
+     *
      * @param name the name of the player
      * @return the player information if the player exists, else return null
      */

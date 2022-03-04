@@ -1,12 +1,14 @@
 package com.team9.questgame.Entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.team9.questgame.ApplicationContextHolder;
 import com.team9.questgame.Data.CardData;
 import com.team9.questgame.Data.PlayerData;
 import com.team9.questgame.Entities.cards.AdventureCards;
 import com.team9.questgame.Entities.cards.CardArea;
 import com.team9.questgame.Entities.cards.Cards;
 import com.team9.questgame.exception.IllegalCardStateException;
+import com.team9.questgame.gamemanager.service.OutboundService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +35,7 @@ public class Players implements CardArea<AdventureCards> {
     private int battlePoints;
     private int shields;
     private boolean isHandOversize;
+    private OutboundService outboundService;
 
     @JsonIgnore
     private static long nextId=0;
@@ -50,6 +53,7 @@ public class Players implements CardArea<AdventureCards> {
         this.name=playerName;
         rank=PlayerRanks.SQUIRE;
         this.playerId=nextId++;
+        this.outboundService = ApplicationContextHolder.getContext().getBean(OutboundService.class);
         onGameReset();
     }
 
@@ -121,6 +125,7 @@ public class Players implements CardArea<AdventureCards> {
         hand.remove(card);
         LOG.info(name+": Has DISCARDED a card.");
         validateHandSize();
+        notifyHandChanged();
     }
 
     public void discardCard(long cardId ) {
@@ -191,6 +196,15 @@ public class Players implements CardArea<AdventureCards> {
 
     }
 
+    public void notifyHandChanged() {
+        outboundService.broadcastPlayerHandUpdate(generatePlayerData());
+    }
+
+    public void notifyPlayerRankUP() {
+        //TODO: Notify game and player of a Rank Up event. Game will check victory condition, and player UI must be updated
+        outboundService.broadcastPlayerRankUpdate(generatePlayerData());
+    }
+
     public PlayerData generatePlayerData() {
         ArrayList<CardData> handCards = new ArrayList<>();
         for(Cards card : hand) {
@@ -233,14 +247,6 @@ public class Players implements CardArea<AdventureCards> {
 
     private void notifyHandOversize() {
 
-    }
-
-    public void notifyHandChanged() {
-
-    }
-
-    public void notifyPlayerRankUP() {
-        //TODO: Notify game and player of a Rank Up event. Game will check victory condition, and player UI must be updated
     }
 
 }

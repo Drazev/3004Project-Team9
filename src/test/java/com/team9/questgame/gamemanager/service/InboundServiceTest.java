@@ -3,40 +3,43 @@ package com.team9.questgame.gamemanager.service;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-class GameServiceTest {
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+class InboundServiceTest {
 
     @Autowired
-    GameService gameService;
+    InboundService inboundService;
 
     @Autowired
     SessionService sessionService;
 
     @Test
     void contextLoad() {
-        assertThat(gameService).isNotNull();
+        assertThat(inboundService).isNotNull();
         assertThat(sessionService).isNotNull();
     }
 
     @Test
     void startGame() {
         // Not enough player
-        assertFalse(gameService.startGame());
-        assertFalse(gameService.isGameStarted());
+        assertFalse(inboundService.startGame());
+        assertFalse(inboundService.isGameStarted());
 
         // Enough player
         sessionService.registerPlayer("A");
         sessionService.registerPlayer("B");
-        assertTrue(gameService.startGame());
-        assertTrue(gameService.isGameStarted());
+        assertTrue(inboundService.startGame());
+        assertTrue(inboundService.isGameStarted());
 
         // Start the game the second time
-        assertTrue(gameService.startGame());
-        assertTrue(gameService.isGameStarted());
+        assertTrue(inboundService.startGame());
+        assertTrue(inboundService.isGameStarted());
 
     }
 }

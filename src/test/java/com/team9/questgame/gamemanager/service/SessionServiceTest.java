@@ -1,26 +1,27 @@
 package com.team9.questgame.gamemanager.service;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.HashMap;
-import java.util.UUID;
+import org.springframework.test.annotation.DirtiesContext;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class SessionServiceTest {
 
     @Autowired
     SessionService sessionService;
 
+    @Autowired
+    OutboundService outboundService;
+
     @Test
     void contextLoad() {
         assertThat(sessionService).isNotNull();
+        assertThat(outboundService).isNotNull();
     }
 
     @Test
@@ -28,12 +29,12 @@ class SessionServiceTest {
         int repetitions = 100;
         sessionService = new SessionService();
 
-        for (int i=0; i<repetitions; i++) {
+        for (int i = 0; i < repetitions; i++) {
             assertTrue(sessionService.registerPlayer(Integer.toString(i)));
         }
         assertEquals(sessionService.getSessionMap().size(), repetitions);
 
-        for (int i=0; i<repetitions; i++) {
+        for (int i = 0; i < repetitions; i++) {
             assertFalse(sessionService.registerPlayer(Integer.toString(i)));
         }
         assertEquals(sessionService.getSessionMap().size(), repetitions);
@@ -45,12 +46,12 @@ class SessionServiceTest {
         int repetitions = 100;
         sessionService = prepareSession();
 
-        for (int i=0; i<repetitions; i++) {
+        for (int i = 0; i < repetitions; i++) {
             assertFalse(sessionService.deregisterPlayer("lol" + i));
         }
         assertEquals(sessionService.getSessionMap().size(), repetitions);
 
-        for (int i=0; i<repetitions; i++) {
+        for (int i = 0; i < repetitions; i++) {
             assertTrue(sessionService.deregisterPlayer(Integer.toString(i)));
         }
         assertEquals(sessionService.getSessionMap().size(), 0);
@@ -68,7 +69,7 @@ class SessionServiceTest {
         int repetitions = 100;
         sessionService = prepareSession();
 
-        for (int i=0; i<repetitions; i++) {
+        for (int i = 0; i < repetitions; i++) {
             assertEquals(sessionService.getPlayerSessionId(Integer.toString(i)), "value" + i);
         }
     }
@@ -84,7 +85,7 @@ class SessionServiceTest {
     SessionService prepareSession() {
         int repetitions = 100;
         sessionService.getSessionMap().clear();
-        for (int i=0; i<repetitions; i++) {
+        for (int i = 0; i < repetitions; i++) {
             sessionService.getSessionMap().put(Integer.toString(i), "value" + i);
         }
         return sessionService;

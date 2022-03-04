@@ -1,9 +1,7 @@
 package com.team9.questgame.gamemanager.configuration;
 
-import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.sun.security.auth.UserPrincipal;
 import com.team9.questgame.exception.UnauthorizedException;
-import com.team9.questgame.gamemanager.service.GameService;
 import com.team9.questgame.gamemanager.service.SessionService;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -12,10 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.util.UriComponentsBuilder;
 
