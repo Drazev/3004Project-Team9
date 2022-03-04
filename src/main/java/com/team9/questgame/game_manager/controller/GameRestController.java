@@ -1,13 +1,13 @@
-package com.team9.questgame.gamemanager.controller;
+package com.team9.questgame.game_manager.controller;
 
 
 import com.team9.questgame.exception.BadRequestException;
-import com.team9.questgame.gamemanager.record.rest.GameStartResponse;
-import com.team9.questgame.gamemanager.record.rest.RegistrationRequest;
-import com.team9.questgame.gamemanager.record.rest.RegistrationResponse;
-import com.team9.questgame.gamemanager.service.InboundService;
-import com.team9.questgame.gamemanager.service.OutboundService;
-import com.team9.questgame.gamemanager.service.SessionService;
+import com.team9.questgame.game_manager.record.rest.GameStartResponse;
+import com.team9.questgame.game_manager.record.rest.RegistrationRequest;
+import com.team9.questgame.game_manager.record.rest.RegistrationResponse;
+import com.team9.questgame.game_manager.service.InboundService;
+import com.team9.questgame.game_manager.service.OutboundService;
+import com.team9.questgame.game_manager.service.SessionService;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.slf4j.Logger;

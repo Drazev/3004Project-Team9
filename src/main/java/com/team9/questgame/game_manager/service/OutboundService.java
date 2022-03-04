@@ -1,7 +1,7 @@
-package com.team9.questgame.gamemanager.service;
+package com.team9.questgame.game_manager.service;
 
 import com.team9.questgame.Data.PlayerData;
-import com.team9.questgame.gamemanager.record.rest.EmptyJsonReponse;
+import com.team9.questgame.game_manager.record.rest.EmptyJsonReponse;
 import com.team9.questgame.gamemanager.record.socket.HandUpdateOubound;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -60,12 +60,12 @@ public class OutboundService {
     }
 
     private void sendToPlayer(String topic, String name, Object payload) {
-        LOG.info(String.format("Broadcasting to one players: topic=%s, name=%s, payload=%s", topic, name, payload));
+        LOG.info(String.format("Broadcasting to one player: topic=%s, name=%s, payload=%s", topic, name, payload));
         messenger.convertAndSendToUser(topic, sessionService.getPlayerSessionId(name), payload);
     }
 
     private void sendToAllPlayers(String topic, Object payload) {
-        LOG.info(String.format("Broadcasting to one players: topic=%s, payload=%s", topic, payload));
+        LOG.info(String.format("Broadcasting to all players: topic=%s, payload=%s", topic, payload));
         messenger.convertAndSend(topic, payload);
     }
 

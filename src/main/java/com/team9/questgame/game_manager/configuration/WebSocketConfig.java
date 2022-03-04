@@ -1,4 +1,4 @@
-package com.team9.questgame.gamemanager.configuration;
+package com.team9.questgame.game_manager.configuration;
 
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;

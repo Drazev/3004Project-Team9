@@ -1,4 +1,4 @@
-package com.team9.questgame.gamemanager.service;
+package com.team9.questgame.game_manager.service;
 
 import com.team9.questgame.Entities.Players;
 import lombok.Data;

@@ -1,8 +1,8 @@
-package com.team9.questgame.gamemanager.controller;
+package com.team9.questgame.game_manager.controller;
 
-import com.team9.questgame.gamemanager.record.rest.RegistrationRequest;
-import com.team9.questgame.gamemanager.service.InboundService;
-import com.team9.questgame.gamemanager.service.SessionService;
+import com.team9.questgame.game_manager.record.rest.RegistrationRequest;
+import com.team9.questgame.game_manager.service.InboundService;
+import com.team9.questgame.game_manager.service.SessionService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

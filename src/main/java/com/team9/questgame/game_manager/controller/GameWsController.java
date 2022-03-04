@@ -1,7 +1,7 @@
-package com.team9.questgame.gamemanager.controller;
+package com.team9.questgame.game_manager.controller;
 
-import com.team9.questgame.gamemanager.record.socket.CardUpdateInbound;
-import com.team9.questgame.gamemanager.service.InboundService;
+import com.team9.questgame.game_manager.record.socket.CardUpdateInbound;
+import com.team9.questgame.game_manager.service.InboundService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;

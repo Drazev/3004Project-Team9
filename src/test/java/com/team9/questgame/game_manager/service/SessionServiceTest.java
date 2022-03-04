@@ -1,18 +1,15 @@
-package com.team9.questgame.gamemanager.service;
+package com.team9.questgame.game_manager.service;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.HashMap;
-import java.util.UUID;
+import org.springframework.test.annotation.DirtiesContext;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class SessionServiceTest {
 
     @Autowired

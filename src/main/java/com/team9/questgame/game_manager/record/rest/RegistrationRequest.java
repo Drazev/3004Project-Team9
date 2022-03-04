@@ -1,4 +1,4 @@
-package com.team9.questgame.gamemanager.record.rest;
+package com.team9.questgame.game_manager.record.rest;
 
 /**
  * Request body for POST/DELETE /api/register

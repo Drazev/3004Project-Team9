@@ -1,4 +1,4 @@
-package com.team9.questgame.gamemanager.record.rest;
+package com.team9.questgame.game_manager.record.rest;
 
 /**
  * Response body for GET /status and POST /start-game
