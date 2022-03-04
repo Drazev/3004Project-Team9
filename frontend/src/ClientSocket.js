@@ -49,6 +49,15 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
       console.log(body);
       addNewMessage(body.name, body.message);
     });
+    client.subscribe("/topic/general/next-turn", (name) => {
+        console.log("Turn is now: " + name.body);
+//        setTurn(name);
+    });
+    client.subscribe("/topic/player/hand-update", (message) => {
+        let newHand = JSON.parse(message.body);
+        console.log("New Hand: " + message.body);
+//        updateHand(newHand.name,newHand.hand);
+    });
     client.subscribe("/topic/general/player-connect", (players) => {
       let body = JSON.parse(players.body);
       console.log("clientsocket players.body: " + players.body);
@@ -82,6 +91,28 @@ export function sendMessage(name, message) {
     body: JSON.stringify({
       name: name,
       message: message,
+    }),
+  });
+}
+
+export function drawCard(name, cardId) {
+  console.log("Draw Card: \nName: " + name + "\nCardID: " + cardId);
+  client.publish({
+    destination: "/app/general/player-draw-card",
+    body: JSON.stringify({
+      name: name,
+      cardId: cardId, //server will not care about this
+    }),
+  });
+}
+
+export function discardCard(name, cardId) {
+  console.log("Discard Card: \nName: " + name + "\nCardID: " + cardId);
+  client.publish({
+    destination: "/app/general/player-discard-card",
+    body: JSON.stringify({
+      name: name,
+      cardId: cardId,
     }),
   });
 }

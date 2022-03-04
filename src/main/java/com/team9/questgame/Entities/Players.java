@@ -88,45 +88,17 @@ public class Players implements CardArea<AdventureCards> {
         battlePoints=rank.getRankBattlePointValue(); //TODO: Modify to include bp value of cards in play
     }
 
-    public boolean onEndOfPhase() {
-        boolean rc=false;
-
-        return rc;
-    }
-
-    public boolean actionPlayCard(long cardId) {
-        AdventureCards card = findCardFromCardId(cardId);
-        playCard(card);
-        return card!=null;
-    }
-
-    public boolean actionDiscardCard(long cardId ) {
-        AdventureCards card = findCardFromCardId(cardId);
-        discardCard(card);
-        return card!=null;
-    }
-
-    public boolean actionEndTurn() {
-        boolean rc=false;
-
-        return rc;
-    }
-
     private boolean validateHandSize() {
         boolean prevState=isHandOversize;
         isHandOversize = hand.size()>MAX_HAND_SIZE;
         if(isHandOversize) {
             LOG.debug(name+": Oversize Hand State SET.");
-            emitHandOversize();
+            notifyHandOversize();
         }
         else if(prevState) {
             LOG.debug(name+": Oversize Hand State CLEARED.");
         }
         return isHandOversize;
-    }
-
-    private void emitHandOversize() {
-
     }
 
     @Override
@@ -151,22 +123,21 @@ public class Players implements CardArea<AdventureCards> {
         validateHandSize();
     }
 
+    public void discardCard(long cardId ) {
+        AdventureCards card = findCardFromCardId(cardId);
+        discardCard(card);
+    }
+
+
     @Override
     public void playCard(AdventureCards card) {
         LOG.info(name+": Has PLAYED CARD "+card);
         notifyHandChanged();
     }
 
-    @Override
-    public void onGameReset() {
-        this.rank=PlayerRanks.SQUIRE;
-        this.battlePoints=rank.getRankBattlePointValue();
-        this.shields=0;
-        this.isHandOversize=false;
-        this.hand = new HashSet<>();
-        this.cardIdMap = new HashMap<>();
-        notifyHandChanged();
-        LOG.info(name+": Has reset to GAME START state.");
+    public void playCard(long cardId) {
+        AdventureCards card = findCardFromCardId(cardId);
+        playCard(card);
     }
 
     private AdventureCards findCardFromCardId(Long cardId) {
@@ -220,14 +191,6 @@ public class Players implements CardArea<AdventureCards> {
 
     }
 
-    public void notifyHandChanged() {
-
-    }
-
-    public void notifyPlayerRankUP() {
-        //TODO: Notify game and player of a Rank Up event. Game will check victory condition, and player UI must be updated
-    }
-
     public PlayerData generatePlayerData() {
         ArrayList<CardData> handCards = new ArrayList<>();
         for(Cards card : hand) {
@@ -244,4 +207,40 @@ public class Players implements CardArea<AdventureCards> {
         );
         return data;
     }
+
+    /**
+     * Play area clear's all cards other than allies from their play area.
+     *
+     */
+    public void onEndOfPhase() {
+
+    }
+
+    /**
+     * Resets Player data and state to start of game condition
+     */
+    @Override
+    public void onGameReset() {
+        this.rank=PlayerRanks.SQUIRE;
+        this.battlePoints=rank.getRankBattlePointValue();
+        this.shields=0;
+        this.isHandOversize=false;
+        this.hand = new HashSet<>();
+        this.cardIdMap = new HashMap<>();
+        notifyHandChanged();
+        LOG.info(name+": Has reset to GAME START state.");
+    }
+
+    private void notifyHandOversize() {
+
+    }
+
+    public void notifyHandChanged() {
+
+    }
+
+    public void notifyPlayerRankUP() {
+        //TODO: Notify game and player of a Rank Up event. Game will check victory condition, and player UI must be updated
+    }
+
 }
