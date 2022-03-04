@@ -18,11 +18,11 @@ const App = () => {
         <>
 
 
-          <WaitingRoom />
-          {/* <MessageForm /> */}
-          <Messages />
+          {/* { <WaitingRoom /> }
+          { <MessageForm /> }
+          <Messages /> */}
 
-          {/* <GameBoard /> */}
+          <GameBoard />
 
         </>
       ) : (

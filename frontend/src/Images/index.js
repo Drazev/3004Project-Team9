@@ -1,4 +1,5 @@
 const CardImages = {
+    Back_Adventure: "./Assets/Adventure Deck (346x470)/Adventure Deck Card Back.png",
     Ally_KingArthur: "./Assets/Adventure Deck (346x470)/Ally - King Arthur.png",
     Ally_KingPellinore: "./Assets/Adventure Deck (346x470)/Ally - King Pellinore.png",
     Ally_Merlin: "./Assets/Adventure Deck (346x470)/Ally - Merlin.png",
