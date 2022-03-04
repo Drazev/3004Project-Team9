@@ -3,12 +3,14 @@ import create from "zustand";
 const useStore = create((set) => ({
   title: "Quest Game",
   connected: false,
+  gameStarted: false,
   name: "",
   messages: [],
   players: [],
   loadPlayers: async () => {await handleLoadPlayers(set)},
   setConnected: (connected) => set(() => ({ connected: connected })),
   setName: (name) => set(() => ({ name: name })),
+  setGameStarted: (gameStarted) => set(() => ({gameStarted: gameStarted})),
   setPlayers: (players) => set(() => ({ players: players})),
   addNewMessage: (name, message) =>
     set((current) => ({
@@ -29,11 +31,13 @@ export const useTitle = () => useStore((state) => state.title);
 export const useConnected = () => useStore((state) => state.connected);
 export const useName = () => useStore((state) => state.name);
 export const useMessages = () => useStore((state) => state.messages);
+export const useGameStarted = () => useStore((state) => state.gameStarted);
 
 export const usePlayers = () => useStore((state) => state.players);
 export const useAddNewPlayer = () => useStore((state) => state.addNewPlayer);
 
 export const useSetConnected = () => useStore((state) => state.setConnected);
+export const useSetGameStarted = () => useStore((state) => state.setGameStarted);
 export const useSetName = () => useStore((state) => state.setName);
 export const useAddNewMessage = () => useStore((state) => state.addNewMessage);
 
