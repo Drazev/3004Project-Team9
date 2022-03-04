@@ -1,16 +1,47 @@
 import PlayerHand from "./PlayerHand";
 import CardImages from "../Images/index";
 import Card from "./Card";
+import {drawCard} from "../ClientSocket";
+import {useName} from "../Store";
 import {Button} from "react-bootstrap";
 
 function GameBoard(props){
-    props = {player1:{name:"Shelly",isTurn:true,isMyHand:true,cardsInHand:[CardImages.Ally_KingArthur,CardImages.Weapon_Excalibur,CardImages.Weapon_Lance,CardImages.Ally_SirPercival,CardImages.Ally_QueenGuinevere,CardImages.Amour,CardImages.Event_Plague,CardImages.Ally_SirTristan,CardImages.Weapon_Sword,CardImages.Weapon_BattleAx,CardImages.Weapon_Dagger,CardImages.Quest_BoarHunt,CardImages.Weapon_Lance],cardsInPlay:[],rank:CardImages.Rank_Squire,shields:54},
-             player2:{name:"Sarah",isTurn:true,isMyHand:true,cardsInHand:[CardImages.Ally_KingArthur,CardImages.Weapon_Excalibur,CardImages.Weapon_Lance,CardImages.Ally_SirPercival,CardImages.Ally_QueenGuinevere,CardImages.Amour,CardImages.Event_Plague,CardImages.Ally_SirTristan,CardImages.Weapon_Sword,CardImages.Weapon_BattleAx,CardImages.Weapon_Dagger,CardImages.Quest_BoarHunt,CardImages.Weapon_Lance],cardsInPlay:[CardImages.Ally_KingPellinore,CardImages.Ally_SirGalahad],rank:CardImages.Rank_Squire,shields:5},
-             player3:{name:"Tony",isTurn:true,isMyHand:true,cardsInHand:[CardImages.Ally_KingArthur,CardImages.Weapon_Excalibur,CardImages.Weapon_Lance,CardImages.Ally_SirPercival,CardImages.Ally_QueenGuinevere,CardImages.Amour,CardImages.Event_Plague,CardImages.Ally_SirTristan,CardImages.Weapon_Sword,CardImages.Weapon_BattleAx,CardImages.Weapon_Dagger,CardImages.Quest_BoarHunt,CardImages.Weapon_Lance],cardsInPlay:[CardImages.Ally_KingPellinore],rank:CardImages.Rank_Squire,shields:5},
-             player4:{name:"Jack",isTurn:true,isMyHand:true,cardsInHand:[CardImages.Ally_KingArthur,CardImages.Weapon_Excalibur,CardImages.Weapon_Lance,CardImages.Ally_SirPercival,CardImages.Ally_QueenGuinevere,CardImages.Amour,CardImages.Event_Plague,CardImages.Ally_SirTristan,CardImages.Weapon_Sword,CardImages.Weapon_BattleAx,CardImages.Weapon_Dagger,CardImages.Quest_BoarHunt,CardImages.Weapon_Lance],cardsInPlay:[CardImages.Event_ChivalrousDeed],rank:CardImages.Rank_Squire,shields:5}
-            };
     let init = 130;
     let jump = 175;
+    const name = useName();
+    //const turn = useTurn();
+    const turn = "PlayerName";
+
+    props = {player1:{name:"Test1",isTurn:true,cardsInHand:[{cardId:1,cardImage:CardImages.Ally_KingArthur}],cardsInPlay:[],rank:CardImages.Rank_Squire,shields:54},
+             player2:{name:"Test2",isTurn:true,cardsInHand:[{cardId:2,cardImage:CardImages.Ally_KingArthur}],cardsInPlay:[],rank:CardImages.Rank_Squire,shields:5},
+             player3:{name:"Test3",isTurn:true,cardsInHand:[{cardId:3,cardImage:CardImages.Ally_KingArthur}],cardsInPlay:[],rank:CardImages.Rank_Squire,shields:5},
+             player4:{name:"Test4",isTurn:true,cardsInHand:[{cardId:4,cardImage:CardImages.Ally_KingArthur}],cardsInPlay:[],rank:CardImages.Rank_Squire,shields:5}
+            };
+    
+    if(props.player1.name == name){
+        props.player1.isMyHand=true;
+    }else if(props.player2.name == name){
+        props.player2.isMyHand=true;
+    }else if(props.player3.name == name){
+        props.player3.isMyHand=true;
+    }else if(props.player4.name == name){
+        props.player4.isMyHand=true;
+    }
+
+    /*
+    props.player1Turn = false;
+    props.player2Turn = false;
+    props.player3Turn = false;
+    props.player4Turn = false;
+    if(turn == props.player1.name){
+        props.player1Turn = true;
+    }else if(turn == props.player2.name){
+        props.player2Turn = true;
+    }else if(turn == props.player3.name){
+        player3Turn = true;
+    }else if(turn == props.player4.name){
+        player4Turn = true;
+    }*/
 
     return (
         <div id="GameBoard">
@@ -92,20 +123,9 @@ function GameBoard(props){
             <div id="stageDisplay">
 
             </div>
-            <Button>Draw</Button>
+            <Button onClick={() => drawCard(name,0)} >Draw</Button>
             <Button>End Turn</Button>
         </div>
     );
 }
 export default GameBoard;
-
-/*
-<div>
-                    <Card cardImage={CardImages.Amour} selectedAllowed={false} canGrow={false}></Card>
-                    <Card cardImage={CardImages.Amour} selectedAllowed={false} canGrow={false}></Card>
-                </div>
-                <div>
-                    <Card cardImage={CardImages.Amour} selectedAllowed={false} canGrow={false}></Card>
-                    <Card cardImage={CardImages.Amour} selectedAllowed={false} canGrow={false}></Card>
-                </div>
-*/
