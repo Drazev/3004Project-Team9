@@ -18,8 +18,8 @@ const App = () => {
         <>
 
 
-          {/* { <WaitingRoom /> }
-          { <MessageForm /> }
+          <WaitingRoom />
+          {/* <MessageForm /> }
           <Messages /> */}
 
           <GameBoard />
