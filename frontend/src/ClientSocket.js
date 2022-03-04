@@ -1,13 +1,16 @@
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import { setGameStarted } from "./Store";
+
 
 let client;
 
 const REGISTRATION_URL = "http://localhost:8080/api/register"
 const SOCK_SERVER = "http://localhost:8080/quest-game-websocket"
+const START_URL = "http://localhost:8080/api/start"
 
 
-export async function connect(setConnected, addNewMessage, name) {
+export async function connect(setConnected,setGameStarted, addNewMessage, setPlayers, name) {
   console.log("Attempt connection");
 
   // Register player name
@@ -46,6 +49,26 @@ export async function connect(setConnected, addNewMessage, name) {
       console.log(body);
       addNewMessage(body.name, body.message);
     });
+    client.subscribe("/topic/general/next-turn", (name) => {
+        console.log("Turn is now: " + name.body);
+//        setTurn(name);
+    });
+    client.subscribe("/topic/player/hand-update", (message) => {
+        let newHand = JSON.parse(message.body);
+        console.log("New Hand: " + message.body);
+//        updateHand(newHand.name,newHand.hand);
+    });
+    client.subscribe("/topic/general/player-connect", (players) => {
+      let body = JSON.parse(players.body);
+      console.log("clientsocket players.body: " + players.body);
+      const bodyKeys = Object.keys(body);
+      console.log(bodyKeys);
+      setPlayers(bodyKeys);
+    });
+    client.subscribe("/topic/general/game-start", () => {
+      console.log("setting game started true");
+      setGameStarted(true);
+    })
   };
 
   client.onDisconnect = () => {
@@ -72,6 +95,38 @@ export function sendMessage(name, message) {
   });
 }
 
+export function drawCard(name, cardId) {
+  console.log("Draw Card: \nName: " + name + "\nCardID: " + cardId);
+  client.publish({
+    destination: "/app/general/player-draw-card",
+    body: JSON.stringify({
+      name: name,
+      cardId: cardId, //server will not care about this
+    }),
+  });
+}
+
+export function discardCard(name, cardId) {
+  console.log("Discard Card: \nName: " + name + "\nCardID: " + cardId);
+  client.publish({
+    destination: "/app/general/player-discard-card",
+    body: JSON.stringify({
+      name: name,
+      cardId: cardId,
+    }),
+  });
+}
+
 export function disconnect() {
   client.disconnect();
 }
+
+export function startGame(){
+  fetch(START_URL,
+  {method: "POST",
+  headers: {
+      "Content-Type": "application/json"
+    }} );
+    //setGameStarted(true);
+}
+

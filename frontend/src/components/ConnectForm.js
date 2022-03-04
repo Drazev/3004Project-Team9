@@ -6,12 +6,18 @@ import {
   useSetConnected,
   useSetName,
   useAddNewMessage,
+  useAddNewPlayer,
+  useSetPlayers,
+  useSetGameStarted,
 } from "../Store";
 
 const ConnectForm = () => {
   const name = useName();
   const addNewMessage = useAddNewMessage();
+  const addNewPlayer =  useAddNewPlayer();
+  const setPlayers = useSetPlayers();
   const setConnected = useSetConnected();
+  const setGameStarted = useSetGameStarted();
 
   const setName = useSetName();
 
@@ -22,7 +28,7 @@ const ConnectForm = () => {
       alert("Please enter your name");
       return;
     }
-    if (connect(setConnected, addNewMessage, name) === false) {
+    if (connect(setConnected, setGameStarted, addNewMessage, setPlayers, name) === false) {
       alert("Name already taken, please choose a different one")
     }
   };

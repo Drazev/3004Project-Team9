@@ -113,7 +113,5 @@ public class GameRestControllerTest {
         inboundService.startGame();
         assertThat(this.restTemplate.getForObject(String.format("http://localhost:%d/api/start", port), String.class))
                 .contains("{\"gameStarted\":true}");
-
     }
-
 }

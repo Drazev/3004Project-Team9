@@ -1,14 +1,11 @@
 import CardImages from "../Images/index";
 import React,{useState} from "react";
 import {Button} from "react-bootstrap";
+import {discardCard} from "../ClientSocket";
 
 function Card(props){
     const [isBig, setIsBig]=useState(false);
     const [isSelected, setSelected]=useState(false);
-
-    //depriciated for now
-    //const [activeDiscard, setDiscard]=useState(true);
-    //const [activePlay, setPlay]=useState(true);
 
     //add border around card when selected
     let borderSize;
@@ -61,7 +58,7 @@ function Card(props){
                             paddingRight: 5,
                             backgroundColor:"#c96b6b",
                             borderColor:"#c96b6b",}}
-                        //onClick={() => setDiscard(!activeDiscard)}
+                        onClick={() => discardCard(props.cardOwner,props.cardId)}
                     >Discard</Button>{' '}
                 </>
             }

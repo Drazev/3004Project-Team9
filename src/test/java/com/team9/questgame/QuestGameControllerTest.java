@@ -141,7 +141,7 @@ class QuestGameControllerTest {
         //Discard all cards
         for( Map.Entry<Players,PlayerData> entry : pData.entrySet()) {
                 for(CardData cd : entry.getValue().hand()) {
-                    entry.getKey().actionDiscardCard(cd.cardID());
+                    entry.getKey().discardCard(cd.cardID());
                 }
         }
 

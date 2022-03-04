@@ -64,7 +64,7 @@ public class InboundService {
 
     public synchronized void playerDiscardCard(String name, long cardId) {
         Players player = sessionService.getPlayerMap().get(name);
-        player.actionDiscardCard(cardId);
+        player.discardCard(cardId);
     }
 
 

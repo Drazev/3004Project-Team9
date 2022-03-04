@@ -7,6 +7,4 @@ public interface GamePhases extends CardArea {
 
     PlayerRewardData getRewards();
     void startPhase();
-
-
 }
