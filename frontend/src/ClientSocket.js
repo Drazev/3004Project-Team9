@@ -1,5 +1,6 @@
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import { setGameStarted } from "./Store";
 
 
 let client;
@@ -9,7 +10,7 @@ const SOCK_SERVER = "http://localhost:8080/quest-game-websocket"
 const START_URL = "http://localhost:8080/api/start"
 
 
-export async function connect(setConnected, addNewMessage, setPlayers, name) {
+export async function connect(setConnected,setGameStarted, addNewMessage, setPlayers, name) {
   console.log("Attempt connection");
 
   // Register player name
@@ -54,6 +55,10 @@ export async function connect(setConnected, addNewMessage, setPlayers, name) {
       const bodyKeys = Object.keys(body);
       console.log(bodyKeys);
       setPlayers(bodyKeys);
+    });
+    client.subscribe("/topic/general/game-start", () => {
+      console.log("setting game started true");
+      setGameStarted(true);
     })
   };
 
@@ -91,5 +96,6 @@ export function startGame(){
   headers: {
       "Content-Type": "application/json"
     }} );
+    //setGameStarted(true);
 }
 

@@ -5,7 +5,8 @@ import {
         useConnected, 
         useLoadPlayers,
         usePlayers, 
-        useSetPlayers
+        useSetPlayers,
+        useGameStarted
        } from "../Store";
 
 const WaitingRoom = () => {
@@ -14,6 +15,7 @@ const WaitingRoom = () => {
     const loadPlayers = useLoadPlayers();
     const setPlayers = useSetPlayers();
     const connected = useConnected();
+    const gameStarted = useGameStarted();
     useEffect(() => {
                 loadPlayers(setPlayers);
             
