@@ -1,6 +1,8 @@
 package com.team9.questgame.Entities.Effects;
 
-public enum AbstractTargetTypes {
+import com.team9.questgame.Entities.cards.TargetableCardCodes;
+
+public enum AbstractTargetTypes implements TargetableCardCodes<AbstractTargetTypes> {
     ALL_ALLIES,
     PLAYER_CURRENT,
     PLAYER_DRAWING_CARD,
