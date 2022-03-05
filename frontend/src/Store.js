@@ -21,11 +21,11 @@ const useStore = create((set) => ({
   }),*/
   updateHand: (hand) =>
     set((current) => ({
-      hands: () => {
+      hands: (() => {
         console.log("hand = " + hand);
         let playerExist = false;
-        for (let currHand in current.hands) {
-          if (currHand.name === hand.name) {
+        for (let i in current.hands) {
+          if (current.hands[i].name === hand.name) {
             playerExist = true;
           }
         }
@@ -41,7 +41,7 @@ const useStore = create((set) => ({
         } else {
           return [...current.hands, hand]
         }
-      },
+      })(),
     })),
   addNewMessage: (name, message) =>
     set((current) => ({

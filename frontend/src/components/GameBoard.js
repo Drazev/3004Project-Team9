@@ -19,13 +19,12 @@ function GameBoard(props){
     // hands = [{name:"Test1",isTurn:true,hand:[{cardId:1,cardImage:CardImages.Ally_KingArthur}],cardsInPlay:[],rank:CardImages.Rank_Squire,shields:54},
     // {name:"Test2",isTurn:true,hand:[{cardId:2,cardImage:CardImages.Ally_KingArthur}],cardsInPlay:[],rank:CardImages.Rank_Squire,shields:5}];
 
-    /*
+    let myHandArr = [false,false,false,false];
     for(let i = 0; i < hands.length; i++){
-        hands[i].isMyHand = false;
         if(hands[i].name === name){
-            hands[i].isMyHand = true;
+            myHandArr[i] = true;
         }
-    }*/
+    }
 
     /*
     hands[0]Turn = false;
@@ -49,7 +48,7 @@ function GameBoard(props){
                 <PlayerHand 
                     playerName={hands[0].name} 
                     isTurn={true /*hands[0].isTurn*/} 
-                    isMyHand={true} 
+                    isMyHand={myHandArr[0]} 
                     cardsInHand={hands[0].hand} 
                     //cardsInPlay={hands[0].cardsInPlay}
                     rank={ CardImages.Rank_Squire/*hands[0].rank*/}
@@ -64,7 +63,7 @@ function GameBoard(props){
                 <PlayerHand 
                     playerName={hands[1].name} 
                     isTurn={true /*hands[1].isTurn*/} 
-                    isMyHand={true} 
+                    isMyHand={myHandArr[1]} 
                     cardsInHand={hands[1].hand} 
                     //cardsInPlay={hands[1].cardsInPlay}
                     rank={ CardImages.Rank_Squire/*hands[1].rank*/}
@@ -80,7 +79,7 @@ function GameBoard(props){
                     <PlayerHand 
                         playerName={hands[2].name} 
                         isTurn={true /*hands[2].isTurn*/} 
-                        isMyHand={true} 
+                        isMyHand={myHandArr[2]} 
                         cardsInHand={hands[2].hand} 
                         //cardsInPlay={hands[2].cardsInPlay}
                         rank={ CardImages.Rank_Squire/*hands[2].rank*/}
@@ -97,8 +96,8 @@ function GameBoard(props){
                     <PlayerHand 
                         playerName={hands[3].name} 
                         isTurn={true /*hands[3].isTurn*/} 
-                        isMyHand={true} 
-                        hand={hands[3].hand} 
+                        isMyHand={myHandArr[3]} 
+                        cardsInHand={hands[3].hand} 
                         //cardsInPlay={hands[3].cardsInPlay}
                         rank={ CardImages.Rank_Squire/*hands[3].rank*/}
                         numShields={5/*hands[3].shields*/}

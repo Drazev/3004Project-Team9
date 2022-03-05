@@ -55,6 +55,7 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
     });
     client.subscribe("/topic/player/hand-update", (message) => {
         let newHand = JSON.parse(message.body);
+        console.log("Received hand update: " + newHand);
 //        updateHand(newHand.name,newHand.hand);
         updateHand(newHand);
     });

@@ -5,12 +5,13 @@ import ConnectForm from "./components/ConnectForm";
 import GameBoard from "./components/GameBoard";
 import MessageForm from "./components/MessageForm";
 import Messages from "./components/Messages";
-import { useConnected, useGameStarted } from "./Store";
+import { useConnected, useGameStarted, usePlayerHands } from "./Store";
 import WaitingRoom from "./components/WaitingRoom";
 
 const App = () => {
   const connected = useConnected();
   const gameStarted = useGameStarted();
+  const playerHands = usePlayerHands();
 
 
   return (
