@@ -9,6 +9,7 @@ import {
   useAddNewPlayer,
   useSetPlayers,
   useSetGameStarted,
+  useUpdateHand
 } from "../Store";
 
 const ConnectForm = () => {
@@ -18,9 +19,9 @@ const ConnectForm = () => {
   const setPlayers = useSetPlayers();
   const setConnected = useSetConnected();
   const setGameStarted = useSetGameStarted();
+  const updateHand = useUpdateHand();
 
   const setName = useSetName();
-
   // Preprocess before making connection request
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -28,7 +29,7 @@ const ConnectForm = () => {
       alert("Please enter your name");
       return;
     }
-    if (connect(setConnected, setGameStarted, addNewMessage, setPlayers, name) === false) {
+    if (connect(setConnected, setGameStarted, addNewMessage, setPlayers, name, updateHand) === false) {
       alert("Name already taken, please choose a different one")
     }
   };

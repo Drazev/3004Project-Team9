@@ -44,6 +44,7 @@ public class InboundService {
                     setGameStarted(true);
                     for (Players player : sessionService.getPlayerMap().values()) {
                         gameController.playerJoin(player);
+                        gameController.dealCard(player);
                     }
                     outboundService.broadcastGameStart();
                 }

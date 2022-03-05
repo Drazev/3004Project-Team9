@@ -5,9 +5,9 @@ function PlayerHand(props){
 
     const Rendercards = props.cardsInHand?.map((card) => (
         props.isMyHand ? (
-           <Card cardId={card.cardId} key={card.cardId} cardImage={card.cardImage} selectedAllowed={props.isTurn && props.isMyHand} canGrow={props.isMyHand} cardOwner={props.playerName}></Card>
+           <Card cardId={card.cardID} key={card.cardID} cardImage={card.imgSrc} selectedAllowed={props.isTurn && props.isMyHand} canGrow={props.isMyHand} cardOwner={props.playerName}></Card>
         ) : (
-            <Card cardId={card.cardId} key={card.cardId} cardImage={CardImages.Back_Adventure} selectedAllowed={props.isTurn && props.isMyHand} canGrow={props.isMyHand} cardOwner={props.playerName}></Card>
+            <Card cardId={card.cardID} key={card.cardID} cardImage={CardImages.Back_Adventure} selectedAllowed={props.isTurn && props.isMyHand} canGrow={props.isMyHand} cardOwner={props.playerName}></Card>
         )
     ));
 

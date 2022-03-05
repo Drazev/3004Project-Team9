@@ -2,58 +2,57 @@ import PlayerHand from "./PlayerHand";
 import CardImages from "../Images/index";
 import Card from "./Card";
 import {drawCard} from "../ClientSocket";
-import {useName} from "../Store";
+import {useName, usePlayerHands, usePlayers} from "../Store";
 import {Button} from "react-bootstrap";
 
 function GameBoard(props){
     let init = 130;
     let jump = 175;
     const name = useName();
+    const allNames = usePlayers();
+    let hands = usePlayerHands();
     //const turn = useTurn();
+    console.log("Hands: " + JSON.stringify(hands) + "\n");
     const turn = "PlayerName";
 
-    props = {player1:{name:"Test1",isTurn:true,cardsInHand:[{cardId:1,cardImage:CardImages.Ally_KingArthur}],cardsInPlay:[],rank:CardImages.Rank_Squire,shields:54},
-             player2:{name:"Test2",isTurn:true,cardsInHand:[{cardId:2,cardImage:CardImages.Ally_KingArthur}],cardsInPlay:[],rank:CardImages.Rank_Squire,shields:5},
-             player3:{name:"Test3",isTurn:true,cardsInHand:[{cardId:3,cardImage:CardImages.Ally_KingArthur}],cardsInPlay:[],rank:CardImages.Rank_Squire,shields:5},
-             player4:{name:"Test4",isTurn:true,cardsInHand:[{cardId:4,cardImage:CardImages.Ally_KingArthur}],cardsInPlay:[],rank:CardImages.Rank_Squire,shields:5}
-            };
-    
-    if(props.player1.name == name){
-        props.player1.isMyHand=true;
-    }else if(props.player2.name == name){
-        props.player2.isMyHand=true;
-    }else if(props.player3.name == name){
-        props.player3.isMyHand=true;
-    }else if(props.player4.name == name){
-        props.player4.isMyHand=true;
+
+    // hands = [{name:"Test1",isTurn:true,hand:[{cardId:1,cardImage:CardImages.Ally_KingArthur}],cardsInPlay:[],rank:CardImages.Rank_Squire,shields:54},
+    // {name:"Test2",isTurn:true,hand:[{cardId:2,cardImage:CardImages.Ally_KingArthur}],cardsInPlay:[],rank:CardImages.Rank_Squire,shields:5}];
+
+    let myHandArr = [false,false,false,false];
+    for(let i = 0; i < hands.length; i++){
+        if(hands[i].name === name){
+            myHandArr[i] = true;
+        }
     }
 
     /*
-    props.player1Turn = false;
-    props.player2Turn = false;
-    props.player3Turn = false;
-    props.player4Turn = false;
-    if(turn == props.player1.name){
-        props.player1Turn = true;
-    }else if(turn == props.player2.name){
-        props.player2Turn = true;
-    }else if(turn == props.player3.name){
+    hands[0]Turn = false;
+    hands[1]Turn = false;
+    hands[2]Turn = false;
+    hands[3]Turn = false;
+    if(turn == hands[0].name){
+        hands[0]Turn = true;
+    }else if(turn == hands[1].name){
+        hands[1]Turn = true;
+    }else if(turn == hands[2].name){
         player3Turn = true;
-    }else if(turn == props.player4.name){
+    }else if(turn == hands[3].name){
         player4Turn = true;
     }*/
+
 
     return (
         <div id="GameBoard">
             <div id="allHands">
                 <PlayerHand 
-                    playerName={props.player1.name} 
-                    isTurn={props.player1.isTurn} 
-                    isMyHand={props.player1.isMyHand} 
-                    cardsInHand={props.player1.cardsInHand} 
-                    cardsInPlay={props.player1.cardsInPlay}
-                    rank={props.player1.rank}
-                    numShields={props.player1.shields}
+                    playerName={hands[0].name} 
+                    isTurn={true /*hands[0].isTurn*/} 
+                    isMyHand={myHandArr[0]} 
+                    cardsInHand={hands[0].hand} 
+                    //cardsInPlay={hands[0].cardsInPlay}
+                    rank={ CardImages.Rank_Squire/*hands[0].rank*/}
+                    numShields={5/*hands[0].shields*/}
                     top={init}
                     left={0}
                     shield={CardImages.Shield_3}
@@ -62,13 +61,13 @@ function GameBoard(props){
                     }}>
                 </PlayerHand>
                 <PlayerHand 
-                    playerName={props.player2.name} 
-                    isTurn={props.player2.isTurn} 
-                    isMyHand={props.player2.isMyHand} 
-                    cardsInHand={props.player2.cardsInHand} 
-                    cardsInPlay={props.player2.cardsInPlay}
-                    rank={props.player2.rank}
-                    numShields={props.player2.shields}
+                    playerName={hands[1].name} 
+                    isTurn={true /*hands[1].isTurn*/} 
+                    isMyHand={myHandArr[1]} 
+                    cardsInHand={hands[1].hand} 
+                    //cardsInPlay={hands[1].cardsInPlay}
+                    rank={ CardImages.Rank_Squire/*hands[1].rank*/}
+                    numShields={5/*hands[1].shields*/}
                     top={init+jump}
                     left={0}
                     shield={CardImages.Shield_1}
@@ -76,15 +75,15 @@ function GameBoard(props){
 
                     }}>
                 </PlayerHand>
-                {props.hasOwnProperty('player3') &&
+                {hands.length > 2 &&
                     <PlayerHand 
-                        playerName={props.player3.name} 
-                        isTurn={props.player3.isTurn} 
-                        isMyHand={props.player3.isMyHand} 
-                        cardsInHand={props.player3.cardsInHand} 
-                        cardsInPlay={props.player3.cardsInPlay}
-                        rank={props.player3.rank}
-                        numShields={props.player3.shields}
+                        playerName={hands[2].name} 
+                        isTurn={true /*hands[2].isTurn*/} 
+                        isMyHand={myHandArr[2]} 
+                        cardsInHand={hands[2].hand} 
+                        //cardsInPlay={hands[2].cardsInPlay}
+                        rank={ CardImages.Rank_Squire/*hands[2].rank*/}
+                        numShields={5/*hands[2].shields*/}
                         top={init+jump*2}
                         left={0}
                         shield={CardImages.Shield_8}
@@ -93,15 +92,15 @@ function GameBoard(props){
                         }}>
                     </PlayerHand>
                 }
-                {props.hasOwnProperty('player4') &&
+                {hands.length > 3 &&
                     <PlayerHand 
-                        playerName={props.player4.name} 
-                        isTurn={props.player4.isTurn} 
-                        isMyHand={props.player4.isMyHand} 
-                        cardsInHand={props.player4.cardsInHand} 
-                        cardsInPlay={props.player4.cardsInPlay}
-                        rank={props.player4.rank}
-                        numShields={props.player4.shields}
+                        playerName={hands[3].name} 
+                        isTurn={true /*hands[3].isTurn*/} 
+                        isMyHand={myHandArr[3]} 
+                        cardsInHand={hands[3].hand} 
+                        //cardsInPlay={hands[3].cardsInPlay}
+                        rank={ CardImages.Rank_Squire/*hands[3].rank*/}
+                        numShields={5/*hands[3].shields*/}
                         top={init+jump*3}
                         left={0}
                         shield={CardImages.Shield_6}
