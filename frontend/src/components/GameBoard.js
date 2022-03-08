@@ -51,7 +51,7 @@ function GameBoard(props){
                     isTurn={true /*hands[0].isTurn*/} 
                     isMyHand={myHandArr[0]} 
                     cardsInHand={hands[0].hand} 
-                    activeCards={[]/*hands[0].hand*/}
+                    activeCards={hands[0].hand}
                     rank={ CardImages.Rank_Squire/*hands[0].rank*/}
                     numShields={5/*hands[0].shields*/}
                     top={init}
