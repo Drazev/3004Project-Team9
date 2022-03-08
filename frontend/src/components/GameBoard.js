@@ -27,22 +27,6 @@ function GameBoard(props){
         }
     }
 
-    /*
-    hands[0]Turn = false;
-    hands[1]Turn = false;
-    hands[2]Turn = false;
-    hands[3]Turn = false;
-    if(turn == hands[0].name){
-        hands[0]Turn = true;
-    }else if(turn == hands[1].name){
-        hands[1]Turn = true;
-    }else if(turn == hands[2].name){
-        player3Turn = true;
-    }else if(turn == hands[3].name){
-        player4Turn = true;
-    }*/
-
-
     return (
         <div id="GameBoard">
             <div id="allHands">
