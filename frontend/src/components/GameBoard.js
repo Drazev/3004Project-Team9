@@ -1,4 +1,5 @@
 import PlayerHand from "./PlayerHand";
+import QuestDisplay from "./QuestDisplay";
 import CardImages from "../Images/index";
 import Card from "./Card";
 import {drawCard} from "../ClientSocket";
@@ -6,8 +7,8 @@ import {useName, usePlayerHands, usePlayers} from "../Store";
 import {Button} from "react-bootstrap";
 
 function GameBoard(props){
-    let init = 130;
-    let jump = 175;
+    let init = 80;
+    let jump = 240;
     const name = useName();
     const allNames = usePlayers();
     let hands = usePlayerHands();
@@ -50,7 +51,7 @@ function GameBoard(props){
                     isTurn={true /*hands[0].isTurn*/} 
                     isMyHand={myHandArr[0]} 
                     cardsInHand={hands[0].hand} 
-                    //cardsInPlay={hands[0].cardsInPlay}
+                    activeCards={[]/*hands[0].hand*/}
                     rank={ CardImages.Rank_Squire/*hands[0].rank*/}
                     numShields={5/*hands[0].shields*/}
                     top={init}
@@ -65,7 +66,7 @@ function GameBoard(props){
                     isTurn={true /*hands[1].isTurn*/} 
                     isMyHand={myHandArr[1]} 
                     cardsInHand={hands[1].hand} 
-                    //cardsInPlay={hands[1].cardsInPlay}
+                    activeCards={hands[1].hand}
                     rank={ CardImages.Rank_Squire/*hands[1].rank*/}
                     numShields={5/*hands[1].shields*/}
                     top={init+jump}
@@ -81,7 +82,7 @@ function GameBoard(props){
                         isTurn={true /*hands[2].isTurn*/} 
                         isMyHand={myHandArr[2]} 
                         cardsInHand={hands[2].hand} 
-                        //cardsInPlay={hands[2].cardsInPlay}
+                        activeCards={hands[2].hand}
                         rank={ CardImages.Rank_Squire/*hands[2].rank*/}
                         numShields={5/*hands[2].shields*/}
                         top={init+jump*2}
@@ -98,7 +99,7 @@ function GameBoard(props){
                         isTurn={true /*hands[3].isTurn*/} 
                         isMyHand={myHandArr[3]} 
                         cardsInHand={hands[3].hand} 
-                        //cardsInPlay={hands[3].cardsInPlay}
+                        activeCards={hands[3].hand}
                         rank={ CardImages.Rank_Squire/*hands[3].rank*/}
                         numShields={5/*hands[3].shields*/}
                         top={init+jump*3}
@@ -119,12 +120,11 @@ function GameBoard(props){
                 top: 30
             }}>
             </div>
-            <div id="stageDisplay">
-
-            </div>
+            <QuestDisplay></QuestDisplay>
             <Button onClick={() => drawCard(name,0)} >Draw</Button>
             <Button>End Turn</Button>
         </div>
     );
 }
+
 export default GameBoard;

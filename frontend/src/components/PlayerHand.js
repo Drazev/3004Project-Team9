@@ -5,23 +5,28 @@ function PlayerHand(props){
 
     const Rendercards = props.cardsInHand?.map((card) => (
         props.isMyHand ? (
-           <Card cardId={card.cardID} key={card.cardID} cardImage={card.imgSrc} selectedAllowed={props.isTurn && props.isMyHand} canGrow={props.isMyHand} cardOwner={props.playerName}></Card>
+           <Card cardId={card.cardID} key={card.cardID} cardImage={card.imgSrc} selectedAllowed={props.isTurn && props.isMyHand} canGrow={props.isMyHand} cardOwner={props.playerName} active={false}></Card>
         ) : (
-            <Card cardId={card.cardID} key={card.cardID} cardImage={CardImages.Back_Adventure} selectedAllowed={props.isTurn && props.isMyHand} canGrow={props.isMyHand} cardOwner={props.playerName}></Card>
+            <Card cardId={card.cardID} key={card.cardID} cardImage={CardImages.Back_Adventure} selectedAllowed={props.isTurn && props.isMyHand} canGrow={props.isMyHand} cardOwner={props.playerName} active={false}></Card>
         )
     ));
 
-    const RenderInPlay = props.cardsInPlay?.map((card) => (
+    const RenderActiveCards = props.activeCards?.map((card) => (
         <>
-            <Card cardImage={card} selectedAllowed={false} canGrow={props.isMyHand}></Card>
+            <Card cardId={card.cardID} key={card.cardID} cardImage={CardImages.Ally_Merlin} selectedAllowed={false} canGrow={false} cardOwner={props.playerName} isActive={true}></Card>
         </>
     ));
+
+    let newTop = props.top;
+    if(props.activeCards.length > 0){
+        newTop += 70;
+    }
 
     return(
         <div>
             <div
             style={{
-                position: "absolute",
+                position: "fixed",
                 top: props.top-70,
                 left: props.left
             }}>
@@ -39,6 +44,17 @@ function PlayerHand(props){
                 <p style={{position:"absolute",top:10,left:85,fontSize:13}}>{"x" + props.numShields}</p> 
                 <p style={{position:"absolute",top:43,left:65,fontSize:13}}>{props.playerName}</p>           
             </div>
+
+            <div
+            style={{
+                position: "absolute",
+                top: newTop,
+                left: props.left
+            }}>
+                {typeof props.cardsInHand !== 'undefined' && props.cardsInHand.length > 0 &&
+                    Rendercards
+                }
+            </div>
             <div
             style={{
                 position: "absolute",
@@ -46,7 +62,7 @@ function PlayerHand(props){
                 left: props.left
             }}>
                 {typeof props.cardsInHand !== 'undefined' && props.cardsInHand.length > 0 &&
-                    Rendercards
+                    RenderActiveCards
                 }
             </div>
         </div>
