@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class IllegalGameRequest extends RuntimeException{
-    Logger LOG = LoggerFactory.getLogger(Players.class);
+    Logger LOG = LoggerFactory.getLogger(IllegalGameRequest.class);
     static String defaultMsg="Player made invalid request from the game.";
     Players player;
 

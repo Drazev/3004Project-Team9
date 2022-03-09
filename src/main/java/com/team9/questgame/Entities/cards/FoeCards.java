@@ -3,7 +3,7 @@ package com.team9.questgame.Entities.cards;
 import com.team9.questgame.Data.CardData;
 import com.team9.questgame.Entities.Effects.Effects;
 
-public class FoeCards extends AdventureCards {
+public class FoeCards extends AdventureCards implements BoostableCard, BattlePointContributor {
     private final int bpValue;
     private final int boostedBpValue;
     private boolean isBoosted;
@@ -18,6 +18,29 @@ public class FoeCards extends AdventureCards {
                 '}';
     }
 
+    @Override
+    public void notifyBoostEnded(CardArea boostTriggerLocation) {
+        if(boostTriggerLocation==location) {
+            isBoosted=false;
+        }
+    }
+
+    public void setBoosted(boolean boosted) {
+        isBoosted = boosted;
+    }
+
+    public int getBattlePoints() {
+        return isBoosted ? bpValue : boostedBpValue;
+    }
+
+    public boolean isBoosted() {
+        return isBoosted;
+    }
+
+    public Effects getActiveEffect() {
+        return activeEffect;
+    }
+
     public FoeCards(Decks assignedDeck, String activeAbilityDescription, String cardName, CardTypes subType, String imageFileName, AdventureDeckCards cardCode, int battlePointValue) {
         this(assignedDeck,activeAbilityDescription, cardName, subType, imageFileName, cardCode,battlePointValue,0);
     }
@@ -27,13 +50,6 @@ public class FoeCards extends AdventureCards {
         this.boostedBpValue=boostedBattlePointValue;
         this.isBoosted=false;
         this.activeEffect=null; //TODO: Change when Effects Implemented
-    }
-
-
-    @Override
-    public void playCard()
-    {
-
     }
 
     @Override
@@ -50,5 +66,40 @@ public class FoeCards extends AdventureCards {
                 activeEffect!=null
         );
         return data;
+    }
+
+    @Override
+    boolean playCard(PlayAreas cardArea) {
+        boolean rc=super.playCard(cardArea);
+        //Based on card attributes, register with PlayArea
+        if(rc) {
+            if(activeEffect!=null) {
+                location.registerActiveEffect(this);
+            }
+
+            if(bpValue>0 || boostedBpValue>0) {
+                location.registerBattlePointContributor(this);
+            }
+        }
+        return rc;
+    }
+
+    @Override
+    public boolean discardCard() {
+        PlayAreas oldLocation=location;
+        boolean rc=  super.discardCard();
+        if(rc) {
+            isBoosted=false;
+        }
+
+        if(activeEffect!=null) {
+            oldLocation.removeActiveEffect(this);
+        }
+
+        if(bpValue>0 || boostedBpValue>0) {
+            oldLocation.removeBattlePointContributor(this);
+        }
+
+        return rc;
     }
 }

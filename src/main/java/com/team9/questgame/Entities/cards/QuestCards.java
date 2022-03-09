@@ -1,11 +1,5 @@
 package com.team9.questgame.Entities.cards;
 
-import com.team9.questgame.Entities.Players;
-import com.team9.questgame.game_phases.GamePhases;
-import com.team9.questgame.game_phases.GeneralGameController;
-
-import java.util.ArrayList;
-
 /**
  * Entity class representing an instance of a Quest Card type
  *
@@ -29,8 +23,8 @@ public class QuestCards<T extends Enum<T> & TargetableCardCodes> extends StoryCa
     }
 
     @Override
-    public GamePhases generateGamePhase(ArrayList<Players> players, GeneralGameController gameInstance) {
-        return null;
+    protected void onLocationChanged(CardArea oldLocation) {
+
     }
 
 

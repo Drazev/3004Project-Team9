@@ -2,21 +2,15 @@ package com.team9.questgame.Entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.team9.questgame.ApplicationContextHolder;
-import com.team9.questgame.Data.CardData;
 import com.team9.questgame.Data.PlayerData;
-import com.team9.questgame.Entities.cards.AdventureCards;
-import com.team9.questgame.Entities.cards.CardArea;
-import com.team9.questgame.Entities.cards.Cards;
+import com.team9.questgame.Entities.cards.*;
+import com.team9.questgame.exception.BadRequestException;
 import com.team9.questgame.exception.IllegalCardStateException;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 
 /**
  * Entity representation of a Player registered to an individual game session.
@@ -28,14 +22,25 @@ import java.util.HashSet;
  *
  * This class owns a PlayerArea and contains a hand;
  */
-public class Players implements CardArea<AdventureCards> {
+public class Players {
     @JsonIgnore
     private Logger LOG;
     private final long playerId; //Unique to player game session. Does not persist between games.
+    private final PlayerPlayAreas playArea;
     private String name;
     private PlayerRanks rank;
     private int battlePoints;
+
+    public PlayerPlayAreas getPlayArea() {
+        return playArea;
+    }
+
+    public Hand getHand() {
+        return hand;
+    }
+
     private int shields;
+    private Hand hand;
     private boolean isHandOversize;
     private OutboundService outboundService;
 
@@ -47,13 +52,12 @@ public class Players implements CardArea<AdventureCards> {
 
     @JsonIgnore
     static public final int MAX_HAND_SIZE = 12;
-    private HashSet<AdventureCards> hand;
-    @JsonIgnore
-    private HashMap<Long, AdventureCards> cardIdMap;
 
     public Players(String playerName)
     {
         LOG= LoggerFactory.getLogger(Players.class);
+        playArea = new PlayerPlayAreas(this);
+        hand = new Hand(this,playArea);
         this.name=playerName;
         rank=PlayerRanks.SQUIRE;
         this.playerId=nextId++;
@@ -78,94 +82,21 @@ public class Players implements CardArea<AdventureCards> {
         return shields;
     }
 
-    public boolean isHandOversize() {
-        return isHandOversize;
-    }
-
-    public int getHandSize() { return hand.size(); }
-
-    public int getBattlePoints() {
-        return battlePoints;
-    }
-
     public PlayerRanks getRank() {
         return rank;
     }
 
-    private void updateBattlePoints()
-    {
-        battlePoints=rank.getRankBattlePointValue(); //TODO: Modify to include bp value of cards in play
+
+    public void actionPlayCard(long cardId) throws BadRequestException,IllegalCardStateException {
+        hand.playCard(cardId);
     }
 
-    private boolean validateHandSize() {
-        boolean prevState=isHandOversize;
-        isHandOversize = hand.size()>MAX_HAND_SIZE;
-        if(isHandOversize) {
-            LOG.debug(name+": Oversize Hand State SET.");
-            notifyHandOversize();
-        }
-        else if(prevState) {
-            LOG.debug(name+": Oversize Hand State CLEARED.");
-        }
-        return isHandOversize;
+    public void actionDiscardCard(long cardId) throws BadRequestException,IllegalCardStateException {
+        hand.discardCard(cardId);
     }
 
-    @Override
-    public void receiveCard(AdventureCards card) {
-        hand.add(card);
-        cardIdMap.put(card.getCardID(),card);
-        LOG.info(name+": Has DRAWN a card.");
-        validateHandSize();
-        notifyHandChanged();
-    }
-
-    @Override
-    public void discardCard(AdventureCards card) {
-        if (hand.contains(card) == false) {
-            //TODO: Handle card was not in hand
-        }
-
-        card.discardCard();
-        hand.remove(card);
-        LOG.info(name+": Has DISCARDED a card.");
-        validateHandSize();
-        notifyHandChanged();
-    }
-
-    public void discardCard(long cardId ) {
-        AdventureCards card = findCardFromCardId(cardId);
-        discardCard(card);
-    }
-
-
-    @Override
-    public void playCard(AdventureCards card) {
-        LOG.info(name+": Has PLAYED CARD "+card);
-        notifyHandChanged();
-    }
-
-    public void playCard(long cardId) {
-        AdventureCards card = findCardFromCardId(cardId);
-        playCard(card);
-    }
-
-    private AdventureCards findCardFromCardId(Long cardId) {
-        AdventureCards card = cardIdMap.get(cardId);
-        if(card==null) {
-
-            //If we get null, determine if it was bad request or internal error
-            if(cardIdMap.containsKey(cardId))
-            {
-                //The map did not contain the cardId, BAD REQUEST
-                //TODO: Trigger BAD_REQUEST to front end
-            }
-            else {
-                //The key was mapped to a null card value. This should not happen and is an illegal state
-                LOG.error("Player hand state has lost a card in cardIdMap");
-                throw new IllegalCardStateException();
-            }
-        }
-        return card;
+    public void actionActivateCard(long cardId) throws BadRequestException,IllegalCardStateException {
+        playArea.activateCard(cardId);
     }
 
     /**
@@ -200,20 +131,13 @@ public class Players implements CardArea<AdventureCards> {
 
     }
 
-    public void notifyHandChanged() {
-        outboundService.broadcastPlayerHandUpdate(generatePlayerData());
-    }
-
     public void notifyPlayerRankUP() {
         //TODO: Notify game and player of a Rank Up event. Game will check victory condition, and player UI must be updated
         outboundService.broadcastPlayerRankUpdate(generatePlayerData());
     }
 
     public PlayerData generatePlayerData() {
-        ArrayList<CardData> handCards = new ArrayList<>();
-        for(Cards card : hand) {
-            handCards.add(card.generateCardData());
-        }
+
         PlayerData data = new PlayerData(
         playerId,
         name,
@@ -221,36 +145,25 @@ public class Players implements CardArea<AdventureCards> {
         battlePoints,
         shields,
         isHandOversize,
-        handCards
+        hand.getCardData()
         );
         return data;
     }
 
     /**
-     * Play area clear's all cards other than allies from their play area.
-     *
-     */
-    public void onEndOfPhase() {
-
-    }
-
-    /**
      * Resets Player data and state to start of game condition
      */
-    @Override
     public void onGameReset() {
         this.rank=PlayerRanks.SQUIRE;
         this.battlePoints=rank.getRankBattlePointValue();
         this.shields=0;
         this.isHandOversize=false;
-        this.hand = new HashSet<>();
-        this.cardIdMap = new HashMap<>();
-        notifyHandChanged();
+        this.hand.onGameReset();
         LOG.info(name+": Has reset to GAME START state.");
     }
 
-    private void notifyHandOversize() {
-
+    public void notifyHandChanged() {
+        outboundService.broadcastPlayerHandUpdate(generatePlayerData());
     }
 
 }

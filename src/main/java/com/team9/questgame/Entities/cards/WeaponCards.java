@@ -2,7 +2,7 @@ package com.team9.questgame.Entities.cards;
 
 import com.team9.questgame.Data.CardData;
 
-public class WeaponCards extends AdventureCards {
+public class WeaponCards extends AdventureCards implements BattlePointContributor{
     private final int bonusBp;
 
     @Override
@@ -17,13 +17,8 @@ public class WeaponCards extends AdventureCards {
         this.bonusBp = bonusBp;
     }
 
-    public int getBonusBp() {
+    public int getBattlePoints() {
         return bonusBp;
-    }
-
-    @Override
-    public void playCard() {
-
     }
 
     @Override

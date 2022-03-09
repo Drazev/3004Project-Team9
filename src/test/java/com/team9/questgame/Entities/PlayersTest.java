@@ -123,8 +123,6 @@ class PlayersTest {
         }
         p1.onGameReset();
 
-        assert(p1.getHandSize()==0);
-        assert(p1.getBattlePoints()==5);
         assert(p1.getShields()==0);
     }
 }

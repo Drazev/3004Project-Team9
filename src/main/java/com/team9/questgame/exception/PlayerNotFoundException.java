@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PlayerNotFoundException extends RuntimeException {
-    Logger LOG = LoggerFactory.getLogger(Players.class);
+    Logger LOG = LoggerFactory.getLogger(PlayerNotFoundException.class);
     static String defaultMsg="Player was not found in game.";
     Players player;
 

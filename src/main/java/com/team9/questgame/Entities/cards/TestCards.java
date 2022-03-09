@@ -2,14 +2,45 @@ package com.team9.questgame.Entities.cards;
 
 import com.team9.questgame.Data.CardData;
 
-public class TestCards extends AdventureCards {
+public class TestCards <T extends Enum<T> & AllCardCodes> extends AdventureCards implements BoostableCard {
     private final int minimumBids;
     private final int boostedMinBids;
     private boolean isBoosted;
-    private final AllCardCodes boostConditionCardCode;
+    private final T boostConditionCardCode;
 
     public TestCards(Decks assignedDeck,String activeAbilityDescription, String cardName, CardTypes subType, String fileName, AdventureDeckCards cardCode, int minimumBids) {
         this(assignedDeck,activeAbilityDescription, cardName, subType, fileName, cardCode,minimumBids,0,null);
+    }
+
+    public TestCards(Decks assignedDeck, String activeAbilityDescription, String cardName, CardTypes subType, String fileName, AdventureDeckCards cardCode, int minimumBids, int boostedMinBids, T boostConditionCardCode) {
+        super(assignedDeck,activeAbilityDescription, cardName, subType, fileName, cardCode);
+        this.minimumBids = minimumBids;
+        this.boostedMinBids = boostedMinBids;
+        this.boostConditionCardCode = boostConditionCardCode;
+        this.isBoosted=false;
+    }
+
+    public int getMinimumBids() {
+        return minimumBids;
+    }
+
+    public boolean isBoosted() {
+        return isBoosted;
+    }
+
+    public void setBoosted(boolean boosted) {
+        isBoosted = boosted;
+    }
+
+    @Override
+    public void notifyBoostEnded(CardArea boostTriggerLocation) {
+        if(boostTriggerLocation==location) {
+            isBoosted=false;
+        }
+    }
+
+    public T getBoostConditionCardCode() {
+        return boostConditionCardCode;
     }
 
     @Override
@@ -20,19 +51,6 @@ public class TestCards extends AdventureCards {
                 ", isBoosted=" + isBoosted +
                 ", boostConditionCardCode=" + boostConditionCardCode +
                 '}';
-    }
-
-    public TestCards(Decks assignedDeck, String activeAbilityDescription, String cardName, CardTypes subType, String fileName, AdventureDeckCards cardCode, int minimumBids, int boostedMinBids, AllCardCodes boostConditionCardCode) {
-        super(assignedDeck,activeAbilityDescription, cardName, subType, fileName, cardCode);
-        this.minimumBids = minimumBids;
-        this.boostedMinBids = boostedMinBids;
-        this.boostConditionCardCode = boostConditionCardCode;
-        this.isBoosted=false;
-    }
-
-    @Override
-    public void playCard() {
-
     }
 
     @Override
@@ -49,6 +67,34 @@ public class TestCards extends AdventureCards {
                 false
         );
         return data;
+    }
+
+    boolean playCard(PlayAreas playArea) {
+        boolean rc=super.playCard(playArea);
+
+        //Based on card attributes, register with PlayArea
+        if(rc) {
+            if(boostConditionCardCode!=null) {
+                location.registerCardBoostDependency(boostConditionCardCode,this);
+            }
+        }
+
+
+        return rc;
+    }
+
+    @Override
+    public boolean discardCard() {
+        PlayAreas oldLocation = location;
+        boolean rc=  super.discardCard();
+        if(rc) {
+            isBoosted=false;
+
+            if(boostConditionCardCode!=null) {
+                location.removeCardBoostDependency(boostConditionCardCode,this);
+            }
+        }
+        return rc;
     }
 
 }
