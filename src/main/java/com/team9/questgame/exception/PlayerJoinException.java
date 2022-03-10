@@ -11,6 +11,7 @@ public class PlayerJoinException extends RuntimeException {
     PlayerJoinExceptionReasonCodes reasonCode;
 
     public enum PlayerJoinExceptionReasonCodes {
+        DUPLICATE_JOIN_REQUEST,
         GAME_FULL,
         GAME_IN_PROGRESS
     }

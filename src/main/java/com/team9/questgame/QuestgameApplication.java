@@ -10,10 +10,10 @@ import java.util.concurrent.Executor;
 
 @SpringBootApplication
 @EnableAsync
-public class QuestgameApplication {
+public class QuestGameApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(QuestgameApplication.class, args);
+		SpringApplication.run(QuestGameApplication.class, args);
 	}
 
 	@Bean(name="asyncExecutor")

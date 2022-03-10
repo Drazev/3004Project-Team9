@@ -11,7 +11,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 class QuestgameApplicationTests {
 
 	@Autowired
-	QuestgameApplication questgameApplication;
+	QuestGameApplication questgameApplication;
 
 	@Test
 	void contextLoads() {

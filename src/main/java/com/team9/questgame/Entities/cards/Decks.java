@@ -1,6 +1,7 @@
 package com.team9.questgame.Entities.cards;
 
 import com.team9.questgame.exception.IllegalCardStateException;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,8 +11,9 @@ public abstract class  Decks<T extends Cards> {
     private Logger LOG;
     protected HashSet<T> cardsInDeck;
     private Stack<T> drawDeck;
+    @Getter
     private ArrayList<T> discardPile;
-    private HashMap<T,CardArea> cardLocation;
+    private final HashMap<T, CardArea> cardLocation;
     protected static final CardFactory factory = CardFactory.getInstance();
 
 

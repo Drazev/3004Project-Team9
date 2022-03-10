@@ -1,7 +1,7 @@
 package com.team9.questgame.gamemanager.service;
 
 import com.team9.questgame.Entities.Players;
-import com.team9.questgame.QuestGameController;
+import com.team9.questgame.game_phases.GeneralGameController;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +21,7 @@ public class InboundService {
     private OutboundService outboundService;
 
     @Autowired
-    private QuestGameController gameController;
+    private GeneralGameController gameController;
 
     public InboundService() {
         this.LOG = LoggerFactory.getLogger(InboundService.class);
@@ -44,9 +44,8 @@ public class InboundService {
                     setGameStarted(true);
                     for (Players player : sessionService.getPlayerMap().values()) {
                         gameController.playerJoin(player);
-                        gameController.dealCard(player);
                     }
-                    outboundService.broadcastGameStart();
+                    gameController.startGame();
                 }
                 return true;
             } else {
