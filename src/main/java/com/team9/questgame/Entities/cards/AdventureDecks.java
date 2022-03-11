@@ -67,7 +67,7 @@ public class AdventureDecks extends Decks<AdventureCards>{
             {
                 AdventureCards card = factory.createCard(this,e.getKey());
                 if(card==null) {
-                    //TODO: Log error
+                    LOG.error("Adventure Deck factory failure. Card created as null");
                 }
                 else {
                     cardsInDeck.add(card);

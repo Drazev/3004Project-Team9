@@ -15,5 +15,4 @@ public interface GamePhaseControllers {
     void startPhase();
     PlayerRewardData getRewardData();
     StoryDeckCards getPhaseCardCode();
-
 }

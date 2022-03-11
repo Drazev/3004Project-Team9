@@ -21,6 +21,10 @@ public class TestCards <T extends Enum<T> & AllCardCodes> extends AdventureCards
     }
 
     public int getMinimumBids() {
+        if(minimumBids<boostedMinBids & isBoosted)
+        {
+            return boostedMinBids;
+        }
         return minimumBids;
     }
 
@@ -61,7 +65,7 @@ public class TestCards <T extends Enum<T> & AllCardCodes> extends AdventureCards
                 cardName,
                 subType,
                 imgSrc,
-                isBoosted ? minimumBids: boostedMinBids,
+                getMinimumBids(),
                 0,
                 activeAbilityDescription,
                 false
@@ -69,32 +73,16 @@ public class TestCards <T extends Enum<T> & AllCardCodes> extends AdventureCards
         return data;
     }
 
-    boolean playCard(PlayAreas playArea) {
-        boolean rc=super.playCard(playArea);
-
-        //Based on card attributes, register with PlayArea
-        if(rc) {
-            if(boostConditionCardCode!=null) {
-                location.registerCardBoostDependency(boostConditionCardCode,this);
-            }
+    protected void registerWithNewPlayArea(PlayerPlayAreas playArea) {
+        if(boostConditionCardCode!=null) {
+            playArea.registerCardBoostDependency(boostConditionCardCode,this);
         }
-
-
-        return rc;
     }
 
     @Override
-    public boolean discardCard() {
-        PlayAreas oldLocation = location;
-        boolean rc=  super.discardCard();
-        if(rc) {
-            isBoosted=false;
-
-            if(boostConditionCardCode!=null) {
-                location.removeCardBoostDependency(boostConditionCardCode,this);
-            }
-        }
-        return rc;
+    public void discardCard() {
+        isBoosted=false;
+        super.discardCard();
     }
 
 }

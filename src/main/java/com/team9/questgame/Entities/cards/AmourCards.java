@@ -46,20 +46,9 @@ public class AmourCards extends AdventureCards implements BattlePointContributor
     }
 
     @Override
-    public boolean discardCard() {
-        PlayAreas oldLocation = location;
-        boolean rc = super.discardCard();
-        oldLocation.removeBattlePointContributor(this);
-        oldLocation.removeBidContributor(this);
-        return rc;
-    }
-
-    @Override
-    boolean playCard(PlayAreas cardArea) {
-        boolean rc= super.playCard(cardArea);
-        location.registerBidContributor(this);
-        location.registerBattlePointContributor(this);
-        return rc;
+    protected void registerWithNewPlayArea(PlayerPlayAreas playArea) {
+        playArea.registerBidContributor(this);
+        playArea.registerBattlePointContributor(this);
     }
 
     @Override

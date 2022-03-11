@@ -86,8 +86,8 @@ public class AllyCards <T extends Enum<T> & AllCardCodes> extends AdventureCards
                 cardName,
                 subType,
                 imgSrc,
-                isBoosted ? bids : boostBids,
-                isBoosted ? bonusBp : boostBonusBp,
+                getBids(),
+                getBattlePoints(),
                 activeAbilityDescription,
                 activeEffect!=null
         );
@@ -95,11 +95,17 @@ public class AllyCards <T extends Enum<T> & AllCardCodes> extends AdventureCards
     }
 
     public int getBids() {
-        return isBoosted ? bids : boostBids;
+        if(boostBids > bids && isBoosted) {
+            return boostBids;
+        }
+        return bids;
     }
 
     public int getBattlePoints() {
-        return isBoosted ? bonusBp : boostBonusBp;
+        if(boostBonusBp > bonusBp && isBoosted) {
+            return boostBonusBp;
+        }
+        return bonusBp;
     }
 
     public boolean isBoosted() {
@@ -118,55 +124,28 @@ public class AllyCards <T extends Enum<T> & AllCardCodes> extends AdventureCards
         return activeEffect;
     }
 
-    boolean playCard(PlayAreas playArea) {
-        boolean rc=super.playCard(playArea);
+    protected void registerWithNewPlayArea(PlayerPlayAreas playArea) {
 
-        //Based on card attributes, register with PlayArea
-        if(rc) {
-            if(activeEffect!=null) {
-                location.registerActiveEffect(this);
-            }
-
-            if(bids>0 || boostBids>0) {
-                location.registerBidContributor(this);
-            }
-
-            if(bonusBp>0 || boostBonusBp>0) {
-                location.registerBattlePointContributor(this);
-            }
-
-            if(boostConditionCardCode!=null) {
-                location.registerCardBoostDependency(boostConditionCardCode,this);
-            }
+        if(activeEffect!=null) {
+            playArea.registerActiveEffect(this);
         }
 
+        if(bids>0 || boostBids>0) {
+            playArea.registerBidContributor(this);
+        }
 
-        return rc;
+        if(bonusBp>0 || boostBonusBp>0) {
+            playArea.registerBattlePointContributor(this);
+        }
+
+        if(boostConditionCardCode!=null) {
+            playArea.registerCardBoostDependency(boostConditionCardCode,this);
+        }
     }
 
     @Override
-    public boolean discardCard() {
-        PlayAreas oldLocation = location;
-        boolean rc=  super.discardCard();
-        if(rc) {
-            isBoosted=false;
-
-            if(activeEffect!=null) {
-                oldLocation.removeActiveEffect(this);
-            }
-
-            if(bids>0 || boostBids>0) {
-                oldLocation.removeBidContributor(this);
-            }
-
-            if(bonusBp>0 || boostBonusBp>0) {
-                oldLocation.removeBattlePointContributor(this);
-            }
-
-            if(boostConditionCardCode!=null) {
-                location.removeCardBoostDependency(boostConditionCardCode,this);
-            }
-        }
-        return rc;
+    public void discardCard() {
+        isBoosted=false;
+        super.discardCard();
     }
 }

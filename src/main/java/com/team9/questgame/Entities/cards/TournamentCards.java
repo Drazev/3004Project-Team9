@@ -16,7 +16,7 @@ public class TournamentCards extends StoryCards {
     }
 
     @Override
-    protected void onLocationChanged(CardArea oldLocation) {
+    protected void onLocationChanged() {
 
     }
 

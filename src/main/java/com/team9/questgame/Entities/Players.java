@@ -1,6 +1,8 @@
 package com.team9.questgame.Entities;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.team9.questgame.ApplicationContextHolder;
 import com.team9.questgame.Data.PlayerData;
 import com.team9.questgame.Entities.cards.*;
@@ -12,6 +14,9 @@ import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
+import java.util.HashSet;
+
 /**
  * Entity representation of a Player registered to an individual game session.
  * This class governs the individual actions a player can choose or be forced to take.
@@ -22,26 +27,24 @@ import org.slf4j.LoggerFactory;
  *
  * This class owns a PlayerArea and contains a hand;
  */
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property="playerId"
+)
 public class Players {
     @JsonIgnore
     private Logger LOG;
     private final long playerId; //Unique to player game session. Does not persist between games.
+    @JsonIgnore
     private final PlayerPlayAreas playArea;
     private String name;
     private PlayerRanks rank;
     private int battlePoints;
-
-    public PlayerPlayAreas getPlayArea() {
-        return playArea;
-    }
-
-    public Hand getHand() {
-        return hand;
-    }
-
     private int shields;
     private Hand hand;
     private boolean isHandOversize;
+
+    @JsonIgnore
     private OutboundService outboundService;
 
     @JsonIgnore
@@ -66,6 +69,14 @@ public class Players {
         onGameReset();
     }
 
+    public PlayerPlayAreas getPlayArea() {
+        return playArea;
+    }
+
+    public Hand getHand() {
+        return hand;
+    }
+
     public long getPlayerId() {
         return playerId;
     }
@@ -86,6 +97,9 @@ public class Players {
         return rank;
     }
 
+    public HashMap<CardTypes, HashSet<AllCardCodes>> getUniqueCardsCodesBySubType() {
+        return hand.getUniqueCardsCodesBySubType();
+    }
 
     public void actionPlayCard(long cardId) throws BadRequestException,IllegalCardStateException {
         hand.playCard(cardId);
@@ -126,6 +140,7 @@ public class Players {
             shields-=nextRank.getRankShieldCost();
             rank=nextRank;
             LOG.info("Player "+name+" has attained rank "+rank);
+            playArea.update();
             notifyPlayerRankUP();
         }
 

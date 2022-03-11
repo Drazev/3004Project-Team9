@@ -1,32 +1,49 @@
 package com.team9.questgame.Entities.cards;
 
+import com.fasterxml.jackson.annotation.*;
+import com.team9.questgame.ApplicationContextHolder;
+import com.team9.questgame.Data.CardData;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.GamePhases.GamePhaseControllers;
 import com.team9.questgame.exception.CardAreaException;
 import com.team9.questgame.exception.IllegalGamePhaseStateException;
+import com.team9.questgame.gamemanager.service.OutboundService;
 
 import java.util.*;
 
 import static com.team9.questgame.exception.IllegalGamePhaseStateException.GamePhaseExceptionReasonCodes.NULL_ACTIVE_PHASE;
 
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property="id"
+)
 public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
 
+    private long id;
+    @JsonIgnore
     private final Players player;
+    @JsonIgnore
     private GamePhaseControllers phaseController;
+    @JsonIgnore
+    private final OutboundService outboundService;
     private PlayAreas<AdventureCards> targetPlayArea;
-    int bids;
-    int battlePoints;
+    private int bids;
+    private int battlePoints;
     private HashMap<CardTypes, HashSet<AdventureCards>> cardTypeMap;
     private HashMap<AllCardCodes,AdventureCards> allCards;
+    private QuestCards questCard;
 
     //Managed by Registration methods and triggered by cards
     private HashMap<AllCardCodes,HashSet<BoostableCard>> cardBoostDependencies;
+    private HashMap<AllCardCodes,BoostableCard> allBoostableCards;
     private HashSet<AdventureCards> cardsWithActiveEffects;
     private HashSet<BattlePointContributor> cardsWithBattleValue;
     private HashSet<BidContributor> cardsWithBidValue;
 
+    static private long nextid=0;
 
     public PlayerPlayAreas(Players player) {
+        this.id = nextid++;
         this.player = player;
         cardTypeMap = new HashMap<>();
         allCards = new HashMap<>();
@@ -35,9 +52,12 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         phaseController = null;
         cardsWithBattleValue = new HashSet<>();
         cardsWithBidValue = new HashSet<>();
+        allBoostableCards = new HashMap<>();
         targetPlayArea=null;
         bids=0;
         battlePoints=0;
+        questCard=null;
+        this.outboundService = ApplicationContextHolder.getContext().getBean(OutboundService.class);
     }
 
     @Override
@@ -50,6 +70,18 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         return bids;
     }
 
+    public int size() {
+        return allCards.size();
+    }
+
+    public ArrayList<CardData> getCardData() {
+        ArrayList<CardData> handCards = new ArrayList<>();
+        for(Cards card : allCards.values()) {
+            handCards.add(card.generateCardData());
+        }
+        return handCards;
+    }
+
     void discardAllCards() {
         for(AdventureCards card : allCards.values()) {
             card.discardCard();
@@ -57,6 +89,10 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         cardTypeMap.clear();
         allCards.clear();
         update();
+    }
+
+    public HashMap<CardTypes, HashSet<AdventureCards>> getCardTypeMap() {
+        return cardTypeMap;
     }
 
     public void discardAllFoes() {
@@ -84,6 +120,13 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         discardCards(cardList);
     }
 
+    @Override
+    public void discardCard(AdventureCards card) {
+        card.discardCard(); //This will trigger all affected cards boost status to reset
+        removeCard(card);
+        update();
+    }
+
     /**
      * Add a card to the Players In play area.
      * Cards are recieved by Players Hand when they
@@ -91,7 +134,8 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
      * @param card
      */
     @Override
-    public boolean receiveCard(AdventureCards card) {
+    public boolean receiveCard(AdventureCards card) throws CardAreaException {
+        boolean rc = false;
         if(card==null) {
             throw new CardAreaException(CardAreaException.CardAreaExceptionReasonCodes.NULL_CARD);
         }
@@ -103,42 +147,25 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
             throw new CardAreaException(CardAreaException.CardAreaExceptionReasonCodes.DUPLICATE_CARD_INSTANCE);
         }
 
-        //GameRule:: Cannot play two of the same card
-        if(allCards.containsKey(cardCode)) {
-            throw new CardAreaException(CardAreaException.CardAreaExceptionReasonCodes.RULE_CANNOT_HAVE_TWO_OF_SAME_CARD_IN_PLAY);
+        switch(card.getSubType()) {
+            case FOE:
+            case TEST:
+                rc=playCard(card);
+                break;
+            default:
+                addToPlayArea(card);
+                rc=true;
+                break;
         }
 
-        allCards.put(card.getCardCode(),card);
-
-        CardTypes cardType = card.getCardCode().getSubType();
-        if(!cardTypeMap.containsKey(cardType))
-        {
-            cardTypeMap.put(cardType,new HashSet<>());
-        }
-
-        cardTypeMap.get(cardType).add(card);
-
-        //Check to see if the new card is listed as a boost dependency list and boost all associated cards if found
-        if(cardBoostDependencies.containsKey(cardCode)) {
-            for(BoostableCard boostCard : cardBoostDependencies.get(cardCode)) {
-                boostCard.setBoosted(true);
-                card.registerBoostedCard(boostCard);
-            }
-        }
-        update();
-        return true; //Player Play area's does not reject cards
+        return rc; //Player Play area's does not reject cards
     }
 
-    @Override
-    public void discardCard(AdventureCards card) {
-        card.discardCard(); //This will trigger all affected cards boost status to reset
-        removeCard(card);
-        update();
-    }
+
 
     @Override
     public boolean playCard(AdventureCards card) {
-        if(targetPlayArea==null || !allCards.containsKey(card.getCardCode())) {
+        if(targetPlayArea==null) {
             return false;
         }
         boolean rc = card.playCard(targetPlayArea);
@@ -150,20 +177,6 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         return rc;
     }
 
-
-    @Override
-    public void onGameReset() {
-        cardTypeMap.clear();
-        allCards.clear();
-        cardBoostDependencies.clear();
-        cardsWithActiveEffects.clear();
-        phaseController = null;
-        cardsWithBattleValue.clear();
-        cardsWithBidValue.clear();
-        bids=0;
-        battlePoints=0;
-    }
-
     /**
      * Cards may register a boost trigger. This trigger is checked with a card is added or removed from
      * the play area.
@@ -171,7 +184,6 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
      * @param card The card that would be boosted if trigger is found
      * @return
      */
-    @Override
     public void registerCardBoostDependency(AllCardCodes triggerCardCode, BoostableCard card) {
         HashSet<BoostableCard> list = cardBoostDependencies.get(triggerCardCode);
 
@@ -192,55 +204,27 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         }
     }
 
+    public void registerBoostableCard(AllCardCodes cardCode,BoostableCard card) {
+        allBoostableCards.put(cardCode,card);
+        update();
+    }
+
     public void registerBidContributor(BidContributor card) {
         cardsWithBidValue.add(card);
         updateBids();
+        notifyPlayAreaChanged();
     }
 
     public void registerBattlePointContributor(BattlePointContributor card) {
         cardsWithBattleValue.add(card);
         updateBattlePoints();
+        notifyPlayAreaChanged();
     }
 
-    @Override
-    public void removeCardBoostDependency(AllCardCodes triggerCardCode, BoostableCard card) {
-        if(cardBoostDependencies.containsKey(triggerCardCode)) {
-            HashSet<BoostableCard> list = cardBoostDependencies.get(triggerCardCode);
-            if(list!=null) {
-                list.remove(card);
-            }
-
-            if(list==null || list.size()<1) {
-                cardBoostDependencies.remove(triggerCardCode);
-            }
-        }
-    }
-
-    @Override
     public boolean registerActiveEffect(AdventureCards card) {
         return cardsWithActiveEffects.add(card);
     }
 
-    public void removeBidContributor(BidContributor card) {
-        cardsWithBidValue.remove(card);
-        updateBids();
-    }
-
-    public void removeBattlePointContributor(BattlePointContributor card) {
-        cardsWithBattleValue.remove(card);
-        updateBattlePoints();
-    }
-
-    @Override
-    public void removeActiveEffect(AdventureCards card) {
-        cardsWithActiveEffects.remove(card);
-    }
-
-    public boolean activateCard(long cardId) {
-        return true; //TODO: Implement with active effects
-    }
-
-    @Override
     public void registerGamePhase(GamePhaseControllers activePhase) {
         if(activePhase==null)
         {
@@ -249,13 +233,39 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         this.phaseController=activePhase;
     }
 
+    public boolean activateCard(long cardId) {
+        return true; //TODO: Implement with active effects
+    }
+
     @Override
     public void onGamePhaseEnded() {
+        //Unset Quest boost if quest card was set
+        if(questCard!=null && allBoostableCards.containsKey(questCard.getBoostedFoe())) {
+            allBoostableCards.get(questCard.getBoostedFoe()).setBoosted(false);
+        }
         phaseController=null;
+        targetPlayArea=null;
+        questCard=null;
         discardAllAmour();
         discardAllFoes();
         discardAllWeapons();
         update();
+    }
+
+    @Override
+    public void onGameReset() {
+        cardTypeMap.clear();
+        allCards.clear();
+        cardBoostDependencies.clear();
+        cardsWithActiveEffects.clear();
+        phaseController = null;
+        cardsWithBattleValue.clear();
+        cardsWithBidValue.clear();
+        allBoostableCards.clear();
+        bids=0;
+        battlePoints=0;
+        questCard=null;
+        targetPlayArea=null;
     }
 
     public void onPlayAreaChanged(PlayAreas targetPlayArea) {
@@ -263,6 +273,13 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
             return;
         }
         this.targetPlayArea=targetPlayArea;
+    }
+
+    public void onQuestStarted(QuestCards questCard) {
+        this.questCard=questCard;
+        if(allBoostableCards.containsKey(questCard.getBoostedFoe())) {
+            allBoostableCards.get(questCard.getBoostedFoe()).setBoosted(true);
+        }
     }
 
     private boolean removeCard(AdventureCards card) {
@@ -279,11 +296,19 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         AllCardCodes cardCode = card.getCardCode();
         allCards.remove(cardCode);
         cardTypeMap.get(cardCode.getSubType()).remove(card);
+
+        cardBoostDependencies.remove(cardCode);
+        allBoostableCards.remove(cardCode);
+        cardsWithActiveEffects.remove(delCard);
+        cardsWithBattleValue.remove(delCard);
+        cardsWithBidValue.remove(delCard);
         return true;
     }
-    private void update() {
+
+    public void update() {
         updateBids();
         updateBattlePoints();
+        notifyPlayAreaChanged();
     }
 
     private void updateBids() {
@@ -297,7 +322,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
     }
 
     private void updateBattlePoints() {
-        int newBattlePoints=0;
+        int newBattlePoints=player.getRank().getRankBattlePointValue();
 
         for(BattlePointContributor card : cardsWithBattleValue) {
             newBattlePoints+=card.getBattlePoints();
@@ -313,10 +338,46 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
      */
     private void discardCards(HashSet<AdventureCards> cardList)
     {
-        for(AdventureCards card : cardList) {
+        HashSet<AdventureCards> list = new HashSet<>(cardList);
+        for(AdventureCards card : list) {
             discardCard(card);
         }
         cardList.clear();
         update();
+    }
+
+    private void addToPlayArea(AdventureCards card) throws CardAreaException {
+        //GameRule:: Cannot play two of the same card
+        if(allCards.containsKey(card.getCardCode())) {
+            throw new CardAreaException(CardAreaException.CardAreaExceptionReasonCodes.RULE_CANNOT_HAVE_TWO_OF_SAME_CARD_IN_PLAY);
+        }
+
+        allCards.put(card.getCardCode(),card);
+
+        CardTypes cardType = card.getCardCode().getSubType();
+        if(!cardTypeMap.containsKey(cardType))
+        {
+            cardTypeMap.put(cardType,new HashSet<>());
+        }
+
+        cardTypeMap.get(cardType).add(card);
+
+        //Check to see if the new card is listed as a boost dependency list and boost all associated cards if found
+        if(cardBoostDependencies.containsKey(card.getCardCode())) {
+            for(BoostableCard boostCard : cardBoostDependencies.get(card.getCardCode())) {
+                boostCard.setBoosted(true);
+                card.registerBoostedCard(boostCard);
+            }
+        }
+
+        if(questCard!=null && allBoostableCards.containsKey(questCard.getBoostedFoe())) {
+            allBoostableCards.get(questCard.getBoostedFoe()).setBoosted(true);
+        }
+
+        update();
+    }
+
+    private void notifyPlayAreaChanged() {
+        //outboundService.playAreaChanged(player,getCardData());
     }
 }

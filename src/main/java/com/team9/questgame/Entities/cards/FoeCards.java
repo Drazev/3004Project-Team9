@@ -30,7 +30,10 @@ public class FoeCards extends AdventureCards implements BoostableCard, BattlePoi
     }
 
     public int getBattlePoints() {
-        return isBoosted ? bpValue : boostedBpValue;
+        if(boostedBpValue > bpValue & isBoosted) {
+            return boostedBpValue;
+        }
+        return bpValue;
     }
 
     public boolean isBoosted() {
@@ -61,45 +64,23 @@ public class FoeCards extends AdventureCards implements BoostableCard, BattlePoi
                 subType,
                 imgSrc,
                 0,
-                isBoosted ? bpValue : boostedBpValue,
+                getBattlePoints(),
                 activeAbilityDescription,
                 activeEffect!=null
         );
         return data;
     }
 
-    @Override
-    boolean playCard(PlayAreas cardArea) {
-        boolean rc=super.playCard(cardArea);
-        //Based on card attributes, register with PlayArea
-        if(rc) {
-            if(activeEffect!=null) {
-                location.registerActiveEffect(this);
-            }
-
-            if(bpValue>0 || boostedBpValue>0) {
-                location.registerBattlePointContributor(this);
-            }
+    protected void registerWithNewPlayArea(PlayerPlayAreas playArea) {
+        //Foes do not contribute to Player battlepoints. Their strength only works as part of a quest stage
+        if(activeEffect!=null) {
+            playArea.registerActiveEffect(this);
         }
-        return rc;
     }
 
     @Override
-    public boolean discardCard() {
-        PlayAreas oldLocation=location;
-        boolean rc=  super.discardCard();
-        if(rc) {
-            isBoosted=false;
-        }
-
-        if(activeEffect!=null) {
-            oldLocation.removeActiveEffect(this);
-        }
-
-        if(bpValue>0 || boostedBpValue>0) {
-            oldLocation.removeBattlePointContributor(this);
-        }
-
-        return rc;
+    public void discardCard() {
+        isBoosted=false;
+        super.discardCard();
     }
 }

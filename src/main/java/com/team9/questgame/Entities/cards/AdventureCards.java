@@ -16,6 +16,7 @@ public abstract class AdventureCards extends Cards {
     protected <T extends Enum<T> & AllCardCodes> AdventureCards(Decks assignedDeck,String activeAbilityDescription, String cardName, CardTypes subType, String fileName, T cardCode) {
         super(assignedDeck,activeAbilityDescription, cardName, subType, "./Assets/Adventure Deck (346x470)/"+fileName, cardCode);
         cardsBoostObservers = new HashSet<>();
+
     }
 
     @Override
@@ -43,11 +44,23 @@ public abstract class AdventureCards extends Cards {
      * observers that boost has ended
      */
     @Override
-    protected void onLocationChanged(CardArea oldLocation) {
+    protected void onLocationChanged() {
         LOG.debug("AdventureCards::onLocationChanged triggered for "+cardCode);
         for(BoostableCard card : cardsBoostObservers) {
-            card.notifyBoostEnded(oldLocation);
+            card.notifyBoostEnded(location);
         }
+        cardsBoostObservers.clear();
     }
+
+    boolean playCard(PlayerPlayAreas playArea) {
+        boolean rc=super.playCard(playArea);
+        //Based on card attributes, register with PlayArea
+        if(rc) {
+            registerWithNewPlayArea(playArea);
+        }
+        return rc;
+    }
+
+    abstract protected void registerWithNewPlayArea(PlayerPlayAreas playArea);
 
 }

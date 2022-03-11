@@ -1,10 +1,11 @@
 package com.team9.questgame.Entities.cards;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.*;
 import com.team9.questgame.ApplicationContextHolder;
 import com.team9.questgame.Data.CardData;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.exception.BadRequestException;
+import com.team9.questgame.exception.CardAreaException;
 import com.team9.questgame.exception.IllegalCardStateException;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import org.slf4j.Logger;
@@ -14,13 +15,26 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property="id"
+)
 public class Hand implements CardArea<AdventureCards> {
+    @JsonIgnore
     private Logger LOG;
+    private long id;
+    static private long nextid=0;
+    @JsonIgnore
     private final Players player;
+    @JsonIgnore
     private final PlayerPlayAreas playArea;
+
+    @JsonIgnore
     private final OutboundService outboundService;
-    boolean isHandOversize;
+    private boolean isHandOversize;
+
     private HashSet<AdventureCards> hand;
+
     private HashMap<Long,AdventureCards> cardIdMap;
 
     @JsonIgnore
@@ -28,6 +42,7 @@ public class Hand implements CardArea<AdventureCards> {
 
 
     public Hand(Players player, PlayerPlayAreas playArea) {
+        this.id=nextid++;
         this.playArea = playArea;
         LOG= LoggerFactory.getLogger(Hand.class);
         this.outboundService = ApplicationContextHolder.getContext().getBean(OutboundService.class);
@@ -35,6 +50,29 @@ public class Hand implements CardArea<AdventureCards> {
         hand = new HashSet<>();
         cardIdMap = new HashMap<>();
         onGameReset();
+    }
+
+    public boolean isHandOversize() {
+        return isHandOversize;
+    }
+
+    public int getHandSize() {
+        return hand.size();
+    }
+
+    public HashMap<CardTypes,HashSet<AllCardCodes>> getUniqueCardsCodesBySubType() {
+        HashMap<CardTypes,HashSet<AllCardCodes>> uniqueCards = new HashMap<>();
+
+        for(AdventureCards card : hand) {
+            HashSet<AllCardCodes> codes = uniqueCards.get(card.getSubType());
+            if(codes==null) {
+                codes = new HashSet<>();
+                uniqueCards.put(card.getSubType(),codes);
+            }
+            codes.add(card.getCardCode());
+        }
+
+        return uniqueCards;
     }
 
     private boolean validateHandSize() {
@@ -53,6 +91,7 @@ public class Hand implements CardArea<AdventureCards> {
     @Override
     public boolean receiveCard(AdventureCards card) {
         hand.add(card);
+
         cardIdMap.put(card.getCardID(),card);
         LOG.info(player.getName()+": Has DRAWN a card.");
         validateHandSize();
@@ -64,6 +103,7 @@ public class Hand implements CardArea<AdventureCards> {
     public void discardCard(AdventureCards card) {
         card.discardCard();
         hand.remove(card);
+        cardIdMap.remove(card.getCardID());
         LOG.info(player.getName()+": Has DISCARDED a card.");
         validateHandSize();
         player.notifyHandChanged();
@@ -75,7 +115,7 @@ public class Hand implements CardArea<AdventureCards> {
     }
 
     @Override
-    public boolean playCard(AdventureCards card) {
+    public boolean playCard(AdventureCards card) throws CardAreaException {
         LOG.info(player.getName()+": Has PLAYED CARD "+card);
         if(playArea==null || !hand.contains(card)) {
             return false;
@@ -116,15 +156,10 @@ public class Hand implements CardArea<AdventureCards> {
         AdventureCards card = cardIdMap.get(cardId);
         if(card==null) {
             //If we get null, determine if it was bad request or internal error
-            if(cardIdMap.containsKey(cardId))
+            if(!cardIdMap.containsKey(cardId))
             {
                 //The map did not contain the cardId, BAD REQUEST
                 throw new BadRequestException("Provided cardId was not found in players hand:  "+player.getName());
-            }
-            else {
-                //The key was mapped to a null card value. This should not happen and is an illegal state
-                LOG.error("Player hand state has lost a card in cardIdMap");
-                throw new IllegalCardStateException();
             }
         }
         return card;

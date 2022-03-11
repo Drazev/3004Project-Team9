@@ -19,8 +19,7 @@ public class EventCards extends StoryCards {
                 '}';
     }
 
-    @Override
-    protected void onLocationChanged(CardArea oldLocation) {
+    protected void onLocationChanged() {
 
     }
 
