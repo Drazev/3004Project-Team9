@@ -1,6 +1,7 @@
 package com.team9.questgame.game_phases;
 
 import com.team9.questgame.Entities.Players;
+import com.team9.questgame.Entities.cards.CardTypes;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,17 +14,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
 
-    // Type of Story Cards
-    private final byte NOT_DRAWN = 0;
-    private final byte QUEST_CARD = 1;
-    private final byte EVENT_CARD = 2;
-    private final byte TOURNAMENT_CARD = 3;
-
     @Autowired
     @Lazy
     private GeneralGameController controller;
-
-    private byte drawnStoryCardType;
 
     @Getter
     private GeneralStateE previousState;
@@ -39,7 +32,6 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
     private GeneralStateE currentState;
 
     public GeneralStateMachine() {
-        drawnStoryCardType = NOT_DRAWN;
         previousState = null;
         currentState = GeneralStateE.SETUP;
         isGameStartRequested = false;
@@ -51,27 +43,6 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
 
     public boolean isGameStarted() {
         return currentState != GeneralStateE.SETUP && currentState != GeneralStateE.NOT_STARTED;
-    }
-
-    /**
-     * Player drawn a Quest story card
-     */
-    public void drawnQuestCard() {
-        drawnStoryCardType = QUEST_CARD;
-    }
-
-    /**
-     * Player drawn an Event story card
-     */
-    public void drawnEventCard() {
-        drawnStoryCardType = EVENT_CARD;
-    }
-
-    /**
-     * Player drawn a Tournament story card
-     */
-    public void drawnTournamentCard() {
-        drawnStoryCardType = TOURNAMENT_CARD;
     }
 
     /**
@@ -123,15 +94,17 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
     }
 
     private GeneralStateE drawStoryCardState() {
-        switch (drawnStoryCardType) {
-            case QUEST_CARD:
-                return GeneralStateE.QUEST_PHASE;
-            case EVENT_CARD:
-                return GeneralStateE.EVENT_PHASE;
-            case TOURNAMENT_CARD:
-                return GeneralStateE.TOURNAMENT_PHASE;
-            default:
-                break;
+        if (controller.getStoryCard() != null) {
+            switch (controller.getStoryCard().getSubType()) {
+                case QUEST:
+                    return GeneralStateE.QUEST_PHASE;
+                case EVENT:
+                    return GeneralStateE.EVENT_PHASE;
+                case TOURNAMENT:
+                    return GeneralStateE.TOURNAMENT_PHASE;
+                default:
+                    throw new RuntimeException("Unexpected Story Card type");
+            }
         }
         return GeneralStateE.DRAW_STORY_CARD;
     }
@@ -140,7 +113,6 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
         if (isWinnerFound()) {
             return GeneralStateE.ENDED;
         } else if (this.isPhaseEnded) {
-            resetDrawnCard();
             return GeneralStateE.DRAW_STORY_CARD;
         } else {
             return GeneralStateE.QUEST_PHASE;
@@ -151,7 +123,6 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
         if (isWinnerFound()) {
             return GeneralStateE.ENDED;
         } else if (this.isPhaseEnded) {
-            resetDrawnCard();
             return GeneralStateE.DRAW_STORY_CARD;
         } else {
             return GeneralStateE.EVENT_PHASE;
@@ -178,10 +149,6 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
             }
         }
         return false;
-    }
-
-    private void resetDrawnCard() {
-        drawnStoryCardType = NOT_DRAWN;
     }
 
     private boolean isAllPlayerReady() {

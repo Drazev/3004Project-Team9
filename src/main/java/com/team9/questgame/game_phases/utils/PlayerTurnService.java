@@ -16,24 +16,46 @@ public class PlayerTurnService {
         currentPlayerIndex = 0;
     }
 
-    public Players nextPlayerTurn() {
+    public Players getPlayerTurn() {
         if (players.size() == 0) {
             throw new RuntimeException("No player found");
         }
-
-        Players returnValue = players.get(currentPlayerIndex);
-        currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
-        return returnValue;
+        return players.get(currentPlayerIndex);
     }
 
-    public int nextPlayerIndexTurn() {
+    public int getPlayerIndexTurn() {
         if (players.size() == 0) {
             throw new RuntimeException("No player found");
         }
-        int returnValue = currentPlayerIndex;
-        currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
-        return returnValue;
+        return currentPlayerIndex;
     }
 
+    public void nextPlayer() {
+        if (players.size() == 0) {
+            throw new RuntimeException("No player found");
+        }
+        currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
+    }
+
+    public boolean setPlayerTurn(int i) {
+        if (i >= 0 && i < players.size()) {
+            currentPlayerIndex = i;
+            return true;
+        }
+        return false;
+    }
+
+    public boolean setPlayerTurn(Players player) {
+        int i = players.indexOf(player);
+        if (i != -1) {
+            currentPlayerIndex = i;
+            return true;
+        }
+        return false;
+    }
+
+    public void onGameReset() {
+        currentPlayerIndex = 0;
+    }
 
 }
