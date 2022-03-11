@@ -2,14 +2,13 @@ package com.team9.questgame.game_phases;
 
 import com.team9.questgame.Entities.PlayerRanks;
 import com.team9.questgame.Entities.Players;
-import com.team9.questgame.Entities.cards.AdventureDecks;
-import com.team9.questgame.Entities.cards.CardArea;
-import com.team9.questgame.Entities.cards.StoryCards;
-import com.team9.questgame.Entities.cards.StoryDecks;
+import com.team9.questgame.Entities.cards.*;
 import com.team9.questgame.exception.IllegalGameRequest;
 import com.team9.questgame.exception.IllegalGameStateException;
 import com.team9.questgame.exception.PlayerJoinException;
 import com.team9.questgame.exception.PlayerNotFoundException;
+import com.team9.questgame.game_phases.quest.QuestPhaseController;
+import com.team9.questgame.game_phases.utils.PlayerTurnService;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -49,6 +48,13 @@ public class GeneralGameController implements CardArea<StoryCards> {
     @Autowired
     private OutboundService outboundService;
 
+    @Getter
+    private PlayerTurnService playerTurnService;
+
+    @Getter
+    @Autowired
+    private QuestPhaseController questPhaseController;
+
     public GeneralGameController() {
         this(PlayerRanks.KNIGHT_OF_ROUND_TABLE);
     }
@@ -56,12 +62,11 @@ public class GeneralGameController implements CardArea<StoryCards> {
     public GeneralGameController(PlayerRanks victoryRank) {
         LOG = LoggerFactory.getLogger(GeneralGameController.class);
         this.players = new ArrayList<>();
-        this.activePlayer = null;
         this.victoryCondtion = victoryRank;
         this.winners = new ArrayList<>();
-        turnSequence = null;
         aDeck = new AdventureDecks();
         sDeck = new StoryDecks();
+        playerTurnService = new PlayerTurnService(players);
     }
 
     /**
@@ -127,16 +132,41 @@ public class GeneralGameController implements CardArea<StoryCards> {
     @Override
     public boolean receiveCard(StoryCards card) {
         if (stateMachine.getCurrentState() != GeneralStateE.DRAW_STORY_CARD) {
-            throw new IllegalGameStateException("Cannot receive story card when it's not DRAW_STORY_CARD state");
+            throw new IllegalGameStateException("Cannot receive story card when it's not DRAW_STORY_CARD state, currentState=" + stateMachine.getCurrentState());
         }
 
         discardCard(storyCard);
         storyCard = card;
 
         stateMachine.update();
-        return false;
+        return true;
     }
 
+
+    /**
+     * Draw a story card from the story deck and play that card (generate the game phase)
+     * @param players the player who requested
+     */
+    public void drawStoryCard(Players players) {
+        if (stateMachine.getCurrentState() != GeneralStateE.DRAW_STORY_CARD) {
+            throw new IllegalGameStateException("Story card can only be drawn during DRAW_STORY_CARD state");
+        }
+
+        if (playerTurnService.getPlayerTurn() != players) {
+            return;
+        }
+
+        sDeck.drawCard(this);
+        playCard(this.storyCard);
+        playerTurnService.nextPlayer();
+
+        stateMachine.update();
+    }
+
+    /**
+     * Discard the story card to the discard pile
+     * @param card
+     */
     @Override
     public void discardCard(StoryCards card) {
         if (!stateMachine.isGameStarted()) {
@@ -151,30 +181,39 @@ public class GeneralGameController implements CardArea<StoryCards> {
         stateMachine.update();
     }
 
+    /**
+     * Generate the appropriate game phase from the story card
+     * @param card
+     */
     @Override
     public boolean playCard(StoryCards card) {
-
-
-        return false;
-    }
-
-    /**
-     * Draw a story card from the story deck
-     */
-    public void drawStoryCard() {
-        if (stateMachine.getCurrentState() != GeneralStateE.DRAW_STORY_CARD) {
-            throw new IllegalGameStateException("Story card can only be drawn during DRAW_STORY_CARD state");
+        if (!stateMachine.isGameStarted()) {
+            throw new IllegalGameStateException("Cannot play card before the game is started");
+        } else if (card == null) {
+            throw new NullPointerException("Story card is null");
         }
 
-        sDeck.drawCard(this);
-
+        switch (card.getSubType()) {
+            case QUEST:
+                questPhaseController.receiveCard(this.storyCard);
+                questPhaseController.startPhase();
+                break;
+            case TOURNAMENT:
+            case EVENT:
+                break;
+            default:
+                throw new RuntimeException("Unexpected card type, should be a story card");
+        }
         stateMachine.update();
+        return true;
     }
 
     @Override
     public void onGameReset() {
         aDeck.onGameReset();
         sDeck.onGameReset();
+        playerTurnService.onGameReset();
+        questPhaseController.onGameReset();
         for (Players p : players) {
             p.onGameReset();
         }
@@ -182,9 +221,8 @@ public class GeneralGameController implements CardArea<StoryCards> {
         Collections.shuffle(players);
         winners.clear();
 
-        activePlayer = null;
         storyCard = null;
-        turnSequence = null;
+
 
         stateMachine.update();
     }

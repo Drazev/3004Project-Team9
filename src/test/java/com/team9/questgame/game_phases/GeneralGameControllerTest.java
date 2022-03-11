@@ -1,10 +1,11 @@
 package com.team9.questgame.game_phases;
 
 import com.team9.questgame.Entities.Players;
-import com.team9.questgame.Entities.cards.StoryCards;
+import com.team9.questgame.Entities.cards.*;
 import com.team9.questgame.exception.IllegalGameStateException;
 import com.team9.questgame.exception.PlayerJoinException;
 import com.team9.questgame.exception.PlayerNotFoundException;
+import com.team9.questgame.game_phases.quest.QuestPhaseStatesE;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -166,22 +170,50 @@ class GeneralGameControllerTest {
         assertThat(gameController.getPlayers().size()).isEqualTo(0);
         assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.SETUP);
 
-        assertThrows(IllegalGameStateException.class, () -> gameController.drawStoryCard());
+        assertThrows(IllegalGameStateException.class, () -> gameController.drawStoryCard(null)); // param doesn't matter here
 
-        // Allowed receiving card
+        // Allowed drawing story card
         for (int i = 0; i < GeneralGameController.MAX_PLAYERS; ++i) {
             gameController.playerJoin(players.get(i));
         }
         gameController.startGame();
         assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.DRAW_STORY_CARD);
 
-        gameController.drawStoryCard();
+        // wrong player turn
+        gameController.drawStoryCard(players.get(1));
+        assertThat(gameController.getStoryCard()).isNull();
+
+
+        // correct player turn
+        gameController.drawStoryCard(gameController.getPlayerTurnService().getPlayerTurn());
+        assertThat(gameController.getStoryCard()).isNotNull();
         assertThat(gameController.getStoryCard()).isInstanceOf(StoryCards.class);
 
     }
 
     @Test
     void playCard() {
+        // Cannot draw card when the game not in DRAW_STORY_CARD state
+        assertThat(gameController.getPlayers().size()).isEqualTo(0);
+        assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.SETUP);
+
+        assertThrows(IllegalGameStateException.class, () -> gameController.playCard(null)); // param doesn't matter here
+
+        // Allowed playing card
+        for (int i = 0; i < GeneralGameController.MAX_PLAYERS; ++i) {
+            gameController.playerJoin(players.get(i));
+        }
+        gameController.startGame();
+        assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.DRAW_STORY_CARD);
+
+        // Get a quest card and generate the quest phase
+        ArrayList<StoryCards> questCards = getQuestCards();
+        gameController.receiveCard(questCards.get(0));
+        gameController.playCard(gameController.getStoryCard());
+        assertThat(gameController.getQuestPhaseController().getStoryCard()).isNotNull();
+        assertThat(gameController.getQuestPhaseController().getStoryCard()).isEqualTo(gameController.getStoryCard());
+        assertThat(gameController.getQuestPhaseController().getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SPONSOR);
+
     }
 
     @Test
@@ -206,5 +238,32 @@ class GeneralGameControllerTest {
 
     @Test
     void getSDeck() {
+    }
+
+    ArrayList<StoryCards> getQuestCards() {
+        CardFactory cf = CardFactory.getInstance();
+        AdventureDecks testDeck = new AdventureDecks();
+        HashMap<StoryDeckCards,Integer> deckList = new HashMap<>();
+        ArrayList<StoryCards> cards = new ArrayList<>();
+        deckList.put(StoryDeckCards.SEARCH_FOR_THE_HOLY_GRAIL,1);
+        deckList.put(StoryDeckCards.TEST_OF_THE_GREEN_KNIGHT,1);
+        deckList.put(StoryDeckCards.SEARCH_FOR_THE_QUESTING_BEAST,1);
+        deckList.put(StoryDeckCards.DEFEND_THE_QUEENS_HONOR,1);
+        deckList.put(StoryDeckCards.RESCUE_THE_FAIR_MAIDEN,1);
+        deckList.put(StoryDeckCards.JOURNEY_THROUGH_THE_ENCHANTED_FOREST,1);
+        deckList.put(StoryDeckCards.VANQUISH_KING_ARTHURS_ENEMIES,2);
+        deckList.put(StoryDeckCards.SLAY_THE_DRAGON,1);
+        deckList.put(StoryDeckCards.BOAR_HUNT,2);
+        deckList.put(StoryDeckCards.REPEL_THE_SAXON_RAIDERS,2);
+
+        for(Map.Entry<StoryDeckCards,Integer> e : deckList.entrySet()) {
+
+            //Create number of cards as proscribed in list
+            for (int i = 0; i < e.getValue(); ++i) {
+                StoryCards card = cf.createCard(testDeck, e.getKey());
+                cards.add(card);
+            }
+        }
+        return cards;
     }
 }
