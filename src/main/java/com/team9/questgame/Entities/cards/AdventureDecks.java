@@ -1,15 +1,14 @@
 package com.team9.questgame.Entities.cards;
 
-import org.springframework.stereotype.Service;
+import com.team9.questgame.Entities.DeckTypes;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 public class AdventureDecks extends Decks<AdventureCards>{
 
     public AdventureDecks() {
-         super(AdventureDecks.class);
+         super(DeckTypes.ADVENTURE, AdventureDecks.class);
     }
 
     @Override
@@ -59,6 +58,11 @@ public class AdventureDecks extends Decks<AdventureCards>{
         //Amours
         deckList.put(AdventureDeckCards.AMOUR,8);
 
+        createDeck(deckList);
+    }
+
+    protected void createDeck(HashMap<AdventureDeckCards,Integer> deckList) {
+
         //Iterate through each card in list
         for(Map.Entry<AdventureDeckCards,Integer> e : deckList.entrySet()) {
 
@@ -67,17 +71,12 @@ public class AdventureDecks extends Decks<AdventureCards>{
             {
                 AdventureCards card = factory.createCard(this,e.getKey());
                 if(card==null) {
-                    LOG.error("Adventure Deck factory failure. Card created as null");
+                    //TODO: Log error
                 }
                 else {
                     cardsInDeck.add(card);
                 }
             }
         }
-    }
-
-    @Override
-    public void notifyDeckChanged() {
-
     }
 }

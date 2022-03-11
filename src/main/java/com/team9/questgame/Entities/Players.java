@@ -8,6 +8,7 @@ import com.team9.questgame.Data.PlayerData;
 import com.team9.questgame.Entities.cards.*;
 import com.team9.questgame.exception.BadRequestException;
 import com.team9.questgame.exception.IllegalCardStateException;
+import com.team9.questgame.gamemanager.service.InboundService;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import lombok.Getter;
 import lombok.Setter;
@@ -42,19 +43,17 @@ public class Players {
     private int battlePoints;
     private int shields;
     private Hand hand;
-    private boolean isHandOversize;
 
     @JsonIgnore
     private OutboundService outboundService;
+    @JsonIgnore
+    private final InboundService inboundService;
 
     @JsonIgnore
     private static long nextId = 0;
     @Getter
     @Setter
     private boolean isReady;
-
-    @JsonIgnore
-    static public final int MAX_HAND_SIZE = 12;
 
     public Players(String playerName)
     {
@@ -65,6 +64,7 @@ public class Players {
         rank=PlayerRanks.SQUIRE;
         this.playerId=nextId++;
         this.outboundService = ApplicationContextHolder.getContext().getBean(OutboundService.class);
+        this.inboundService = ApplicationContextHolder.getContext().getBean(InboundService.class);
         this.isReady = true;
         onGameReset();
     }
@@ -87,6 +87,7 @@ public class Players {
 
     public void setName(String name) {
         this.name = name;
+        notifyPlayerDataChanged();
     }
 
     public int getShields() {
@@ -97,8 +98,14 @@ public class Players {
         return rank;
     }
 
-    public HashMap<CardTypes, HashSet<AllCardCodes>> getUniqueCardsCodesBySubType() {
-        return hand.getUniqueCardsCodesBySubType();
+    public boolean awardShields(int shieldsRewarded) {
+        if(shieldsRewarded>0) {
+            shields+=shieldsRewarded;
+            updateRank();
+            notifyPlayerDataChanged();
+            return true;
+        }
+        return false;
     }
 
     public void actionPlayCard(long cardId) throws BadRequestException,IllegalCardStateException {
@@ -146,9 +153,13 @@ public class Players {
 
     }
 
-    public void notifyPlayerRankUP() {
+    private void notifyPlayerRankUP() {
         //TODO: Notify game and player of a Rank Up event. Game will check victory condition, and player UI must be updated
-        outboundService.broadcastPlayerRankUpdate(generatePlayerData());
+        inboundService.notifyPlayerRankUP(this,rank);
+    }
+
+    private void notifyPlayerDataChanged() {
+        outboundService.broadcastPlayerDataChanged(this,generatePlayerData());
     }
 
     public PlayerData generatePlayerData() {
@@ -158,9 +169,7 @@ public class Players {
         name,
         rank,
         battlePoints,
-        shields,
-        isHandOversize,
-        hand.getCardData()
+        shields
         );
         return data;
     }
@@ -172,13 +181,9 @@ public class Players {
         this.rank=PlayerRanks.SQUIRE;
         this.battlePoints=rank.getRankBattlePointValue();
         this.shields=0;
-        this.isHandOversize=false;
         this.hand.onGameReset();
         LOG.info(name+": Has reset to GAME START state.");
-    }
-
-    public void notifyHandChanged() {
-        outboundService.broadcastPlayerHandUpdate(generatePlayerData());
+        notifyPlayerDataChanged();
     }
 
 }

@@ -1,6 +1,6 @@
 package com.team9.questgame.gamemanager.service;
 
-import com.team9.questgame.Data.PlayerData;
+import com.team9.questgame.Data.*;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.gamemanager.record.rest.EmptyJsonReponse;
 import com.team9.questgame.gamemanager.record.socket.HandUpdateOutbound;
@@ -51,12 +51,12 @@ public class OutboundService {
         this.sendToAllPlayers("/topic/general/next-turn");
     }
 
-    public void broadcastPlayerHandUpdate(PlayerData playerData) {
-        HandUpdateOutbound handUpdate = new HandUpdateOutbound(playerData.name(), playerData.hand());
-        this.sendToAllPlayers("/topic/player/hand-update", handUpdate);
+    public void broadcastHandUpdate( HandData data) {
+//        HandUpdateOutbound handUpdate = new HandUpdateOutbound(playerData.name(), playerData.);
+        this.sendToAllPlayers("/topic/player/hand-update", data);
     }
 
-    public void broadcastPlayerRankUpdate(PlayerData playerData) {
+    public void broadcastPlayerDataChanged(Players player,PlayerData playerData) {
         this.sendToAllPlayers("/topic/player/rank-up", playerData);
     }
 
@@ -65,8 +65,19 @@ public class OutboundService {
         messenger.convertAndSendToUser(topic, sessionService.getPlayerSessionId(player.getName()), payload);
     }
 
-    public void sendHandOversize(Players player) {
-        this.sendToPlayer("/topic/player/hand-oversize",sessionService.getPlayerSessionId(player.getName()),new EmptyJsonReponse());
+    public void broadcastPlayAreaChanged(Players player, PlayAreaData data) {
+        LOG.info(String.format("Broadcasting \"play-area-changed\", Source: %s, ID: %d",player.getName(),player.getPlayerId()));
+        this.sendToAllPlayers("/topic/play-areas/play-area-changed",data);
+    }
+
+    public void broadcastHandOversize(Players player, HandOversizeData data) {
+        LOG.info(String.format("Broadcasting \"hand-oversize\", Source: %s, ID: %d",player.getName(),player.getPlayerId()));
+        this.sendToAllPlayers("/topic/player/hand-oversize",data);
+    }
+
+    public void broadcastDeckUpdate(DeckUpdateData data) {
+        LOG.info(String.format("Broadcasting \"deck-update\" for deck %s",data.deckType()));
+        this.sendToAllPlayers("/topic/decks/deck-update",data);
     }
 
     private void sendToPlayer(String topic, String name, Object payload) {
@@ -83,4 +94,5 @@ public class OutboundService {
         LOG.info(String.format("Broadcasting to one players: topic=%s", topic));
         messenger.convertAndSend(topic, new EmptyJsonReponse());
     }
+
 }

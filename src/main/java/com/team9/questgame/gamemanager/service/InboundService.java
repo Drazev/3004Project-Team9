@@ -1,5 +1,6 @@
 package com.team9.questgame.gamemanager.service;
 
+import com.team9.questgame.Entities.PlayerRanks;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.game_phases.GeneralGameController;
 import lombok.AllArgsConstructor;
@@ -65,6 +66,16 @@ public class InboundService {
     public synchronized void playerDiscardCard(String name, long cardId) {
         Players player = sessionService.getPlayerMap().get(name);
          player.actionDiscardCard(cardId);
+    }
+
+    public synchronized void playerNotifyHandOversized(Players player,boolean isHandOversized) {
+        LOG.info(String.format("NotifyHandOversized sent to Game Controller. Player: %s, Id: %d triggered a hand-oversized event with value: %d",player.getName(),player.getPlayerId(),isHandOversized));
+        //TODO: Tom please make sure to inform the game controller about hand oversized
+    }
+
+    public synchronized void notifyPlayerRankUP(Players player, PlayerRanks newRank) {
+        LOG.info(String.format("notifyPlayerRankUP sent to Game Controller. Player: %s, Id: %d triggered a PlayerRankUP event with value: %s",player.getName(),player.getPlayerId(),newRank));
+        //TODO: Tom please make sure to inform the game controller about player rank up
     }
 
 

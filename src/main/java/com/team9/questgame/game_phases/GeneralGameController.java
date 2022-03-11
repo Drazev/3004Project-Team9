@@ -115,7 +115,7 @@ public class GeneralGameController implements CardArea<StoryCards> {
             throw new IllegalGameStateException("Game can only be started during SETUP state");
         }
 
-        for (int i = 0; i < Players.MAX_HAND_SIZE; ++i) {
+        for (int i = 0; i < Hand.MAX_HAND_SIZE; ++i) {
             for (Players p : players) {
                 aDeck.drawCard(p.getHand());
             }
