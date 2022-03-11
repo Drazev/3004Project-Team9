@@ -1,5 +1,6 @@
 import React, { useEffect} from "react";
 import { startGame } from "../ClientSocket";
+import "./WaitingRoom.css";
 import { 
         useName, 
         useConnected, 

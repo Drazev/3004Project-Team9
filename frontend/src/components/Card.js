@@ -5,12 +5,15 @@ import {discardCard} from "../ClientSocket";
 
 function Card(props){
     const [isBig, setIsBig]=useState(false);
+    const [isActiveSelected, setIsActiveSelected]=useState(false);
     const [isSelected, setSelected]=useState(false);
 
     //add border around card when selected
     let borderSize;
     if(isSelected && props.selectedAllowed){
         borderSize = "2px solid #e9eb6e";
+    }else if(props.isActive && isActiveSelected){
+        borderSize = "2px solid red";
     }else{
         borderSize = "";
     }
@@ -27,6 +30,7 @@ function Card(props){
     return (
         <div 
             id="CardSection"
+            position="absolute"
             style={{height:68,width:73,margin:"0 auto",float:"left",marginBottom:10,marginRight:-13}} 
             onMouseLeave={() => {setIsBig(false); if(isSelected) setSelected(false);}}
         >
@@ -40,11 +44,11 @@ function Card(props){
                 borderRadius:10,
             }}
             onMouseOver={() => setIsBig(true)} 
-            onClick={() => setSelected(!isSelected)} 
+            onClick={() => {if(props.selectedAllowed) {setSelected(!isSelected);} if(props.isActive) { setIsActiveSelected(!isActiveSelected) }}} 
             alt="ohno"
           />
          <div style={{marginTop:-12,}}>
-            {isSelected && props.selectedAllowed &&
+            {isSelected &&
                 <>
                     <Button
                         id="DiscardButton"
@@ -62,7 +66,7 @@ function Card(props){
                     >Discard</Button>{' '}
                 </>
             }
-            {isSelected && props.selectedAllowed &&
+            {isSelected &&
                 <>
                     <Button 
                         id="PlayButton"
@@ -76,8 +80,24 @@ function Card(props){
                             paddingRight: 5,
                             backgroundColor:"#77a3c9",
                             borderColor:"#77a3c9",}}
-                        //onClick={() => setPlay(!activePlay)}
                     >Play</Button>{' '}
+                </>
+            }
+            {isActiveSelected &&
+                <>
+                    <Button 
+                        id="Remove"
+                        style={{
+                            width: 30,
+                            height: 10,
+                            fontSize: 5,
+                            marginLeft: 1,
+                            paddingTop: 0,
+                            paddingLeft: 5,
+                            paddingRight: 5,
+                            backgroundColor:"#c96b6b",
+                            borderColor:"#c96b6b",}}
+                    >Remove</Button>{' '}
                 </>
             }
          </div>
