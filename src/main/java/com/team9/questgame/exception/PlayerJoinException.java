@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PlayerJoinException extends RuntimeException {
-    Logger LOG = LoggerFactory.getLogger(Players.class);
+    Logger LOG = LoggerFactory.getLogger(PlayerJoinException.class);
     static String defaultMsg="Player failed to join game.";
     Players player;
     PlayerJoinExceptionReasonCodes reasonCode;

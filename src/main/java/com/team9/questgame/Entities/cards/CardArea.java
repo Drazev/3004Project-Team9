@@ -5,8 +5,12 @@ package com.team9.questgame.Entities.cards;
  * functions required to work with the Decks
  */
 public interface CardArea<T extends Cards> {
-    void receiveCard(T card);
+    /**
+     * Cards are delt to this
+     * @param card
+     */
+    boolean receiveCard(T card);
     void discardCard(T card);
-    void playCard(T card);
+    boolean playCard(T card);
     void onGameReset();
 }

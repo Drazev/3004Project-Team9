@@ -1,11 +1,5 @@
 package com.team9.questgame.Entities.cards;
 
-import com.team9.questgame.Entities.Players;
-import com.team9.questgame.game_phases.GamePhases;
-import com.team9.questgame.game_phases.GeneralGameController;
-
-import java.util.ArrayList;
-
 public class TournamentCards extends StoryCards {
     final int bonusShields;
 
@@ -17,8 +11,8 @@ public class TournamentCards extends StoryCards {
     }
 
     @Override
-    public GamePhases generateGamePhase(ArrayList<Players> players, GeneralGameController gameInstance) {
-        return null;
+    protected void onLocationChanged() {
+
     }
 
 

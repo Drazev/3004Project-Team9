@@ -1,23 +1,25 @@
 package com.team9.questgame.Entities.cards;
 
-import com.team9.questgame.Entities.Players;
-import com.team9.questgame.game_phases.GamePhases;
-import com.team9.questgame.game_phases.GeneralGameController;
-
-import java.util.ArrayList;
-
 /**
  * Entity class representing an instance of a Quest Card type
  *
  * @param <T> A cardCode that represents an individual adventure card, or card gropuing that will be boosted by the quest
  *
  */
-public class QuestCards<T extends Enum<T> & TargetableCardCodes> extends StoryCards {
+public class QuestCards<T extends Enum<T> & AllCardCodes> extends StoryCards {
     final int stages;
     final T boostedFoe;
 
     public QuestCards(Decks assignedDeck,String activeAbilityDescription, String cardName, CardTypes subType, String fileName, StoryDeckCards cardCode, int stages) {
         this(assignedDeck,activeAbilityDescription, cardName, subType, fileName, cardCode,stages,null);
+    }
+
+    public int getStages() {
+        return stages;
+    }
+
+    public T getBoostedFoe() {
+        return boostedFoe;
     }
 
     @Override
@@ -29,8 +31,8 @@ public class QuestCards<T extends Enum<T> & TargetableCardCodes> extends StoryCa
     }
 
     @Override
-    public GamePhases generateGamePhase(ArrayList<Players> players, GeneralGameController gameInstance) {
-        return null;
+    protected void onLocationChanged() {
+
     }
 
 
@@ -38,14 +40,6 @@ public class QuestCards<T extends Enum<T> & TargetableCardCodes> extends StoryCa
         super(assignedDeck,activeAbilityDescription, cardName, subType, fileName, cardCode);
         this.stages = stages;
         this.boostedFoe = foeBoosted;
-    }
-
-    public int getStages() {
-        return stages;
-    }
-
-    public T getBoostedFoe() {
-        return boostedFoe;
     }
 
 }

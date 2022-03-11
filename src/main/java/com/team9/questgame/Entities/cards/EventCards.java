@@ -1,11 +1,6 @@
 package com.team9.questgame.Entities.cards;
 
 import com.team9.questgame.Entities.Effects.Effects;
-import com.team9.questgame.Entities.Players;
-import com.team9.questgame.game_phases.GamePhases;
-import com.team9.questgame.game_phases.GeneralGameController;
-
-import java.util.ArrayList;
 
 /**
  * Entity representing Event Cards
@@ -24,9 +19,8 @@ public class EventCards extends StoryCards {
                 '}';
     }
 
-    @Override
-    public GamePhases generateGamePhase(ArrayList<Players> players, GeneralGameController gameInstance) {
-        return null;
+    protected void onLocationChanged() {
+
     }
 
     /**

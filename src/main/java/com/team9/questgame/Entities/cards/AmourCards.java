@@ -2,7 +2,7 @@ package com.team9.questgame.Entities.cards;
 
 import com.team9.questgame.Data.CardData;
 
-public class AmourCards extends AdventureCards {
+public class AmourCards extends AdventureCards implements BattlePointContributor,BidContributor{
     private final int bonusBp=10;
     private final int bids=1;
 
@@ -30,11 +30,6 @@ public class AmourCards extends AdventureCards {
     }
 
     @Override
-    public void playCard() {
-
-    }
-
-    @Override
     public CardData generateCardData() {
         CardData data = new CardData(
                 cardID,
@@ -48,5 +43,21 @@ public class AmourCards extends AdventureCards {
                 false
         );
         return data;
+    }
+
+    @Override
+    protected void registerWithNewPlayArea(PlayerPlayAreas playArea) {
+        playArea.registerBidContributor(this);
+        playArea.registerBattlePointContributor(this);
+    }
+
+    @Override
+    public int getBattlePoints() {
+        return bonusBp;
+    }
+
+    @Override
+    public int getBids() {
+        return bids;
     }
 }

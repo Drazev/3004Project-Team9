@@ -3,7 +3,7 @@ package com.team9.questgame.Entities.cards;
 import com.team9.questgame.Data.CardData;
 import com.team9.questgame.Entities.Effects.Effects;
 
-public class FoeCards extends AdventureCards {
+public class FoeCards extends AdventureCards implements BoostableCard, BattlePointContributor {
     private final int bpValue;
     private final int boostedBpValue;
     private boolean isBoosted;
@@ -18,6 +18,32 @@ public class FoeCards extends AdventureCards {
                 '}';
     }
 
+    @Override
+    public void notifyBoostEnded(CardArea boostTriggerLocation) {
+        if(boostTriggerLocation==location) {
+            isBoosted=false;
+        }
+    }
+
+    public void setBoosted(boolean boosted) {
+        isBoosted = boosted;
+    }
+
+    public int getBattlePoints() {
+        if(boostedBpValue > bpValue & isBoosted) {
+            return boostedBpValue;
+        }
+        return bpValue;
+    }
+
+    public boolean isBoosted() {
+        return isBoosted;
+    }
+
+    public Effects getActiveEffect() {
+        return activeEffect;
+    }
+
     public FoeCards(Decks assignedDeck, String activeAbilityDescription, String cardName, CardTypes subType, String imageFileName, AdventureDeckCards cardCode, int battlePointValue) {
         this(assignedDeck,activeAbilityDescription, cardName, subType, imageFileName, cardCode,battlePointValue,0);
     }
@@ -29,13 +55,6 @@ public class FoeCards extends AdventureCards {
         this.activeEffect=null; //TODO: Change when Effects Implemented
     }
 
-
-    @Override
-    public void playCard()
-    {
-
-    }
-
     @Override
     public CardData generateCardData() {
         CardData data = new CardData(
@@ -45,10 +64,23 @@ public class FoeCards extends AdventureCards {
                 subType,
                 imgSrc,
                 0,
-                isBoosted ? bpValue : boostedBpValue,
+                getBattlePoints(),
                 activeAbilityDescription,
                 activeEffect!=null
         );
         return data;
+    }
+
+    protected void registerWithNewPlayArea(PlayerPlayAreas playArea) {
+        //Foes do not contribute to Player battlepoints. Their strength only works as part of a quest stage
+        if(activeEffect!=null) {
+            playArea.registerActiveEffect(this);
+        }
+    }
+
+    @Override
+    public void discardCard() {
+        isBoosted=false;
+        super.discardCard();
     }
 }

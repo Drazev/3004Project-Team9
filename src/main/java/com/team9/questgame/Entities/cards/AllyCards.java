@@ -11,13 +11,13 @@ import com.team9.questgame.Entities.Effects.Effects;
  * ally being in the owing players play area.
  * @param <T> This is an enumeration type representing the card that triggers the boost.
  */
-public class AllyCards <T extends Enum<T> & AllCardCodes> extends AdventureCards {
+public class AllyCards <T extends Enum<T> & AllCardCodes> extends AdventureCards implements BoostableCard, BattlePointContributor,BidContributor {
     private final int bonusBp; //Battle Points
     private final int bids;
     private final int boostBonusBp;
     private final int boostBids;
     boolean isBoosted;
-    private final T boostCardCode;
+    private final T boostConditionCardCode;
     private Effects activeEffect; //TODO: Modify for Effect implementation
 
     /**
@@ -34,18 +34,6 @@ public class AllyCards <T extends Enum<T> & AllCardCodes> extends AdventureCards
         this(assignedDeck,activeAbilityDescription, cardName, subType, fileName, cardCode,bonusBp,bids,0,0,null);
     }
 
-    @Override
-    public String toString() {
-        return super.toString() + ", AllyCards{" +
-                "bonusBp=" + bonusBp +
-                ", bids=" + bids +
-                ", boostBonusBp=" + boostBonusBp +
-                ", boostBids=" + boostBids +
-                ", isBoosted=" + isBoosted +
-                ", boostCardCode=" + boostCardCode +
-                '}';
-    }
-
     /**
      *
      * @param activeAbilityDescription A description text to appear at the bottom of a card with an active or conditional effect.
@@ -57,23 +45,37 @@ public class AllyCards <T extends Enum<T> & AllCardCodes> extends AdventureCards
      * @param bids The bids this ally contributes
      * @param boostBonusBp The total number of battlepoints this ally contributes if the boost condition was met.
      * @param boostBids The total number of bids this ally contributes if the boost condition was met.
-     * @param boostCardCode The target card that will trigger this ally's boost effect.
+     * @param boostConditionCardCode The target card that will trigger this ally's boost effect.
      */
-    public AllyCards(Decks assignedDeck,String activeAbilityDescription, String cardName, CardTypes subType, String fileName, AdventureDeckCards cardCode, int bonusBp, int bids, int boostBonusBp, int boostBids,T boostCardCode) {
+    public AllyCards(Decks assignedDeck,String activeAbilityDescription, String cardName, CardTypes subType, String fileName, AdventureDeckCards cardCode, int bonusBp, int bids, int boostBonusBp, int boostBids,T boostConditionCardCode) {
         super(assignedDeck,activeAbilityDescription, cardName, subType, fileName, cardCode);
         this.bonusBp = bonusBp;
         this.bids = bids;
         this.boostBonusBp = boostBonusBp;
         this.boostBids=boostBids;
         this.isBoosted=false;
-        this.boostCardCode = boostCardCode;
+        this.boostConditionCardCode = boostConditionCardCode;
         this.activeEffect=null; //TODO: Change when Effects implemented
 
     }
 
     @Override
-    public void playCard() {
+    public String toString() {
+        return super.toString() + ", AllyCards{" +
+                "bonusBp=" + bonusBp +
+                ", bids=" + bids +
+                ", boostBonusBp=" + boostBonusBp +
+                ", boostBids=" + boostBids +
+                ", isBoosted=" + isBoosted +
+                ", boostCardCode=" + boostConditionCardCode +
+                '}';
+    }
 
+    @Override
+    public void notifyBoostEnded(CardArea boostTriggerLocation) {
+        if(boostTriggerLocation==location) {
+            isBoosted=false;
+        }
     }
 
     @Override
@@ -84,11 +86,66 @@ public class AllyCards <T extends Enum<T> & AllCardCodes> extends AdventureCards
                 cardName,
                 subType,
                 imgSrc,
-                isBoosted ? bids : boostBids,
-                isBoosted ? bonusBp : boostBonusBp,
+                getBids(),
+                getBattlePoints(),
                 activeAbilityDescription,
                 activeEffect!=null
         );
         return data;
+    }
+
+    public int getBids() {
+        if(boostBids > bids && isBoosted) {
+            return boostBids;
+        }
+        return bids;
+    }
+
+    public int getBattlePoints() {
+        if(boostBonusBp > bonusBp && isBoosted) {
+            return boostBonusBp;
+        }
+        return bonusBp;
+    }
+
+    public boolean isBoosted() {
+        return isBoosted;
+    }
+
+    public void setBoosted(boolean boosted) {
+        isBoosted = boosted;
+    }
+
+    public T getBoostConditionCardCode() {
+        return boostConditionCardCode;
+    }
+
+    public Effects getActiveEffect() {
+        return activeEffect;
+    }
+
+    protected void registerWithNewPlayArea(PlayerPlayAreas playArea) {
+
+        if(activeEffect!=null) {
+            playArea.registerActiveEffect(this);
+        }
+
+        if(bids>0 || boostBids>0) {
+            playArea.registerBidContributor(this);
+        }
+
+        if(bonusBp>0 || boostBonusBp>0) {
+            playArea.registerBattlePointContributor(this);
+        }
+
+        if(boostConditionCardCode!=null) {
+            playArea.registerCardBoostDependency(boostConditionCardCode,this);
+        }
+    }
+
+    @Override
+    public void discardCard() {
+        isBoosted=false;
+        super.discardCard();
     }
 }

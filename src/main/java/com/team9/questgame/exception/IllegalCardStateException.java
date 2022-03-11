@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
 public class IllegalCardStateException extends RuntimeException {
-    Logger LOG = LoggerFactory.getLogger(Players .class);
+    Logger LOG = LoggerFactory.getLogger(IllegalCardStateException.class);
     static String defaultMsg="A card has been assigned to an invalid location and was lost.";
 
     public IllegalCardStateException() {

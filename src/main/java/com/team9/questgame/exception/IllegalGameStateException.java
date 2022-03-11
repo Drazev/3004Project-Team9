@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class IllegalGameStateException extends RuntimeException{
-    Logger LOG = LoggerFactory.getLogger(Players.class);
+    Logger LOG = LoggerFactory.getLogger(IllegalGameStateException.class);
     static String defaultMsg="The game has reached an invalid state";
 
     public IllegalGameStateException() {

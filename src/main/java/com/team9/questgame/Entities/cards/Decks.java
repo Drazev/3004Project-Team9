@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 public abstract class  Decks<T extends Cards> {
-    private Logger LOG;
+    protected Logger LOG;
     protected HashSet<T> cardsInDeck;
     private Stack<T> drawDeck;
     @Getter
@@ -65,7 +65,7 @@ public abstract class  Decks<T extends Cards> {
         card = drawDeck.pop();
         cardLocation.put(card,area);
 
-        area.receiveCard(card);
+        card.playCard(area);
         return card;
     }
 
