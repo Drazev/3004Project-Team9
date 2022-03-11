@@ -166,7 +166,7 @@ public class Hand implements CardArea<AdventureCards> {
     }
 
     void notifyHandOversize() {
-        outboundService.sendHandOversize(player.getName());
+        outboundService.sendHandOversize(player);
     }
 
 }

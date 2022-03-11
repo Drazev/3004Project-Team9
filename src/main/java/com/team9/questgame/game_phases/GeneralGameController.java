@@ -112,7 +112,7 @@ public class GeneralGameController implements CardArea<StoryCards> {
 
         for (int i = 0; i < Players.MAX_HAND_SIZE; ++i) {
             for (Players p : players) {
-                aDeck.drawCard(p);
+                aDeck.drawCard(p.getHand());
             }
         }
 
@@ -125,7 +125,7 @@ public class GeneralGameController implements CardArea<StoryCards> {
 
 
     @Override
-    public void receiveCard(StoryCards card) {
+    public boolean receiveCard(StoryCards card) {
         if (stateMachine.getCurrentState() != GeneralStateE.DRAW_STORY_CARD) {
             throw new IllegalGameStateException("Cannot receive story card when it's not DRAW_STORY_CARD state");
         }
@@ -134,6 +134,7 @@ public class GeneralGameController implements CardArea<StoryCards> {
         storyCard = card;
 
         stateMachine.update();
+        return false;
     }
 
     @Override
@@ -151,9 +152,10 @@ public class GeneralGameController implements CardArea<StoryCards> {
     }
 
     @Override
-    public void playCard(StoryCards card) {
+    public boolean playCard(StoryCards card) {
 
 
+        return false;
     }
 
     /**
@@ -190,6 +192,6 @@ public class GeneralGameController implements CardArea<StoryCards> {
     // Only here to support backward dependency
     // TODO: Remove after Iteration 1 test
     public void dealCard(Players player) {
-        aDeck.drawCard(player);
+        aDeck.drawCard(player.getHand());
     }
 }

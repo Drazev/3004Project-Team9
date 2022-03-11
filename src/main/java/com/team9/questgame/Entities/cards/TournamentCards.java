@@ -1,10 +1,5 @@
 package com.team9.questgame.Entities.cards;
 
-import com.team9.questgame.Entities.Players;
-import com.team9.questgame.QuestGameController;
-
-import java.util.ArrayList;
-
 public class TournamentCards extends StoryCards {
     final int bonusShields;
 
