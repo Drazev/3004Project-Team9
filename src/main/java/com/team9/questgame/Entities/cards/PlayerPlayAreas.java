@@ -3,10 +3,13 @@ package com.team9.questgame.Entities.cards;
 import com.fasterxml.jackson.annotation.*;
 import com.team9.questgame.ApplicationContextHolder;
 import com.team9.questgame.Data.CardData;
+import com.team9.questgame.Data.PlayAreaData;
+import com.team9.questgame.Data.PlayAreaDataSources;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.GamePhases.GamePhaseControllers;
 import com.team9.questgame.exception.CardAreaException;
 import com.team9.questgame.exception.IllegalGamePhaseStateException;
+import com.team9.questgame.gamemanager.service.InboundService;
 import com.team9.questgame.gamemanager.service.OutboundService;
 
 import java.util.*;
@@ -80,6 +83,22 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
             handCards.add(card.generateCardData());
         }
         return handCards;
+    }
+
+    public PlayAreaData getPlayAreaData() {
+        HashSet<CardTypes> allowedTypes = new HashSet<>();
+        allowedTypes.add(CardTypes.ALLY);
+        allowedTypes.add(CardTypes.WEAPON);
+        allowedTypes.add(CardTypes.AMOUR);
+        PlayAreaData data = new PlayAreaData(
+                PlayAreaDataSources.PLAYER,
+                id,
+                bids,
+                battlePoints,
+                allowedTypes,
+                getCardData()
+        );
+        return data;
     }
 
     void discardAllCards() {
@@ -378,6 +397,6 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
     }
 
     private void notifyPlayAreaChanged() {
-        //outboundService.playAreaChanged(player,getCardData());
+        outboundService.broadcastPlayAreaChanged(player,getPlayAreaData());
     }
 }

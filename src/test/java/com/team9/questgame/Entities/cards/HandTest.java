@@ -65,10 +65,10 @@ class HandTest {
             aDeck.drawCard(hand);
         }
         LOG.info("Hand Printout: "+objMap.writerWithDefaultPrettyPrinter().writeValueAsString(hand));
-        for(CardData card : hand.getCardData()) {
+        for(CardData card : hand.generateCardData()) {
             hand.discardCard(card.cardID());
         }
-        assert(hand.getCardData().size()==0);
+        assert(hand.generateCardData().size()==0);
         LOG.info("Hand Printout: \n"+objMap.writerWithDefaultPrettyPrinter().writeValueAsString(hand));
 
     }
@@ -89,7 +89,7 @@ class HandTest {
 
         HashSet<AllCardCodes> uniqueCardCodes = new HashSet<>();
 
-        for(CardData card : hand.getCardData()) {
+        for(CardData card : hand.generateCardData()) {
             LOG.info("PLAY CARD: \n"+objMap.writerWithDefaultPrettyPrinter().writeValueAsString(card));
             if(!uniqueCardCodes.contains(card.cardCode())) {
                 if(hand.playCard(card.cardID()))
@@ -106,7 +106,7 @@ class HandTest {
             }
         }
 
-        assert(hand.getCardData().size()== (Hand.MAX_HAND_SIZE-uniqueCardCodes.size()));
+        assert(hand.generateCardData().size()== (Hand.MAX_HAND_SIZE-uniqueCardCodes.size()));
         LOG.info("Hand Printout: \n"+objMap.writerWithDefaultPrettyPrinter().writeValueAsString(hand));
         assertThrows(BadRequestException.class,()->
                 hand.playCard(141098754)
@@ -151,6 +151,17 @@ class HandTest {
         assert(result.get(CardTypes.WEAPON).size()==uniqueWeapons);
         assert(result.get(CardTypes.TEST).size()==uniqueTests);
 
+    }
+
+    @Test
+    void testGenerateHandData() throws JsonProcessingException {
+        Hand hand = player.getHand();
+        LOG.info("Hand state before card received.");
+        for(int i=0;i<Hand.MAX_HAND_SIZE;++i) {
+            aDeck.drawCard(hand);
+        }
+        LOG.info("Hand Printout: "+objMap.writerWithDefaultPrettyPrinter().writeValueAsString(hand));
+        LOG.info("JSON Printout: "+objMap.writerWithDefaultPrettyPrinter().writeValueAsString(player.getHand().generateHandData()));
     }
 
     //Cannot unit test since it communicates with other part of program

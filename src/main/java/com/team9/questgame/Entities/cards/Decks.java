@@ -1,6 +1,12 @@
 package com.team9.questgame.Entities.cards;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.team9.questgame.ApplicationContextHolder;
+import com.team9.questgame.Data.CardData;
+import com.team9.questgame.Data.DeckUpdateData;
+import com.team9.questgame.Entities.DeckTypes;
 import com.team9.questgame.exception.IllegalCardStateException;
+import com.team9.questgame.gamemanager.service.OutboundService;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 public abstract class  Decks<T extends Cards> {
+    final DeckTypes type;
     protected Logger LOG;
     protected HashSet<T> cardsInDeck;
     private Stack<T> drawDeck;
@@ -15,21 +22,26 @@ public abstract class  Decks<T extends Cards> {
     private ArrayList<T> discardPile;
     private final HashMap<T, CardArea> cardLocation;
     protected static final CardFactory factory = CardFactory.getInstance();
+    @JsonIgnore
+    private final OutboundService outboundService;
 
 
 
-    protected Decks(Class cType) {
+    protected Decks(DeckTypes type, Class cType) {
+        this.type = type;
         LOG=LoggerFactory.getLogger(cType);
         this.cardsInDeck=new HashSet<>();
         this.drawDeck = new Stack<>();
         this.discardPile = new ArrayList<>();
         this.cardLocation = new HashMap<>();
+        this.outboundService = ApplicationContextHolder.getContext().getBean(OutboundService.class);
         init();
     }
 
     protected void init() {
         createDeck();
         shuffleDeck();
+        notifyDeckChanged();
     }
 
     abstract protected void createDeck();
@@ -66,6 +78,7 @@ public abstract class  Decks<T extends Cards> {
         cardLocation.put(card,area);
 
         card.playCard(area);
+        notifyDeckChanged();
         return card;
     }
 
@@ -94,7 +107,21 @@ public abstract class  Decks<T extends Cards> {
         notifyDeckChanged();
     }
 
-    abstract public void notifyDeckChanged();
+    private DeckUpdateData generateDeckUpdateData() {
+        ArrayList<CardData> data = new ArrayList<>();
+        for(Cards card : discardPile) {
+            data.add(card.generateCardData());
+        }
+        return new DeckUpdateData(
+                type,
+                drawDeck.size(),
+                data
+        );
+    }
+
+    private void notifyDeckChanged() {
+        outboundService.broadcastDeckUpdate(generateDeckUpdateData());
+    }
 
     //TODO: Function that notifies observers or sends event to GameManager with new deck
 

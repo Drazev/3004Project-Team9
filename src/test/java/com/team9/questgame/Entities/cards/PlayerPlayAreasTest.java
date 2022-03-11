@@ -71,7 +71,7 @@ class PlayerPlayAreasTest {
     void playAllNonDuplicateCardsFromHand() {
         for(Hand h : hands) {
             HashSet<AllCardCodes> uniqueCardCodes = new HashSet<>();
-            for(CardData card : h.getCardData()) {
+            for(CardData card : h.generateCardData()) {
                 if(!uniqueCardCodes.contains(card.cardCode())) {
                     h.playCard(card.cardID());
                     uniqueCardCodes.add(card.cardCode());
@@ -272,6 +272,11 @@ class PlayerPlayAreasTest {
             }
         }
 
+    }
+
+    @Test
+    void getPlayAreaData() throws JsonProcessingException {
+        LOG.info(objMap.writerWithDefaultPrettyPrinter().writeValueAsString(pPlayAreas.get(0).getPlayAreaData()));
     }
 
     @Test

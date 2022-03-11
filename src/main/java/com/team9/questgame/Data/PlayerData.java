@@ -10,7 +10,5 @@ public record PlayerData(
         String name,
         PlayerRanks rank,
         int rankBattlePoints,
-        int shields,
-        boolean isHandOversize,
-        ArrayList<CardData> hand
+        int shields
 ) {}

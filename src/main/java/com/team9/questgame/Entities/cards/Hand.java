@@ -3,10 +3,13 @@ package com.team9.questgame.Entities.cards;
 import com.fasterxml.jackson.annotation.*;
 import com.team9.questgame.ApplicationContextHolder;
 import com.team9.questgame.Data.CardData;
+import com.team9.questgame.Data.HandData;
+import com.team9.questgame.Data.HandOversizeData;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.exception.BadRequestException;
 import com.team9.questgame.exception.CardAreaException;
 import com.team9.questgame.exception.IllegalCardStateException;
+import com.team9.questgame.gamemanager.service.InboundService;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +34,9 @@ public class Hand implements CardArea<AdventureCards> {
 
     @JsonIgnore
     private final OutboundService outboundService;
+    @JsonIgnore
+    private final InboundService inboundService;
+
     private boolean isHandOversize;
 
     private HashSet<AdventureCards> hand;
@@ -46,6 +52,7 @@ public class Hand implements CardArea<AdventureCards> {
         this.playArea = playArea;
         LOG= LoggerFactory.getLogger(Hand.class);
         this.outboundService = ApplicationContextHolder.getContext().getBean(OutboundService.class);
+        this.inboundService = ApplicationContextHolder.getContext().getBean(InboundService.class);
         this.player=player;
         hand = new HashSet<>();
         cardIdMap = new HashMap<>();
@@ -95,7 +102,7 @@ public class Hand implements CardArea<AdventureCards> {
         cardIdMap.put(card.getCardID(),card);
         LOG.info(player.getName()+": Has DRAWN a card.");
         validateHandSize();
-        player.notifyHandChanged();
+        notifyHandUpdated();
         return true;
     }
 
@@ -106,7 +113,7 @@ public class Hand implements CardArea<AdventureCards> {
         cardIdMap.remove(card.getCardID());
         LOG.info(player.getName()+": Has DISCARDED a card.");
         validateHandSize();
-        player.notifyHandChanged();
+        notifyHandUpdated();
     }
 
     public void discardCard(long cardId) throws BadRequestException,IllegalCardStateException {
@@ -128,7 +135,7 @@ public class Hand implements CardArea<AdventureCards> {
             validateHandSize();
         }
 
-        player.notifyHandChanged();
+        notifyHandUpdated();
         return rc;
     }
 
@@ -142,14 +149,23 @@ public class Hand implements CardArea<AdventureCards> {
         hand.clear();
         cardIdMap.clear();
         isHandOversize=false;
+        notifyHandUpdated();
     }
 
-    public ArrayList<CardData> getCardData() {
+    public ArrayList<CardData> generateCardData() {
         ArrayList<CardData> handCards = new ArrayList<>();
         for(Cards card : hand) {
             handCards.add(card.generateCardData());
         }
         return handCards;
+    }
+
+    public HandData generateHandData() {
+        return new HandData(
+                player.getPlayerId(),
+                isHandOversize,
+                generateCardData()
+        );
     }
 
     private AdventureCards findCardFromCardId(Long cardId) throws BadRequestException,IllegalCardStateException{
@@ -165,8 +181,14 @@ public class Hand implements CardArea<AdventureCards> {
         return card;
     }
 
-    void notifyHandOversize() {
-        outboundService.sendHandOversize(player);
+    private void notifyHandOversize() {
+        HandOversizeData data = new HandOversizeData(player.getPlayerId(),MAX_HAND_SIZE,getHandSize());
+        outboundService.broadcastHandOversize(player,data);
+        inboundService.playerNotifyHandOversized(player,isHandOversize);
+    }
+
+    private void notifyHandUpdated() {
+        outboundService.broadcastHandUpdate(generateHandData());
     }
 
 }

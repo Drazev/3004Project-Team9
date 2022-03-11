@@ -1,13 +1,13 @@
 package com.team9.questgame.Entities.cards;
 
-import org.springframework.stereotype.Service;
+import com.team9.questgame.Entities.DeckTypes;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class StoryDecks extends Decks<StoryCards> {
     public StoryDecks() {
-        super(StoryDecks.class);
+        super(DeckTypes.STORY, StoryDecks.class);
     }
 
     @Override
@@ -42,6 +42,11 @@ public class StoryDecks extends Decks<StoryCards> {
         deckList.put(StoryDeckCards.PROSPERITY_THROUGHOUT_THE_REALM,1);
         deckList.put(StoryDeckCards.KINGS_CALL_TO_ARMS,1);
 
+        createDeck(deckList);
+    }
+
+    protected void createDeck(HashMap<StoryDeckCards,Integer> deckList) {
+
         //Iterate through each card in list
         for(Map.Entry<StoryDeckCards,Integer> e : deckList.entrySet()) {
 
@@ -57,11 +62,6 @@ public class StoryDecks extends Decks<StoryCards> {
                 }
             }
         }
-    }
-
-    @Override
-    public void notifyDeckChanged() {
-
     }
 }
 
