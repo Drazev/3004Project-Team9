@@ -2,8 +2,8 @@ package com.team9.questgame.Entities.cards;
 
 import com.team9.questgame.Data.CardData;
 import com.team9.questgame.Entities.Players;
-import com.team9.questgame.GamePhases.GamePhases;
-import com.team9.questgame.QuestGameController;
+import com.team9.questgame.game_phases.GamePhases;
+import com.team9.questgame.game_phases.GeneralGameController;
 
 import java.util.ArrayList;
 
@@ -18,7 +18,7 @@ public abstract class StoryCards extends Cards {
         return super.toString()+", StoryCards{}";
     }
 
-    abstract public GamePhases generateGamePhase(ArrayList<Players> players, QuestGameController gameInstance);
+    abstract public GamePhases generateGamePhase(ArrayList<Players> players, GeneralGameController gameInstance);
 
     @Override
     public CardData generateCardData() {

@@ -9,6 +9,8 @@ import com.team9.questgame.Entities.cards.CardArea;
 import com.team9.questgame.Entities.cards.Cards;
 import com.team9.questgame.exception.IllegalCardStateException;
 import com.team9.questgame.gamemanager.service.OutboundService;
+import lombok.Getter;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,14 +40,16 @@ public class Players implements CardArea<AdventureCards> {
     private OutboundService outboundService;
 
     @JsonIgnore
-    private static long nextId=0;
+    private static long nextId = 0;
+    @Getter
+    @Setter
+    private boolean isReady;
 
     @JsonIgnore
     static public final int MAX_HAND_SIZE = 12;
     private HashSet<AdventureCards> hand;
-
     @JsonIgnore
-    private HashMap<Long,AdventureCards> cardIdMap;
+    private HashMap<Long, AdventureCards> cardIdMap;
 
     public Players(String playerName)
     {
@@ -54,6 +58,7 @@ public class Players implements CardArea<AdventureCards> {
         rank=PlayerRanks.SQUIRE;
         this.playerId=nextId++;
         this.outboundService = ApplicationContextHolder.getContext().getBean(OutboundService.class);
+        this.isReady = true;
         onGameReset();
     }
 
@@ -116,8 +121,7 @@ public class Players implements CardArea<AdventureCards> {
 
     @Override
     public void discardCard(AdventureCards card) {
-        if(hand.contains(card)==false)
-        {
+        if (hand.contains(card) == false) {
             //TODO: Handle card was not in hand
         }
 

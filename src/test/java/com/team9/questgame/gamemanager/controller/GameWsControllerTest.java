@@ -14,9 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
-import org.springframework.messaging.simp.stomp.StompFrameHandler;
-import org.springframework.messaging.simp.stomp.StompHeaders;
-import org.springframework.messaging.simp.stomp.StompSession;
+import org.springframework.messaging.simp.stomp.*;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
@@ -26,7 +24,6 @@ import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -35,7 +32,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-class GameWsControllerTest implements StompFrameHandler {
+class GameWsControllerTest {
+    private final Logger LOG = LoggerFactory.getLogger(GameWsControllerTest.class);
     @Autowired
     private SessionService sessionService;
     @Autowired
@@ -49,13 +47,8 @@ class GameWsControllerTest implements StompFrameHandler {
     @LocalServerPort
     private Integer port;
 
-    ArrayBlockingQueue<Object> blockingQueue;
-
-    private final Logger LOG = LoggerFactory.getLogger(GameWsControllerTest.class);
-
     @BeforeEach
     public void setup() throws ExecutionException, InterruptedException, TimeoutException {
-        blockingQueue = new ArrayBlockingQueue<>(10);
         assertThat(sessionService.registerPlayer("A")).isTrue();
         assertThat(sessionService.registerPlayer("B")).isTrue();
 
@@ -68,24 +61,20 @@ class GameWsControllerTest implements StompFrameHandler {
         stompSessionA = stompClientA.connect(String.format("http://localhost:%d/quest-game-websocket?name=A", port), new CustomStompSessionHandler()).get(1, SECONDS);
         stompSessionB = stompClientB.connect(String.format("http://localhost:%d/quest-game-websocket?name=B", port), new CustomStompSessionHandler()).get(1, SECONDS);
 
-        stompSessionA.subscribe("/topic/general/player-connect", this);
-        stompSessionB.subscribe("/topic/general/player-connect", this);
+        stompSessionA.subscribe("/topic/general/player-connect", new MyStompSessionHandler());
+        stompSessionB.subscribe("/topic/general/player-connect", new MyStompSessionHandler());
 
-        stompSessionA.subscribe("/topic/general/game-start", this);
-        stompSessionB.subscribe("/topic/general/game-start", this);
+        stompSessionA.subscribe("/topic/general/game-start", new MyStompSessionHandler());
+        stompSessionB.subscribe("/topic/general/game-start", new MyStompSessionHandler());
 
-        stompSessionA.subscribe("/topic/player/hand-update", this);
-        stompSessionB.subscribe("/topic/player/hand-update", this);
+        stompSessionA.subscribe("/topic/player/hand-update", new MyStompSessionHandler());
+        stompSessionB.subscribe("/topic/player/hand-update", new MyStompSessionHandler());
 
         assertThat(inboundService.startGame()).isTrue();
     }
 
     @AfterEach
     void tearDown() throws InterruptedException {
-        LOG.info("Printing blocking queue");
-        while(!blockingQueue.isEmpty()) {
-            LOG.info("Received broadcast " + blockingQueue.poll(2, SECONDS));
-        }
     }
 
     @Test
@@ -105,12 +94,17 @@ class GameWsControllerTest implements StompFrameHandler {
         int dummyCardId = 0;
         String payload = "{\"name\":\"A\",\"cardId\":32}";
         stompSessionA.send("/app/general/player-draw-card", new CardUpdateInbound("A", dummyCardId));
-        LOG.info("Received broadcast " + blockingQueue.poll(1, SECONDS));
     }
 
     @Test
     void handlePlayerDiscardCard() {
     }
+
+
+}
+
+class MyStompSessionHandler implements StompFrameHandler {
+    private final Logger LOG = LoggerFactory.getLogger(MyStompSessionHandler.class);
 
     @Override
     public Type getPayloadType(StompHeaders headers) {
@@ -124,15 +118,29 @@ class GameWsControllerTest implements StompFrameHandler {
                 return Map.class;
             }
         } catch (NullPointerException e) {
-            LOG.info("Destination not provided");
+            LOG.error("Destination not provided");
         }
-        return null;
+        return String.class;
     }
 
     @Override
     public void handleFrame(StompHeaders headers, Object payload) {
-//        LOG.info("Received broadcast from server : " + payload);
-        blockingQueue.add(payload);
+//        LOG.info("Received broadcast from server : " + (String) payload);
     }
 
+}
+class CustomStompSessionHandler extends StompSessionHandlerAdapter {
+
+    private static final Logger logger = LoggerFactory.getLogger(CustomStompSessionHandler .class);
+
+    @Override
+    public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
+        logger.info("New session established : " + session.getSessionId());
+    }
+
+    @Override
+    public void handleException(StompSession session, StompCommand command, StompHeaders headers,
+                                byte[] payload, Throwable exception) {
+        logger.error("Got an exception", exception);
+    }
 }

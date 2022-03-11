@@ -1,6 +1,8 @@
 package com.team9.questgame.gamemanager.service;
 
+import com.team9.questgame.Data.CardData;
 import com.team9.questgame.Data.PlayerData;
+import com.team9.questgame.Entities.Players;
 import com.team9.questgame.gamemanager.record.rest.EmptyJsonReponse;
 import com.team9.questgame.gamemanager.record.socket.HandUpdateOutbound;
 import lombok.AllArgsConstructor;
@@ -59,9 +61,9 @@ public class OutboundService {
         this.sendToAllPlayers("/topic/player/rank-up", playerData);
     }
 
-    private void sendToPlayer(String topic, String name, Object payload) {
-        LOG.info(String.format("Broadcasting to one player: topic=%s, name=%s, payload=%s", topic, name, payload));
-        messenger.convertAndSendToUser(topic, sessionService.getPlayerSessionId(name), payload);
+    private void sendToPlayer(String topic, Players player, Object payload) {
+        LOG.info(String.format("Broadcasting to one player: topic=%s, name=%s, payload=%s", topic, player.getName(), payload));
+        messenger.convertAndSendToUser(topic, sessionService.getPlayerSessionId(player.getName()), payload);
     }
 
     private void sendToAllPlayers(String topic, Object payload) {
