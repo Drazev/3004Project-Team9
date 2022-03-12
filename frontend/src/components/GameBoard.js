@@ -3,7 +3,7 @@ import QuestDisplay from "./QuestDisplay";
 import CardImages from "../Images/index";
 import Card from "./Card";
 import {drawCard} from "../ClientSocket";
-import {useName, usePlayerHands, usePlayers} from "../Stores/GeneralStore";
+import {useName, usePlayerHands, usePlayers } from "../Stores/GeneralStore";
 import { useUpdatePlayArea } from "../Stores/PlayAreaStore";
 import {Button} from "react-bootstrap";
 const x = useUpdatePlayArea;
@@ -17,6 +17,12 @@ function GameBoard(props){
     //const turn = useTurn();
     //console.log("Hands: " + JSON.stringify(hands) + "\n");
     const turn = "PlayerName";
+
+    hands.forEach((hand) => {
+        for(let i = 0; i < allPlayers.length; i++){
+            if(hand.playerId === allPlayers[i].playerId) { hand.name = allPlayers[i].name; }
+        }
+    });
 
 
     // hands = [{name:"Test1",isTurn:true,hand:[{cardId:1,cardImage:CardImages.Ally_KingArthur}],cardsInPlay:[],rank:CardImages.Rank_Squire,shields:54},

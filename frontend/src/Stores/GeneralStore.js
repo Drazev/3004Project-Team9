@@ -19,6 +19,28 @@ const useStore = create((set) => ({
   updateHand: (hand) => set((currentState) => {
     hands: [...currentState.hands, hand]
   }),*/
+  updatePlayer: (player) =>
+  set((current) => ({
+    players: (() => {
+      let playerExist = false;
+      for (let i in current.players) {
+        if (current.players[i].playerId === player.playerId) {
+          playerExist = true;
+        }
+      }
+      if (playerExist) {
+        return current.players.map((currPlayer) => {
+          if (currPlayer.playerId === player.playerId) {
+            return player;
+          } else {
+            return currPlayer;
+          }
+        });
+      } else {
+        return [...current.players, player];
+      }
+    })
+  })),
   updateHand: (hand) =>
     set((current) => ({
       hands: (() => {
@@ -77,6 +99,8 @@ export const useSetName = () => useStore((state) => state.setName);
 export const useAddNewMessage = () => useStore((state) => state.addNewMessage);
 
 export const useUpdateHand = () => useStore((state) => state.updateHand);
+
+export const useUpdatePlayer = () => useStore((state) => state.updatePlayer);
 
 export const useSetPlayers = () => useStore((state) => state.setPlayers);
 

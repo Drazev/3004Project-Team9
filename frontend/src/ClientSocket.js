@@ -10,7 +10,7 @@ const SOCK_SERVER = "http://localhost:8080/quest-game-websocket"
 const START_URL = "http://localhost:8080/api/start"
 
 
-export async function connect(setConnected,setGameStarted, addNewMessage, setPlayers, name, updateHand, updatePlayArea) {
+export async function connect(setConnected,setGameStarted, addNewMessage, setPlayers, name, updateHand, updatePlayArea, updatePlayer) {
   console.log("Attempt connection");
 
   // Register player name
@@ -72,6 +72,10 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
     client.subscribe("topic/player/hand-oversize" , (message) => {
       let body = JSON.parse(message.body);
       console.log("Player Hand Oversize: \n" + body + " \n\n ");
+    });
+    client.subscribe("topic/player/player-update", (message) => {
+      let body = JSON.parse(message.body);
+      updatePlayer(body);
     });
   };
 /*
