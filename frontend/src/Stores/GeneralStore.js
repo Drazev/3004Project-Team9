@@ -15,22 +15,18 @@ const useStore = create((set) => ({
   setName: (name) => set(() => ({ name: name })),
   setGameStarted: (gameStarted) => set(() => ({ gameStarted: gameStarted })),
   setPlayers: (players) => set(() => ({ players: players })),
-  /*
-  updateHand: (hand) => set((currentState) => {
-    hands: [...currentState.hands, hand]
-  }),*/
   updatePlayer: (player) =>
   set((current) => ({
     players: (() => {
       let playerExist = false;
-      for (let i in current.players) {
-        if (current.players[i].playerId === player.playerId) {
+      for (let i = 0; i < current.players.length; i++) {
+        if (current.players[i].playerName === player.playerName) {
           playerExist = true;
         }
       }
       if (playerExist) {
         return current.players.map((currPlayer) => {
-          if (currPlayer.playerId === player.playerId) {
+          if (currPlayer.playerName === player.playerName) {
             return player;
           } else {
             return currPlayer;
@@ -44,14 +40,14 @@ const useStore = create((set) => ({
   updateHand: (hand) =>
     set((current) => ({
       hands: (() => {
-        console.log("hand = " + JSON.stringify(hand));
+        //console.log("hand = " + JSON.stringify(hand));
         let playerExist = false;
         for (let i in current.hands) {
           if (current.hands[i].playerName === hand.playerName) {
             playerExist = true;
           }
         }
-        console.log("playerExist = " + playerExist);
+        //console.log("playerExist = " + playerExist);
         if (playerExist) {
           return current.hands.map((currHand) => {
             if (currHand.playerName === hand.playerName) {

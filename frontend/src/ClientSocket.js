@@ -9,7 +9,6 @@ const REGISTRATION_URL = "http://localhost:8080/api/register"
 const SOCK_SERVER = "http://localhost:8080/quest-game-websocket"
 const START_URL = "http://localhost:8080/api/start"
 
-
 export async function connect(setConnected,setGameStarted, addNewMessage, setPlayers, name, updateHand, updatePlayArea, updatePlayer) {
   console.log("Attempt connection");
 
@@ -77,8 +76,7 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
       let body = JSON.parse(message.body);
       updatePlayer(body);
     });
-  };
-/*
+  };/*
   client.subscribe("/topic/play-areas/play-area-changed", (data) => {
     let body = JSON.parse(data.body);
     console.log("Play Area Update recieved for playerId: "+body.playerId);

@@ -14,6 +14,8 @@ function GameBoard(props){
     const allPlayers = usePlayers();
     let hands = usePlayerHands();
     let active = usePlayerPlayAreas();
+    console.log(JSON.stringify(allPlayers));
+    console.log(JSON.stringify(name));
     //const turn = useTurn();
 
     const turn = "PlayerName";
