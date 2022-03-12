@@ -108,6 +108,19 @@ public class Players {
         return false;
     }
 
+    public boolean looseShields(int shieldsLost) {
+        if(shields<1) {
+            return false;
+        }
+        else if(shields<shieldsLost) {
+            shields = 0;
+        }
+        else {
+            shields-=shieldsLost;
+        }
+        return true;
+    }
+
     public void actionPlayCard(long cardId) throws BadRequestException,IllegalCardStateException {
         hand.playCard(cardId);
     }

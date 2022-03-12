@@ -11,6 +11,7 @@ import com.team9.questgame.exception.CardAreaException;
 import com.team9.questgame.exception.IllegalGamePhaseStateException;
 import com.team9.questgame.gamemanager.service.InboundService;
 import com.team9.questgame.gamemanager.service.OutboundService;
+import org.slf4j.Logger;
 
 import java.util.*;
 
@@ -29,6 +30,8 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
     private GamePhaseControllers phaseController;
     @JsonIgnore
     private final OutboundService outboundService;
+    @JsonIgnore
+    private Logger LOG;
     private PlayAreas<AdventureCards> targetPlayArea;
     private int bids;
     private int battlePoints;
@@ -101,49 +104,38 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         return data;
     }
 
-    void discardAllCards() {
-        for(AdventureCards card : allCards.values()) {
-            card.discardCard();
-        }
-        cardTypeMap.clear();
-        allCards.clear();
-        update();
+    public boolean discardAllCards() {
+        HashSet<AdventureCards> cardList = new HashSet<>(allCards.values());
+        return discardCards(cardList);
+
     }
 
     public HashMap<CardTypes, HashSet<AdventureCards>> getCardTypeMap() {
         return cardTypeMap;
     }
 
-    public void discardAllFoes() {
-        HashSet<AdventureCards> cardList = cardTypeMap.get(CardTypes.FOE);
-        discardCards(cardList);
-    }
 
-    public void discardAllAllies() {
+    public boolean discardAllAllies() {
         HashSet<AdventureCards> cardList = cardTypeMap.get(CardTypes.ALLY);
-        discardCards(cardList);
+        return discardCards(cardList);
+
     }
 
-    public void discardAllWeapons() {
+    public boolean discardAllWeapons() {
         HashSet<AdventureCards> cardList = cardTypeMap.get(CardTypes.WEAPON);
-        discardCards(cardList);
+        return discardCards(cardList);
     }
 
-    public void discardAllTests() {
-        HashSet<AdventureCards> cardList = cardTypeMap.get(CardTypes.TEST);
-        discardCards(cardList);
-    }
-
-    public void discardAllAmour() {
+    public boolean discardAllAmour() {
         HashSet<AdventureCards> cardList = cardTypeMap.get(CardTypes.AMOUR);
-        discardCards(cardList);
+        return discardCards(cardList);
     }
 
     @Override
     public void discardCard(AdventureCards card) {
-        card.discardCard(); //This will trigger all affected cards boost status to reset
-        removeCard(card);
-        update();
+        HashSet<AdventureCards> cardList = new HashSet<>();
+        cardList.add(card);
+        discardCards(cardList);
     }
 
     /**
@@ -266,7 +258,6 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         targetPlayArea=null;
         questCard=null;
         discardAllAmour();
-        discardAllFoes();
         discardAllWeapons();
         update();
     }
@@ -354,15 +345,19 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
      *
      * @sideEffects Card discard function will trigger all observing boosted cards to clear boost status.
      * @param cardList The list of cards to be discarded
+     * @return True if at least one card was discarded
      */
-    private void discardCards(HashSet<AdventureCards> cardList)
+    private boolean discardCards(HashSet<AdventureCards> cardList)
     {
         HashSet<AdventureCards> list = new HashSet<>(cardList);
+        boolean rc = !list.isEmpty();
         for(AdventureCards card : list) {
-            discardCard(card);
+            card.discardCard();
+            removeCard(card);
         }
         cardList.clear();
         update();
+        return rc;
     }
 
     private void addToPlayArea(AdventureCards card) throws CardAreaException {
