@@ -6,7 +6,7 @@ import com.team9.questgame.Data.CardData;
 import com.team9.questgame.Data.PlayAreaData;
 import com.team9.questgame.Data.PlayAreaDataSources;
 import com.team9.questgame.Entities.Players;
-import com.team9.questgame.GamePhases.GamePhaseControllers;
+import com.team9.questgame.game_phases.GamePhaseControllers;
 import com.team9.questgame.exception.CardAreaException;
 import com.team9.questgame.exception.IllegalGamePhaseStateException;
 import com.team9.questgame.gamemanager.service.InboundService;
