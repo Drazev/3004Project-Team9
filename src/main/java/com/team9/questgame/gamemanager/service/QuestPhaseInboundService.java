@@ -17,6 +17,9 @@ import org.springframework.stereotype.Service;
 public class QuestPhaseInboundService {
     private Logger LOG;
 
+    @Autowired
+    private SessionService sessionService;
+
 
     @Autowired
     private QuestPhaseOutboundService outboundService;
@@ -29,14 +32,15 @@ public class QuestPhaseInboundService {
     }
 
 
-    public synchronized boolean checkSponsorResult(Players player, boolean found){
+    public synchronized void checkSponsorResult(String name, boolean found){
 //        if(found){
 //            //TODO:
 //        }
 //        questController.noSponsor();
 //        return found;
+        Players player = sessionService.getPlayerMap().get(name);
         questController.checkSponsorResult(player, found);
-        return found;
+        //return found;
     }
 
 }

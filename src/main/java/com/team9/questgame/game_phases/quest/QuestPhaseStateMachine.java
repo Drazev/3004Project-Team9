@@ -24,6 +24,8 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
     @Setter
     private boolean sponsorFound;
 
+
+
     public QuestPhaseStateMachine() {
         previousState = null;
         currentState = QuestPhaseStatesE.NOT_STARTED;
@@ -93,7 +95,11 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
     }
 
     public QuestPhaseStatesE questSetupState(){
-
+        if(controller.getNumStages() >= controller.getQuestCard().getStages()){
+            return QuestPhaseStatesE.STAGE_ONE;
+        }
+        controller.setupStage();
+        return QuestPhaseStatesE.QUEST_SETUP;
     }
 
     public QuestPhaseStatesE stageOneState() {

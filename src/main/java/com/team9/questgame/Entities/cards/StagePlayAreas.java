@@ -18,9 +18,9 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
 
     static private int nextid = 0;
 
-    public StagePlayAreas(QuestCards questCard){
+    public StagePlayAreas(){
         this.id = "q"+nextid++;
-        this.questCard = questCard;
+        //this.questCard = questCard;
         this.allCards = new HashMap<>();
         this.battlePoints = 0;
         this.bids = 0;

@@ -43,6 +43,5 @@ public class QuestPhaseOutboundService {
     public void broadcastSponsorSearch(PlayerData playerData){
         LOG.info(String.format("Broadcast sponsor needed"));
         this.sendToAllPlayers("/topic/quest/sponsor-search", playerData);
-        //TODO: send player name and id for frontend to decide who to ask. you;ll be sending this broadcast up to the number of players, keep track of this in controller
     }
 }

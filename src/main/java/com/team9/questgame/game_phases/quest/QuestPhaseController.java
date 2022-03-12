@@ -8,8 +8,6 @@ import com.team9.questgame.game_phases.GamePhases;
 import com.team9.questgame.game_phases.GeneralGameController;
 import com.team9.questgame.exception.IllegalQuestPhaseStateException;
 import com.team9.questgame.Entities.cards.CardTypes;
-import com.team9.questgame.game_phases.GamePhases;
-import com.team9.questgame.game_phases.GeneralGameController;
 import com.team9.questgame.game_phases.utils.PlayerTurnService;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import com.team9.questgame.gamemanager.service.QuestPhaseOutboundService;
@@ -48,16 +46,20 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
     private Players sponsor;
     @Getter
     private int sponsorAttempts;
+    @Getter
+    private int numStages;
 
-    private StagePlayAreas stage;
+    private ArrayList<StagePlayAreas> stages;
 
 
     public QuestPhaseController() {
         LOG = LoggerFactory.getLogger(QuestPhaseController.class);
         this.players = new ArrayList<>();
+        this.stages = new ArrayList<>();
         playerTurnService = new PlayerTurnService(players);
         sponsor = null;
         sponsorAttempts = 0;
+        numStages = 0;
         this.outboundService = ApplicationContextHolder.getContext().getBean(QuestPhaseOutboundService.class);
 
     }
@@ -68,10 +70,10 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
    // @Override
     public boolean receiveCard(QuestCards card) {
         if(stateMachine.getCurrentState() != QuestPhaseStatesE.NOT_STARTED){
-            throw new IllegalQuestPhaseStateException("Quest can only receive storycard if no quest is currently in progress");
+            throw new IllegalQuestPhaseStateException("Quest can only receive questcard if no quest is currently in progress");
         }
         if (card.getSubType() == CardTypes.QUEST) {
-            questCard = card; // TODO: Remove type casting
+            questCard = card;
             return true;
         }
         return false;
@@ -151,6 +153,13 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
 
     public void noSponsor(){
         stateMachine.setSponsorFound(false);
+    }
+
+    public void setupStage(){
+        StagePlayAreas stage = new StagePlayAreas();
+        //broadcast
+        numStages++;
+        stateMachine.update();
     }
 
 
