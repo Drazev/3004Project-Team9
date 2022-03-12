@@ -2,6 +2,7 @@ package com.team9.questgame.Entities.cards;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.team9.questgame.ApplicationContextHolder;
+import com.team9.questgame.exception.CardAreaException;
 import com.team9.questgame.gamemanager.service.OutboundService;
 
 import java.util.HashMap;
@@ -28,5 +29,21 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
     }
 
     @Override
+    public boolean receiveCard(AdventureCards card){
+        if(card==null) {
+            throw new CardAreaException(CardAreaException.CardAreaExceptionReasonCodes.NULL_CARD);
+        }
+    }
+
+    @Override
     public int getBattlePoints(){return battlePoints;}
+
+    @Override
+    public int getBids(){return bids;}
+
+    @Override
+    public void onGamePhaseEnded(){
+
+    }
 }
+

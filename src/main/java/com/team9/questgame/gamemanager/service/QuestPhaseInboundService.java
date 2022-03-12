@@ -43,4 +43,9 @@ public class QuestPhaseInboundService {
         //return found;
     }
 
+    public synchronized void checkJoinResult(String name, boolean joined){
+        Players player = sessionService.getPlayerMap().get(name);
+        questController.checkJoinResult(player, joined);
+    }
+
 }

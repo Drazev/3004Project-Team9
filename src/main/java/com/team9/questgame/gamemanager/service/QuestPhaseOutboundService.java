@@ -44,4 +44,9 @@ public class QuestPhaseOutboundService {
         LOG.info(String.format("Broadcast sponsor needed"));
         this.sendToAllPlayers("/topic/quest/sponsor-search", playerData);
     }
+
+    public void broadcastJoinRequest(PlayerData playerData){
+        LOG.info(String.format("Broadcast join request"));
+        this.sendToAllPlayers("/topic/quest/join-request", playerData);
+    }
 }

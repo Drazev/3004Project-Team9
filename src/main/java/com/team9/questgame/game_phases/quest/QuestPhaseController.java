@@ -43,9 +43,13 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
     @Getter
     private PlayerTurnService playerTurnService;
     @Getter
+    private PlayerTurnService questTurnService;
+    @Getter
     private Players sponsor;
     @Getter
     private int sponsorAttempts;
+    @Getter
+    private int joinAttempts;
     @Getter
     private int numStages;
 
@@ -55,6 +59,7 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
     public QuestPhaseController() {
         LOG = LoggerFactory.getLogger(QuestPhaseController.class);
         this.players = new ArrayList<>();
+        this.questingPlayers = new ArrayList<>();
         this.stages = new ArrayList<>();
         playerTurnService = new PlayerTurnService(players);
         sponsor = null;
@@ -67,7 +72,7 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
 
 
 
-   // @Override
+    //@Override
     public boolean receiveCard(QuestCards card) {
         if(stateMachine.getCurrentState() != QuestPhaseStatesE.NOT_STARTED){
             throw new IllegalQuestPhaseStateException("Quest can only receive questcard if no quest is currently in progress");
@@ -147,6 +152,26 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
             this.sponsor = player;
         }
         
+        stateMachine.update();
+    }
+    public void checkJoins(){
+        if(joinAttempts == 0){
+            playerTurnService.setPlayerTurn(sponsor);
+            playerTurnService.nextPlayer();
+        }
+        Players player = playerTurnService.getPlayerTurn();
+        outboundService.broadcastJoinRequest(player.generatePlayerData());
+        playerTurnService.nextPlayer();
+        joinAttempts++;
+
+    }
+    public void checkJoinResult(Players player, boolean joined){
+        if(joined){
+            questingPlayers.add(player);
+            if(joinAttempts == playerTurnService.getPlayers().size()-1){
+                questTurnService = new PlayerTurnService(questingPlayers);
+            }
+        }
         stateMachine.update();
     }
 

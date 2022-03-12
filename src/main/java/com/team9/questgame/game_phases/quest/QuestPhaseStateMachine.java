@@ -46,6 +46,8 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
             case QUEST_SETUP:
                 this.currentState = questSetupState();
                 break;
+            case QUEST_JOIN:
+                this.currentState = questJoinState();
             case STAGE_ONE:
                 this.currentState = stageOneState();
                 break;
@@ -96,10 +98,17 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
 
     public QuestPhaseStatesE questSetupState(){
         if(controller.getNumStages() >= controller.getQuestCard().getStages()){
-            return QuestPhaseStatesE.STAGE_ONE;
+            return QuestPhaseStatesE.QUEST_JOIN;
         }
         controller.setupStage();
         return QuestPhaseStatesE.QUEST_SETUP;
+    }
+
+    public QuestPhaseStatesE questJoinState(){
+        if(controller.getJoinAttempts() >= controller.getPlayerTurnService().getPlayers().size()-1){
+            return QuestPhaseStatesE.STAGE_ONE;
+        }
+        controller.checkJoins();
     }
 
     public QuestPhaseStatesE stageOneState() {
