@@ -72,11 +72,11 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
     client.subscribe("topic/player/hand-oversize" , (message) => {
       let body = JSON.parse(message.body);
       console.log("Player Hand Oversize: \n" + body + " \n\n ");
-    });/*
+    });
     client.subscribe("topic/player/player-update", (message) => {
       let body = JSON.parse(message.body);
       updatePlayer(body);
-    });*/
+    });
   };
 /*
   client.subscribe("/topic/play-areas/play-area-changed", (data) => {
@@ -128,6 +128,18 @@ export function discardCard(name, cardId) {
     body: JSON.stringify({
       name: name,
       cardId: cardId,
+    }),
+  });
+}
+
+export function playCard(name, cardId, card) {
+  console.log("Play Card: \nName: " + name + "\nCardID: " + cardId + "\nCard: " + JSON.stringify(card));
+  client.publish({
+    destination: "/app/general/player-play-card",
+    body: JSON.stringify({
+      name: name,
+      cardId: cardId,
+      card: card,
     }),
   });
 }
