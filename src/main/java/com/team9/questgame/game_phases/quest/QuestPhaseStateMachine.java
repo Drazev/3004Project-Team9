@@ -21,10 +21,14 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
     @Setter
     private boolean isPhaseStartRequested;
 
+    @Setter
+    private boolean sponsorFound;
+
     public QuestPhaseStateMachine() {
         previousState = null;
         currentState = QuestPhaseStatesE.NOT_STARTED;
         isPhaseStartRequested = false;
+        sponsorFound = false;
     }
 
     @Override
@@ -74,8 +78,11 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
     private QuestPhaseStatesE questSponsorState() {
         if(controller.getSponsor() != null){
             return QuestPhaseStatesE.QUEST_SETUP;
+        }//TODO: stopped here, questPhaseInboundService provides result of sponsor search, use that here
+        else if(controller.getSponsorAttempts() >= controller.getPlayerTurnService().getPlayers().size()){
+            return QuestPhaseStatesE.ENDED;
         }
-
+        controller.checkSponsor();
         return QuestPhaseStatesE.QUEST_SPONSOR;
     }
 

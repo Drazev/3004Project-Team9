@@ -1,5 +1,6 @@
 package com.team9.questgame.game_phases.quest;
 
+import com.team9.questgame.ApplicationContextHolder;
 import com.team9.questgame.Data.PlayerRewardData;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.Entities.cards.*;
@@ -7,10 +8,11 @@ import com.team9.questgame.game_phases.GamePhases;
 import com.team9.questgame.game_phases.GeneralGameController;
 import com.team9.questgame.exception.IllegalQuestPhaseStateException;
 import com.team9.questgame.Entities.cards.CardTypes;
-import com.team9.questgame.Entities.cards.StoryCards;
 import com.team9.questgame.game_phases.GamePhases;
 import com.team9.questgame.game_phases.GeneralGameController;
 import com.team9.questgame.game_phases.utils.PlayerTurnService;
+import com.team9.questgame.gamemanager.service.OutboundService;
+import com.team9.questgame.gamemanager.service.QuestPhaseOutboundService;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,12 +36,18 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
     @Lazy
     private GeneralGameController generalController;
 
+    @Autowired
+    private QuestPhaseOutboundService outboundService;
     @Getter
     private ArrayList<Players> players;
+    @Getter
+    private ArrayList<Players> questingPlayers;
     @Getter
     private PlayerTurnService playerTurnService;
     @Getter
     private Players sponsor;
+    @Getter
+    private int sponsorAttempts;
 
     private StagePlayAreas stage;
 
@@ -49,6 +57,9 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
         this.players = new ArrayList<>();
         playerTurnService = new PlayerTurnService(players);
         sponsor = null;
+        sponsorAttempts = 0;
+        this.outboundService = ApplicationContextHolder.getContext().getBean(QuestPhaseOutboundService.class);
+
     }
 
 
@@ -112,7 +123,36 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
 
             LOG.info("Quest phase started");
             this.playerTurnService = playerTurnService;
+            stateMachine.update();
         }
     }
+
+
+
+    public void checkSponsor(){
+//        for(Players player : players){
+//            outboundService.broadcastSponsorSearch(player.generatePlayerData());
+//        }
+          //outboundService.broadcastSponsorSearch();
+        Players player = playerTurnService.getPlayerTurn();
+        outboundService.broadcastSponsorSearch(player.generatePlayerData());
+        playerTurnService.nextPlayer();
+        sponsorAttempts++;
+    }
+
+    public void checkSponsorResult(Players player, boolean found){
+        if(found){
+            this.sponsor = player;
+        }
+        
+        stateMachine.update();
+    }
+
+
+    public void noSponsor(){
+        stateMachine.setSponsorFound(false);
+    }
+
+
 
 }
