@@ -96,7 +96,7 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
     private GeneralStateE setupState() {
         // Start the game
         GeneralStateE nextState;
-        if (controller.getPlayers().size() > GeneralGameController.MIN_PLAYERS && isAllPlayerReady() && isGameStartRequested) {
+        if (controller.getPlayers().size() >= GeneralGameController.MIN_PLAYERS && isAllPlayerReady() && isGameStartRequested) {
             nextState = GeneralStateE.DRAW_STORY_CARD;
         } else {
             nextState = GeneralStateE.SETUP;

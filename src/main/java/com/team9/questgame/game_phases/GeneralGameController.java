@@ -168,12 +168,15 @@ public class GeneralGameController implements CardArea<StoryCards> {
         sDeck.drawCard(this);
 
         // Temporarily here to only start Quest Phase
-        if (this.storyCard.getSubType() == CardTypes.QUEST) {
+        // TODO: Remove this when all phases are implemented
+        while (this.storyCard.getSubType() != CardTypes.QUEST) {
             this.discardCard(this.storyCard);
+            sDeck.drawCard(this);
         }
 
         playCard(this.storyCard);
         playerTurnService.nextPlayer();
+
 
         stateMachine.update();
     }
