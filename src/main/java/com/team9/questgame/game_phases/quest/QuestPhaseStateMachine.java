@@ -38,12 +38,15 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
     }
 
     private QuestPhaseStatesE notStartedState() {
-        if (isPhaseStartRequested) {
-            return QuestPhaseStatesE.QUEST_SPONSOR;
+        QuestPhaseStatesE nextState;
+        if (isPhaseStartRequested && isPhaseStartRequested) {
+            nextState = QuestPhaseStatesE.QUEST_SPONSOR;
         } else {
-            return QuestPhaseStatesE.NOT_STARTED;
+            nextState = QuestPhaseStatesE.NOT_STARTED;
         }
 
+        isPhaseStartRequested = false;
+        return nextState;
     }
 
     private QuestPhaseStatesE questSponsorState() {

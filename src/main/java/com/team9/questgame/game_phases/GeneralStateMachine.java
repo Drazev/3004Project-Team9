@@ -19,6 +19,9 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
     private GeneralGameController controller;
 
     @Getter
+    private GeneralStateE currentState;
+
+    @Getter
     private GeneralStateE previousState;
 
     @Setter
@@ -29,7 +32,8 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
     private boolean isGameStartRequested;
 
     @Getter
-    private GeneralStateE currentState;
+    @Setter
+    private boolean isGamePhaseRequested;
 
     public GeneralStateMachine() {
         previousState = null;
@@ -43,6 +47,10 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
 
     public boolean isGameStarted() {
         return currentState != GeneralStateE.SETUP && currentState != GeneralStateE.NOT_STARTED;
+    }
+
+    public boolean isInPhases() {
+        return currentState == GeneralStateE.QUEST_PHASE || currentState == GeneralStateE.TOURNAMENT_PHASE || currentState == GeneralStateE.EVENT_PHASE;
     }
 
     /**
@@ -73,7 +81,7 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
                 currentState = endedState();
                 break;
             default:
-                throw new IllegalStateException("Unknow state: " + currentState);
+                throw new IllegalStateException("Unknown state: " + currentState);
         }
     }
 
@@ -86,53 +94,75 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
     }
 
     private GeneralStateE setupState() {
-        // Start the game when there are enough players and all of them are ready
-        if (controller.getPlayers().size() > GeneralGameController.MIN_PLAYERS && isAllPlayerReady() && isGameStartRequested)
-            return GeneralStateE.DRAW_STORY_CARD;
-        else isGameStartRequested = false;
-        return GeneralStateE.SETUP;
+        // Start the game
+        GeneralStateE nextState;
+        if (controller.getPlayers().size() >= GeneralGameController.MIN_PLAYERS && isAllPlayerReady() && isGameStartRequested) {
+            nextState = GeneralStateE.DRAW_STORY_CARD;
+        } else {
+            nextState = GeneralStateE.SETUP;
+        }
+        isGameStartRequested = false;
+        return nextState;
     }
 
     private GeneralStateE drawStoryCardState() {
-        if (controller.getStoryCard() != null) {
+        GeneralStateE nextState;
+        if (controller.getStoryCard() != null && isGamePhaseRequested) {
             switch (controller.getStoryCard().getSubType()) {
                 case QUEST:
-                    return GeneralStateE.QUEST_PHASE;
+                    nextState = GeneralStateE.QUEST_PHASE;
+                    break;
                 case EVENT:
-                    return GeneralStateE.EVENT_PHASE;
+                    nextState = GeneralStateE.EVENT_PHASE;
+                    break;
                 case TOURNAMENT:
-                    return GeneralStateE.TOURNAMENT_PHASE;
+                    nextState = GeneralStateE.TOURNAMENT_PHASE;
+                    break;
                 default:
                     throw new RuntimeException("Unexpected Story Card type");
             }
+        } else {
+            nextState = GeneralStateE.DRAW_STORY_CARD;
         }
-        return GeneralStateE.DRAW_STORY_CARD;
+
+        isGamePhaseRequested = false;
+        return nextState;
     }
 
     private GeneralStateE questPhaseState() {
+        GeneralStateE nextState;
         if (isWinnerFound()) {
-            return GeneralStateE.ENDED;
+            nextState = GeneralStateE.ENDED;
         } else if (this.isPhaseEnded) {
-            return GeneralStateE.DRAW_STORY_CARD;
+            nextState = GeneralStateE.DRAW_STORY_CARD;
         } else {
-            return GeneralStateE.QUEST_PHASE;
+            nextState = GeneralStateE.QUEST_PHASE;
         }
+        return nextState;
     }
 
     private GeneralStateE eventPhaseState() {
+        GeneralStateE nextState;
         if (isWinnerFound()) {
-            return GeneralStateE.ENDED;
+            nextState = GeneralStateE.ENDED;
         } else if (this.isPhaseEnded) {
-            return GeneralStateE.DRAW_STORY_CARD;
+            nextState = GeneralStateE.DRAW_STORY_CARD;
         } else {
-            return GeneralStateE.EVENT_PHASE;
+            nextState = GeneralStateE.EVENT_PHASE;
         }
+        return nextState;
     }
 
     private GeneralStateE tournamentPhaseState() {
-        if (isWinnerFound()) return GeneralStateE.ENDED;
-        else if (this.isPhaseEnded) return GeneralStateE.DRAW_STORY_CARD;
-        else return GeneralStateE.TOURNAMENT_PHASE;
+        GeneralStateE nextState;
+        if (isWinnerFound()) {
+            nextState = GeneralStateE.ENDED;
+        } else if (this.isPhaseEnded) {
+            nextState = GeneralStateE.DRAW_STORY_CARD;
+        } else {
+            nextState = GeneralStateE.TOURNAMENT_PHASE;
+        }
+        return nextState;
     }
 
     private GeneralStateE endedState() {
