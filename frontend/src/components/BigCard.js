@@ -1,11 +1,7 @@
-import CardImages from "../Images/index";
 import React,{useState} from "react";
-import {Button} from "react-bootstrap";
-import {discardCard} from "../ClientSocket";
 
 function BigCard(props){
     const size = {width: "100px", height: "135px"};
-    //Actual Card component
     return (
         <div 
             id="CardSection"

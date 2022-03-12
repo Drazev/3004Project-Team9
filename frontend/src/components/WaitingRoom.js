@@ -7,7 +7,7 @@ import {
         useLoadPlayers,
         usePlayers, 
         useSetPlayers
-       } from "../Store";
+       } from "../Stores/GeneralStore";
 
 const WaitingRoom = () => {
     const name = useName();

@@ -1,4 +1,3 @@
-import CardImages from "../Images/index";
 import React,{useState} from "react";
 import {Button} from "react-bootstrap";
 import {discardCard} from "../ClientSocket";

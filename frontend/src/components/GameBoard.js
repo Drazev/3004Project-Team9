@@ -3,8 +3,10 @@ import QuestDisplay from "./QuestDisplay";
 import CardImages from "../Images/index";
 import Card from "./Card";
 import {drawCard} from "../ClientSocket";
-import {useName, usePlayerHands, usePlayers} from "../Store";
+import {useName, usePlayerHands, usePlayers} from "../Stores/GeneralStore";
+import { useUpdatePlayArea } from "../Stores/PlayAreaStore";
 import {Button} from "react-bootstrap";
+const x = useUpdatePlayArea;
 
 function GameBoard(props){
     let init = 80;
@@ -106,7 +108,39 @@ function GameBoard(props){
             </div>
             <QuestDisplay></QuestDisplay>
             <Button onClick={() => drawCard(name,0)} >Draw</Button>
-            <Button>End Turn</Button>
+            <Button onClick={() => x({ playerId: -1, isHandOversize: false, hand: [
+                {
+                    "cardID" : 418,
+                    "cardCode" : "THIEVES",
+                    "cardName" : "Thieves",
+                    "subType" : "FOE",
+                    "imgSrc" : "./Assets/Adventure Deck (346x470)/Foe - Thieves.png",
+                    "bids" : 0,
+                    "battlePoints" : 5,
+                    "effectDescription" : null,
+                    "hasActiveEffect" : false
+                  }, {
+                    "cardID" : 419,
+                    "cardCode" : "THIEVES",
+                    "cardName" : "Thieves",
+                    "subType" : "FOE",
+                    "imgSrc" : "./Assets/Adventure Deck (346x470)/Foe - Thieves.png",
+                    "bids" : 0,
+                    "battlePoints" : 5,
+                    "effectDescription" : null,
+                    "hasActiveEffect" : false
+                  }, {
+                    "cardID" : 406,
+                    "cardCode" : "EVIL_KNIGHT",
+                    "cardName" : "Evil Knight",
+                    "subType" : "FOE",
+                    "imgSrc" : "./Assets/Adventure Deck (346x470)/Foe - Evil Knight.png",
+                    "bids" : 0,
+                    "battlePoints" : 20,
+                    "effectDescription" : null,
+                    "hasActiveEffect" : false
+                  }
+            ] })}>End Turn</Button>
         </div>
     );
 }

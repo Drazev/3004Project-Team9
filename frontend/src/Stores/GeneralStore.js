@@ -22,14 +22,14 @@ const useStore = create((set) => ({
   updateHand: (hand) =>
     set((current) => ({
       hands: (() => {
-        console.log("hand = " + hand);
+        console.log("hand = " + JSON.stringify(hand));
         let playerExist = false;
         for (let i in current.hands) {
           if (current.hands[i].name === hand.name) {
             playerExist = true;
           }
         }
-        console.log("playerExist = " + playerExist)
+        console.log("playerExist = " + playerExist);
         if (playerExist) {
           return current.hands.map((currHand) => {
             if (currHand.name === hand.name) {
@@ -39,7 +39,7 @@ const useStore = create((set) => ({
             }
           });
         } else {
-          return [...current.hands, hand]
+          return [...current.hands, hand];
         }
       })(),
     })),

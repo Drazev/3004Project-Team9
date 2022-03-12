@@ -1,5 +1,5 @@
 import React from "react";
-import { usePlayerHands } from "../Store";
+import { usePlayerHands } from "../Stores/GeneralStore";
 import BigCard from "./BigCard";
 import Card from "./Card";
 
