@@ -72,11 +72,11 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
     client.subscribe("topic/player/hand-oversize" , (message) => {
       let body = JSON.parse(message.body);
       console.log("Player Hand Oversize: \n" + body + " \n\n ");
-    });
+    });/*
     client.subscribe("topic/player/player-update", (message) => {
       let body = JSON.parse(message.body);
       updatePlayer(body);
-    });
+    });*/
   };
 /*
   client.subscribe("/topic/play-areas/play-area-changed", (data) => {

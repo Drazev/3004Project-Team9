@@ -1,7 +1,7 @@
 import create from 'zustand';
 
 const useStore = create((set)=> ({
-    playerPlayAreas: [],
+    playerPlayAreas: [{hand: []}, {hand: []}, {hand: []}, {hand: []}], //{hand: []} is temp
     //setPlayerPlayAreas : (playerPlayAreas,index) => set(()=>{playerPlayAreas[index] : playerPlayAreas}),
     stageAreas: [],
     //setStageAreas : (stageAreas) => set(()=>{stageAreas : stageAreas}),

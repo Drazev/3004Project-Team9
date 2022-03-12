@@ -3,6 +3,7 @@ import FoeStageDisplay from "./FoeStageDisplay";
 import Card from "./Card";
 import CardImages from "../Images/index";
 import BigCard from "./BigCard";
+import "./GameBoard.css";
 
 
 /*
