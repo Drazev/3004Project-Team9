@@ -57,7 +57,8 @@ public class OutboundService {
     }
 
     public void broadcastPlayerDataChanged(Players player,PlayerData playerData) {
-        this.sendToAllPlayers("/topic/player/rank-up", playerData);
+        LOG.info(String.format("Broadcasting \"player-update\" for player: %s",player.getName()));
+        this.sendToAllPlayers("/topic/player/player-update", playerData);
     }
 
     private void sendToPlayer(String topic, Players player, Object payload) {
