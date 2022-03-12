@@ -1,7 +1,7 @@
 package com.team9.questgame.exception;
 
 import com.team9.questgame.Entities.Players;
-import com.team9.questgame.GamePhases.GamePhaseControllers;
+import com.team9.questgame.game_phases.GamePhaseControllers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

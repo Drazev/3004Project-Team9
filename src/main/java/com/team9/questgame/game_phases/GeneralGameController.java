@@ -7,7 +7,9 @@ import com.team9.questgame.exception.IllegalGameRequest;
 import com.team9.questgame.exception.IllegalGameStateException;
 import com.team9.questgame.exception.PlayerJoinException;
 import com.team9.questgame.exception.PlayerNotFoundException;
+import com.team9.questgame.game_phases.event.EventPhaseController;
 import com.team9.questgame.game_phases.quest.QuestPhaseController;
+import com.team9.questgame.game_phases.tournament.TournamentPhaseController;
 import com.team9.questgame.game_phases.utils.PlayerTurnService;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import lombok.Getter;
@@ -54,6 +56,14 @@ public class GeneralGameController implements CardArea<StoryCards> {
     @Getter
     @Autowired
     private QuestPhaseController questPhaseController;
+
+    @Getter
+    @Autowired
+    private TournamentPhaseController tournamentPhaseController;
+
+    @Getter
+    @Autowired
+    private EventPhaseController eventPhaseController;
 
     public GeneralGameController() {
         this(PlayerRanks.KNIGHT_OF_ROUND_TABLE);
@@ -142,7 +152,6 @@ public class GeneralGameController implements CardArea<StoryCards> {
         return true;
     }
 
-
     /**
      * Draw a story card from the story deck and play that card (generate the game phase)
      * @param players the player who requested
@@ -157,25 +166,36 @@ public class GeneralGameController implements CardArea<StoryCards> {
         }
 
         sDeck.drawCard(this);
+
+        // Temporarily here to only start Quest Phase
+        // TODO: Remove this when all phases are implemented
+        while (this.storyCard.getSubType() != CardTypes.QUEST) {
+            this.discardCard(this.storyCard);
+            sDeck.drawCard(this);
+        }
+
         playCard(this.storyCard);
         playerTurnService.nextPlayer();
+
 
         stateMachine.update();
     }
 
     /**
      * Discard the story card to the discard pile
+     * This should never be called, the GamePhase should be the one who discard the cards
      * @param card
      */
     @Override
     public void discardCard(StoryCards card) {
-        if (!stateMachine.isGameStarted()) {
-            throw new IllegalGameStateException("Cannot receive card before the game is started");
+        if (stateMachine.getCurrentState() != GeneralStateE.DRAW_STORY_CARD) {
+            throw new IllegalGameStateException("Cannot receive card when not ");
         }
 
         // Ignore if there's no story card
         if (card != null) {
             card.discardCard();
+            this.storyCard = null;
         }
 
         stateMachine.update();
@@ -193,17 +213,27 @@ public class GeneralGameController implements CardArea<StoryCards> {
             throw new NullPointerException("Story card is null");
         }
 
+        PlayerTurnService gamePhaseTurnService = new PlayerTurnService(players);
+        gamePhaseTurnService.setPlayerTurn(playerTurnService.getPlayerTurn());
+
         switch (card.getSubType()) {
             case QUEST:
                 questPhaseController.receiveCard(this.storyCard);
-                questPhaseController.startPhase();
+                questPhaseController.startPhase(gamePhaseTurnService);
                 break;
             case TOURNAMENT:
+                tournamentPhaseController.receiveCard(this.storyCard);
+                tournamentPhaseController.startPhase(gamePhaseTurnService);
+                break;
             case EVENT:
+                eventPhaseController.receiveCard(this.storyCard);
+                eventPhaseController.startPhase(gamePhaseTurnService);
                 break;
             default:
                 throw new RuntimeException("Unexpected card type, should be a story card");
         }
+
+        stateMachine.setGamePhaseRequested(true);
         stateMachine.update();
         return true;
     }

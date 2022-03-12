@@ -6,6 +6,10 @@ import com.team9.questgame.Entities.cards.*;
 import com.team9.questgame.game_phases.GamePhases;
 import com.team9.questgame.game_phases.GeneralGameController;
 import com.team9.questgame.exception.IllegalQuestPhaseStateException;
+import com.team9.questgame.Entities.cards.CardTypes;
+import com.team9.questgame.Entities.cards.StoryCards;
+import com.team9.questgame.game_phases.GamePhases;
+import com.team9.questgame.game_phases.GeneralGameController;
 import com.team9.questgame.game_phases.utils.PlayerTurnService;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -18,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 @Component
-public class QuestPhaseController implements GamePhases {
+public class QuestPhaseController implements GamePhases<QuestCards> {
     Logger LOG;
     @Getter
     @Autowired
@@ -47,6 +51,9 @@ public class QuestPhaseController implements GamePhases {
         sponsor = null;
     }
 
+
+
+
    // @Override
     public boolean receiveCard(QuestCards card) {
         if(stateMachine.getCurrentState() != QuestPhaseStatesE.NOT_STARTED){
@@ -60,19 +67,20 @@ public class QuestPhaseController implements GamePhases {
     }
 
     @Override
-    public void discardCard(Cards card) {
+    public void discardCard(QuestCards card) {
 
     }
 
     @Override
-    public boolean playCard(Cards card) {
+    public boolean playCard(QuestCards card) {
         return false;
     }
 
+    /**
+     * Reset the game
+     */
     @Override
     public void onGameReset() {
-
-
 
     }
 
@@ -80,18 +88,31 @@ public class QuestPhaseController implements GamePhases {
     public PlayerRewardData getRewards() {
         return null;
     }
+    /**
+     * Reset the phase
+     */
+    @Override
+    public void onPhaseReset() {
+
+    }
 
     @Override
-    public void startPhase() {
+    public void startPhase(PlayerTurnService playerTurnService) {
         if (questCard == null) {
             throw new RuntimeException("Cannot start quest phase, questCard is null");
         }
-        onGameReset();
+        onPhaseReset();
         stateMachine.setPhaseStartRequested(true);
+
         stateMachine.update();
         if (stateMachine.getCurrentState() == QuestPhaseStatesE.QUEST_SPONSOR) {
-            // broadcast that quest has started
+            // TODO: broadcast that quest has started
+            //       start sponsorQuest() /topic/quest/sponsor
+            //           { id: long, name: string }
+
             LOG.info("Quest phase started");
+            this.playerTurnService = playerTurnService;
         }
     }
+
 }

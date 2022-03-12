@@ -163,6 +163,7 @@ public class Hand implements CardArea<AdventureCards> {
     public HandData generateHandData() {
         return new HandData(
                 player.getPlayerId(),
+                player.getName(),
                 isHandOversize,
                 generateCardData()
         );
