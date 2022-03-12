@@ -12,10 +12,10 @@ function GameBoard(props){
     let init = 80;
     let jump = 240;
     const name = useName();
-    const allNames = usePlayers();
+    const allPlayers = usePlayers();
     let hands = usePlayerHands();
     //const turn = useTurn();
-    console.log("Hands: " + JSON.stringify(hands) + "\n");
+    //console.log("Hands: " + JSON.stringify(hands) + "\n");
     const turn = "PlayerName";
 
 
