@@ -210,8 +210,8 @@ class GeneralGameControllerTest {
         ArrayList<StoryCards> questCards = getQuestCards();
         gameController.receiveCard(questCards.get(0));
         gameController.playCard(gameController.getStoryCard());
-        assertThat(gameController.getQuestPhaseController().getStoryCard()).isNotNull();
-        assertThat(gameController.getQuestPhaseController().getStoryCard()).isEqualTo(gameController.getStoryCard());
+        assertThat(gameController.getQuestPhaseController().getQuestCard()).isNotNull();
+        assertThat(gameController.getQuestPhaseController().getQuestCard()).isEqualTo(gameController.getStoryCard());
         assertThat(gameController.getQuestPhaseController().getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SPONSOR);
 
     }

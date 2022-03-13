@@ -3,6 +3,7 @@ package com.team9.questgame.game_phases.quest;
 import com.team9.questgame.game_phases.StateMachineI;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +16,7 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
     @Getter
     private QuestPhaseStatesE previousState;
 
+    @Autowired
     @Lazy
     private QuestPhaseController controller;
 

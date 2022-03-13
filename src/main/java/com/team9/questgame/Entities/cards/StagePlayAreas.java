@@ -33,6 +33,23 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
         if(card==null) {
             throw new CardAreaException(CardAreaException.CardAreaExceptionReasonCodes.NULL_CARD);
         }
+        //TODO
+        return false;
+    }
+
+    @Override
+    public boolean playCard(AdventureCards card){
+        return false;
+    }
+
+    @Override
+    public void discardCard(AdventureCards card){
+
+    }
+
+    @Override
+    public void onGameReset(){
+
     }
 
     @Override

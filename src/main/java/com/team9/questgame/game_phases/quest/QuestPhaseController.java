@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 @Component
-public class QuestPhaseController implements GamePhases<QuestCards> {
+public class QuestPhaseController implements GamePhases<Cards> {
     Logger LOG;
     @Getter
     @Autowired
@@ -73,24 +73,26 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
 
 
     //@Override
-    public boolean receiveCard(QuestCards card) {
+    public boolean receiveCard(Cards card) {
         if(stateMachine.getCurrentState() != QuestPhaseStatesE.NOT_STARTED){
             throw new IllegalQuestPhaseStateException("Quest can only receive questcard if no quest is currently in progress");
         }
         if (card.getSubType() == CardTypes.QUEST) {
-            questCard = card;
+            questCard =(QuestCards) card; //TODO: remove typeCast
             return true;
         }
         return false;
     }
 
+
+
     @Override
-    public void discardCard(QuestCards card) {
+    public void discardCard(Cards card) {
 
     }
 
     @Override
-    public boolean playCard(QuestCards card) {
+    public boolean playCard(Cards card) {
         return false;
     }
 
