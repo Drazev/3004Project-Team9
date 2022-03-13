@@ -194,7 +194,7 @@ class GeneralGameControllerTest {
     void handlePlayerHandOversize() {
         // Not allowed in NOT_STARTED, SETUP, DRAW_STORY_CARD
         assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.SETUP);
-//        assertThrows(IllegalGameStateException.class, () -> gameController.handlePlayerHandOversize(null)); // Params doesn't matter
+        assertThrows(IllegalGameStateException.class, () -> gameController.handlePlayerHandOversize()); // Params doesn't matter
 
         // Start the game
         for (int i = 0; i < GeneralGameController.MAX_PLAYERS; ++i) {
@@ -202,17 +202,19 @@ class GeneralGameControllerTest {
         }
         gameController.startGame();
         assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.DRAW_STORY_CARD);
-//        assertThrows(IllegalGameStateException.class, () -> gameController.handlePlayerHandOversize(null)); // Params doesn't matter
+        assertThrows(IllegalGameStateException.class, () -> gameController.handlePlayerHandOversize()); // Params doesn't matter
 
         gameController.drawStoryCard(gameController.getPlayerTurnService().getPlayerTurn());
 
         GeneralStateE currentState = gameController.getStateMachine().getCurrentState();
-        assertThat(currentState == GeneralStateE.QUEST_PHASE
-                || currentState == GeneralStateE.TOURNAMENT_PHASE
-                || currentState == GeneralStateE.EVENT_PHASE);
+        assert(currentState == GeneralStateE.QUEST_PHASE
+            || currentState == GeneralStateE.TOURNAMENT_PHASE
+            || currentState == GeneralStateE.EVENT_PHASE);
 
+        // Try to false trigger handOversize state when no hand is oversize
+        assertThrows(RuntimeException.class, () -> gameController.handlePlayerHandOversize());
 
-        // Make a hand go Oversize
+        // Make a hand go oversize
         Players player = gameController.getPlayers().get(0);
         GeneralStateE previousState = gameController.getStateMachine().getCurrentState();
         AdventureCards lastDrawnCard = null;
@@ -266,18 +268,6 @@ class GeneralGameControllerTest {
 
     @Test
     void getVictoryCondtion() {
-    }
-
-    @Test
-    void getPlayers() {
-    }
-
-    @Test
-    void getADeck() {
-    }
-
-    @Test
-    void getSDeck() {
     }
 
     ArrayList<StoryCards> getQuestCards() {

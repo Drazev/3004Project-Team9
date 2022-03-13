@@ -112,7 +112,7 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
     private GeneralStateE setupState() {
         // Start the game
         GeneralStateE nextState;
-        if (!isAllHandNotOversize()) {
+        if (!isAllHandNotOversize() || isHandOversizeRequested) {
             nextState = GeneralStateE.PLAYER_HAND_OVERSIZE;
         } else if (controller.getPlayers().size() >= GeneralGameController.MIN_PLAYERS && isAllPlayerReady() && isGameStartRequested) {
             nextState = GeneralStateE.DRAW_STORY_CARD;
@@ -124,7 +124,7 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
 
     private GeneralStateE drawStoryCardState() {
         GeneralStateE nextState;
-        if (!isAllHandNotOversize()) {
+        if (!isAllHandNotOversize() || isHandOversizeRequested) {
             nextState = GeneralStateE.PLAYER_HAND_OVERSIZE;
         } else if (controller.getStoryCard() != null && isGamePhaseRequested) {
             switch (controller.getStoryCard().getSubType()) {
@@ -149,7 +149,7 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
 
     private GeneralStateE questPhaseState() {
         GeneralStateE nextState;
-        if (!isAllHandNotOversize()) {
+        if (!isAllHandNotOversize() || isHandOversizeRequested) {
             nextState = GeneralStateE.PLAYER_HAND_OVERSIZE;
         } else if (isWinnerFound()) {
             nextState = GeneralStateE.ENDED;
@@ -163,7 +163,7 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
 
     private GeneralStateE eventPhaseState() {
         GeneralStateE nextState;
-        if (!isAllHandNotOversize()) {
+        if (!isAllHandNotOversize() || isHandOversizeRequested) {
             nextState = GeneralStateE.PLAYER_HAND_OVERSIZE;
         } else if (isWinnerFound()) {
             nextState = GeneralStateE.ENDED;
@@ -177,7 +177,7 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
 
     private GeneralStateE tournamentPhaseState() {
         GeneralStateE nextState;
-        if (!isAllHandNotOversize()) {
+        if (!isAllHandNotOversize() || isHandOversizeRequested) {
             nextState = GeneralStateE.PLAYER_HAND_OVERSIZE;
         } else if (isWinnerFound()) {
             nextState = GeneralStateE.ENDED;
@@ -195,7 +195,7 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
 
     private GeneralStateE playerHandOversizeState() {
         GeneralStateE nextState;
-        if (isAllHandNotOversize()) {
+        if (isAllHandNotOversize() || isHandOversizeRequested) {
             // Go back to whatever state that was blocked by HAND_OVERSIZE
             nextState = this.previousState;
         } else {

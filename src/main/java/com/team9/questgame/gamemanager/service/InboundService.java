@@ -71,10 +71,10 @@ public class InboundService {
     public synchronized void playerNotifyHandOversize(Players player) {
         LOG.info(String.format("NotifyHandOversized sent to Game Controller. Player: %s, Id: %d triggered a hand-oversized event",player.getName(),player.getPlayerId()));
         // Currently, the gameController doesn't need to know whose hand is oversize
-//        gameController.handlePlayerHandOversize();
+        gameController.handlePlayerHandOversize();
     }
 
-    public synchronized void notifyPlayerRankUP(Players player, PlayerRanks newRank) {
+    public synchronized void playerNotifyPlayerRankUP(Players player, PlayerRanks newRank) {
         LOG.info(String.format("notifyPlayerRankUP sent to Game Controller. Player: %s, Id: %d triggered a PlayerRankUP event with value: %s",player.getName(),player.getPlayerId(),newRank));
         //TODO: Tom please make sure to inform the game controller about player rank up
     }

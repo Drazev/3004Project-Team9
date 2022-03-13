@@ -168,22 +168,26 @@ public class GeneralGameController implements CardArea<StoryCards> {
         stateMachine.update();
     }
 
-//    public void handlePlayerHandOversize() {
-//        if (!stateMachine.isInPhases()) {
-//            throw new IllegalGameStateException("Player hand should only be oversize when " +
-//                    "in QUEST_PHASE, EVENT_PHASE, or TOURNAMENT_PHASE");
-//        }
-//
-//        boolean is
-//        for (Players p: this.players) {
-//            if (p.getHand().isHandOversize()) {
-//                throw new RuntimeException("Mismatch state, expecting ")
-//            }
-//
-//        }
-//        stateMachine.setHandOversizeRequested(true);
-//        stateMachine.update();
-//    }
+    public void handlePlayerHandOversize() {
+        boolean isOversize = false;
+        if (!stateMachine.isInPhases()) {
+            throw new IllegalGameStateException("Player hand should only be oversize when " +
+                    "in QUEST_PHASE, EVENT_PHASE, or TOURNAMENT_PHASE");
+        }
+
+        // Double check
+        for (Players p: this.players) {
+            if (p.getHand().isHandOversize()) {
+                isOversize = true;
+            }
+        }
+        if (!isOversize) {
+            throw new RuntimeException("Expecting at least one oversize hand");
+        }
+
+        stateMachine.setHandOversizeRequested(true);
+        stateMachine.update();
+    }
 
     public void playerDiscardCard(Players player, long cardId) {
         player.actionDiscardCard(cardId);
