@@ -38,7 +38,7 @@ function GameBoard(props){
             <div id="allHands">
                 <PlayerHand 
                     playerName={hands[0].playerName} 
-                    playerId={hands[0].playerId}
+                    playerID={hands[0].playerId}
                     isTurn={true /*hands[0].isTurn*/} 
                     isMyHand={myHandArr[0]} 
                     cardsInHand={hands[0].hand} 
@@ -54,7 +54,7 @@ function GameBoard(props){
                 </PlayerHand>
                 <PlayerHand 
                     playerName={hands[1].playerName} 
-                    playerId={hands[1].playerId}
+                    playerID={hands[1].playerId}
                     isTurn={true /*hands[1].isTurn*/} 
                     isMyHand={myHandArr[1]} 
                     cardsInHand={hands[1].hand} 
@@ -71,7 +71,7 @@ function GameBoard(props){
                 {hands.length > 2 &&
                     <PlayerHand 
                         playerName={hands[2].playerName} 
-                        playerId={hands[2].playerId}
+                        playerID={hands[2].playerId}
                         isTurn={true /*hands[2].isTurn*/} 
                         isMyHand={myHandArr[2]} 
                         cardsInHand={hands[2].hand} 
@@ -89,7 +89,7 @@ function GameBoard(props){
                 {hands.length > 3 &&
                     <PlayerHand 
                         playerName={hands[3].playerName} 
-                        playerId={hands[3].playerId}
+                        playerID={hands[3].playerId}
                         isTurn={true /*hands[3].isTurn*/} 
                         isMyHand={myHandArr[3]} 
                         cardsInHand={hands[3].hand} 
