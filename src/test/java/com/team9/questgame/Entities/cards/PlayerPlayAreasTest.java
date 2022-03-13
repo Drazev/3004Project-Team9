@@ -8,6 +8,7 @@ import com.team9.questgame.Data.CardData;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.exception.CardAreaException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,20 +90,20 @@ class PlayerPlayAreasTest {
         }
     }
 
-    @Test
-    void discardAllFoes() {
-        for(PlayerPlayAreas pa : pPlayAreas) {
-            HashSet<AdventureCards> cards = pa.getCardTypeMap().get(CardTypes.FOE);
-            if(cards==null) {
-                break;
-            }
-            int numOfType = cards.size();
-            LOG.info("Card Area had "+numOfType+" Foes BEFORE discard");
-            pa.discardAllFoes();
-            assert(pa.getCardTypeMap().get(CardTypes.FOE).size()==0);
-        }
-
-    }
+//    @Test
+//    void discardAllFoes() {
+//        for(PlayerPlayAreas pa : pPlayAreas) {
+//            HashSet<AdventureCards> cards = pa.getCardTypeMap().get(CardTypes.FOE);
+//            if(cards==null) {
+//                break;
+//            }
+//            int numOfType = cards.size();
+//            LOG.info("Card Area had "+numOfType+" Foes BEFORE discard");
+//            pa.discardAllFoes();
+//            assert(pa.getCardTypeMap().get(CardTypes.FOE).size()==0);
+//        }
+//
+//    }
 
     @Test
     void discardAllAllies() {
@@ -132,19 +133,19 @@ class PlayerPlayAreasTest {
         }
     }
 
-    @Test
-    void discardAllTests() {
-        for(PlayerPlayAreas pa : pPlayAreas) {
-            HashSet<AdventureCards> cards = pa.getCardTypeMap().get(CardTypes.TEST);
-            if(cards==null) {
-                break;
-            }
-            int numOfType = cards.size();
-            LOG.info("Card Area had "+numOfType+" Foes BEFORE discard");
-            pa.discardAllTests();
-            assert(pa.getCardTypeMap().get(CardTypes.TEST).size()==0);
-        }
-    }
+//    @Test
+//    void discardAllTests() {
+//        for(PlayerPlayAreas pa : pPlayAreas) {
+//            HashSet<AdventureCards> cards = pa.getCardTypeMap().get(CardTypes.TEST);
+//            if(cards==null) {
+//                break;
+//            }
+//            int numOfType = cards.size();
+//            LOG.info("Card Area had "+numOfType+" Foes BEFORE discard");
+//            pa.discardAllTests();
+//            assert(pa.getCardTypeMap().get(CardTypes.TEST).size()==0);
+//        }
+//    }
 
     @Test
     void discardAllAmour() {

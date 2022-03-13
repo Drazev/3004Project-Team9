@@ -39,7 +39,7 @@ public class EventPhaseController implements GamePhases<StoryCards> {
     }
 
     @Override
-    public void onPhaseReset() {
+    public void endPhase() {
 
     }
 }

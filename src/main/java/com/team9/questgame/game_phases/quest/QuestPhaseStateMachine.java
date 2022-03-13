@@ -24,15 +24,13 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
     private boolean isPhaseStartRequested;
 
     @Setter
-    private boolean sponsorFound;
-
-
+    private boolean sponsorFoundRequest;
 
     public QuestPhaseStateMachine() {
         previousState = null;
         currentState = QuestPhaseStatesE.NOT_STARTED;
         isPhaseStartRequested = false;
-        sponsorFound = false;
+        sponsorFoundRequest = false;
     }
 
     @Override
@@ -47,7 +45,7 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
                 break;
             case QUEST_SETUP:
                 this.currentState = questSetupState();
-                System.out.println(this.currentState +" " +controller.getJoinAttempts());
+                //System.out.println(this.currentState +" " +controller.getJoinAttempts());
                 break;
             case QUEST_JOIN:
                 this.currentState = questJoinState();
@@ -65,54 +63,49 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
                 break;
             default:
                 throw new IllegalStateException("Unknown state: " + currentState);
-
         }
-
+        resetAllRequest();
     }
 
     private QuestPhaseStatesE notStartedState() {
         QuestPhaseStatesE nextState;
-        if (isPhaseStartRequested) {
+        if (isPhaseStartRequested && controller.getQuestCard() != null) {
             nextState = QuestPhaseStatesE.QUEST_SPONSOR;
         } else {
             nextState = QuestPhaseStatesE.NOT_STARTED;
         }
-
-        isPhaseStartRequested = false;
         return nextState;
     }
 
     private QuestPhaseStatesE questSponsorState() {
         //System.out.println("in sponsor state" + controller.getSponsor().getName());
-        if(controller.getSponsor() != null){
-            System.out.println("got sponsor");
+        if (controller.getSponsor() != null) {
+            //System.out.println("got sponsor");
             return QuestPhaseStatesE.QUEST_SETUP;
-        }//TODO: stopped here, questPhaseInboundService provides result of sponsor search, use that here
-        else if(controller.getSponsorAttempts() >= controller.getPlayerTurnService().getPlayers().size()){
+        } else if (controller.getSponsorAttempts() >= controller.getPlayerTurnService().getPlayers().size()) {
             return QuestPhaseStatesE.ENDED;
         }
-        controller.checkSponsor();
+
         return QuestPhaseStatesE.QUEST_SPONSOR;
     }
 
     public void onGameReset() {
         previousState = null;
         currentState = QuestPhaseStatesE.NOT_STARTED;
-        isPhaseStartRequested = false;
     }
 
-    public QuestPhaseStatesE questSetupState(){
-        if(controller.getNumStages() >= controller.getQuestCard().getStages()){
-           System.out.println("quest setup state returning join state");
+    public QuestPhaseStatesE questSetupState() {
+        if (controller.getNumStages() >= controller.getQuestCard().getStages()) {
+            //System.out.println("quest setup state returning join state");
             return QuestPhaseStatesE.QUEST_JOIN;
         }
         controller.setupStage();
         return QuestPhaseStatesE.QUEST_SETUP;
     }
 
-    public QuestPhaseStatesE questJoinState(){
-        if(controller.getJoinAttempts() >= controller.getPlayerTurnService().getPlayers().size()-1){
-            if(controller.getQuestingPlayers().size() == 0){
+    public QuestPhaseStatesE questJoinState() {
+        if (controller.getJoinAttempts() >= controller.getPlayerTurnService().getPlayers().size() - 1) {
+            if (controller.getQuestingPlayers().size() == 0) {
                 return QuestPhaseStatesE.ENDED;
             }
             return QuestPhaseStatesE.STAGE_ONE;
@@ -126,7 +119,7 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
     }
 
     public QuestPhaseStatesE stageTwoState() {
-        if(controller.getQuestCard().getStages() < 2){
+        if (controller.getQuestCard().getStages() < 2) {
             return QuestPhaseStatesE.ENDED;
         }
 
@@ -134,14 +127,19 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
     }
 
     public QuestPhaseStatesE stageThreeState() {
-        if(controller.getQuestCard().getStages() < 3){
+        if (controller.getQuestCard().getStages() < 3) {
             return QuestPhaseStatesE.ENDED;
         }
 
         return QuestPhaseStatesE.STAGE_THREE;
     }
 
-    public QuestPhaseStatesE endedState(){
+    public QuestPhaseStatesE endedState() {
         return QuestPhaseStatesE.ENDED;
+    }
+
+    private void resetAllRequest() {
+        setPhaseStartRequested(false);
+        setSponsorFoundRequest(false);
     }
 }

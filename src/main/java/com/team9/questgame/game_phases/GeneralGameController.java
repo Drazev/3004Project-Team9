@@ -149,6 +149,7 @@ public class GeneralGameController implements CardArea<StoryCards> {
         }
 
         if (playerTurnService.getPlayerTurn() != players) {
+            // TODO: Throw error because this is client request
             return;
         }
 
@@ -243,9 +244,12 @@ public class GeneralGameController implements CardArea<StoryCards> {
         PlayerTurnService gamePhaseTurnService = new PlayerTurnService(players);
         gamePhaseTurnService.setPlayerTurn(playerTurnService.getPlayerTurn());
 
+        /**
+         * Start the correct phase that corresponds to the type of StoryCard
+         */
         switch (card.getSubType()) {
             case QUEST:
-                questPhaseController.receiveCard(this.storyCard);
+                questPhaseController.receiveCard((QuestCards) this.storyCard);
                 questPhaseController.startPhase(gamePhaseTurnService);
                 break;
             case TOURNAMENT:

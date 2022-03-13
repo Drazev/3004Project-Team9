@@ -64,14 +64,14 @@ class QuestPhaseControllerTest {
     void receiveCard(){
         assertThat(controller.getPlayers().size()).isEqualTo(0);
         assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.NOT_STARTED);
+
         // Get a quest card and generate the quest phase
-        ArrayList<StoryCards> questCards = getQuestCards();
+        ArrayList<QuestCards> questCards = getQuestCards();
+
         //assertThrows(IllegalQuestPhaseStateException.class, () -> controller.receiveCard(null));
         controller.receiveCard(questCards.get(0));
         controller.startPhase(turnService);
         assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SPONSOR);
-
-
     }
 
     @Test
@@ -79,7 +79,7 @@ class QuestPhaseControllerTest {
         assertThat(controller.getPlayers().size()).isEqualTo(0);
         assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.NOT_STARTED);
         // Get a quest card and generate the quest phase
-        ArrayList<StoryCards> questCards = getQuestCards();
+        ArrayList<QuestCards> questCards = getQuestCards();
 
         controller.receiveCard(questCards.get(0));
         controller.startPhase(turnService);
@@ -99,7 +99,7 @@ class QuestPhaseControllerTest {
 //        assertThat(controller.getPlayers().size()).isEqualTo(0);
 //        assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.NOT_STARTED);
 //        // Get a quest card and generate the quest phase
-//        ArrayList<StoryCards> questCards = getQuestCards();
+//        ArrayList<QuestCards> questCards = getQuestCards();
 //
 //        controller.receiveCard(questCards.get(0));
 //        controller.startPhase(turnService);
@@ -119,11 +119,11 @@ class QuestPhaseControllerTest {
 //        controller.checkJoinResult(players.get(2), true);
 //
 //    }
-    ArrayList<StoryCards> getQuestCards() {
+    ArrayList<QuestCards> getQuestCards() {
         CardFactory cf = CardFactory.getInstance();
         AdventureDecks testDeck = new AdventureDecks();
         HashMap<StoryDeckCards,Integer> deckList = new HashMap<>();
-        ArrayList<StoryCards> cards = new ArrayList<>();
+        ArrayList<QuestCards> cards = new ArrayList<>();
         deckList.put(StoryDeckCards.SEARCH_FOR_THE_HOLY_GRAIL,1);
         deckList.put(StoryDeckCards.TEST_OF_THE_GREEN_KNIGHT,1);
         deckList.put(StoryDeckCards.SEARCH_FOR_THE_QUESTING_BEAST,1);
@@ -139,7 +139,7 @@ class QuestPhaseControllerTest {
 
             //Create number of cards as proscribed in list
             for (int i = 0; i < e.getValue(); ++i) {
-                StoryCards card = cf.createCard(testDeck, e.getKey());
+                QuestCards card = (QuestCards) cf.createCard(testDeck, e.getKey());
                 cards.add(card);
             }
         }

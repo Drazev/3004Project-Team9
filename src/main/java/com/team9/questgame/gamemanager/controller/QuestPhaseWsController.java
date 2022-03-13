@@ -19,7 +19,7 @@ public class QuestPhaseWsController {
         inboundService.checkSponsorResult( sponsorResponseInbound.name(), sponsorResponseInbound.found());
     }
 
-    @MessageMapping("quest/join-response")
+    @MessageMapping("/quest/join-response")
     private void handleJoinResponse(JoinResponseInbound joinResponseInbound){
         inboundService.checkJoinResult(joinResponseInbound.name(), joinResponseInbound.joined());
     }
