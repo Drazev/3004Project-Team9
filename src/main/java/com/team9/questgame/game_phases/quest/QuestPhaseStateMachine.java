@@ -106,9 +106,13 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
 
     public QuestPhaseStatesE questJoinState(){
         if(controller.getJoinAttempts() >= controller.getPlayerTurnService().getPlayers().size()-1){
+            if(controller.getQuestingPlayers().size() == 0){
+                return QuestPhaseStatesE.ENDED;
+            }
             return QuestPhaseStatesE.STAGE_ONE;
         }
         controller.checkJoins();
+        return QuestPhaseStatesE.QUEST_JOIN;
     }
 
     public QuestPhaseStatesE stageOneState() {
