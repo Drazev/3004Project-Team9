@@ -5,15 +5,15 @@ function PlayerHand(props){
 
     const Rendercards = props.cardsInHand?.map((card) => (
         props.isMyHand ? (
-           <Card cardId={card.cardID} key={card.cardID} cardImage={card.imgSrc} selectedAllowed={props.isTurn && props.isMyHand} canGrow={props.isMyHand} cardOwner={props.playerName} active={false}></Card>
+           <Card card={card} key={card.cardID} cardImage={card.imgSrc} selectedAllowed={props.isTurn && props.isMyHand} canGrow={props.isMyHand} cardOwner={props.playerName} active={false}></Card>
         ) : (
-            <Card cardId={card.cardID} key={card.cardID} cardImage={CardImages.Back_Adventure} selectedAllowed={props.isTurn && props.isMyHand} canGrow={props.isMyHand} cardOwner={props.playerName} active={false}></Card>
+            <Card card={card} key={card.cardID} cardImage={CardImages.Back_Adventure} selectedAllowed={props.isTurn && props.isMyHand} canGrow={props.isMyHand} cardOwner={props.playerName} active={false}></Card>
         )
     ));
 
     const RenderActiveCards = props.activeCards?.map((card) => (
         <>
-            <Card cardId={card.cardID} key={card.cardID} cardImage={CardImages.Ally_Merlin} selectedAllowed={false} canGrow={false} cardOwner={props.playerName} isActive={true}></Card>
+            <Card card={card} key={card.cardID} cardImage={card.imgSrc} selectedAllowed={false} canGrow={false} cardOwner={props.playerName} isActive={true}></Card>
         </>
     ));
 

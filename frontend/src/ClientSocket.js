@@ -1,6 +1,6 @@
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import { setGameStarted } from "./Store";
+import { setGameStarted } from "./Stores/GeneralStore";
 
 
 let client;
@@ -9,8 +9,7 @@ const REGISTRATION_URL = "http://localhost:8080/api/register"
 const SOCK_SERVER = "http://localhost:8080/quest-game-websocket"
 const START_URL = "http://localhost:8080/api/start"
 
-
-export async function connect(setConnected,setGameStarted, addNewMessage, setPlayers, name, updateHand) {
+export async function connect(setConnected,setGameStarted, addNewMessage, setPlayers, name, updateHand, updatePlayArea, updatePlayer) {
   console.log("Attempt connection");
 
   // Register player name
@@ -56,7 +55,6 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
     client.subscribe("/topic/player/hand-update", (message) => {
         let newHand = JSON.parse(message.body);
         console.log("Received hand update: " + newHand);
-//        updateHand(newHand.name,newHand.hand);
         updateHand(newHand);
     });
     client.subscribe("/topic/general/player-connect", (players) => {
@@ -69,8 +67,21 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
     client.subscribe("/topic/general/game-start", () => {
       console.log("setting game started true");
       setGameStarted(true);
-    })
-  };
+    });
+    client.subscribe("topic/player/hand-oversize" , (message) => {
+      let body = JSON.parse(message.body);
+      console.log("Player Hand Oversize: \n" + body + " \n\n ");
+    });
+    client.subscribe("topic/player/player-update", (message) => {
+      let body = JSON.parse(message.body);
+      updatePlayer(body);
+    });
+  };/*
+  client.subscribe("/topic/play-areas/play-area-changed", (data) => {
+    let body = JSON.parse(data.body);
+    console.log("Play Area Update recieved for playerId: "+body.playerId);
+    updatePlayArea(body);
+});*/
 
   client.onDisconnect = () => {
     disconnect();
@@ -84,6 +95,7 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
 
   client.activate();
   return true;
+
 }
 
 export function sendMessage(name, message) {
@@ -114,6 +126,18 @@ export function discardCard(name, cardId) {
     body: JSON.stringify({
       name: name,
       cardId: cardId,
+    }),
+  });
+}
+
+export function playCard(name, cardId, card) {
+  console.log("Play Card: \nName: " + name + "\nCardID: " + cardId + "\nCard: " + JSON.stringify(card));
+  client.publish({
+    destination: "/app/general/player-play-card",
+    body: JSON.stringify({
+      name: name,
+      cardId: cardId,
+      card: card,
     }),
   });
 }
