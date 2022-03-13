@@ -57,15 +57,15 @@ public class Players {
 
     public Players(String playerName)
     {
+        this.name=playerName;
         LOG= LoggerFactory.getLogger(Players.class);
         playArea = new PlayerPlayAreas(this);
-        hand = new Hand(this,playArea);
-        this.name=playerName;
         rank=PlayerRanks.SQUIRE;
         this.playerId=nextId++;
         this.outboundService = ApplicationContextHolder.getContext().getBean(OutboundService.class);
         this.inboundService = ApplicationContextHolder.getContext().getBean(InboundService.class);
         this.isReady = true;
+        hand = new Hand(this,playArea);
         onGameReset();
     }
 
