@@ -184,7 +184,7 @@ public class Hand implements CardArea<AdventureCards> {
 
     private void notifyHandOversize() {
         HandOversizeData data = new HandOversizeData(player.getPlayerId(),MAX_HAND_SIZE,getHandSize());
-        inboundService.playerNotifyHandOversize(player);
+        inboundService.playerNotifyHandOversize();
         outboundService.broadcastHandOversize(player,data);
     }
 

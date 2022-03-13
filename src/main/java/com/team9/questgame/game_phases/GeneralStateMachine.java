@@ -195,7 +195,7 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
 
     private GeneralStateE playerHandOversizeState() {
         GeneralStateE nextState;
-        if (isAllHandNotOversize() || isHandOversizeRequested) {
+        if (isAllHandNotOversize()) {
             // Go back to whatever state that was blocked by HAND_OVERSIZE
             nextState = this.previousState;
         } else {
