@@ -1,6 +1,8 @@
 
 p {
     color: white;
+    text-align: center;
+    font-size: 25px;
 }
 
 h2 {
@@ -13,5 +15,4 @@ h3 {
 
 li {
     color: white;
-    font-size: 20px;
 }

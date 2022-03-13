@@ -138,22 +138,9 @@ public class GeneralGameController implements CardArea<StoryCards> {
         }
     }
 
-
-    @Override
-    public boolean receiveCard(StoryCards card) {
-        if (stateMachine.getCurrentState() != GeneralStateE.DRAW_STORY_CARD) {
-            throw new IllegalGameStateException("Cannot receive story card when it's not DRAW_STORY_CARD state, currentState=" + stateMachine.getCurrentState());
-        }
-
-        discardCard(storyCard);
-        storyCard = card;
-
-        stateMachine.update();
-        return true;
-    }
-
     /**
      * Draw a story card from the story deck and play that card (generate the game phase)
+     *
      * @param players the player who requested
      */
     public void drawStoryCard(Players players) {
@@ -180,6 +167,46 @@ public class GeneralGameController implements CardArea<StoryCards> {
 
         stateMachine.update();
     }
+
+    public void handlePlayerHandOversize() {
+        boolean isOversize = false;
+        if (!stateMachine.isInPhases()) {
+            throw new IllegalGameStateException("Player hand should only be oversize when " +
+                    "in QUEST_PHASE, EVENT_PHASE, or TOURNAMENT_PHASE");
+        }
+
+        // Double check
+        for (Players p: this.players) {
+            if (p.getHand().isHandOversize()) {
+                isOversize = true;
+            }
+        }
+        if (!isOversize) {
+            throw new RuntimeException("Expecting at least one oversize hand");
+        }
+
+        stateMachine.setHandOversizeRequested(true);
+        stateMachine.update();
+    }
+
+    public void playerDiscardCard(Players player, long cardId) {
+        player.actionDiscardCard(cardId);
+        stateMachine.update();
+    }
+
+    @Override
+    public boolean receiveCard(StoryCards card) {
+        if (stateMachine.getCurrentState() != GeneralStateE.DRAW_STORY_CARD) {
+            throw new IllegalGameStateException("Cannot receive story card when it's not DRAW_STORY_CARD state, currentState=" + stateMachine.getCurrentState());
+        }
+
+        discardCard(storyCard);
+        storyCard = card;
+
+        stateMachine.update();
+        return true;
+    }
+
 
     /**
      * Discard the story card to the discard pile

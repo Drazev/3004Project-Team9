@@ -15,7 +15,6 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -192,6 +191,49 @@ class GeneralGameControllerTest {
     }
 
     @Test
+    void handlePlayerHandOversize() {
+        // Not allowed in NOT_STARTED, SETUP, DRAW_STORY_CARD
+        assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.SETUP);
+        assertThrows(IllegalGameStateException.class, () -> gameController.handlePlayerHandOversize()); // Params doesn't matter
+
+        // Start the game
+        for (int i = 0; i < GeneralGameController.MAX_PLAYERS; ++i) {
+            gameController.playerJoin(players.get(i));
+        }
+        gameController.startGame();
+        assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.DRAW_STORY_CARD);
+        assertThrows(IllegalGameStateException.class, () -> gameController.handlePlayerHandOversize()); // Params doesn't matter
+
+        gameController.drawStoryCard(gameController.getPlayerTurnService().getPlayerTurn());
+
+        GeneralStateE currentState = gameController.getStateMachine().getCurrentState();
+        assert(currentState == GeneralStateE.QUEST_PHASE
+            || currentState == GeneralStateE.TOURNAMENT_PHASE
+            || currentState == GeneralStateE.EVENT_PHASE);
+
+        // Try to false trigger handOversize state when no hand is oversize
+        assertThrows(RuntimeException.class, () -> gameController.handlePlayerHandOversize());
+
+        // Make a hand go oversize
+        Players player = gameController.getPlayers().get(0);
+        GeneralStateE previousState = gameController.getStateMachine().getCurrentState();
+        AdventureCards lastDrawnCard = null;
+        while (player.getHand().getHandSize() <= Hand.MAX_HAND_SIZE) {
+            lastDrawnCard = gameController.getADeck().drawCard(player.getHand());
+        }
+        assertThat(lastDrawnCard).isNotNull();
+        assertThat(player.getHand().getHandSize()).isEqualTo(Hand.MAX_HAND_SIZE + 1);
+
+        gameController.getStateMachine().update();
+        assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.PLAYER_HAND_OVERSIZE);
+        assertThat(player.getHand().getHandSize()).isEqualTo(Hand.MAX_HAND_SIZE + 1);
+
+        // Discard a card, the state should be reset to what was before
+        gameController.playerDiscardCard(player, lastDrawnCard.getCardID());
+        assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(previousState);
+    }
+
+    @Test
     void playCard() {
         // Cannot draw card when the game not in DRAW_STORY_CARD state
         assertThat(gameController.getPlayers().size()).isEqualTo(0);
@@ -226,18 +268,6 @@ class GeneralGameControllerTest {
 
     @Test
     void getVictoryCondtion() {
-    }
-
-    @Test
-    void getPlayers() {
-    }
-
-    @Test
-    void getADeck() {
-    }
-
-    @Test
-    void getSDeck() {
     }
 
     ArrayList<StoryCards> getQuestCards() {

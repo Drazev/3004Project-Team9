@@ -1,7 +1,6 @@
-import CardImages from "../Images/index";
 import React,{useState} from "react";
 import {Button} from "react-bootstrap";
-import {discardCard} from "../ClientSocket";
+import {discardCard, playCard} from "../ClientSocket";
 
 function Card(props){
     const [isBig, setIsBig]=useState(false);
@@ -62,7 +61,7 @@ function Card(props){
                             paddingRight: 5,
                             backgroundColor:"#c96b6b",
                             borderColor:"#c96b6b",}}
-                        onClick={() => discardCard(props.cardOwner,props.cardId)}
+                        onClick={() => discardCard(props.cardOwner,props.card.cardID)}
                     >Discard</Button>{' '}
                 </>
             }
@@ -80,6 +79,7 @@ function Card(props){
                             paddingRight: 5,
                             backgroundColor:"#77a3c9",
                             borderColor:"#77a3c9",}}
+                        onClick={() => playCard(props.cardOwner, props.card.cardID, props.card, props.playerID)}
                     >Play</Button>{' '}
                 </>
             }

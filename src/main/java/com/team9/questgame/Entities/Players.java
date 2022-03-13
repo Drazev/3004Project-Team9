@@ -57,15 +57,15 @@ public class Players {
 
     public Players(String playerName)
     {
+        this.name=playerName;
         LOG= LoggerFactory.getLogger(Players.class);
         playArea = new PlayerPlayAreas(this);
-        hand = new Hand(this,playArea);
-        this.name=playerName;
         rank=PlayerRanks.SQUIRE;
         this.playerId=nextId++;
         this.outboundService = ApplicationContextHolder.getContext().getBean(OutboundService.class);
         this.inboundService = ApplicationContextHolder.getContext().getBean(InboundService.class);
         this.isReady = true;
+        hand = new Hand(this,playArea);
         onGameReset();
     }
 
@@ -106,6 +106,19 @@ public class Players {
             return true;
         }
         return false;
+    }
+
+    public boolean looseShields(int shieldsLost) {
+        if(shields<1) {
+            return false;
+        }
+        else if(shields<shieldsLost) {
+            shields = 0;
+        }
+        else {
+            shields-=shieldsLost;
+        }
+        return true;
     }
 
     public void actionPlayCard(long cardId) throws BadRequestException,IllegalCardStateException {
@@ -155,7 +168,7 @@ public class Players {
 
     private void notifyPlayerRankUP() {
         //TODO: Notify game and player of a Rank Up event. Game will check victory condition, and player UI must be updated
-        inboundService.notifyPlayerRankUP(this,rank);
+        inboundService.playerNotifyPlayerRankUP(this,rank);
     }
 
     private void notifyPlayerDataChanged() {

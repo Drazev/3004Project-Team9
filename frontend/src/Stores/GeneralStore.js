@@ -15,31 +15,49 @@ const useStore = create((set) => ({
   setName: (name) => set(() => ({ name: name })),
   setGameStarted: (gameStarted) => set(() => ({ gameStarted: gameStarted })),
   setPlayers: (players) => set(() => ({ players: players })),
-  /*
-  updateHand: (hand) => set((currentState) => {
-    hands: [...currentState.hands, hand]
-  }),*/
+  updatePlayer: (player) =>
+  set((current) => ({
+    players: (() => {
+      let playerExist = false;
+      for (let i = 0; i < current.players.length; i++) {
+        if (current.players[i].playerName === player.playerName) {
+          playerExist = true;
+        }
+      }
+      if (playerExist) {
+        return current.players.map((currPlayer) => {
+          if (currPlayer.playerName === player.playerName) {
+            return player;
+          } else {
+            return currPlayer;
+          }
+        });
+      } else {
+        return [...current.players, player];
+      }
+    })
+  })),
   updateHand: (hand) =>
     set((current) => ({
       hands: (() => {
-        console.log("hand = " + hand);
+        //console.log("hand = " + JSON.stringify(hand));
         let playerExist = false;
         for (let i in current.hands) {
-          if (current.hands[i].name === hand.name) {
+          if (current.hands[i].playerName === hand.playerName) {
             playerExist = true;
           }
         }
-        console.log("playerExist = " + playerExist)
+        //console.log("playerExist = " + playerExist);
         if (playerExist) {
           return current.hands.map((currHand) => {
-            if (currHand.name === hand.name) {
+            if (currHand.playerName === hand.playerName) {
               return hand;
             } else {
               return currHand;
             }
           });
         } else {
-          return [...current.hands, hand]
+          return [...current.hands, hand];
         }
       })(),
     })),
@@ -77,6 +95,8 @@ export const useSetName = () => useStore((state) => state.setName);
 export const useAddNewMessage = () => useStore((state) => state.addNewMessage);
 
 export const useUpdateHand = () => useStore((state) => state.updateHand);
+
+export const useUpdatePlayer = () => useStore((state) => state.updatePlayer);
 
 export const useSetPlayers = () => useStore((state) => state.setPlayers);
 

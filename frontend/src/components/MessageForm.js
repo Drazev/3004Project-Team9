@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { sendMessage } from "../ClientSocket";
-import { useName } from "../Store";
+import { useName } from "../Stores/GeneralStore";
 
 const MessageForm = () => {
   const [message, setMessage] = useState("");

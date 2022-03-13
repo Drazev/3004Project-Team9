@@ -3,18 +3,24 @@ import QuestDisplay from "./QuestDisplay";
 import CardImages from "../Images/index";
 import Card from "./Card";
 import {drawCard} from "../ClientSocket";
-import {useName, usePlayerHands, usePlayers} from "../Store";
+import {useName, usePlayerHands, usePlayers } from "../Stores/GeneralStore";
+import { useUpdatePlayArea, usePlayerPlayAreas } from "../Stores/PlayAreaStore";
 import {Button} from "react-bootstrap";
 
 function GameBoard(props){
     let init = 80;
     let jump = 240;
     const name = useName();
-    const allNames = usePlayers();
+    const allPlayers = usePlayers();
     let hands = usePlayerHands();
+    let active = usePlayerPlayAreas();
+    console.log(JSON.stringify(allPlayers));
+    console.log(JSON.stringify(name));
     //const turn = useTurn();
-    console.log("Hands: " + JSON.stringify(hands) + "\n");
+
     const turn = "PlayerName";
+
+    console.log("HANDS: " + JSON.stringify(hands));
 
 
     // hands = [{name:"Test1",isTurn:true,hand:[{cardId:1,cardImage:CardImages.Ally_KingArthur}],cardsInPlay:[],rank:CardImages.Rank_Squire,shields:54},
@@ -22,7 +28,7 @@ function GameBoard(props){
 
     let myHandArr = [false,false,false,false];
     for(let i = 0; i < hands.length; i++){
-        if(hands[i].name === name){
+        if(hands[i].playerName === name){
             myHandArr[i] = true;
         }
     }
@@ -31,11 +37,12 @@ function GameBoard(props){
         <div id="GameBoard">
             <div id="allHands">
                 <PlayerHand 
-                    playerName={hands[0].name} 
+                    playerName={hands[0].playerName} 
+                    playerID={hands[0].playerId}
                     isTurn={true /*hands[0].isTurn*/} 
                     isMyHand={myHandArr[0]} 
                     cardsInHand={hands[0].hand} 
-                    activeCards={hands[0].hand}
+                    activeCards={active[0].hand}
                     rank={ CardImages.Rank_Squire/*hands[0].rank*/}
                     numShields={5/*hands[0].shields*/}
                     top={init}
@@ -46,11 +53,12 @@ function GameBoard(props){
                     }}>
                 </PlayerHand>
                 <PlayerHand 
-                    playerName={hands[1].name} 
+                    playerName={hands[1].playerName} 
+                    playerID={hands[1].playerId}
                     isTurn={true /*hands[1].isTurn*/} 
                     isMyHand={myHandArr[1]} 
                     cardsInHand={hands[1].hand} 
-                    activeCards={hands[1].hand}
+                    activeCards={active[1].hand}
                     rank={ CardImages.Rank_Squire/*hands[1].rank*/}
                     numShields={5/*hands[1].shields*/}
                     top={init+jump}
@@ -62,11 +70,12 @@ function GameBoard(props){
                 </PlayerHand>
                 {hands.length > 2 &&
                     <PlayerHand 
-                        playerName={hands[2].name} 
+                        playerName={hands[2].playerName} 
+                        playerID={hands[2].playerId}
                         isTurn={true /*hands[2].isTurn*/} 
                         isMyHand={myHandArr[2]} 
                         cardsInHand={hands[2].hand} 
-                        activeCards={hands[2].hand}
+                        activeCards={active[2].hand}
                         rank={ CardImages.Rank_Squire/*hands[2].rank*/}
                         numShields={5/*hands[2].shields*/}
                         top={init+jump*2}
@@ -79,11 +88,12 @@ function GameBoard(props){
                 }
                 {hands.length > 3 &&
                     <PlayerHand 
-                        playerName={hands[3].name} 
+                        playerName={hands[3].playerName} 
+                        playerID={hands[3].playerId}
                         isTurn={true /*hands[3].isTurn*/} 
                         isMyHand={myHandArr[3]} 
                         cardsInHand={hands[3].hand} 
-                        activeCards={hands[3].hand}
+                        activeCards={active[3].hand}
                         rank={ CardImages.Rank_Squire/*hands[3].rank*/}
                         numShields={5/*hands[3].shields*/}
                         top={init+jump*3}

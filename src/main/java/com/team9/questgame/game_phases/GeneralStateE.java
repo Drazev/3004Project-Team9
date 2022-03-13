@@ -7,5 +7,6 @@ public enum GeneralStateE {
     QUEST_PHASE,            // Quest phase
     EVENT_PHASE,            // Event phase
     TOURNAMENT_PHASE,       // Tournament phase
-    ENDED
+    ENDED,
+    PLAYER_HAND_OVERSIZE
 }

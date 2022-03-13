@@ -64,4 +64,5 @@ const CardImages = {
     Tournament_AtTintagel: "./Assets/Story Deck (327x491)/Tournament - At Tintagel.png",
     Tournament_AtYork: "./Assets/Story Deck (327x491)/Tournament - At York.png",
   }
+
   export default CardImages;
