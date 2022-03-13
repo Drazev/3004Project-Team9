@@ -155,7 +155,7 @@ public class Players {
 
     private void notifyPlayerRankUP() {
         //TODO: Notify game and player of a Rank Up event. Game will check victory condition, and player UI must be updated
-        inboundService.notifyPlayerRankUP(this,rank);
+        inboundService.playerNotifyPlayerRankUP(this,rank);
     }
 
     private void notifyPlayerDataChanged() {
