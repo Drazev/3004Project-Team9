@@ -64,13 +64,14 @@ public class InboundService {
     }
 
     public synchronized void playerDiscardCard(String name, long cardId) {
-        Players player = sessionService.getPlayerMap().get(name);
-         player.actionDiscardCard(cardId);
+        LOG.info(String.format("Player named %s requested to discard a card with id %ld", name, cardId));
+        gameController.playerDiscardCard(sessionService.getPlayerMap().get(name), cardId);
     }
 
-    public synchronized void playerNotifyHandOversized(Players player,boolean isHandOversized) {
-        LOG.info(String.format("NotifyHandOversized sent to Game Controller. Player: %s, Id: %d triggered a hand-oversized event with value: %d",player.getName(),player.getPlayerId(),isHandOversized));
-        //TODO: Tom please make sure to inform the game controller about hand oversized
+    public synchronized void playerNotifyHandOversize(Players player) {
+        LOG.info(String.format("NotifyHandOversized sent to Game Controller. Player: %s, Id: %d triggered a hand-oversized event",player.getName(),player.getPlayerId()));
+        // Currently, the gameController doesn't need to know whose hand is oversize
+//        gameController.handlePlayerHandOversize();
     }
 
     public synchronized void notifyPlayerRankUP(Players player, PlayerRanks newRank) {

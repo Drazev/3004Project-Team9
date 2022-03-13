@@ -24,8 +24,9 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
     @Getter
     private GeneralStateE previousState;
 
+    @Getter
     @Setter
-    private boolean isPhaseEnded;
+    private boolean isPhaseEndRequested;
 
     @Getter
     @Setter
@@ -34,6 +35,10 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
     @Getter
     @Setter
     private boolean isGamePhaseRequested;
+
+    @Getter
+    @Setter
+    private boolean isHandOversizeRequested;
 
     public GeneralStateMachine() {
         previousState = null;
@@ -57,7 +62,8 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
      * Switch to the next state if needed
      */
     public void update() {
-        previousState = currentState;
+        GeneralStateE tempState = currentState;
+
         switch (currentState) {
             case NOT_STARTED:
                 currentState = notStartedState();
@@ -80,9 +86,19 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
             case ENDED:
                 currentState = endedState();
                 break;
+            case PLAYER_HAND_OVERSIZE:
+                currentState = playerHandOversizeState();
+                break;
             default:
                 throw new IllegalStateException("Unknown state: " + currentState);
         }
+
+        if (tempState != currentState) {
+            // State changed, update previousState
+            this.previousState = tempState;
+        }
+
+        resetAllRequest();
     }
 
     /**
@@ -96,18 +112,21 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
     private GeneralStateE setupState() {
         // Start the game
         GeneralStateE nextState;
-        if (controller.getPlayers().size() >= GeneralGameController.MIN_PLAYERS && isAllPlayerReady() && isGameStartRequested) {
+        if (!isAllHandNotOversize()) {
+            nextState = GeneralStateE.PLAYER_HAND_OVERSIZE;
+        } else if (controller.getPlayers().size() >= GeneralGameController.MIN_PLAYERS && isAllPlayerReady() && isGameStartRequested) {
             nextState = GeneralStateE.DRAW_STORY_CARD;
         } else {
             nextState = GeneralStateE.SETUP;
         }
-        isGameStartRequested = false;
         return nextState;
     }
 
     private GeneralStateE drawStoryCardState() {
         GeneralStateE nextState;
-        if (controller.getStoryCard() != null && isGamePhaseRequested) {
+        if (!isAllHandNotOversize()) {
+            nextState = GeneralStateE.PLAYER_HAND_OVERSIZE;
+        } else if (controller.getStoryCard() != null && isGamePhaseRequested) {
             switch (controller.getStoryCard().getSubType()) {
                 case QUEST:
                     nextState = GeneralStateE.QUEST_PHASE;
@@ -125,15 +144,16 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
             nextState = GeneralStateE.DRAW_STORY_CARD;
         }
 
-        isGamePhaseRequested = false;
         return nextState;
     }
 
     private GeneralStateE questPhaseState() {
         GeneralStateE nextState;
-        if (isWinnerFound()) {
+        if (!isAllHandNotOversize()) {
+            nextState = GeneralStateE.PLAYER_HAND_OVERSIZE;
+        } else if (isWinnerFound()) {
             nextState = GeneralStateE.ENDED;
-        } else if (this.isPhaseEnded) {
+        } else if (this.isPhaseEndRequested) {
             nextState = GeneralStateE.DRAW_STORY_CARD;
         } else {
             nextState = GeneralStateE.QUEST_PHASE;
@@ -143,9 +163,11 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
 
     private GeneralStateE eventPhaseState() {
         GeneralStateE nextState;
-        if (isWinnerFound()) {
+        if (!isAllHandNotOversize()) {
+            nextState = GeneralStateE.PLAYER_HAND_OVERSIZE;
+        } else if (isWinnerFound()) {
             nextState = GeneralStateE.ENDED;
-        } else if (this.isPhaseEnded) {
+        } else if (this.isPhaseEndRequested) {
             nextState = GeneralStateE.DRAW_STORY_CARD;
         } else {
             nextState = GeneralStateE.EVENT_PHASE;
@@ -155,9 +177,11 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
 
     private GeneralStateE tournamentPhaseState() {
         GeneralStateE nextState;
-        if (isWinnerFound()) {
+        if (!isAllHandNotOversize()) {
+            nextState = GeneralStateE.PLAYER_HAND_OVERSIZE;
+        } else if (isWinnerFound()) {
             nextState = GeneralStateE.ENDED;
-        } else if (this.isPhaseEnded) {
+        } else if (this.isPhaseEndRequested) {
             nextState = GeneralStateE.DRAW_STORY_CARD;
         } else {
             nextState = GeneralStateE.TOURNAMENT_PHASE;
@@ -167,6 +191,17 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
 
     private GeneralStateE endedState() {
         return GeneralStateE.ENDED;
+    }
+
+    private GeneralStateE playerHandOversizeState() {
+        GeneralStateE nextState;
+        if (isAllHandNotOversize()) {
+            // Go back to whatever state that was blocked by HAND_OVERSIZE
+            nextState = this.previousState;
+        } else {
+            nextState = GeneralStateE.PLAYER_HAND_OVERSIZE;
+        }
+        return nextState;
     }
 
     /**
@@ -188,5 +223,21 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
             }
         }
         return true;
+    }
+
+    private boolean isAllHandNotOversize() {
+        for(Players p: controller.getPlayers()) {
+            if (p.getHand().isHandOversize()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void resetAllRequest() {
+        setHandOversizeRequested(false);
+        setGamePhaseRequested(false);
+        setGameStartRequested(false);
+        setPhaseEndRequested(false);
     }
 }
