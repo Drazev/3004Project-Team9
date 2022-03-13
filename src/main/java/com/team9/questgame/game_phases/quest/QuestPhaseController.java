@@ -4,6 +4,7 @@ import com.team9.questgame.ApplicationContextHolder;
 import com.team9.questgame.Data.PlayerRewardData;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.Entities.cards.*;
+import com.team9.questgame.exception.SponsorAlreadyExistsException;
 import com.team9.questgame.game_phases.GamePhases;
 import com.team9.questgame.game_phases.GeneralGameController;
 import com.team9.questgame.exception.IllegalQuestPhaseStateException;
@@ -72,10 +73,10 @@ public class QuestPhaseController implements GamePhases<Cards> {
 
 
 
-    //@Override
+    @Override
     public boolean receiveCard(Cards card) {
         if(stateMachine.getCurrentState() != QuestPhaseStatesE.NOT_STARTED){
-            throw new IllegalQuestPhaseStateException("Quest can only receive questcard if no quest is currently in progress");
+            throw new IllegalQuestPhaseStateException("Quest can only receive questCard if no quest is currently in progress");
         }
         if (card.getSubType() == CardTypes.QUEST) {
             questCard =(QuestCards) card; //TODO: remove typeCast
@@ -150,7 +151,15 @@ public class QuestPhaseController implements GamePhases<Cards> {
     }
 
     public void checkSponsorResult(Players player, boolean found){
+        if(stateMachine.getCurrentState() != (QuestPhaseStatesE.QUEST_SPONSOR)){
+            throw new IllegalQuestPhaseStateException("Cannot check sponsor result when not in QUEST_SPONSOR state" );
+        }
         if(found){
+            if(this.sponsor != null){
+                throw new SponsorAlreadyExistsException(player);
+
+            }
+            System.out.println("checking Sponsor Result");
             this.sponsor = player;
         }
         
@@ -183,8 +192,11 @@ public class QuestPhaseController implements GamePhases<Cards> {
     }
 
     public void setupStage(){
-        StagePlayAreas stage = new StagePlayAreas();
+        //StagePlayAreas stage = new StagePlayAreas();
+        System.out.println("num stages="+questCard.getStages()+" setupStage take "+numStages );
+
         //broadcast
+        //TODO:
         numStages++;
         stateMachine.update();
     }

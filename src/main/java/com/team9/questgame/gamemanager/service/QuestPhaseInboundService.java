@@ -38,12 +38,16 @@ public class QuestPhaseInboundService {
 //        }
 //        questController.noSponsor();
 //        return found;
+        LOG.info(String.format("Receiving Sponsor Result: name=%s, found=%s", name, found));
+        System.out.println("inbound check Sponsor" + sessionService.getPlayers());
         Players player = sessionService.getPlayerMap().get(name);
+        System.out.println("session service get player: name =" + player.getName());
         questController.checkSponsorResult(player, found);
         //return found;
     }
 
     public synchronized void checkJoinResult(String name, boolean joined){
+
         Players player = sessionService.getPlayerMap().get(name);
         questController.checkJoinResult(player, joined);
     }

@@ -47,6 +47,7 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
                 break;
             case QUEST_SETUP:
                 this.currentState = questSetupState();
+                System.out.println(this.currentState +" " +controller.getJoinAttempts());
                 break;
             case QUEST_JOIN:
                 this.currentState = questJoinState();
@@ -71,7 +72,7 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
 
     private QuestPhaseStatesE notStartedState() {
         QuestPhaseStatesE nextState;
-        if (isPhaseStartRequested && isPhaseStartRequested) {
+        if (isPhaseStartRequested) {
             nextState = QuestPhaseStatesE.QUEST_SPONSOR;
         } else {
             nextState = QuestPhaseStatesE.NOT_STARTED;
@@ -82,7 +83,9 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
     }
 
     private QuestPhaseStatesE questSponsorState() {
+        //System.out.println("in sponsor state" + controller.getSponsor().getName());
         if(controller.getSponsor() != null){
+            System.out.println("got sponsor");
             return QuestPhaseStatesE.QUEST_SETUP;
         }//TODO: stopped here, questPhaseInboundService provides result of sponsor search, use that here
         else if(controller.getSponsorAttempts() >= controller.getPlayerTurnService().getPlayers().size()){
@@ -100,6 +103,7 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
 
     public QuestPhaseStatesE questSetupState(){
         if(controller.getNumStages() >= controller.getQuestCard().getStages()){
+           System.out.println("quest setup state returning join state");
             return QuestPhaseStatesE.QUEST_JOIN;
         }
         controller.setupStage();
