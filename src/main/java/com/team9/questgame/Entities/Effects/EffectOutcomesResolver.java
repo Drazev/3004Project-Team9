@@ -4,7 +4,7 @@ import com.team9.questgame.Entities.Players;
 
 import java.util.HashSet;
 
-public interface EffectOutcomes {
+public interface EffectOutcomesResolver {
 
     /**
      * Apply effect outcome to target player list.
@@ -16,4 +16,6 @@ public interface EffectOutcomes {
     void getSuccessMessage();
 
     void getFailureMessage();
+
+    boolean isNegativeEffect();
 }

@@ -27,7 +27,6 @@ import java.util.ArrayList;
  */
 public abstract class Effects {
     private final ArrayList<TargetSelector> targetSelectors;
-    private final ArrayList<EffectOutcomes> outcomes;
     private final Cards source;
     private Players activatedBy;
     private EffectState state;
@@ -39,12 +38,10 @@ public abstract class Effects {
     /**
      * Creates a new Effect Recipe
      * @param targetSelectors A selector algorithm used by EffectResolutionService to determine those in the effect area.
-     * @param outcomes An outcome algorithm that when given affected players will determine how they are affected.
      * @param source Card that was the source of the effect.
      */
-    protected Effects(ArrayList<TargetSelector> targetSelectors, ArrayList<EffectOutcomes> outcomes, Cards source) {
+    protected Effects(ArrayList<TargetSelector> targetSelectors, Cards source) {
         this.targetSelectors = targetSelectors;
-        this.outcomes = outcomes;
         this.source = source;
         this.activatedBy=null;
         this.state = EffectState.INACTIVE;

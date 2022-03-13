@@ -394,4 +394,8 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
     private void notifyPlayAreaChanged() {
         outboundService.broadcastPlayAreaChanged(player,getPlayAreaData());
     }
+
+    public void onPhaseNextPlayerTurn(Players player) {
+
+    }
 }
