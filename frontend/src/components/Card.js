@@ -79,7 +79,7 @@ function Card(props){
                             paddingRight: 5,
                             backgroundColor:"#77a3c9",
                             borderColor:"#77a3c9",}}
-                        onClick={() => playCard(props.cardOwner, props.card.cardID, props.card)}
+                        onClick={() => playCard(props.cardOwner, props.card.cardID, props.card, props.playerID)}
                     >Play</Button>{' '}
                 </>
             }

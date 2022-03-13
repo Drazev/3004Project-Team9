@@ -130,14 +130,15 @@ export function discardCard(name, cardId) {
   });
 }
 
-export function playCard(name, cardId, card) {
-  console.log("Play Card: \nName: " + name + "\nCardID: " + cardId + "\nCard: " + JSON.stringify(card));
+export function playCard(name, cardId, card, playerID) {
+  console.log("Play Card: \nName: " + name + "\nCardID: " + cardId + "\nCard: " + JSON.stringify(card) + "\nPlayerID: " + JSON.stringify(playerID));
   client.publish({
     destination: "/app/general/player-play-card",
     body: JSON.stringify({
       name: name,
       cardId: cardId,
       card: card,
+      playerID: playerID
     }),
   });
 }
