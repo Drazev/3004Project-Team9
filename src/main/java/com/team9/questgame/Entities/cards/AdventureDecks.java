@@ -11,6 +11,12 @@ public class AdventureDecks extends Decks<AdventureCards>{
          super(DeckTypes.ADVENTURE, AdventureDecks.class);
     }
 
+    public AdventureCards drawCard(Hand hand) {
+        AdventureCards card=selectCard(hand);
+        card.playCard(hand);
+        return card;
+    }
+
     @Override
     protected void createDeck() {
         HashMap<AdventureDeckCards,Integer> deckList = new HashMap<>();

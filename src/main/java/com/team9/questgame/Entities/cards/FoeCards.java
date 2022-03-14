@@ -71,13 +71,6 @@ public class FoeCards extends AdventureCards implements BoostableCard, BattlePoi
         return data;
     }
 
-    protected void registerWithNewPlayArea(PlayerPlayAreas playArea) {
-        //Foes do not contribute to Player battlepoints. Their strength only works as part of a quest stage
-        if(activeEffect!=null) {
-            playArea.registerActiveEffect(this);
-        }
-    }
-
     @Override
     public void discardCard() {
         isBoosted=false;

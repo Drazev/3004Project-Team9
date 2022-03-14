@@ -8,6 +8,7 @@ import com.team9.questgame.ApplicationContextHolder;
 import com.team9.questgame.Data.CardData;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.exception.BadRequestException;
+import com.team9.questgame.game_phases.quest.QuestPhaseController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -79,8 +80,13 @@ class HandTest {
 
     @Test
     void playCard() throws JsonProcessingException {
-        PlayAreas area = player.getPlayArea();
+        PlayerPlayAreas area = player.getPlayArea();
         Hand hand = player.getHand();
+        QuestPhaseController phase = new QuestPhaseController();
+        TestPlayArea stageStandIn = new TestPlayArea();
+        area.registerGamePhase(phase);
+        area.onPlayAreaChanged(stageStandIn);
+        area.onPhaseNextPlayerTurn(player);
         LOG.info("Hand state before card received.");
         for(int i=0;i<Hand.MAX_HAND_SIZE;++i) {
             aDeck.drawCard(hand);
@@ -128,9 +134,11 @@ class HandTest {
         deckList.put(AdventureDeckCards.SIR_GALAHAD,1);
         deckList.put(AdventureDeckCards.SIR_LANCELOT,1);
         deckList.put(AdventureDeckCards.KING_ARTHUR,1);
-        int uniqueFoes = 1;
-        int uniqueTests = 2;
-        int uniqueWeapons = 2;
+        HashMap<CardTypes,Integer> totals = new HashMap<>();
+        totals.put(CardTypes.FOE,2);
+        totals.put(CardTypes.TEST,2);
+        totals.put(CardTypes.WEAPON,4);
+        totals.put(CardTypes.ALLY,3);
 
         for(Map.Entry<AdventureDeckCards,Integer> e : deckList.entrySet()) {
 
@@ -146,11 +154,15 @@ class HandTest {
                 }
             }
         }
-        HashMap<CardTypes,HashSet<AllCardCodes>> result = hand.getUniqueCardsCodesBySubType();
-        assert(result.get(CardTypes.FOE).size()==uniqueFoes);
-        assert(result.get(CardTypes.WEAPON).size()==uniqueWeapons);
-        assert(result.get(CardTypes.TEST).size()==uniqueTests);
+        HashMap<CardTypes,HashMap<AllCardCodes,Integer>> result = hand.getNumberOfEachCardCodeBySubType();
 
+        for(Map.Entry<CardTypes,HashMap<AllCardCodes,Integer>> e : result.entrySet()) {
+            int total = 0;
+            for(Integer n : e.getValue().values()) {
+                total+=n;
+            }
+            assert(total==totals.get(e.getKey()));
+        }
     }
 
     @Test

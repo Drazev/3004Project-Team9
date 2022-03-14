@@ -20,7 +20,6 @@ public abstract class  Decks<T extends Cards> {
     private Stack<T> drawDeck;
     @Getter
     private ArrayList<T> discardPile;
-    private final HashMap<T, CardArea> cardLocation;
     protected static final CardFactory factory = CardFactory.getInstance();
     @JsonIgnore
     private final OutboundService outboundService;
@@ -33,7 +32,6 @@ public abstract class  Decks<T extends Cards> {
         this.cardsInDeck=new HashSet<>();
         this.drawDeck = new Stack<>();
         this.discardPile = new ArrayList<>();
-        this.cardLocation = new HashMap<>();
         this.outboundService = ApplicationContextHolder.getContext().getBean(OutboundService.class);
         init();
     }
@@ -62,6 +60,12 @@ public abstract class  Decks<T extends Cards> {
      * @param area The card area that where the CardArea::recieveCard() methiod will be triggered with given card.
      */
     public T drawCard(CardArea area) {
+        T card=selectCard(area);
+        card.playCard(area);
+        return card;
+    }
+
+    protected T selectCard(CardArea area) {
         T card=null;
 
         if(drawDeck.size()==0)
@@ -75,9 +79,7 @@ public abstract class  Decks<T extends Cards> {
         }
 
         card = drawDeck.pop();
-        cardLocation.put(card,area);
 
-        card.playCard(area);
         notifyDeckChanged();
         return card;
     }

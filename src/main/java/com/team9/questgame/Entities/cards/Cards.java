@@ -55,6 +55,10 @@ public abstract class Cards {
         return imgSrc;
     }
 
+    public long getCardID() {
+        return cardID;
+    }
+
     public AllCardCodes getCardCode() {
         return cardCode;
     }
@@ -71,9 +75,7 @@ public abstract class Cards {
         return cardID == cards.cardID && cardCode==cards.cardCode;
     }
 
-    public long getCardID() {
-        return cardID;
-    }
+
 
     @Override
     public int hashCode() {
@@ -111,7 +113,6 @@ public abstract class Cards {
         CardArea tmp = playArea;
         boolean rc = playCard(tmp);
         if(rc) {
-
             if(location!=null) {
                 onLocationChanged();
             }

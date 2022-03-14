@@ -7,6 +7,7 @@ import com.team9.questgame.ApplicationContextHolder;
 import com.team9.questgame.Data.PlayerData;
 import com.team9.questgame.Entities.cards.*;
 import com.team9.questgame.exception.BadRequestException;
+import com.team9.questgame.exception.CardAreaException;
 import com.team9.questgame.exception.IllegalCardStateException;
 import com.team9.questgame.gamemanager.service.InboundService;
 import com.team9.questgame.gamemanager.service.OutboundService;
@@ -121,7 +122,7 @@ public class Players {
         return true;
     }
 
-    public void actionPlayCard(long cardId) throws BadRequestException,IllegalCardStateException {
+    public void actionPlayCard(long cardId) throws BadRequestException,IllegalCardStateException, CardAreaException {
         hand.playCard(cardId);
     }
 
@@ -130,7 +131,7 @@ public class Players {
     }
 
     public void actionActivateCard(long cardId) throws BadRequestException,IllegalCardStateException {
-        playArea.activateCard(cardId);
+
     }
 
     /**

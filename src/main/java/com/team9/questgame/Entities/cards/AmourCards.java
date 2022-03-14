@@ -46,7 +46,7 @@ public class AmourCards extends AdventureCards implements BattlePointContributor
     }
 
     @Override
-    protected void registerWithNewPlayArea(PlayerPlayAreas playArea) {
+    protected void registerWithNewPlayerPlayArea(PlayerPlayAreas playArea) {
         playArea.registerBidContributor(this);
         playArea.registerBattlePointContributor(this);
     }

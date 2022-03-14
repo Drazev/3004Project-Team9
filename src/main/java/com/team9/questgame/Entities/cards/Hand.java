@@ -9,6 +9,7 @@ import com.team9.questgame.Entities.Players;
 import com.team9.questgame.exception.BadRequestException;
 import com.team9.questgame.exception.CardAreaException;
 import com.team9.questgame.exception.IllegalCardStateException;
+import com.team9.questgame.exception.IllegalEffectStateException;
 import com.team9.questgame.gamemanager.service.InboundService;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import org.slf4j.Logger;
@@ -40,6 +41,7 @@ public class Hand implements CardArea<AdventureCards> {
     private boolean isHandOversize;
 
     private HashSet<AdventureCards> hand;
+    private HashSet<CardWithEffect> activatableCards;
 
     private HashMap<Long,AdventureCards> cardIdMap;
 
@@ -55,6 +57,7 @@ public class Hand implements CardArea<AdventureCards> {
         this.inboundService = ApplicationContextHolder.getContext().getBean(InboundService.class);
         this.player=player;
         hand = new HashSet<>();
+        activatableCards = new HashSet<>();
         cardIdMap = new HashMap<>();
         onGameReset();
     }
@@ -67,19 +70,30 @@ public class Hand implements CardArea<AdventureCards> {
         return hand.size();
     }
 
-    public HashMap<CardTypes,HashSet<AllCardCodes>> getUniqueCardsCodesBySubType() {
-        HashMap<CardTypes,HashSet<AllCardCodes>> uniqueCards = new HashMap<>();
+    public HashMap<CardTypes,HashMap<AllCardCodes,Integer>> getNumberOfEachCardCodeBySubType() {
+        HashMap<CardTypes,HashMap<AllCardCodes,Integer>> cardList = new HashMap<>();
 
         for(AdventureCards card : hand) {
-            HashSet<AllCardCodes> codes = uniqueCards.get(card.getSubType());
-            if(codes==null) {
-                codes = new HashSet<>();
-                uniqueCards.put(card.getSubType(),codes);
+            HashMap<AllCardCodes,Integer> cardMap;
+            CardTypes type = card.getSubType();
+            int numCards=0;
+            if(!cardList.containsKey(type)) {
+                cardMap = new HashMap<>();
+                cardList.put(type,cardMap);
             }
-            codes.add(card.getCardCode());
+            else {
+                cardMap = cardList.get(type);
+            }
+
+            if(cardMap.containsKey(card.getCardCode()))
+            {
+                numCards = cardMap.get(card.getCardCode());
+            }
+            ++numCards;
+            cardMap.put(card.getCardCode(),numCards);
         }
 
-        return uniqueCards;
+        return cardList;
     }
 
     private boolean validateHandSize() {
@@ -97,10 +111,9 @@ public class Hand implements CardArea<AdventureCards> {
 
     @Override
     public boolean receiveCard(AdventureCards card) {
+        LOG.info(player.getName()+": Has received card"+card.getCardCode());
         hand.add(card);
-
         cardIdMap.put(card.getCardID(),card);
-        LOG.info(player.getName()+": Has DRAWN a card.");
         validateHandSize();
         notifyHandUpdated();
         return true;
@@ -111,7 +124,7 @@ public class Hand implements CardArea<AdventureCards> {
         card.discardCard();
         hand.remove(card);
         cardIdMap.remove(card.getCardID());
-        LOG.info(player.getName()+": Has DISCARDED a card.");
+        LOG.info(player.getName()+": Has DISCARDED card "+card.getCardCode());
         validateHandSize();
         notifyHandUpdated();
     }
@@ -123,7 +136,6 @@ public class Hand implements CardArea<AdventureCards> {
 
     @Override
     public boolean playCard(AdventureCards card) throws CardAreaException {
-        LOG.info(player.getName()+": Has PLAYED CARD "+card);
         if(playArea==null || !hand.contains(card)) {
             return false;
         }
@@ -132,7 +144,9 @@ public class Hand implements CardArea<AdventureCards> {
         if(rc) {
             hand.remove(card);
             cardIdMap.remove(card.getCardID());
+            activatableCards.remove(card);
             validateHandSize();
+            LOG.info(player.getName()+": Has PLAYED CARD "+card.getCardCode());
         }
 
         notifyHandUpdated();
@@ -144,12 +158,32 @@ public class Hand implements CardArea<AdventureCards> {
         return playCard(card);
     }
 
+    public boolean activateCard(long cardId) throws CardAreaException, IllegalEffectStateException {
+        boolean rc = false;
+        if(!cardIdMap.containsKey(cardId)) {
+            rc=playArea.activateCard(cardId);
+        }
+        else {
+            for(CardWithEffect card : activatableCards) {
+                if(card.getCardID()==cardId) {
+                    card.activate(player);
+                    card.discardCard();
+                    activatableCards.remove(card);
+                    rc=true;
+                }
+            }
+        }
+        return rc;
+    }
+
     @Override
     public void onGameReset() {
         hand.clear();
         cardIdMap.clear();
+        activatableCards.clear();
         isHandOversize=false;
         notifyHandUpdated();
+
     }
 
     public ArrayList<CardData> generateCardData() {
@@ -167,6 +201,10 @@ public class Hand implements CardArea<AdventureCards> {
                 isHandOversize,
                 generateCardData()
         );
+    }
+
+    public void registerCardWithEffect(CardWithEffect card) {
+        activatableCards.add(card);
     }
 
     private AdventureCards findCardFromCardId(Long cardId) throws BadRequestException,IllegalCardStateException{
