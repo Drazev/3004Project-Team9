@@ -73,7 +73,7 @@ public class TestCards <T extends Enum<T> & AllCardCodes> extends AdventureCards
         return data;
     }
 
-    protected void registerWithNewPlayArea(PlayerPlayAreas playArea) {
+    protected void registerWithNewPlayerPlayArea(PlayerPlayAreas playArea) {
         if(boostConditionCardCode!=null) {
             playArea.registerCardBoostDependency(boostConditionCardCode,this);
         }

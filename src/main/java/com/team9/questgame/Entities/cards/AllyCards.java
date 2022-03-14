@@ -2,6 +2,7 @@ package com.team9.questgame.Entities.cards;
 
 import com.team9.questgame.Data.CardData;
 import com.team9.questgame.Entities.Effects.Effects;
+import com.team9.questgame.Entities.Players;
 
 /**
  * Entity representing an Ally card within the game.
@@ -11,7 +12,7 @@ import com.team9.questgame.Entities.Effects.Effects;
  * ally being in the owing players play area.
  * @param <T> This is an enumeration type representing the card that triggers the boost.
  */
-public class AllyCards <T extends Enum<T> & AllCardCodes> extends AdventureCards implements BoostableCard, BattlePointContributor,BidContributor {
+public class AllyCards <T extends Enum<T> & AllCardCodes> extends AdventureCards implements BoostableCard, BattlePointContributor,BidContributor,CardWithEffect {
     private final int bonusBp; //Battle Points
     private final int bids;
     private final int boostBonusBp;
@@ -124,7 +125,7 @@ public class AllyCards <T extends Enum<T> & AllCardCodes> extends AdventureCards
         return activeEffect;
     }
 
-    protected void registerWithNewPlayArea(PlayerPlayAreas playArea) {
+    protected void registerWithNewPlayerPlayArea(PlayerPlayAreas playArea) {
 
         if(activeEffect!=null) {
             playArea.registerActiveEffect(this);
@@ -144,8 +145,25 @@ public class AllyCards <T extends Enum<T> & AllCardCodes> extends AdventureCards
     }
 
     @Override
+    protected void registerWithHand(Hand hand) {
+        if(activeEffect!=null) {
+            hand.registerCardWithEffect(this);
+        }
+    }
+
+    @Override
     public void discardCard() {
         isBoosted=false;
         super.discardCard();
+    }
+
+    @Override
+    public void activate(Players activatingPlayer) {
+        if(activeEffect==null) {
+            LOG.error("Player "+ activatingPlayer.getName()+ " activated "+this.cardCode+", but it has no Effect to activate!");
+            return;
+        }
+        activeEffect.activate(activatingPlayer);
+        discardCard();
     }
 }
