@@ -5,6 +5,7 @@ import com.team9.questgame.ApplicationContextHolder;
 import com.team9.questgame.Data.CardData;
 import com.team9.questgame.Data.HandData;
 import com.team9.questgame.Data.HandOversizeData;
+import com.team9.questgame.Entities.Effects.EffectResolverService;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.exception.BadRequestException;
 import com.team9.questgame.exception.CardAreaException;
@@ -38,7 +39,10 @@ public class Hand implements CardArea<AdventureCards> {
     @JsonIgnore
     private final InboundService inboundService;
 
+    private final EffectResolverService effectResolverService;
+
     private boolean isHandOversize;
+    private boolean isForcedToDiscard;
 
     private HashSet<AdventureCards> hand;
     private HashSet<CardWithEffect> activatableCards;
@@ -55,6 +59,7 @@ public class Hand implements CardArea<AdventureCards> {
         LOG= LoggerFactory.getLogger(Hand.class);
         this.outboundService = ApplicationContextHolder.getContext().getBean(OutboundService.class);
         this.inboundService = ApplicationContextHolder.getContext().getBean(InboundService.class);
+        this.effectResolverService = ApplicationContextHolder.getContext().getBean(EffectResolverService.class);
         this.player=player;
         hand = new HashSet<>();
         activatableCards = new HashSet<>();
@@ -64,6 +69,10 @@ public class Hand implements CardArea<AdventureCards> {
 
     public boolean isHandOversize() {
         return isHandOversize;
+    }
+
+    public boolean isForcedToDiscard() {
+        return isForcedToDiscard;
     }
 
     public int getHandSize() {
@@ -126,6 +135,7 @@ public class Hand implements CardArea<AdventureCards> {
         cardIdMap.remove(card.getCardID());
         LOG.info(player.getName()+": Has DISCARDED card "+card.getCardCode());
         validateHandSize();
+        notifyPlayerDiscardedCard(card);
         notifyHandUpdated();
     }
 
@@ -136,7 +146,7 @@ public class Hand implements CardArea<AdventureCards> {
 
     @Override
     public boolean playCard(AdventureCards card) throws CardAreaException {
-        if(playArea==null || !hand.contains(card)) {
+        if(playArea==null || !hand.contains(card) || isForcedToDiscard) {
             return false;
         }
         boolean rc = card.playCard(playArea);
@@ -182,8 +192,8 @@ public class Hand implements CardArea<AdventureCards> {
         cardIdMap.clear();
         activatableCards.clear();
         isHandOversize=false;
+        isForcedToDiscard=false;
         notifyHandUpdated();
-
     }
 
     public ArrayList<CardData> generateCardData() {
@@ -226,8 +236,20 @@ public class Hand implements CardArea<AdventureCards> {
         outboundService.broadcastHandOversize(player,data);
     }
 
+    private void notifyPlayerDiscardedCard(Cards card) {
+        if(isForcedToDiscard) {
+            effectResolverService.notifyCardDiscarded(player,card);
+        }
+    }
+
     private void notifyHandUpdated() {
         outboundService.broadcastHandUpdate(generateHandData());
     }
+
+    private void playerForcedToDiscard(boolean isForcedToDiscard) {
+        this.isForcedToDiscard=isForcedToDiscard;
+    }
+
+
 
 }

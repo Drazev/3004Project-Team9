@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Effects represent an algorithm that affects players
@@ -34,6 +35,10 @@ public abstract class Effects {
     static protected Logger LOG= LoggerFactory.getLogger(Effects.class);
     @JsonIgnore
     static protected EffectResolverService effectResolver=ApplicationContextHolder.getContext().getBean(EffectResolverService .class);
+
+    public Cards getCardSource() {
+        return source;
+    }
 
     /**
      * Creates a new Effect Recipe
@@ -75,6 +80,13 @@ public abstract class Effects {
         nextState();
     }
 
+    public void resolveEffect() {
+        if(state!=EffectState.EFFECT_RESOLUTION_WAIT_FOR_PLAYER_DISCARDS) {
+            throw new IllegalEffectStateException("Effect must be waiting on player discards to resolveEffect. This effect was in the state: "+state,this,source);
+        }
+        nextState();
+    }
+
     /**
      * Rest an effect in progress that may be waiting on a trigger
      */
@@ -97,25 +109,22 @@ public abstract class Effects {
             }
             case ACTIVATED -> {
                 this.state =  EffectState.TARGET_SELECTION;
-                LOG.info(source.getCardName()+" state changed to "+this.state+" by "+activatedBy.getName());
                 onTargetSelection();
             }
             case TARGET_SELECTION_ON_TRIGGER -> {
                 this.state=EffectState.TRIGGERED;
-                LOG.info(source.getCardName()+" state changed to "+this.state+" by "+activatedBy.getName());
-                onTriggered();
+                onTargetSelectionTriggered();
             }
-            case TARGET_SELECTION -> {
+            case TARGET_SELECTION, TRIGGERED-> {
                 this.state=EffectState.EFFECT_RESOLUTION;
-                LOG.info(source.getCardName()+" state changed to "+this.state+" by "+activatedBy.getName());
                 onEffectResolution();
             }
-            case RESOLVED -> {
+            case EFFECT_RESOLUTION,EFFECT_RESOLUTION_WAIT_FOR_PLAYER_DISCARDS -> {
                 this.state=EffectState.RESOLVED;
-                LOG.info(source.getCardName()+" state changed to "+this.state+" by "+activatedBy.getName());
-                onEffectResolution();
+                onResolved();
             }
         }
+        LOG.info(source.getCardName()+" state changed to "+this.state+" by "+activatedBy.getName());
     }
 
     protected void waitForTrigger() {
@@ -125,6 +134,15 @@ public abstract class Effects {
         this.state=EffectState.TARGET_SELECTION_ON_TRIGGER;
         LOG.info(source.getCardName()+" state changed to "+this.state+" by "+activatedBy.getName());
         effectResolver.registerEffectTriggeredOnQuestCompleted(this);
+    }
+
+    protected void waitForPlayerDiscards(HashSet<CardDiscardList> list) {
+        if( !(this.state==EffectState.TARGET_SELECTION || this.state==EffectState.TRIGGERED) ) {
+            throw new IllegalEffectStateException("Effect must be in state "+EffectState.TARGET_SELECTION+" or "+EffectState.TRIGGERED+" to wait for player action trigger, but was in "+this.state,this,source);
+        }
+        this.state=EffectState.EFFECT_RESOLUTION_WAIT_FOR_PLAYER_DISCARDS;
+        LOG.info(source.getCardName()+" state changed to "+this.state+" by "+activatedBy.getName());
+        effectResolver.registerForcePlayerDiscards(list);
     }
 
     /**
@@ -138,9 +156,10 @@ public abstract class Effects {
      *
      * Overriding this is optional
      */
-    protected void onTriggered(){
+    protected void onTargetSelectionTriggered(){
         nextState();
     }
+
 
     /**
      * Automatically gather possible targets from the EffectResolverService
@@ -151,6 +170,15 @@ public abstract class Effects {
         }
         nextState();
     }
+
+    /**
+     * If effect resolution required player action, and that action was completed
+     * this method will be called.
+     *
+     * Use this to complete any actions that need to be done before the effect
+     * resolution stage.
+     */
+    protected void onResolveEffect() { nextState();}
 
     /**
      * Algorithm to manage target selection and effect resolution

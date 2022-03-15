@@ -150,6 +150,20 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
     }
 
     /**
+     * Used by effect service to destroy a card in play regardless game state.
+     * @param cardCode The card code to be destroyed (Likely by Morgan Le Fey)
+     * @return True if the card was found and discarded, False otherwise
+     */
+    public boolean destroyCardIfPresent(AllCardCodes cardCode) {
+        if(allCards.containsKey(cardCode))
+        {
+            discardCard(allCards.get(cardCode));
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Add a card to the Players In play area.
      * Cards are received by Players Hand when they
      * attempt to play a card from their hand.
