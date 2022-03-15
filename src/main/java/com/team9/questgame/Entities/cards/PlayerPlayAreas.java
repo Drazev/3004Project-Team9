@@ -82,6 +82,10 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         return allCards.size();
     }
 
+    public boolean isPlayersTurn() {
+        return !playableCardTypes.isEmpty();
+    }
+
     /**
      * Creates a CardData record for each card in the play area.
      * @return A list of CardData elements representing the cards in the play area
@@ -144,6 +148,9 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
      */
     @Override
     public void discardCard(AdventureCards card) {
+        if(!isPlayersTurn()) {
+            throw new CardAreaException("Card {"+card.getCardCode()+","+card.getSubType()+"} cannot be DISCARDED at this time.", CardAreaException.CardAreaExceptionReasonCodes.RULE_VIOLATION_CANNOT_PLAY_OR_DISCARD_OUT_OF_TURN);
+        }
         HashSet<AdventureCards> cardList = new HashSet<>();
         cardList.add(card);
         discardCards(cardList);
@@ -166,7 +173,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         if(!playableCardTypes.contains(card.getSubType())) {
             //RULE: If hand is oversize the player can discard a card or play Ally card
             if( !( card.getSubType()==CardTypes.ALLY && player.getHand().isHandOversize() ) ) {
-                throw new CardAreaException("Card {"+card.getCardCode()+","+card.getSubType()+"} cannot be played at this time.", CardAreaException.CardAreaExceptionReasonCodes.CARD_TYPE_CANNOT_BE_PLAYED_AT_THIS_TIME);
+                throw new CardAreaException("Card {"+card.getCardCode()+","+card.getSubType()+"} cannot be played at this time.", CardAreaException.CardAreaExceptionReasonCodes.RULE_VIOLATION_CANNOT_PLAY_OR_DISCARD_OUT_OF_TURN);
             }
         }
 

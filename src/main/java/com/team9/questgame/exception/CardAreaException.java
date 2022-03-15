@@ -14,7 +14,7 @@ public class CardAreaException extends RuntimeException{
         NULL_CARD,
         DUPLICATE_CARD_INSTANCE,
         RULE_CANNOT_HAVE_TWO_OF_SAME_CARD_IN_PLAY,
-        CARD_TYPE_CANNOT_BE_PLAYED_AT_THIS_TIME
+        RULE_VIOLATION_CANNOT_PLAY_OR_DISCARD_OUT_OF_TURN
     }
 
     public CardAreaException(CardAreaExceptionReasonCodes reasonCode) {
