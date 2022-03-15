@@ -61,7 +61,7 @@ function Card(props){
                             paddingRight: 5,
                             backgroundColor:"#c96b6b",
                             borderColor:"#c96b6b",}}
-                        onClick={() => discardCard(props.cardOwner,props.card.cardID)}
+                        onClick={() => discardCard(props.cardOwner,props.card.cardID,props.playerID)}
                     >Discard</Button>{' '}
                 </>
             }

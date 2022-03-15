@@ -4,12 +4,12 @@ import ConnectForm from "./components/ConnectForm";
 import GameBoard from "./components/GameBoard";
 import { useConnected, useGameStarted } from "./Stores/GeneralStore";
 import WaitingRoom from "./components/WaitingRoom";
-import background from "./Images/Quest Background.png";
+import Background from "./Images/Quest-Board-Background-with-Logo.png";
 const App = () => {
   const connected = useConnected();
   const gameStarted = useGameStarted();
   return (
-    <div className="App" style={{width:1914,height:975,backgroundImage:`url(${background})`,backgroundSize:"cover",backgroundPosition:"center", backgroundColor:"black"}}>
+    <div className="App" style={{width:1920,height:975,backgroundSize:"cover",backgroundPosition:"center",background:`url(https://wallpaperaccess.com/full/88167.jpg)`}}>
       {gameStarted ? (
           <GameBoard/>
       ) : <>

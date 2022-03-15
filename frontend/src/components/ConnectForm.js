@@ -9,7 +9,8 @@ import {
   useAddNewPlayer,
   useSetPlayers,
   useSetGameStarted,
-  useUpdateHand
+  useUpdateHand,
+  useUpdatePlayer
 } from "../Stores/GeneralStore";
 import {
   useUpdatePlayArea
@@ -19,6 +20,7 @@ const ConnectForm = () => {
   const name = useName();
   const addNewMessage = useAddNewMessage();
   const addNewPlayer =  useAddNewPlayer();
+  const updatePlayer = useUpdatePlayer();
   const setPlayers = useSetPlayers();
   const setConnected = useSetConnected();
   const setGameStarted = useSetGameStarted();
@@ -33,7 +35,7 @@ const ConnectForm = () => {
       alert("Please enter your name");
       return;
     }
-    if (connect(setConnected, setGameStarted, addNewMessage, setPlayers, name, updateHand, updatePlayArea) === false) {
+    if (connect(setConnected, setGameStarted, addNewMessage, setPlayers, name, updateHand, updatePlayArea, updatePlayer) === false) {
       alert("Name already taken, please choose a different one")
     }
   };

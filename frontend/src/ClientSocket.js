@@ -119,13 +119,14 @@ export function drawCard(name, cardId) {
   });
 }
 
-export function discardCard(name, cardId) {
+export function discardCard(name, cardId, playerID) {
   console.log("Discard Card: \nName: " + name + "\nCardID: " + cardId);
   client.publish({
     destination: "/app/general/player-discard-card",
     body: JSON.stringify({
       name: name,
       cardId: cardId,
+      playerID: playerID
     }),
   });
 }

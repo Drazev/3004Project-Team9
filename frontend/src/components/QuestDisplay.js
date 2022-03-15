@@ -58,7 +58,7 @@ public enum CardTypes {
 */
 
 const stages = {
-    0: {stageCard: {cardID: 5, cardName: "Boar", imgsrc: "./Assets/Adventure Deck (346x470)/Foe - Boar.png",bpValue: 5, boostedBpValue: 15, isBoosted: true },
+    0: {stageCard: {cardID: 5, cardName: "Boar", imgsrc: "./Assets/Adventure Deck (346x470)/Ally - Queen Iselut.png",bpValue: 5, boostedBpValue: 15, isBoosted: true },
         activeCards: [
             {cardID:9,cardName:"Horse",imgsrc:"./Assets/Adventure Deck (346x470)/Weapon - Horse.png",battlePoints:10,hasActiveEffect:false},
             {cardID:9,cardName:"Battle-ax",imgsrc:"./Assets/Adventure Deck (346x470)/Weapon - Battle-ax.png",battlePoints:15,hasActiveEffect:false},
