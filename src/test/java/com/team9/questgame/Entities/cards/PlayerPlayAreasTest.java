@@ -7,6 +7,7 @@ import com.team9.questgame.ApplicationContextHolder;
 import com.team9.questgame.Data.CardData;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.exception.CardAreaException;
+import com.team9.questgame.game_phases.quest.QuestPhaseController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,10 @@ class PlayerPlayAreasTest {
     ArrayList<Hand> hands;
     ArrayList<PlayerPlayAreas> pPlayAreas;
 
+    QuestPhaseController testPhaseController;
+    TestPlayArea testStage;
+
+
     Logger LOG;
 
     ObjectMapper objMap;
@@ -44,6 +49,8 @@ class PlayerPlayAreasTest {
         LOG = LoggerFactory.getLogger(PlayerPlayAreasTest.class);
         objMap = ApplicationContextHolder.getContext().getBean(ObjectMapper.class);
         aDeck = new AdventureDecks();
+        testPhaseController = new QuestPhaseController();
+        testStage = new TestPlayArea();
         players.add(new Players("Player 1"));
         players.add(new Players("Player 2"));
         players.add(new Players("Player 3"));
@@ -53,6 +60,8 @@ class PlayerPlayAreasTest {
                 .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
                 .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
                 .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
+
+
 
         for(int i=0;i<players.size();++i) {
             hands.add(players.get(i).getHand());
@@ -66,7 +75,15 @@ class PlayerPlayAreasTest {
             }
         }
 
-        playAllNonDuplicateCardsFromHand();
+        //playAllNonDuplicateCardsFromHand();
+    }
+
+    void setupPlayerPlayAreasToPlayCards() {
+        for(Players p : players) {
+            p.getPlayArea().registerGamePhase(testPhaseController);
+            p.getPlayArea().onPlayAreaChanged(testStage);
+            p.getPlayArea().onPhaseNextPlayerTurn(p);
+        }
     }
 
     void playAllNonDuplicateCardsFromHand() {
@@ -83,7 +100,8 @@ class PlayerPlayAreasTest {
 
     @Test
     void discardAllCards() {
-
+        setupPlayerPlayAreasToPlayCards();
+        playAllNonDuplicateCardsFromHand();
         for(PlayerPlayAreas pa : pPlayAreas) {
             pa.discardAllCards();
             assert(pa.size()==0);
@@ -105,8 +123,11 @@ class PlayerPlayAreasTest {
 //
 //    }
 
+
     @Test
     void discardAllAllies() {
+        setupPlayerPlayAreasToPlayCards();
+        playAllNonDuplicateCardsFromHand();
         for(PlayerPlayAreas pa : pPlayAreas) {
             HashSet<AdventureCards> cards = pa.getCardTypeMap().get(CardTypes.ALLY);
             if(cards==null) {
@@ -121,6 +142,8 @@ class PlayerPlayAreasTest {
 
     @Test
     void discardAllWeapons() {
+        setupPlayerPlayAreasToPlayCards();
+        playAllNonDuplicateCardsFromHand();
         for(PlayerPlayAreas pa : pPlayAreas) {
             HashSet<AdventureCards> cards = pa.getCardTypeMap().get(CardTypes.WEAPON);
             if(cards==null) {
@@ -132,6 +155,7 @@ class PlayerPlayAreasTest {
             assert(pa.getCardTypeMap().get(CardTypes.WEAPON).size()==0);
         }
     }
+
 
 //    @Test
 //    void discardAllTests() {
@@ -147,8 +171,11 @@ class PlayerPlayAreasTest {
 //        }
 //    }
 
+
     @Test
     void discardAllAmour() {
+        setupPlayerPlayAreasToPlayCards();
+        playAllNonDuplicateCardsFromHand();
         for(PlayerPlayAreas pa : pPlayAreas) {
             HashSet<AdventureCards> cards = pa.getCardTypeMap().get(CardTypes.AMOUR);
             if(cards==null) {
@@ -163,6 +190,8 @@ class PlayerPlayAreasTest {
 
     @Test
     void receiveCard() throws JsonProcessingException {
+        setupPlayerPlayAreasToPlayCards();
+        playAllNonDuplicateCardsFromHand();
         for(Players p : players) {
             LOG.info(p.getName()+" CARDS IN PLAY:\n"+objMap.writerWithDefaultPrettyPrinter().writeValueAsString(p.getPlayArea()));
             assert(p.getPlayArea().size()>0);
@@ -171,6 +200,8 @@ class PlayerPlayAreasTest {
 
     @Test
     void discardCard() {
+        setupPlayerPlayAreasToPlayCards();
+        playAllNonDuplicateCardsFromHand();
         for(PlayerPlayAreas pa : pPlayAreas) {
             int start=pa.size();
             int numDiscarded=0;
@@ -198,6 +229,9 @@ class PlayerPlayAreasTest {
         Players player = new Players("test");
         Hand hand = player.getHand();
         PlayerPlayAreas pa = player.getPlayArea();
+        pa.registerGamePhase(testPhaseController);
+        pa.onPlayAreaChanged(testStage);
+        pa.onPhaseNextPlayerTurn(player);
         CardFactory cf = CardFactory.getInstance();
         AdventureDecks testDeck = new AdventureDecks();
         HashMap<AdventureDeckCards,Integer> deckList = new HashMap<>();

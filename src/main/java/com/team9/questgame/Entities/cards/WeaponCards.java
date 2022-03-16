@@ -37,7 +37,7 @@ public class WeaponCards extends AdventureCards implements BattlePointContributo
         return data;
     }
 
-    protected void registerWithNewPlayArea(PlayerPlayAreas playArea) {
+    protected void registerWithNewPlayerPlayArea(PlayerPlayAreas playArea) {
         if(bonusBp>0) {
             playArea.registerBattlePointContributor(this);
         }
