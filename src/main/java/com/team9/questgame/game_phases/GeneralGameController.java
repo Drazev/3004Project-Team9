@@ -160,10 +160,8 @@ public class GeneralGameController implements CardArea<StoryCards> {
             this.discardCard(this.storyCard);
             sDeck.drawCard(this);
         }
-
+        // Generate the GamePhase that corresponds to the type of story card
         playCard(this.storyCard);
-        playerTurnService.nextPlayer();
-
 
         stateMachine.update();
     }

@@ -1,6 +1,8 @@
 package com.team9.questgame.game_phases.utils;
 
+import com.team9.questgame.ApplicationContextHolder;
 import com.team9.questgame.Entities.Players;
+import com.team9.questgame.gamemanager.service.OutboundService;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -13,9 +15,12 @@ public class PlayerTurnService {
     @Getter
     private final ArrayList<Players> players;
 
+    private OutboundService outboundService;
+
     public PlayerTurnService(ArrayList<Players> players) {
         this.players = players;
-        currentPlayerIndex = 0;
+        this.currentPlayerIndex = 0;
+        this.outboundService = ApplicationContextHolder.getContext().getBean(OutboundService.class);
     }
 
     public Players getPlayerTurn() {
@@ -37,6 +42,9 @@ public class PlayerTurnService {
             throw new RuntimeException("No player found");
         }
         currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
+
+        // TODO: Add test for this broadcast in the OutboundServiceTest or WSControllerTest
+        outboundService.broadcastNextTurn(getPlayerTurn());
     }
 
     public boolean setPlayerTurn(int i) {

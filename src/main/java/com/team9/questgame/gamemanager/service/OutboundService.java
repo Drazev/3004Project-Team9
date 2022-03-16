@@ -4,6 +4,7 @@ import com.team9.questgame.Data.*;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.gamemanager.record.rest.EmptyJsonReponse;
 import com.team9.questgame.gamemanager.record.socket.HandUpdateOutbound;
+import com.team9.questgame.gamemanager.record.socket.PlayerNextTurnOutbound;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,9 +47,9 @@ public class OutboundService {
         this.sendToAllPlayers("/topic/general/game-start");
     }
 
-    public void broadcastNextTurn() {
+    public void broadcastNextTurn(Players player) {
         // @TODO: include player turn in the next iteration
-        this.sendToAllPlayers("/topic/general/next-turn");
+        this.sendToAllPlayers("/topic/general/next-turn", new PlayerNextTurnOutbound(player.getPlayerId(), player.getName()));
     }
 
     public void broadcastHandUpdate( HandData data) {
