@@ -144,6 +144,37 @@ class GeneralGameControllerTest {
     }
 
     @Test
+    void playerPlayCard() {
+        // Cannot play card when in SETUP state
+        assertThat(gameController.getPlayers().size()).isEqualTo(0);
+        assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.SETUP);
+        assertThrows(IllegalGameStateException.class, () -> gameController.playerPlayCard(null, 0)); // input param doesn't matter
+
+        // Cannot play card when in DRAW_STORY_CARD phase
+        for (int i = 0; i < GeneralGameController.MAX_PLAYERS; ++i) {
+            gameController.playerJoin(players.get(i));
+        }
+        gameController.startGame();
+        assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.DRAW_STORY_CARD);
+        assertThrows(IllegalGameStateException.class, () -> gameController.playerPlayCard(null, 0)); // input param doesn't matter
+
+        // Start a phase and attempt to play a card
+        // TODO: Test other Game Phases other than Quest when they are implemented
+        ArrayList<StoryCards> questCards = getQuestCards();
+        gameController.receiveCard(questCards.get(0));
+        gameController.playCard(gameController.getStoryCard());
+        assertThat(gameController.getQuestPhaseController().getQuestCard()).isNotNull();
+        assertThat(gameController.getQuestPhaseController().getQuestCard()).isEqualTo(gameController.getStoryCard());
+        assertThat(gameController.getQuestPhaseController().getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SPONSOR);
+
+        // TODO: Fix Hand's playerPlayCard behaviour
+//        Players player = gameController.getPlayers().get(0);
+//        gameController.playerPlayCard(player, player.getHand().getHand().iterator().next().getCardID());
+
+
+    }
+
+    @Test
     void discardCard() {
         // Cannot discard when the game is still being set up
         assertThat(gameController.getPlayers().size()).isEqualTo(0);

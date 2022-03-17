@@ -1,6 +1,7 @@
 package com.team9.questgame.gamemanager.service;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.game_phases.GeneralGameController;
+import com.team9.questgame.gamemanager.record.socket.PlayerPlayCardInbound;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +60,11 @@ public class InboundService {
         // Note: cardId is unused
         Players player = sessionService.getPlayerMap().get(name);
         gameController.dealCard(player);
+    }
+
+    public synchronized void playerPlayCard(PlayerPlayCardInbound playerPlayCardInbound) {
+        Players player = sessionService.getPlayerByPlayerId(playerPlayCardInbound.playerID());
+        gameController.playerPlayCard(player, playerPlayCardInbound.cardId());
     }
 
     public synchronized void playerDiscardCard(String name, long cardId) {

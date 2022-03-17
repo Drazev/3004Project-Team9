@@ -109,7 +109,7 @@ public class QuestPhaseController implements GamePhaseControllers {
     /**
      * Check client sponsor result
      * @param player the player who made the sponsor request
-     * @param found
+     * @param found true if the player decides to sponsor(sponsor found) false otherwise
      */
     public void checkSponsorResult(Players player, boolean found){
         if(stateMachine.getCurrentState() != QuestPhaseStatesE.QUEST_SPONSOR){
@@ -136,13 +136,56 @@ public class QuestPhaseController implements GamePhaseControllers {
                 outboundService.broadcastSponsorSearch(playerTurnService.getPlayerTurn().generatePlayerData());
             } case QUEST_SETUP -> {
                 outboundService.broadcastSponsorFound(sponsor.generatePlayerData());
+                this.setupStage();
             } case ENDED -> {
                 endPhase();
+            } default -> {
+                throw new IllegalQuestPhaseStateException("Unknown state");
             }
         }
     }
 
-    public void checkJoins(){
+    /**
+     * Called by checkSponsorResult() after a sponsor is found and the quest is set up for the first time
+     */
+    private void setupStage(){
+        curStage = new StagePlayAreas();
+        sponsor.getPlayArea().onPlayAreaChanged(curStage);
+        //System.out.println("num stages="+questCard.getStages()+" setupStage take "+numStages );
+        outboundService.broadcastSponsorSetup(sponsor.generatePlayerData());
+
+        stateMachine.update();
+    }
+
+    /*
+    * Called by sponsorSetupStage() after a stage is reported as being setup
+    * */
+    public void stageSetupComplete(boolean complete){
+        if(stateMachine.getCurrentState() != QuestPhaseStatesE.QUEST_SETUP){
+            throw new IllegalQuestPhaseStateException("Cannot set up a stage when not in QUEST_SETUP phase");
+        }
+        if(!complete | curStage.getBattlePoints() == 0){
+            throw new RuntimeException("temp exception sponsor setup was not completed");
+        }
+        stages.add(curStage);
+        stateMachine.update();
+        switch (stateMachine.getCurrentState()) {
+            case QUEST_SETUP -> {
+                outboundService.broadcastSponsorFound(sponsor.generatePlayerData());
+                this.setupStage();
+            } case QUEST_JOIN -> {
+                this.checkJoins();
+            } default -> {
+                throw new IllegalQuestPhaseStateException("Unknown state");
+            }
+        }
+
+    }
+
+    /**
+     * Called by stageSetup
+     */
+    private void checkJoins(){
         if(joinAttempts == 0){
             playerTurnService.setPlayerTurn(sponsor);
             playerTurnService.nextPlayer();
@@ -155,33 +198,40 @@ public class QuestPhaseController implements GamePhaseControllers {
     }
 
     public void checkJoinResult(Players player, boolean joined){
+        if (stateMachine.getCurrentState() != QuestPhaseStatesE.QUEST_JOIN) {
+            throw new IllegalQuestPhaseStateException("A player can only join when the quest is in QUEST_JOIN state");
+        }
+
         if(joined){
             questingPlayers.add(player);
             if(joinAttempts == playerTurnService.getPlayers().size()-1){
                 questTurnService = new PlayerTurnService(questingPlayers);
             }
         }
+
         stateMachine.update();
+        switch (stateMachine.getCurrentState()) {
+            case QUEST_JOIN -> {
+                this.checkJoins();
+            } case STAGE_ONE -> {
+            } case ENDED -> {
+            } default -> {
+                throw new IllegalQuestPhaseStateException("Unknown state");
+            }
+        }
     }
 
     public void noSponsor(){
         stateMachine.setSponsorFoundRequest(false);
     }
 
-    public void setupStage(){
-        curStage = new StagePlayAreas();
-        sponsor.getPlayArea().onPlayAreaChanged(curStage);
-        //System.out.println("num stages="+questCard.getStages()+" setupStage take "+numStages );
-        outboundService.broadcastSponsorSetup(sponsor.generatePlayerData());
-
-        stateMachine.update();
-    }
 
     /**
      * Reset the phase
      */
     public void endPhase() {
-
+        this.questCard.discardCard();
+        this.questCard = null;
     }
 
     /**

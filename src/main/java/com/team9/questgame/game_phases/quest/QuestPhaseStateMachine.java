@@ -99,7 +99,6 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
             //System.out.println("quest setup state returning join state");
             return QuestPhaseStatesE.QUEST_JOIN;
         }
-        controller.setupStage();
         return QuestPhaseStatesE.QUEST_SETUP;
     }
 
@@ -110,7 +109,6 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
             }
             return QuestPhaseStatesE.STAGE_ONE;
         }
-        controller.checkJoins();
         return QuestPhaseStatesE.QUEST_JOIN;
     }
 

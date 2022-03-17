@@ -76,6 +76,15 @@ public class SessionService {
         return sessionMap.getOrDefault(name, null);
     }
 
+    public synchronized Players getPlayerByPlayerId(long playerId) {
+        for (Players p: playerMap.values()) {
+            if (p.getPlayerId() == playerId) {
+                return p;
+            }
+        }
+        return null;
+    }
+
     /**
      * Get the number of player registered
      *
@@ -94,4 +103,5 @@ public class SessionService {
     private synchronized String getPlayer(String name) {
         return sessionMap.getOrDefault(name, null);
     }
+
 }

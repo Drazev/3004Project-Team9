@@ -8,6 +8,7 @@ import com.team9.questgame.Data.PlayAreaDataSources;
 import com.team9.questgame.exception.CardAreaException;
 import com.team9.questgame.game_phases.quest.QuestPhaseController;
 import com.team9.questgame.gamemanager.service.OutboundService;
+import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,6 +21,8 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
     private long id;
     private int battlePoints;
     private int bids;
+    @JsonIgnore
+    private Logger LOG;
     private HashMap<AllCardCodes, AdventureCards> allCards;
     private QuestCards questCard;
     private QuestPhaseController phaseController;
@@ -40,7 +43,16 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
         if(card==null) {
             throw new CardAreaException(CardAreaException.CardAreaExceptionReasonCodes.NULL_CARD);
         }
-        //TODO
+        return addToPlayArea(card);
+    }
+
+
+    private boolean addToPlayArea(AdventureCards card){
+        if(allCards.containsKey(card.getCardCode())){
+            LOG.error("RULE: A stage cannot have two cards of the same type");
+            throw new CardAreaException(CardAreaException.CardAreaExceptionReasonCodes.RULE_CANNOT_HAVE_TWO_OF_SAME_CARD_IN_PLAY);
+        }
+        //TODO:finish
         return false;
     }
 

@@ -188,6 +188,18 @@ public class GeneralGameController implements CardArea<StoryCards> {
         stateMachine.update();
     }
 
+    public void playerPlayCard(Players player, long cardId) {
+        if (!getStateMachine().isInPhases()) {
+            throw new IllegalGameStateException("Card can only be played in a Game Phases");
+        }
+
+        if (!player.getHand().playCard(cardId)) {
+            throw new RuntimeException("Cannot play card, mismatch cardID or unassigned playArea");
+        }
+
+        stateMachine.update();
+    }
+
     public void playerDiscardCard(Players player, long cardId) {
         player.actionDiscardCard(cardId);
         stateMachine.update();
