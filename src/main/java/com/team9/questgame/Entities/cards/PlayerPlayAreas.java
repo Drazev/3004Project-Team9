@@ -46,6 +46,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
     private HashSet<CardWithEffect> cardsWithActiveEffects;
     private HashSet<BattlePointContributor> cardsWithBattleValue;
     private HashSet<BidContributor> cardsWithBidValue;
+    private HashSet<BoostableCard> boostableCards;
 
     static private long nextid=0;
 
@@ -61,6 +62,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         phaseController = null;
         cardsWithBattleValue = new HashSet<>();
         cardsWithBidValue = new HashSet<>();
+        boostableCards = new HashSet<>();
         targetPlayArea=null;
         bids=0;
         battlePoints=0;
@@ -334,6 +336,11 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         update();
     }
 
+    @Override
+    public void registerBoostableCard(BoostableCard card) {
+        boostableCards.add(card);
+    }
+
     /**
      * Can be called to return the player play area so a new game can be played
      */
@@ -346,6 +353,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         phaseController = null;
         cardsWithBattleValue.clear();
         cardsWithBidValue.clear();
+        boostableCards.clear();
         bids=0;
         battlePoints=0;
         questCard=null;
@@ -424,6 +432,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         cardsWithActiveEffects.remove(delCard);
         cardsWithBattleValue.remove(delCard);
         cardsWithBidValue.remove(delCard);
+        boostableCards.remove(delCard);
         return true;
     }
 
