@@ -125,6 +125,7 @@ public class AllyCards <T extends Enum<T> & AllCardCodes> extends AdventureCards
         return activeEffect;
     }
 
+    @Override
     protected void registerWithNewPlayerPlayArea(PlayerPlayAreas playArea) {
 
         if(activeEffect!=null) {
@@ -142,6 +143,11 @@ public class AllyCards <T extends Enum<T> & AllCardCodes> extends AdventureCards
         if(boostConditionCardCode!=null) {
             playArea.registerCardBoostDependency(boostConditionCardCode,this);
         }
+    }
+
+    @Override
+    protected void registerwithNewPlayArea(PlayAreas playArea) {
+        playArea.registerBoostableCard(this);
     }
 
     @Override

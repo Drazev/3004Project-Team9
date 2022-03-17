@@ -72,6 +72,11 @@ public class FoeCards extends AdventureCards implements BoostableCard, BattlePoi
     }
 
     @Override
+    protected void registerwithNewPlayArea(PlayAreas playArea) {
+        playArea.registerBoostableCard(this);
+    }
+
+    @Override
     public void discardCard() {
         isBoosted=false;
         super.discardCard();
