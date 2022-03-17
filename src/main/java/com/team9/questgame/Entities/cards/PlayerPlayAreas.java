@@ -36,7 +36,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
     private final OutboundService outboundService;
     @JsonIgnore
     private Logger LOG;
-    private PlayAreas<AdventureCards> targetPlayArea;
+    private PlayAreas targetPlayArea;
     private int bids;
     private int battlePoints;
     private HashMap<CardTypes, HashSet<AdventureCards>> cardTypeMap;

@@ -26,6 +26,9 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
     @Setter
     private boolean sponsorFoundRequest;
 
+    @Setter
+    private boolean isPhaseReset;
+
     public QuestPhaseStateMachine() {
         previousState = null;
         currentState = QuestPhaseStatesE.NOT_STARTED;
@@ -133,6 +136,10 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
     }
 
     public QuestPhaseStatesE endedState() {
+        if (isPhaseReset) {
+            // Change to not started when the controller receive a QuestCard
+            return QuestPhaseStatesE.NOT_STARTED;
+        }
         return QuestPhaseStatesE.ENDED;
     }
 
@@ -143,5 +150,6 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
     private void resetAllRequest() {
         setPhaseStartRequested(false);
         setSponsorFoundRequest(false);
+        setPhaseReset(false);
     }
 }

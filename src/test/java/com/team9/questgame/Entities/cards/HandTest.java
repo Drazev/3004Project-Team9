@@ -85,7 +85,7 @@ class HandTest {
         QuestPhaseController phase = new QuestPhaseController();
         TestPlayArea stageStandIn = new TestPlayArea();
         area.registerGamePhase(phase);
-        area.onPlayAreaChanged(stageStandIn);
+//        area.onPlayAreaChanged(stageStandIn); TODO: Enable this
         area.onPhaseNextPlayerTurn(player);
         LOG.info("Hand state before card received.");
         for(int i=0;i<Hand.MAX_HAND_SIZE;++i) {

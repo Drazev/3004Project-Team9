@@ -2,10 +2,7 @@ package com.team9.questgame.game_phases.quest;
 
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.Entities.cards.*;
-import com.team9.questgame.exception.IllegalGameStateException;
-import com.team9.questgame.exception.IllegalQuestPhaseStateException;
-import com.team9.questgame.exception.PlayerJoinException;
-import com.team9.questgame.exception.PlayerNotFoundException;
+import com.team9.questgame.exception.*;
 import com.team9.questgame.game_phases.quest.QuestPhaseStatesE;
 import com.team9.questgame.game_phases.utils.PlayerTurnService;
 import com.team9.questgame.gamemanager.service.QuestPhaseInboundService;
@@ -44,7 +41,6 @@ class QuestPhaseControllerTest {
         players.add(new Players("Player 2"));
         players.add(new Players("Player 3"));
         players.add(new Players("Player 4"));
-        players.add(new Players("Player 5"));
 
         turnService = new PlayerTurnService(players);
 
@@ -62,7 +58,6 @@ class QuestPhaseControllerTest {
 
     @Test
     void receiveCard(){
-        assertThat(controller.getPlayers().size()).isEqualTo(0);
         assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.NOT_STARTED);
 
         // Can receive a card when the phase is not started
@@ -103,27 +98,86 @@ class QuestPhaseControllerTest {
 
     @Test
     void checkSponsorResult() {
+        // Cannot send sponsor result before the Quest Phase starts
         assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.NOT_STARTED);
-        assertThrows(IllegalGameStateException.class, () -> controller.checkSponsorResult(players.get(0), false));
+        assertThrows(IllegalQuestPhaseStateException.class, () -> controller.checkSponsorResult(players.get(0), false));
+
+        // Can send sponsor result when the Quest Phase is in QUEST_SPONSOR state
+        ArrayList<QuestCards> questCards = getQuestCards();
+        controller.receiveCard(questCards.get(0));
+        controller.startPhase(new PlayerTurnService(players));
+        assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SPONSOR);
+
+        // Cannot accept sponsor from players that don't hold this turn
+        assertThat(controller.getPlayerTurnService().getPlayerTurn()).isEqualTo(players.get(0));
+        assertThrows(IllegalGameRequest.class,
+                    () -> controller.checkSponsorResult(players.get(1), false));
+        assertThrows(IllegalGameRequest.class,
+                    () -> controller.checkSponsorResult(players.get(2), false));
+        assertThrows(IllegalGameRequest.class,
+                    () -> controller.checkSponsorResult(players.get(3), false));
+        assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SPONSOR);
+
+        // Current turn holder declines to sponsor, the quest should seek out for more sponsors
+        controller.checkSponsorResult(players.get(0), false);
+        assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SPONSOR);
+        controller.checkSponsorResult(players.get(1), false);
+        assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SPONSOR);
+        controller.checkSponsorResult(players.get(2), false);
+        assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SPONSOR);
+
+        // If all players decline to sponsor then the quest should end
+        controller.checkSponsorResult(players.get(3), false);
+        assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.NOT_STARTED);
+
+        // Restart the quest
+        controller.receiveCard(questCards.get(1));
+        controller.startPhase(new PlayerTurnService(players));
+        assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SPONSOR);
+
+        // If a sponsor is found, the quest should start to setting up the stages
+        controller.checkSponsorResult(players.get(0), true);
+        assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SETUP);
     }
 
-//    @Test
-//    void getSponsor(){
-//        assertThat(controller.getPlayers().size()).isEqualTo(0);
-//        assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.NOT_STARTED);
-//        // Get a quest card and generate the quest phase
-//        ArrayList<QuestCards> questCards = getQuestCards();
-//
-//        controller.receiveCard(questCards.get(0));
-//        controller.startPhase(turnService);
-//        assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SPONSOR);
-//
-//        controller.checkSponsorResult(players.get(0), false);
-//        controller.checkSponsorResult(players.get(1), false);
-//        controller.checkSponsorResult(players.get(2), true);
-//        assertThrows(IllegalQuestPhaseStateException.class, () -> controller.checkSponsorResult(players.get(3), true));
-//        assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SETUP);
-//    }
+    @Test
+    void checkJoins() {
+
+    }
+
+    @Test
+    void checkJoinResult() {
+
+    }
+
+    @Test
+    void endPhase() {
+        // Cannot end when not in ENDED state
+        controller.getStateMachine().setCurrentState(QuestPhaseStatesE.NOT_STARTED);
+        assertThrows(IllegalQuestPhaseStateException.class, () -> controller.endPhase());
+        ArrayList<QuestCards> questCards = getQuestCards();
+        controller.receiveCard(questCards.get(0));
+
+        controller.getStateMachine().setCurrentState(QuestPhaseStatesE.QUEST_SPONSOR);
+        assertThrows(IllegalQuestPhaseStateException.class, () -> controller.endPhase());
+        controller.getStateMachine().setCurrentState(QuestPhaseStatesE.QUEST_SETUP);
+        assertThrows(IllegalQuestPhaseStateException.class, () -> controller.endPhase());
+        controller.getStateMachine().setCurrentState(QuestPhaseStatesE.QUEST_JOIN);
+        assertThrows(IllegalQuestPhaseStateException.class, () -> controller.endPhase());
+        controller.getStateMachine().setCurrentState(QuestPhaseStatesE.STAGE_ONE);
+        assertThrows(IllegalQuestPhaseStateException.class, () -> controller.endPhase());
+        controller.getStateMachine().setCurrentState(QuestPhaseStatesE.STAGE_TWO);
+        assertThrows(IllegalQuestPhaseStateException.class, () -> controller.endPhase());
+        controller.getStateMachine().setCurrentState(QuestPhaseStatesE.STAGE_THREE);
+        assertThrows(IllegalQuestPhaseStateException.class, () -> controller.endPhase());
+
+        // Can end in ENDED state and should result in NOT_STARTED state
+        controller.getStateMachine().setCurrentState(QuestPhaseStatesE.ENDED);
+        controller.endPhase();
+        assertThat(controller.getQuestCard()).isNull();
+        controller.getStateMachine().setCurrentState(QuestPhaseStatesE.NOT_STARTED);
+
+    }
 
     //   @Test
 //    void checkJoins(){

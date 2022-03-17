@@ -219,17 +219,17 @@ public class QuestPhaseController implements GamePhaseControllers {
         }
     }
 
-    public void noSponsor(){
-        stateMachine.setSponsorFoundRequest(false);
-    }
-
-
     /**
      * Reset the phase
      */
     public void endPhase() {
+        if (stateMachine.getCurrentState() != QuestPhaseStatesE.ENDED) {
+            throw new IllegalQuestPhaseStateException("Cannot end phase when it's not in ENDED state");
+        }
         this.questCard.discardCard();
         this.questCard = null;
+        stateMachine.setPhaseReset(true);
+        stateMachine.update();
     }
 
     /**
