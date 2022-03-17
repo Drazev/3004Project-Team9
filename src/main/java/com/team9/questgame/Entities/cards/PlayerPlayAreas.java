@@ -12,6 +12,7 @@ import com.team9.questgame.exception.IllegalGamePhaseStateException;
 import com.team9.questgame.game_phases.GamePhaseControllers;
 import com.team9.questgame.game_phases.GamePhases;
 import com.team9.questgame.gamemanager.service.OutboundService;
+import lombok.Getter;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -29,6 +30,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
     @JsonIgnore
     private final Players player;
     @JsonIgnore
+    @Getter
     private GamePhaseControllers phaseController;
     @JsonIgnore
     private final OutboundService outboundService;
@@ -39,6 +41,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
     private int battlePoints;
     private HashMap<CardTypes, HashSet<AdventureCards>> cardTypeMap;
     private HashMap<AllCardCodes,AdventureCards> allCards;
+    @Getter
     private QuestCards questCard;
     private HashSet<CardTypes> playableCardTypes;
 
@@ -278,7 +281,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
     }
 
     /**
-     * Game Phase Controller registers themselvef as the active game controller.
+     * Game Phase Controller registers themself as the active game controller.
      * This will enable certain features.
      * @param activePhase The active game phase to be set
      */

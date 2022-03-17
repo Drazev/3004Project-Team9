@@ -18,6 +18,7 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
 
     @JsonIgnore
     private final OutboundService outboundService;
+    private int stageNum;
     private long id;
     private int battlePoints;
     private int bids;
@@ -26,16 +27,30 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
     private HashMap<AllCardCodes, AdventureCards> allCards;
     private QuestCards questCard;
     private QuestPhaseController phaseController;
+    private HashMap<AllCardCodes,HashSet<BoostableCard>> cardBoostDependencies;
+    private HashSet<BattlePointContributor> cardsWithBattleValue;
+
+    private StagePlayAreas targetPlayArea;
+
+
+
 
     static private int nextid = 0;
 
-    public StagePlayAreas(){
+    public StagePlayAreas(QuestCards questCard, int stageNum){
         this.id = nextid++;
+        this.questCard = questCard;
+        this.stageNum = stageNum;
         //this.questCard = questCard;
         this.allCards = new HashMap<>();
         this.battlePoints = 0;
         this.bids = 0;
         this.outboundService = ApplicationContextHolder.getContext().getBean(OutboundService.class);
+        cardBoostDependencies = new HashMap<>();
+        cardsWithBattleValue = new HashSet<>();
+
+        this.targetPlayArea=null;
+
     }
 
     @Override
@@ -46,19 +61,39 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
         return addToPlayArea(card);
     }
 
+    public void receiveCard(QuestCards questCard){
+        this.questCard = questCard;
+    }
+
 
     private boolean addToPlayArea(AdventureCards card){
         if(allCards.containsKey(card.getCardCode())){
             LOG.error("RULE: A stage cannot have two cards of the same type");
             throw new CardAreaException(CardAreaException.CardAreaExceptionReasonCodes.RULE_CANNOT_HAVE_TWO_OF_SAME_CARD_IN_PLAY);
         }
-        //TODO:finish
-        return false;
+        allCards.put(card.getCardCode(),  card);
+        if(card.getSubType() == CardTypes.FOE){
+            if(questCard.getBoostedFoe().equals(card.getCardCode())){
+                for(BoostableCard boostCard : cardBoostDependencies.get(card.getCardCode())){
+                    boostCard.setBoosted(true);
+                    card.registerBoostedCard(boostCard);
+                }
+            }
+        }
+
+        return true;
     }
 
     @Override
     public boolean playCard(AdventureCards card){
         return false;
+    }
+
+    public void onPlayAreaChanges(StagePlayAreas targetPlayArea){
+        if(phaseController == null){
+            throw new CardAreaException(CardAreaException.CardAreaExceptionReasonCodes.GAMEPHASE_NOT_REGISTERED);
+        }
+        this.targetPlayArea=targetPlayArea;
     }
 
     @Override
@@ -81,6 +116,25 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
     public void onGamePhaseEnded(){
 
     }
+
+    public void registerBattlePointContributor(BattlePointContributor card){
+        cardsWithBattleValue.add(card);
+        updateBattlePoints();
+        notifyStageAreaChanged();
+    }
+
+    /**
+     * Recalculates the battlepoint value based on cards in the play area and the player rank.
+     */
+    private void updateBattlePoints() {
+        int newBattlePoints=0;
+
+        for(BattlePointContributor card : cardsWithBattleValue) {
+            newBattlePoints+=card.getBattlePoints();
+        }
+        battlePoints=newBattlePoints;
+    }
+
     public PlayAreaData getPlayAreaData() {
         HashSet<CardTypes> allowedTypes = new HashSet<>();
         allowedTypes.add(CardTypes.FOE);
@@ -102,6 +156,13 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
             handCards.add(card.generateCardData());
         }
         return handCards;
+    }
+
+    /**
+     * Updates the clients about a play area being changed, sending the new state.
+     */
+    private void notifyStageAreaChanged() {
+        outboundService.broadcastStageChanged(stageNum,getPlayAreaData());
     }
 }
 

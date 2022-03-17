@@ -65,34 +65,65 @@ class QuestPhaseControllerTest {
         assertThat(controller.getPlayers().size()).isEqualTo(0);
         assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.NOT_STARTED);
 
-        // Get a quest card and generate the quest phase
+        // Can receive a card when the phase is not started
         ArrayList<QuestCards> questCards = getQuestCards();
-
-        //assertThrows(IllegalQuestPhaseStateException.class, () -> controller.receiveCard(null));
         controller.receiveCard(questCards.get(0));
+
+        // Cannot receive a card the phase is started
         controller.startPhase(turnService);
         assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SPONSOR);
+
+        assertThrows(IllegalQuestPhaseStateException.class, () -> controller.receiveCard(questCards.get(1)));
     }
 
     @Test
-    void getSponsor(){
-        assertThat(controller.getPlayers().size()).isEqualTo(0);
+    void startPhase() {
+        // Cannot start phase when there's no QuestCard
         assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.NOT_STARTED);
-        // Get a quest card and generate the quest phase
+        assertThat(controller.getQuestCard()).isNull();
+
+        assertThrows(RuntimeException.class, () -> controller.startPhase(null)); // Param doesn't matter
+
+        // Can start phase when there's a QuestCard
         ArrayList<QuestCards> questCards = getQuestCards();
-
         controller.receiveCard(questCards.get(0));
-        controller.startPhase(turnService);
+        assertThat(controller.getQuestCard()).isNotNull();
+
+        controller.startPhase(new PlayerTurnService(players));
         assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SPONSOR);
+        assertThat(controller.getPlayerTurnService()).isNotNull();
+        for (Players p: controller.getPlayerTurnService().getPlayers()) {
+            assertThat(p.getPlayArea().getPhaseController()).isEqualTo(controller);
+            assertThat(p.getPlayArea().getQuestCard()).isEqualTo(controller.getQuestCard());
+        }
 
-        controller.checkSponsorResult(players.get(0), false);
-        controller.checkSponsorResult(players.get(1), false);
-        controller.checkSponsorResult(players.get(2), true);
-        assertThrows(IllegalQuestPhaseStateException.class, () -> controller.checkSponsorResult(players.get(3), true));
-        assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SETUP);
-
-
+        // Cannot start phase when the quest has started
+        assertThrows(IllegalQuestPhaseStateException.class, () -> controller.startPhase(null)); // Param doesn't matter
     }
+
+    @Test
+    void checkSponsorResult() {
+        assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.NOT_STARTED);
+        assertThrows(IllegalGameStateException.class, () -> controller.checkSponsorResult(players.get(0), false));
+    }
+
+//    @Test
+//    void getSponsor(){
+//        assertThat(controller.getPlayers().size()).isEqualTo(0);
+//        assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.NOT_STARTED);
+//        // Get a quest card and generate the quest phase
+//        ArrayList<QuestCards> questCards = getQuestCards();
+//
+//        controller.receiveCard(questCards.get(0));
+//        controller.startPhase(turnService);
+//        assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SPONSOR);
+//
+//        controller.checkSponsorResult(players.get(0), false);
+//        controller.checkSponsorResult(players.get(1), false);
+//        controller.checkSponsorResult(players.get(2), true);
+//        assertThrows(IllegalQuestPhaseStateException.class, () -> controller.checkSponsorResult(players.get(3), true));
+//        assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SETUP);
+//    }
 
     //   @Test
 //    void checkJoins(){

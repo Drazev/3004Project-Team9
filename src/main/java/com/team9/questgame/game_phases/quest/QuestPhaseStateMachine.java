@@ -136,6 +136,10 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
         return QuestPhaseStatesE.ENDED;
     }
 
+    public boolean isQuestStarted() {
+        return this.currentState != QuestPhaseStatesE.NOT_STARTED;
+    }
+
     private void resetAllRequest() {
         setPhaseStartRequested(false);
         setSponsorFoundRequest(false);

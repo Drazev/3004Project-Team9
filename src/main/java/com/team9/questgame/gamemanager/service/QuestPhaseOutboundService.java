@@ -54,6 +54,7 @@ public class QuestPhaseOutboundService {
         LOG.info(String.format("Broadcast sponsor setting up stage"));
         this.sendToAllPlayers("/topic/quest/sponsor-setup", playerData);
     }
+    public void broadcastStageChanged(int stageNum)
 
     public void broadcastJoinRequest(PlayerData playerData){
         LOG.info(String.format("Broadcast join request"));

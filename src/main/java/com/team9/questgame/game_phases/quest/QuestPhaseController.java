@@ -20,7 +20,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 @Component
 public class QuestPhaseController implements GamePhaseControllers {
@@ -37,8 +36,6 @@ public class QuestPhaseController implements GamePhaseControllers {
 
     @Autowired
     private QuestPhaseOutboundService outboundService;
-    @Getter
-    private ArrayList<Players> players;
     @Getter
     private ArrayList<Players> questingPlayers;
     @Getter
@@ -57,10 +54,9 @@ public class QuestPhaseController implements GamePhaseControllers {
 
     public QuestPhaseController() {
         LOG = LoggerFactory.getLogger(QuestPhaseController.class);
-        this.players = new ArrayList<>();
         this.questingPlayers = new ArrayList<>();
         this.stages = new ArrayList<>();
-        playerTurnService = new PlayerTurnService(players);
+        playerTurnService = null;
         sponsor = null;
         sponsorAttempts = 0;
         this.outboundService = ApplicationContextHolder.getContext().getBean(QuestPhaseOutboundService.class);
@@ -91,7 +87,9 @@ public class QuestPhaseController implements GamePhaseControllers {
      */
     @Override
     public void startPhase(PlayerTurnService playerTurnService) {
-        if (questCard == null) {
+        if (stateMachine.isQuestStarted()) {
+            throw new IllegalQuestPhaseStateException("Cannot start quest phase when the Quest has already started");
+        } else if (questCard == null) {
             throw new RuntimeException("Cannot start quest phase, questCard is null");
         }
 
@@ -149,7 +147,7 @@ public class QuestPhaseController implements GamePhaseControllers {
      * Called by checkSponsorResult() after a sponsor is found and the quest is set up for the first time
      */
     private void setupStage(){
-        curStage = new StagePlayAreas();
+        curStage = new StagePlayAreas(questCard, stages.size());
         sponsor.getPlayArea().onPlayAreaChanged(curStage);
         //System.out.println("num stages="+questCard.getStages()+" setupStage take "+numStages );
         outboundService.broadcastSponsorSetup(sponsor.generatePlayerData());
@@ -244,7 +242,7 @@ public class QuestPhaseController implements GamePhaseControllers {
     @Override
     public boolean cardPlayRequest(Cards card){return false;}
 
-    public void registerPlayerPlayAreas(QuestCards card){
+    private void registerPlayerPlayAreas(QuestCards card){
         for(Players player : playerTurnService.getPlayers()){
             player.getPlayArea().registerGamePhase(this);
             player.getPlayArea().onQuestStarted(card);
