@@ -39,18 +39,18 @@ function FoeStageDisplay(props){
     const totalBP = y + x;
   return (
     <div>
-      <div style={{position: "absolute", left:1300, top:270}}>
+      <div style={{position: "absolute", left:1300, top:283}}>
         <BigCard cardId={props.currentStage.stageCard.cardID} key={props.currentStage.stageCard.cardID} cardImage={props.currentStage.stageCard.imgsrc}></BigCard>
       </div>
       <div style={{position: "absolute", left:1397, top:397}}>
         {RenderActiveCards}
       </div>
       <div style={{position: "absolute", left:1450, top:297}}>
-        <h4>Total Battle Points: {totalBP}</h4>
+        <h4 style={{color: "white"}}>Total Battle Points: {totalBP}</h4>
       </div>
       <div style={{position: "absolute", left:1450, top:335}}>
         {props.currentStage.stageCard.isBoosted && (
-          <h4>Foe is Boosted</h4>
+          <h4 style={{color: "white"}}>Foe is Boosted</h4>
         )}
       </div>
       <div style={{position: "absolute", left:1340, top:480}}>

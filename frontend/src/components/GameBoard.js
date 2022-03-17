@@ -1,11 +1,13 @@
 import PlayerHand from "./PlayerHand";
 import QuestDisplay from "./QuestDisplay";
 import CardImages from "../Images/index";
+import Popup from "./Popup";
 import Card from "./Card";
 import {drawCard} from "../ClientSocket";
 import {useName, usePlayerHands, usePlayers } from "../Stores/GeneralStore";
 import { useUpdatePlayArea, usePlayerPlayAreas } from "../Stores/PlayAreaStore";
 import {Button} from "react-bootstrap";
+import React, { useState } from "react";
 
 function GameBoard(props){
     let init = 80;
@@ -14,14 +16,17 @@ function GameBoard(props){
     const allPlayers = usePlayers();
     let hands = usePlayerHands();
     let active = usePlayerPlayAreas();
-    console.log(JSON.stringify(allPlayers));
-    console.log(JSON.stringify(name));
     //const turn = useTurn();
 
     const turn = "PlayerName";
 
-    console.log("HANDS: " + JSON.stringify(hands));
-
+    const [popup, setPopup] = useState(false);
+ 
+    const togglePopup = () => {
+      setPopup(!popup);
+      console.log("trigger popup: " + popup);
+    }
+  
 
     // hands = [{name:"Test1",isTurn:true,hand:[{cardId:1,cardImage:CardImages.Ally_KingArthur}],cardsInPlay:[],rank:CardImages.Rank_Squire,shields:54},
     // {name:"Test2",isTurn:true,hand:[{cardId:2,cardImage:CardImages.Ally_KingArthur}],cardsInPlay:[],rank:CardImages.Rank_Squire,shields:5}];
@@ -114,9 +119,14 @@ function GameBoard(props){
                 top: 30
             }}>
             </div>
+            {(popup) && 
+            <div>
+                <Popup handleYes={togglePopup} handleNo={togglePopup} popupType={"HANDOVERFLOW"}></Popup>
+            </div>
+            }
             <QuestDisplay></QuestDisplay>
             <Button onClick={() => drawCard(name,0)} >Draw</Button>
-            <Button>End Turn</Button>
+            <Button onClick={() => togglePopup()}>End Turn</Button>
         </div>
     );
 }

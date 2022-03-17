@@ -8,6 +8,7 @@ const useStore = create((set) => ({
   messages: [],
   players: [],
   hands: [],
+  events: "",
   loadPlayers: async () => {
     await handleLoadPlayers(set);
   },

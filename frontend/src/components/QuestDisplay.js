@@ -6,57 +6,6 @@ import BigCard from "./BigCard";
 import "./GameBoard.css";
 
 
-/*
-  currentStage: 3
-  stages: {0: {stageType: "foe", stageCard: {}, activeCards: [], totalBP: 5},1:{stageType: "test", stageCard: {}, highestBid: 10},2:{stageType: "foe"}}
-  playerActiveCards: {playerName: {cardsActive[{},{}]}, playerName2:{}}
-  activePlayers: ["player1","player2"]
-  turns will be managed by overall gamestate store
-  questSponsor: "PlayerName"
-
-
-        long cardID,
-        AllCardCodes cardCode,
-        String cardName,
-        CardTypes subType,
-        String imgSrc,
-        int bids,
-        int battlePoints,
-        String effectDescription,
-        boolean hasActiveEffect
-
-
-public enum CardTypes {
-    FOE,
-    TEST,
-    AMOUR,
-    WEAPON,
-    ALLY,
-    EVENT,
-    QUEST,
-    TOURNAMENT
-}
-    private final int bpValue;
-    private final int boostedBpValue;
-    private boolean isBoosted;
-    private Effects activeEffect; //TODO: Modify for Effect implementation
-
-
-  Overall GameState Store
-    updateTurn
-    endTurn
-  
-  Story Store
-    UpdateStages (get stages from backend)
-    UpdateActivePlayerCards (remove old active cards)
-    GetRewards (distributes reward to players)
-
-    PlayerPlaysCard (Card, PlayerName)
-    PlayerJoinsQuest (PlayerName)
-    StartQuest: {questCard}
-    SponsorStageCard (sponsor plays card to sponsor stage) {stageNo, card, PlayerName}
-*/
-
 const stages = {
     0: {stageCard: {cardID: 5, cardName: "Boar", imgsrc: "./Assets/Adventure Deck (346x470)/Foe - Boar.png",bpValue: 5, boostedBpValue: 15, isBoosted: true },
         activeCards: [
