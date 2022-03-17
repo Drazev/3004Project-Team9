@@ -162,14 +162,9 @@ public class Players {
             rank=nextRank;
             LOG.info("Player "+name+" has attained rank "+rank);
             playArea.update();
-            notifyPlayerRankUP();
+            notifyPlayerDataChanged();
         }
 
-    }
-
-    private void notifyPlayerRankUP() {
-        //TODO: Notify game and player of a Rank Up event. Game will check victory condition, and player UI must be updated
-        inboundService.playerNotifyPlayerRankUP(this,rank);
     }
 
     private void notifyPlayerDataChanged() {

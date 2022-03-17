@@ -48,15 +48,12 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
       console.log(body);
       addNewMessage(body.name, body.message);
     });
-    client.subscribe("/topic/general/next-turn", (name) => {
-        console.log("Turn is now: " + name.body);
-//        setTurn(name);
-    });
     client.subscribe("/topic/player/hand-update", (message) => {
         let newHand = JSON.parse(message.body);
         console.log("Received hand update: " + newHand);
         updateHand(newHand);
     });
+
     client.subscribe("/topic/general/player-connect", (players) => {
       let body = JSON.parse(players.body);
       console.log("clientsocket players.body: " + players.body);
@@ -64,24 +61,77 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
       console.log(bodyKeys);
       setPlayers(bodyKeys);
     });
+
     client.subscribe("/topic/general/game-start", () => {
       console.log("setting game started true");
       setGameStarted(true);
     });
-    client.subscribe("topic/player/hand-oversize" , (message) => {
+
+    client.subscribe("/topic/general/next-turn", (name) => {
+      /**
+       * Server informs about the next turn
+       * This endpoind is used in all phases (general, quest, event, tournament)
+       * and scenarios (next player to draw a story card, next player to answer the sponsor search request)
+       * after the game has started
+       */
+
+      console.log("Turn is now: " + name.body);
+      // setTurn(name);
+    });
+
+    client.subscribe("/topic/player/hand-oversize" , (message) => {
+      /**
+       * Server informs that one player has oversized hand (more than 12 cards)
+       * All activity in the game is blocked, this player must discard or play 
+       * the card(s) until their hand has <= 12 cards to proceed
+       */
       let body = JSON.parse(message.body);
       console.log("Player Hand Oversize: \n" + body + " \n\n ");
     });
-    client.subscribe("topic/player/player-update", (message) => {
+
+    client.subscribe("/topic/player/player-update", (message) => {
+      /**
+       * Server informs about changes in player's state including their rank,
+       * rankBattlePoint and the number of shield
+       */
       let body = JSON.parse(message.body);
       updatePlayer(body);
     });
-  };/*
-  client.subscribe("/topic/play-areas/play-area-changed", (data) => {
-    let body = JSON.parse(data.body);
-    console.log("Play Area Update recieved for playerId: "+body.playerId);
-    updatePlayArea(body);
-});*/
+
+    client.subscribe("/topic/decks/deck-update", (message) => {
+      /**
+       * Server notifies clients of discard pile contents, and the number of cards
+       * in a deck draw pile without revealing the cards.
+       * This is to be used for visualization
+       */
+
+    });
+
+    client.subscribe("/topic/play-areas/play-area-changed", (data) => {
+      /**
+       * This represents cards in play. It could be player play areas, or game stages
+       */
+      // let body = JSON.parse(data.body);
+      // console.log("Play Area Update recieved for playerId: "+body.playerId);
+      // updatePlayArea(body);
+    });
+
+    client.subscribe("/topic/quest/sponsor-search", (message) => {
+      /**
+       * Server is querrying for sponsor
+       * This happens right after a player drawn a quest card which started the quest
+       * phase
+       */
+    });
+
+
+    client.subscribe("/topic/quest/join-request", (message) => {
+      /**
+       * Server is querying for players to join quest
+       * This happens after the quest has been setup and a quest stage has started
+       */
+    });
+  };
 
   client.onDisconnect = () => {
     disconnect();
@@ -140,6 +190,34 @@ export function playCard(name, cardId, card, playerID) {
       card: card,
       playerID: playerID
     }),
+  });
+}
+
+export function sponsorRespond(name, sponsorDecision) {
+  /**
+   * Respond to a sponsor search request from the server
+   */
+  console.log(`Player name=${name} decides to ${sponsorDecision ? 'sponsor' : 'not sponsor'} the quest`);
+  client.publish({
+    destination: "/app/quest/sponsor-response",
+    body: JSON.stringify({
+      name: name,
+      found: sponsorDecision
+    })
+  });
+}
+
+export function joinRespond(name, joinDecision) {
+  /**
+   * Respond to a quest stage join request from the server
+   */
+  console.log(`Player name=${name} decides to ${joinDecision ? 'join' : 'not join'} the the quest stage`);
+  client.publish({
+    destination: "/app/quest/join-response",
+    body: JSON.stringify({
+      name: name,
+      joined: joinDecision
+    })
   });
 }
 
