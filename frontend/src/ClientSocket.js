@@ -9,7 +9,7 @@ const REGISTRATION_URL = "http://localhost:8080/api/register"
 const SOCK_SERVER = "http://localhost:8080/quest-game-websocket"
 const START_URL = "http://localhost:8080/api/start"
 
-export async function connect(setConnected,setGameStarted, addNewMessage, setPlayers, name, updateHand, updatePlayArea, updatePlayer) {
+export async function connect(setConnected,setGameStarted, addNewMessage, setPlayers, name, updateHand, updatePlayer) {
   console.log("Attempt connection");
 
   // Register player name
