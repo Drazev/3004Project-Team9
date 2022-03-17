@@ -95,7 +95,7 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
     }
 
     public QuestPhaseStatesE questSetupState() {
-        if (controller.getNumStages() >= controller.getQuestCard().getStages()) {
+        if (controller.getStages().size() >= controller.getQuestCard().getStages()) {
             //System.out.println("quest setup state returning join state");
             return QuestPhaseStatesE.QUEST_JOIN;
         }

@@ -9,6 +9,7 @@ import com.team9.questgame.Entities.Players;
 import com.team9.questgame.exception.IllegalEffectStateException;
 import com.team9.questgame.exception.CardAreaException;
 import com.team9.questgame.exception.IllegalGamePhaseStateException;
+import com.team9.questgame.game_phases.GamePhaseControllers;
 import com.team9.questgame.game_phases.GamePhases;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import org.slf4j.Logger;
@@ -28,7 +29,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
     @JsonIgnore
     private final Players player;
     @JsonIgnore
-    private GamePhases phaseController;
+    private GamePhaseControllers phaseController;
     @JsonIgnore
     private final OutboundService outboundService;
     @JsonIgnore
@@ -281,7 +282,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
      * This will enable certain features.
      * @param activePhase The active game phase to be set
      */
-    public void registerGamePhase(GamePhases activePhase) {
+    public void registerGamePhase(GamePhaseControllers activePhase) {
         if(activePhase==null)
         {
             throw new IllegalGamePhaseStateException(null,NULL_ACTIVE_PHASE);

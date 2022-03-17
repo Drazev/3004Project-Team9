@@ -6,6 +6,7 @@ import com.team9.questgame.Entities.Players;
 import com.team9.questgame.Entities.cards.*;
 import com.team9.questgame.exception.IllegalGameRequest;
 import com.team9.questgame.exception.SponsorAlreadyExistsException;
+import com.team9.questgame.game_phases.GamePhaseControllers;
 import com.team9.questgame.game_phases.GamePhases;
 import com.team9.questgame.game_phases.GeneralGameController;
 import com.team9.questgame.exception.IllegalQuestPhaseStateException;
@@ -19,9 +20,10 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 @Component
-public class QuestPhaseController implements GamePhases<QuestCards> {
+public class QuestPhaseController implements GamePhaseControllers {
     Logger LOG;
     @Getter
     @Autowired
@@ -44,16 +46,14 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
     @Getter
     private PlayerTurnService questTurnService;
     @Getter
+    private ArrayList<StagePlayAreas> stages;
+    private StagePlayAreas curStage;
+    @Getter
     private Players sponsor;
     @Getter
     private int sponsorAttempts;
     @Getter
     private int joinAttempts;
-    @Getter
-    private int numStages;
-
-    private ArrayList<StagePlayAreas> stages;
-
 
     public QuestPhaseController() {
         LOG = LoggerFactory.getLogger(QuestPhaseController.class);
@@ -63,12 +63,15 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
         playerTurnService = new PlayerTurnService(players);
         sponsor = null;
         sponsorAttempts = 0;
-        numStages = 0;
         this.outboundService = ApplicationContextHolder.getContext().getBean(QuestPhaseOutboundService.class);
 
     }
 
-    @Override
+    /**
+     * Receive the QuestCard from the GeneralGameController
+     * @param card
+     * @return
+     */
     public boolean receiveCard(QuestCards card) {
         if(stateMachine.getCurrentState() != QuestPhaseStatesE.NOT_STARTED){
             throw new IllegalQuestPhaseStateException("Quest can only receive questCard if no quest is currently in progress");
@@ -80,24 +83,6 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
         stateMachine.update();
         return true;
     }
-
-    @Override
-    public void discardCard(QuestCards card) {
-        // TODO: Discard the card to the discard pile
-        //       Problem: the card cannot discard itself
-    }
-
-    @Override
-    public boolean playCard(QuestCards card) {
-        // TODO: calls current stage area's receiveCard function
-        return false;
-    }
-
-    @Override
-    public PlayerRewardData getRewards() {
-        return null;
-    }
-
 
     /**
      * Starts the quest phase
@@ -115,6 +100,7 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
         if (stateMachine.getCurrentState() == QuestPhaseStatesE.QUEST_SPONSOR) {
             LOG.info("Quest phase started");
             this.playerTurnService = playerTurnService;
+            registerPlayerPlayAreas(questCard);
             outboundService.broadcastSponsorSearch(playerTurnService.getPlayerTurn().generatePlayerData());
         }
     }
@@ -129,10 +115,10 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
         if(stateMachine.getCurrentState() != QuestPhaseStatesE.QUEST_SPONSOR){
             throw new IllegalQuestPhaseStateException("Cannot check sponsor result when not in QUEST_SPONSOR state" );
         } else if (player.getPlayerId() != playerTurnService.getPlayerTurn().getPlayerId()) {
-            throw new IllegalGameRequest("Must be current player turn to send sponsor resullt",);
+            throw new IllegalGameRequest("Must be current player turn to send sponsor result", player);
         }
 
-        // Increment sponsorAttempts counter so that the state machine know when we run out of attempts
+        // Increment sponsorAttempts counter so that the state machine knows when we run out of attempts
         this.sponsorAttempts++;
 
         if(found){
@@ -149,8 +135,7 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
                 playerTurnService.nextPlayer();
                 outboundService.broadcastSponsorSearch(playerTurnService.getPlayerTurn().generatePlayerData());
             } case QUEST_SETUP -> {
-                // TODO: Broadcast to all players to setup
-                //      { "sponsor": Players }
+                outboundService.broadcastSponsorFound(sponsor.generatePlayerData());
             } case ENDED -> {
                 endPhase();
             }
@@ -168,6 +153,7 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
         this.joinAttempts++;
 
     }
+
     public void checkJoinResult(Players player, boolean joined){
         if(joined){
             questingPlayers.add(player);
@@ -178,25 +164,22 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
         stateMachine.update();
     }
 
-
     public void noSponsor(){
         stateMachine.setSponsorFoundRequest(false);
     }
 
     public void setupStage(){
-        StagePlayAreas stage = new StagePlayAreas();
+        curStage = new StagePlayAreas();
+        sponsor.getPlayArea().onPlayAreaChanged(curStage);
         //System.out.println("num stages="+questCard.getStages()+" setupStage take "+numStages );
+        outboundService.broadcastSponsorSetup(sponsor.generatePlayerData());
 
-        //broadcast
-        //TODO:
-        numStages++;
         stateMachine.update();
     }
 
     /**
      * Reset the phase
      */
-    @Override
     public void endPhase() {
 
     }
@@ -204,9 +187,28 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
     /**
      * Reset the game
      */
-    @Override
     public void onGameReset() {
 
+    }
+
+    @Override
+    public boolean cardPlayRequest(Cards card){return false;}
+
+    public void registerPlayerPlayAreas(QuestCards card){
+        for(Players player : playerTurnService.getPlayers()){
+            player.getPlayArea().registerGamePhase(this);
+            player.getPlayArea().onQuestStarted(card);
+        }
+    }
+
+    @Override
+    public PlayerRewardData getRewardData(){
+        return null;
+    }
+
+    @Override
+    public StoryDeckCards getPhaseCardCode(){
+        return null;
     }
 
 }
