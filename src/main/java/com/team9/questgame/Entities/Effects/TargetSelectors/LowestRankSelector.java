@@ -11,7 +11,7 @@ public class LowestRankSelector implements TargetSelector {
         ArrayList<Players> newList = new ArrayList<>();
         Players p1 = possibleTargets.get(0);
         for(Players p : possibleTargets) {
-            if(p.getRank().getRankBattlePointValue() > p1.getRank().getRankBattlePointValue()) {
+            if(p.getRank().getRankBattlePointValue() < p1.getRank().getRankBattlePointValue()) {
                 newList.clear();
                 p1=p;
                 newList.add(p);
