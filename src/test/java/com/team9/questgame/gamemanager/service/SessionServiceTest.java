@@ -27,7 +27,7 @@ class SessionServiceTest {
     @Test
     void registerPlayer() {
         int repetitions = 100;
-        sessionService = new SessionService();
+        //sessionService = new SessionService();
 
         for (int i = 0; i < repetitions; i++) {
             assertTrue(sessionService.registerPlayer(Integer.toString(i)));

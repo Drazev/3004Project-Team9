@@ -29,4 +29,20 @@ public abstract class StoryCards extends Cards {
         return data;
     }
 
+    @Override
+    public CardData generateObfuscatedCardData() {
+        CardData data = new CardData(
+                cardID,
+                null,
+                null,
+                null,
+                CardFactory.getStoryCardImageURI(),
+                0,
+                0,
+                null,
+                false
+        );
+        return data;
+    }
+
 }
