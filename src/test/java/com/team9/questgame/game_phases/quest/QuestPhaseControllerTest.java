@@ -3,6 +3,7 @@ package com.team9.questgame.game_phases.quest;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.Entities.cards.*;
 import com.team9.questgame.exception.*;
+import com.team9.questgame.game_phases.GeneralGameController;
 import com.team9.questgame.game_phases.quest.QuestPhaseStatesE;
 import com.team9.questgame.game_phases.utils.PlayerTurnService;
 import com.team9.questgame.gamemanager.service.QuestPhaseInboundService;
@@ -27,6 +28,9 @@ class QuestPhaseControllerTest {
 
     @Autowired
     private QuestPhaseController controller;
+
+    @Autowired
+    private GeneralGameController generalGameController;
 
     @Autowired
     private QuestPhaseInboundService inboundService;
@@ -120,10 +124,13 @@ class QuestPhaseControllerTest {
 
         // Current turn holder declines to sponsor, the quest should seek out for more sponsors
         controller.checkSponsorResult(players.get(0), false);
+        assertThat(controller.getSponsor()).isNull();
         assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SPONSOR);
         controller.checkSponsorResult(players.get(1), false);
+        assertThat(controller.getSponsor()).isNull();
         assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SPONSOR);
         controller.checkSponsorResult(players.get(2), false);
+        assertThat(controller.getSponsor()).isNull();
         assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SPONSOR);
 
         // If all players decline to sponsor then the quest should end
@@ -138,10 +145,50 @@ class QuestPhaseControllerTest {
         // If a sponsor is found, the quest should start to setting up the stages
         controller.checkSponsorResult(players.get(0), true);
         assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SETUP);
+        // Check if the sponsor's
+        assertThat(controller.getSponsor()).isEqualTo(players.get(0));
+        assertThat(controller.getSponsor().getPlayArea().getTargetPlayArea()).isNotNull();
+    }
+
+    @Test
+    void stageSetupComplete() {
+        // Cannot call stageSetupComplete when not in SETUP stage
+        assertThrows(IllegalQuestPhaseStateException.class, () -> controller.stageSetupComplete());
+
+        // Can call when in SETUP stage
+        ArrayList<QuestCards> questCards = getQuestCards();
+        controller.receiveCard(questCards.get(0));
+        controller.startPhase(new PlayerTurnService(players));
+        controller.checkSponsorResult(players.get(0), true);
+        assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SETUP);
+
+        // Cannot complete a stage setup when there's no battle point in that stage (No foe)
+        // TODO: This probably has to change with Test card
+        assertThrows(RuntimeException.class, () -> controller.stageSetupComplete());
+
+        // Draw a foe card to the sponsor's hand
+//        Players sponsor = controller.getSponsor();
+//        assertThat(sponsor).isEqualTo(players.get(0));
+//        AdventureDecks aDeck = new AdventureDecks();
+//        ArrayList<AdventureCards> foeCards = new ArrayList<>();
+//        while (foeCards.size() < controller.getStages().size()) {
+//            AdventureCards foeCard = aDeck.drawCard(sponsor.getHand());
+//            if (foeCard.getSubType() == CardTypes.FOE) {
+//                foeCards.add(foeCard);
+//            } else {
+//                continue;
+//            }
+//        }
+
+        // Can complete when a stage is set up properly
+//        generalGameController.playerPlayCard(controller.getSponsor(), foeCard.getCardID());
+//        assertThat(sponsor.getPlayArea().getBattlePoints()).isGreaterThan(0);
+//        controller.stageSetupComplete();
     }
 
     @Test
     void checkJoins() {
+
 
     }
 

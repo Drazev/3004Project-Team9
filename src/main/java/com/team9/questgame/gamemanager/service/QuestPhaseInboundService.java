@@ -45,16 +45,20 @@ public class QuestPhaseInboundService {
         //return found;
     }
 
-    public synchronized void  sponsorSetupStage(String name, boolean complete){
-        LOG.info(String.format("Notification that sponsor has completed stage setup: name=%s, complete=%s", name, complete));
+    public synchronized void  sponsorSetupStage(String name){
+        LOG.info(String.format("Notification that sponsor has completed stage setup: name=%s, complete=%s", name));
         //Players player = sessionService.getPlayerMap().get(name);
-        questController.stageSetupComplete(complete);
+        questController.stageSetupComplete();
     }
 
     public synchronized void checkJoinResult(String name, boolean joined){
 
         Players player = sessionService.getPlayerMap().get(name);
         questController.checkJoinResult(player, joined);
+    }
+
+    public synchronized  void checkParticipantSetup(){
+        questController.checkParticipantSetup();
     }
 
 }

@@ -22,11 +22,16 @@ public class QuestPhaseWsController {
 
     @MessageMapping("/quest/sponser-setup-stage")
     private void handleSponsorSetupStage(SponsorSetupStage sponsorSetupStage){
-        inboundService.sponsorSetupStage(sponsorSetupStage.name(), sponsorSetupStage.complete());
+        inboundService.sponsorSetupStage(sponsorSetupStage.name());
     }
 
     @MessageMapping("/quest/join-response")
     private void handleJoinResponse(JoinResponseInbound joinResponseInbound){
         inboundService.checkJoinResult(joinResponseInbound.name(), joinResponseInbound.joined());
+    }
+
+    @MessageMapping("/quest/participant-setup-complete")
+    private void handleParticipantSetupResponse(){
+        inboundService.checkParticipantSetup();
     }
 }

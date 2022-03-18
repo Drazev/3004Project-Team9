@@ -10,6 +10,7 @@ import com.team9.questgame.exception.CardAreaException;
 import com.team9.questgame.game_phases.quest.QuestPhaseController;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import com.team9.questgame.gamemanager.service.QuestPhaseOutboundService;
+import lombok.Getter;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
     private int bids;
     @JsonIgnore
     private Logger LOG;
+    @Getter
     private HashMap<AllCardCodes, AdventureCards> allCards;
     private QuestCards questCard;
     private QuestPhaseController phaseController;
@@ -45,7 +47,6 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
         this.id = nextid++;
         this.questCard = questCard;
         this.stageNum = stageNum;
-        //this.questCard = questCard;
         this.allCards = new HashMap<>();
         this.battlePoints = 0;
         this.bids = 0;
@@ -81,6 +82,7 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
         allCards.put(card.getCardCode(),  card);
         if(card.getSubType() == CardTypes.FOE){
             if(questCard.getBoostedFoe().equals(card.getCardCode())){
+
                 for(BoostableCard boostCard : cardBoostDependencies.get(card.getCardCode())){
                     boostCard.setBoosted(true);
                     card.registerBoostedCard(boostCard);
@@ -139,6 +141,14 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
         this.targetPlayArea=targetPlayArea;
     }
 
+
+    public boolean discardAllCards() {
+        HashSet<AdventureCards> cardList = new HashSet<>(allCards.values());
+        return discardCards(cardList);
+
+    }
+
+
     @Override
     public void discardCard(AdventureCards card){
         HashSet<AdventureCards> cardList = new HashSet<>();
@@ -190,6 +200,10 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
 
     }
 
+    public int size() {
+        return allCards.size();
+    }
+
     public void registerBattlePointContributor(BattlePointContributor card){
         cardsWithBattleValue.add(card);
         updateBattlePoints();
@@ -199,6 +213,9 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
     @Override
     public void registerBoostableCard(BoostableCard card) {
         boostableCards.add(card);
+        if(questCard.getBoostedFoe() == card.getCardCode()){
+            card.setBoosted(true);
+        }
     }
 
 

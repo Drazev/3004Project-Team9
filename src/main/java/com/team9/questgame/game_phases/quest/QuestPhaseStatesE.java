@@ -5,6 +5,7 @@ public enum QuestPhaseStatesE {
     QUEST_SPONSOR, //check for sponsor
     QUEST_SETUP, //sponsor sets up stages
     QUEST_JOIN, //check for players to join
+    PARTICIPANT_SETUP,
     STAGE_ONE, //stages play out in order
     STAGE_TWO,
     STAGE_THREE,

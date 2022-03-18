@@ -7,4 +7,6 @@ public interface BoostableCard {
 
     void notifyBoostEnded(CardArea boostTriggerLocation);
 
+    AllCardCodes getCardCode();
+
 }

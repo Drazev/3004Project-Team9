@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 @AllArgsConstructor
@@ -55,8 +56,17 @@ public class QuestPhaseOutboundService {
         this.sendToAllPlayers("/topic/quest/sponsor-setup", playerData);
     }
     public void broadcastStageChanged(StageAreaData stageAreaData) {
-        LOG.info(String.format("Broadcast Stage Data for stage %s", stageAreaData.stageNum()));
+        LOG.info(String.format("Broadcast Stage Data for stage %d", stageAreaData.stageNum()));
         this.sendToAllPlayers(("/topic/quest/stage-area-changed"));
+    }
+
+    public void broadcastFoeStageStart(ArrayList<Players> questingPlayersList){
+        this.sendToAllPlayers("/topic/quest/foe-stage-start", questingPlayersList);
+    }
+
+    public void broadcastParticipantSetup(PlayerData playerData){
+        LOG.info(String.format("Broadcast to Participant %s to setup for quest stage", playerData.name()));
+        this.sendToAllPlayers("/topic/quest/participant-setup");
     }
 
     public void broadcastJoinRequest(PlayerData playerData){
