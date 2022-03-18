@@ -23,4 +23,16 @@ public enum PlayerRanks {
     public int getRankShieldCost() {
         return rankShieldCost;
     }
+
+    public PlayerRanks getNextRank() {
+            return switch(this) {
+                case SQUIRE->PlayerRanks.KNIGHT;
+                case KNIGHT->PlayerRanks.CHAMPION_KNIGHT;
+                default->PlayerRanks.KNIGHT_OF_ROUND_TABLE;
+            };
+    }
+
+    public int getNextRankCost() {
+        return getNextRank().getRankShieldCost();
+    }
 }

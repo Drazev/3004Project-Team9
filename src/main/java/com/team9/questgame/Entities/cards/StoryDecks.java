@@ -1,11 +1,13 @@
 package com.team9.questgame.Entities.cards;
 
 import com.team9.questgame.Entities.DeckTypes;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class StoryDecks extends Decks<StoryCards> {
+
+public class StoryDecks extends Decks<StoryCards,StoryDeckCards> {
     public StoryDecks() {
         super(DeckTypes.STORY, StoryDecks.class);
     }
@@ -43,6 +45,14 @@ public class StoryDecks extends Decks<StoryCards> {
         deckList.put(StoryDeckCards.KINGS_CALL_TO_ARMS,1);
 
         createDeck(deckList);
+    }
+
+    @Override
+    public void testRebuildDeckWithList(HashMap<StoryDeckCards, Integer> deckList) {
+        super.testRebuildDeckWithList(deckList);
+        createDeck(deckList);
+        shuffleDeck();
+        notifyDeckChanged();
     }
 
     protected void createDeck(HashMap<StoryDeckCards,Integer> deckList) {
