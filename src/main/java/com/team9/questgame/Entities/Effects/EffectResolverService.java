@@ -104,9 +104,11 @@ public class EffectResolverService implements ApplicationContextAware {
         triggeredEffects.remove(effect);
     }
 
-    void onQuestCompleted(ArrayList<Players> targetedPlayers) {
+    void onQuestCompleted(HashMap<Players, Integer> targetedPlayers) {
+        playerAwardedShields(targetedPlayers);
+        ArrayList<Players> questVictors = new ArrayList<>(targetedPlayers.keySet());
         for(Effects e : triggeredEffects) {
-            e.trigger(targetedPlayers);
+            e.trigger(questVictors);
         }
     }
 

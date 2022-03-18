@@ -208,6 +208,8 @@ class EffectResolverServiceTest {
         deckList.put(AdventureDeckCards.SAXONS,5);
         deckList.put(AdventureDeckCards.BOAR,4);
         deckList.put(AdventureDeckCards.THIEVES,8);
+
+        //Allies
         deckList.put(AdventureDeckCards.SIR_GALAHAD,1);
         deckList.put(AdventureDeckCards.SIR_LANCELOT,1);
         deckList.put(AdventureDeckCards.KING_ARTHUR,1);
@@ -313,19 +315,185 @@ class EffectResolverServiceTest {
     void onQuestCompleted() {
     }
 
-//    @Test
-//    void testChivalrousDeedCard() {
-//        CardFactory cf = CardFactory.getInstance();
-//        CardWithEffect card = (EventCards)cf.createCard(sDeck,StoryDeckCards.CHIVALROUS_DEED);
-//        HashMap<Players,Integer> shieldRewards = new HashMap<>();
-//        shieldRewards.put(players.get(0),5);//Knight
-//        shieldRewards.put(players.get(1),12);//Champion Knight
-//        shieldRewards.put(players.get(2),2);//squire, but now lowest
-//        effectResolverService.playerAwardedShields(shieldRewards);
-//        card.activate(players.get(0));;
-//        assert(players.get(3).getShields()==3);
-//        card.activate(players.get(1));
-//        assert(players.get(2).getShields()==0);
-//        assert(players.get(2).getRank()==PlayerRanks.KNIGHT);
-//    }
+    @Test
+    void testChivalrousDeedCard() {
+        CardFactory cf = CardFactory.getInstance();
+        CardWithEffect card = (EventCards)cf.createCard(sDeck,StoryDeckCards.CHIVALROUS_DEED);
+        HashMap<Players,Integer> shieldRewards = new HashMap<>();
+        shieldRewards.put(players.get(0),5);//Knight
+        shieldRewards.put(players.get(1),12);//Champion Knight
+        shieldRewards.put(players.get(2),2);//squire, but now lowest
+        effectResolverService.playerAwardedShields(shieldRewards);
+        card.activate(players.get(0));;
+        assert(players.get(3).getShields()==3);
+        card.activate(players.get(1));
+        assert(players.get(2).getShields()==0);
+        assert(players.get(2).getRank()==PlayerRanks.KNIGHT);
+    }
+
+    @Test
+    void testQueensFavorCard() {
+        game.drawStoryCard(game.getPlayerTurnService().getPlayerTurn());
+        GeneralStateE currentState = game.getStateMachine().getCurrentState();
+        CardFactory cf = CardFactory.getInstance();
+        CardWithEffect card = (EventCards)cf.createCard(sDeck,StoryDeckCards.QUEENS_FAVOR);
+        HashMap<Players,Integer> shieldRewards = new HashMap<>();
+        shieldRewards.put(players.get(0),5);//Knight
+        shieldRewards.put(players.get(1),12);//Champion Knight
+        shieldRewards.put(players.get(2),2);//squire, but now lowest
+        effectResolverService.playerAwardedShields(shieldRewards);
+        card.activate(players.get(0));;
+        assert(players.get(2).getHand().getHandSize()==14); //Was squire
+        assert(players.get(3).getHand().getHandSize()==14); //Was squire
+    }
+
+    @Test
+    void testPoxCard() {
+        game.drawStoryCard(game.getPlayerTurnService().getPlayerTurn());
+        GeneralStateE currentState = game.getStateMachine().getCurrentState();
+        CardFactory cf = CardFactory.getInstance();
+        CardWithEffect card = (EventCards)cf.createCard(sDeck,StoryDeckCards.POX);
+        HashMap<Players,Integer> shieldRewards = new HashMap<>();
+        shieldRewards.put(players.get(0),5);//Knight
+        shieldRewards.put(players.get(1),15);//Champion Knight
+        shieldRewards.put(players.get(2),2);//squire, but now lowest
+        shieldRewards.put(players.get(3),4);//squire, but now lowest
+        effectResolverService.playerAwardedShields(shieldRewards);
+        card.activate(players.get(3)); //Player 4 drew card
+        assert(players.get(0).getShields()==0);
+        assert(players.get(1).getShields()==2);
+        assert(players.get(2).getShields()==1);
+        assert(players.get(3).getShields()==4); //This should stay same since drawing player is immune
+    }
+
+    @Test
+    void testPlagueCard() {
+        game.drawStoryCard(game.getPlayerTurnService().getPlayerTurn());
+        GeneralStateE currentState = game.getStateMachine().getCurrentState();
+        CardFactory cf = CardFactory.getInstance();
+        CardWithEffect card = (EventCards)cf.createCard(sDeck,StoryDeckCards.PLAGUE);
+        HashMap<Players,Integer> shieldRewards = new HashMap<>();
+        shieldRewards.put(players.get(0),6);//Knight
+        shieldRewards.put(players.get(1),15);//Champion Knight
+        shieldRewards.put(players.get(2),2);//squire, but now lowest
+        shieldRewards.put(players.get(3),4);//squire, but now lowest
+        effectResolverService.playerAwardedShields(shieldRewards);
+        card.activate(players.get(3));
+        assert(players.get(3).getShields()==2);
+        card.activate(players.get(2));
+        assert(players.get(2).getShields()==0);
+        assert(players.get(0).getShields()==1);
+        assert(players.get(1).getShields()==3);
+    }
+
+    @Test
+    void testProsperityThroughtTheRelmCard() {
+        game.drawStoryCard(game.getPlayerTurnService().getPlayerTurn());
+        GeneralStateE currentState = game.getStateMachine().getCurrentState();
+        CardFactory cf = CardFactory.getInstance();
+        CardWithEffect card = (EventCards)cf.createCard(sDeck,StoryDeckCards.PROSPERITY_THROUGHOUT_THE_REALM);
+        HashMap<Players,Integer> shieldRewards = new HashMap<>();
+        shieldRewards.put(players.get(0),5);//Knight
+        shieldRewards.put(players.get(1),12);//Champion Knight
+        shieldRewards.put(players.get(2),2);//squire, but now lowest
+        effectResolverService.playerAwardedShields(shieldRewards);
+        card.activate(players.get(0));;
+        assert(players.get(0).getHand().getHandSize()==14); //Was squire
+        assert(players.get(1).getHand().getHandSize()==14); //Was squire
+        assert(players.get(2).getHand().getHandSize()==14); //Was squire
+        assert(players.get(3).getHand().getHandSize()==14); //Was squire
+    }
+
+    @Test
+    void testCourtCalledToCamelot() {
+        HashMap<AdventureDeckCards,Integer> deckList = new HashMap<>();
+        CardFactory cf = CardFactory.getInstance();
+        CardWithEffect card = (EventCards)cf.createCard(sDeck,StoryDeckCards.COURT_CALLED_TO_CAMELOT);
+        deckList.put(AdventureDeckCards.EXCALIBUR,2);
+        deckList.put(AdventureDeckCards.LANCE,6);
+        deckList.put(AdventureDeckCards.BATTLE_AX,8);
+        deckList.put(AdventureDeckCards.SWORD,16);
+        deckList.put(AdventureDeckCards.HORSE,11);
+        deckList.put(AdventureDeckCards.DAGGER,6);
+        //Allies
+        deckList.put(AdventureDeckCards.SIR_GALAHAD,5);
+        deckList.put(AdventureDeckCards.SIR_LANCELOT,5);
+        deckList.put(AdventureDeckCards.KING_ARTHUR,5);
+        deckList.put(AdventureDeckCards.SIR_TRISTAN,5);
+        deckList.put(AdventureDeckCards.KING_PELLINORE,5);
+        deckList.put(AdventureDeckCards.SIR_GAWAIN,5);
+        deckList.put(AdventureDeckCards.SIR_PERCIVAL,5);
+        deckList.put(AdventureDeckCards.QUEEN_GUINEVERE,5);
+        deckList.put(AdventureDeckCards.QUEEN_ISEULT,5);
+        deckList.put(AdventureDeckCards.MERLIN,5);
+        aDeck.testRebuildDeckWithList(deckList);
+        for(Players p : players) {
+            p.onGameReset();
+        }
+        for(int i=0;i<Hand.MAX_HAND_SIZE;++i) {
+            for(Players p : players) {
+                aDeck.drawCard(p.getHand());
+            }
+        }
+        setupPlayerPlayAreasToPlayCards();
+        playAllNonDuplicateCardsFromHand();
+        for(Players p : players) {
+            assert(p.getPlayArea().getCardTypeMap().size()>0);
+        }
+        HashSet<CardTypes> test1 = new HashSet<>();
+        HashSet<CardTypes> test2 = new HashSet<>();
+        test2.add(CardTypes.ALLY);
+        test2.add(CardTypes.WEAPON);
+        test1.add(CardTypes.WEAPON);
+        test1.add(CardTypes.AMOUR);
+        HashSet<Players> pTest = new HashSet<>();
+        pTest.add(players.get(0));
+        pTest.add(players.get(1));
+        pTest.add(players.get(2));
+        HashMap<Players,Integer> map = new HashMap<>();
+
+       for(Players p : players) {
+           HashSet<AdventureCards> list = p.getPlayArea().getCardTypeMap().get(CardTypes.ALLY);
+           if(list!=null) {
+               map.put(p,list.size());
+           }
+       }
+
+       card.activate(players.get(0));
+        for(Players p : players) {
+            HashSet<AdventureCards> list = p.getPlayArea().getCardTypeMap().get(CardTypes.ALLY);
+            if(list!=null && map.get(p)>0) {
+                assert(list.size()==0);
+            }
+            else {
+                assert(map.get(p)>0);
+            }
+        }
+    }
+
+    @Test
+    void testKingsRecognitionCard() {
+        game.drawStoryCard(game.getPlayerTurnService().getPlayerTurn());
+        CardFactory cf = CardFactory.getInstance();
+        CardWithEffect card = (EventCards)cf.createCard(sDeck,StoryDeckCards.KINGS_RECOGNITION);
+        HashMap<Players,Integer> shieldRewards = new HashMap<>();
+        shieldRewards.put(players.get(0),6);//Knight
+        shieldRewards.put(players.get(1),15);//Champion Knight
+        shieldRewards.put(players.get(2),4);//squire, but now lowest
+        EffectResolverService.getService().playerAwardedShields(shieldRewards);
+        HashMap<Players,Integer> playersCompletedQuest = new HashMap<>();
+        playersCompletedQuest.put(players.get(0),0);
+        playersCompletedQuest.put(players.get(2),0);
+        card.activate(players.get(1));
+        assert(players.get(0).getShields()==1);
+        assert(players.get(1).getShields()==3);
+        assert(players.get(2).getShields()==4);
+        assert(players.get(3).getShields()==0);
+        EffectResolverService.getService().onQuestCompleted(playersCompletedQuest);
+        assert(players.get(0).getShields()==3); //+2 shields
+        assert(players.get(1).getShields()==3);
+        assert(players.get(2).getShields()==1); //+2 shields, rank up\
+        assert(players.get(2).getRank()==PlayerRanks.KNIGHT);
+        assert(players.get(3).getShields()==0);
+    }
 }

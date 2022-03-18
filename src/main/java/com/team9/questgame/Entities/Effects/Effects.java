@@ -65,7 +65,6 @@ public abstract class Effects {
             throw new IllegalEffectStateException("An effect cannot be activated without a player source.",this,source);
         }
         this.activatedBy = activatedBy;
-        this.state=EffectState.ACTIVATED;
         LOG.info(source.getCardName()+" has been activated by "+activatedBy.getName());
 
         nextState();
@@ -112,15 +111,15 @@ public abstract class Effects {
                 LOG.info(source.getCardName()+" state changed to "+this.state+" by "+activatedBy.getName());
                 onTriggered();
             }
-            case TARGET_SELECTION -> {
+            case TARGET_SELECTION,TRIGGERED -> {
                 this.state=EffectState.EFFECT_RESOLUTION;
                 LOG.info(source.getCardName()+" state changed to "+this.state+" by "+activatedBy.getName());
                 onEffectResolution();
             }
-            case RESOLVED -> {
+            case EFFECT_RESOLUTION -> {
                 this.state=EffectState.RESOLVED;
                 LOG.info(source.getCardName()+" state changed to "+this.state+" by "+activatedBy.getName());
-                onEffectResolution();
+                onResolved();
             }
         }
     }

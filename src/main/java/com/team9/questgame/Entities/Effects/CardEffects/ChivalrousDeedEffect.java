@@ -36,6 +36,8 @@ public class ChivalrousDeedEffect extends Effects {
 
     @Override
     protected void onEffectResolution() {
+        ArrayList<Players> targetListLowestRank = new ArrayList<>(this.possibleTargerts);
+        ArrayList<Players> targetListLeastShields = new ArrayList<>(this.possibleTargerts);
         for(int i=0;i<targetSelectors.size();++i) {
             this.possibleTargerts = targetSelectors.get(i).selectTargets(this.possibleTargerts);
         }
