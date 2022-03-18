@@ -1,6 +1,8 @@
 package com.team9.questgame.Entities.cards;
 
-import org.springframework.stereotype.Service;
+import com.team9.questgame.Entities.Effects.CardEffects.ChivalrousDeedEffect;
+import com.team9.questgame.Entities.Effects.Effects;
+
 
 public class CardFactory {
     private static CardFactory instance=null;
@@ -418,6 +420,7 @@ public class CardFactory {
 
         switch(cardEnumId) {
             case CHIVALROUS_DEED:
+                Effects effect = new ChivalrousDeedEffect();
                 card = new EventCards(
                         assignedDeck,
                   "Player(s) with both lowest rank and least amount of shields, recieves 3 shields.",
@@ -425,8 +428,9 @@ public class CardFactory {
                   cardEnumId.getSubType(),
                   "Event - Chivalrous Deed.png",
                         cardEnumId,
-                        null //bind event
+                        effect
                 );
+                effect.setSource(card);
                 break;
             case POX:
                 card = new EventCards(
