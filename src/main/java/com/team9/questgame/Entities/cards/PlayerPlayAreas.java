@@ -486,6 +486,9 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
      */
     private boolean discardCards(HashSet<AdventureCards> cardList)
     {
+        if(cardList==null) {
+            return false;
+        }
         HashSet<AdventureCards> list = new HashSet<>(cardList);
         boolean rc = !list.isEmpty();
         for(AdventureCards card : list) {

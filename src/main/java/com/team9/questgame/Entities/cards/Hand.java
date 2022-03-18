@@ -188,7 +188,6 @@ public class Hand implements CardArea<AdventureCards> {
         activatableCards.clear();
         isHandOversize=false;
         notifyHandUpdated();
-
     }
 
     public ArrayList<CardData> generateCardData() {

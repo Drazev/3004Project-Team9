@@ -5,12 +5,15 @@ import com.team9.questgame.gamemanager.record.socket.PlayerPlayCardInbound;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 
 @AllArgsConstructor
 @Service
-public class InboundService {
+public class InboundService implements ApplicationContextAware {
     private boolean gameStarted;
     private Logger LOG;
 
@@ -22,6 +25,8 @@ public class InboundService {
 
     @Autowired
     private GeneralGameController gameController;
+
+    private static ApplicationContext context;
 
     public InboundService() {
         this.LOG = LoggerFactory.getLogger(InboundService.class);
@@ -84,5 +89,14 @@ public class InboundService {
 
     public void setGameStarted(boolean gameStarted) {
         this.gameStarted = gameStarted;
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        context = applicationContext;
+    }
+
+    public static InboundService getService() {
+        return context.getBean(InboundService.class);
     }
 }

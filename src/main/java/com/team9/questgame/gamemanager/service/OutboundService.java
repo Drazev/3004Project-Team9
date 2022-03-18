@@ -8,7 +8,10 @@ import com.team9.questgame.gamemanager.record.socket.PlayerNextTurnOutbound;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +19,7 @@ import java.util.Map;
 
 @AllArgsConstructor
 @Service
-public class OutboundService {
+public class OutboundService implements ApplicationContextAware {
     private Logger LOG;
 
     @Autowired
@@ -24,6 +27,8 @@ public class OutboundService {
 
     @Autowired
     private SessionService sessionService;
+
+    private static ApplicationContext context;
 
     public OutboundService() {
         this.LOG = LoggerFactory.getLogger(OutboundService.class);
@@ -94,6 +99,15 @@ public class OutboundService {
     private void sendToAllPlayers(String topic) {
         LOG.info(String.format("Broadcasting to one players: topic=%s", topic));
         messenger.convertAndSend(topic, new EmptyJsonReponse());
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        context = applicationContext;
+    }
+
+    public static OutboundService getService() {
+        return context.getBean(OutboundService.class);
     }
 
 }

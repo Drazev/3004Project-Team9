@@ -61,7 +61,12 @@ class HandTest {
     @Test
     void discardCard() throws JsonProcessingException {
         Hand hand =  player.getHand();
-
+        PlayerPlayAreas pa = player.getPlayArea();
+        QuestPhaseController testPhaseController = new QuestPhaseController();
+        TestPlayArea testStage = new TestPlayArea();
+        pa.registerGamePhase(testPhaseController);
+        pa.onPlayAreaChanged(testStage);
+        pa.onPhaseNextPlayerTurn(player);
         for(int i=0;i<Hand.MAX_HAND_SIZE;++i) {
             aDeck.drawCard(hand);
         }

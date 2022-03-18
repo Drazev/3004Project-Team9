@@ -1,6 +1,7 @@
 package com.team9.questgame.Entities.cards;
 
 import com.team9.questgame.Entities.Effects.Effects;
+import com.team9.questgame.Entities.Players;
 
 /**
  * Entity representing Event Cards
@@ -9,7 +10,7 @@ import com.team9.questgame.Entities.Effects.Effects;
  * Some effects are delayed and this is handled by the Effects class and it's
  * subclasses.
  */
-public class EventCards extends StoryCards {
+public class EventCards extends StoryCards implements CardWithEffect {
     final Effects activeEffect;
 
     @Override
@@ -35,5 +36,10 @@ public class EventCards extends StoryCards {
     public EventCards(Decks assignedDeck,String activeAbilityDescription, String cardName, CardTypes subType, String fileName, StoryDeckCards cardCode, Effects activeEffect) {
         super(assignedDeck,activeAbilityDescription, cardName, subType, fileName, cardCode);
         this.activeEffect = activeEffect;
+    }
+
+    @Override
+    public void activate(Players activatingPlayer) {
+        activeEffect.activate(activatingPlayer);
     }
 }
