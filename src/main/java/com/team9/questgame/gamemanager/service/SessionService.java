@@ -2,6 +2,9 @@ package com.team9.questgame.gamemanager.service;
 
 import com.team9.questgame.Entities.Players;
 import lombok.Data;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -14,14 +17,20 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Data
 @Service
-public class SessionService {
+public class SessionService implements ApplicationContextAware {
 
     private final ConcurrentHashMap<String, String> sessionMap;
     private final ConcurrentHashMap<String, Players> playerMap;
+    private final ConcurrentHashMap<String,Players> sessionToPlayerMap;
+    private final ConcurrentHashMap<Players,String> playerToSessionMap;
+    private static ApplicationContext context;
 
     public SessionService() {
         this.sessionMap = new ConcurrentHashMap<>();
+        this.sessionToPlayerMap = new ConcurrentHashMap<>();
         this.playerMap = new ConcurrentHashMap<>();
+        playerToSessionMap = new ConcurrentHashMap<>();
+        this.context = null;
     }
 
     /**
@@ -35,8 +44,12 @@ public class SessionService {
             return false;
         } else {
             String randomId = UUID.randomUUID().toString();
+            Players newPlayer = new Players(name);
             sessionMap.put(name, randomId);
-            playerMap.put(name, new Players(name));
+            playerMap.put(name, newPlayer);
+            sessionToPlayerMap.put(randomId,newPlayer);
+            playerToSessionMap.put(newPlayer,randomId);
+            newPlayer.onGameReset(); //Reset's game state, and brodcasts
             return true;
         }
     }
@@ -48,12 +61,25 @@ public class SessionService {
      * @return true if the player is de-registered successfully, false if the player doesn't exist
      */
     public synchronized boolean deregisterPlayer(String name) {
+        boolean rc = false;
         if (!sessionMap.containsKey(name)) {
             return false;
-        } else {
-            sessionMap.remove(name);
-            playerMap.remove(name);
-            return true;
+        }
+        else {
+            if(sessionMap.containsKey(name))
+            {
+                sessionToPlayerMap.remove(sessionMap.get(name));
+                sessionMap.remove(name);
+                rc=true;
+
+            }
+            if(playerMap.containsKey(name)) {
+                playerToSessionMap.remove(playerMap.remove(name));
+                playerMap.remove(name);
+                rc=true;
+            }
+
+            return rc;
         }
     }
 
@@ -76,6 +102,10 @@ public class SessionService {
         return sessionMap.getOrDefault(name, null);
     }
 
+    public synchronized String getPlayerSessionId(Players player) { return playerToSessionMap.get(player); }
+
+    public synchronized HashMap<Players,String> getPlayerToSessionIdMap() { return new HashMap<>(playerToSessionMap);}
+
     /**
      * Get the number of player registered
      *
@@ -93,5 +123,14 @@ public class SessionService {
      */
     private synchronized String getPlayer(String name) {
         return sessionMap.getOrDefault(name, null);
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        context=applicationContext;
+    }
+
+    public static SessionService getService() {
+        return context.getBean(SessionService.class);
     }
 }

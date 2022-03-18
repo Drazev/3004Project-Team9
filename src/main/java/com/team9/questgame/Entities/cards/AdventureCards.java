@@ -1,5 +1,7 @@
 package com.team9.questgame.Entities.cards;
 
+import com.team9.questgame.Data.CardData;
+
 import java.util.HashSet;
 
 /**
@@ -32,6 +34,22 @@ public abstract class AdventureCards extends Cards {
     boolean registerBoostedCard(BoostableCard card) {
         LOG.debug("Registered card as observer to " + cardCode,card);
         return cardsBoostObservers.add(card);
+    }
+
+    @Override
+    public CardData generateObfuscatedCardData() {
+        CardData data = new CardData(
+                cardID,
+                null,
+                null,
+                null,
+                CardFactory.getAdventureCardImageURI(),
+                0,
+                0,
+                null,
+                false
+        );
+        return data;
     }
 
     /**

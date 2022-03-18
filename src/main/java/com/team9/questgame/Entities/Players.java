@@ -46,11 +46,6 @@ public class Players {
     private Hand hand;
 
     @JsonIgnore
-    private OutboundService outboundService;
-    @JsonIgnore
-    private final InboundService inboundService;
-
-    @JsonIgnore
     private static long nextId = 0;
     @Getter
     @Setter
@@ -63,11 +58,8 @@ public class Players {
         playArea = new PlayerPlayAreas(this);
         rank=PlayerRanks.SQUIRE;
         this.playerId=nextId++;
-        this.outboundService = ApplicationContextHolder.getContext().getBean(OutboundService.class);
-        this.inboundService = ApplicationContextHolder.getContext().getBean(InboundService.class);
         this.isReady = true;
         hand = new Hand(this,playArea);
-        onGameReset();
     }
 
     public PlayerPlayAreas getPlayArea() {
@@ -159,7 +151,7 @@ public class Players {
     }
 
     private void notifyPlayerDataChanged() {
-        outboundService.broadcastPlayerDataChanged(this,generatePlayerData());
+        OutboundService.getService().broadcastPlayerDataChanged(this,generatePlayerData());
     }
 
     public PlayerData generatePlayerData() {

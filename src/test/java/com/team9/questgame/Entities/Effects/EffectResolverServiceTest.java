@@ -11,6 +11,7 @@ import com.team9.questgame.Entities.cards.*;
 import com.team9.questgame.game_phases.GeneralGameController;
 import com.team9.questgame.game_phases.GeneralStateE;
 import com.team9.questgame.game_phases.quest.QuestPhaseController;
+import com.team9.questgame.gamemanager.service.SessionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -33,6 +34,8 @@ class EffectResolverServiceTest {
 
     @Autowired
     GeneralGameController game;
+    @Autowired
+    SessionService session;
     @Autowired
     EffectResolverService effectResolverService;
     AdventureDecks aDeck;
@@ -57,28 +60,28 @@ class EffectResolverServiceTest {
         LOG = LoggerFactory.getLogger(EffectResolverServiceTest.class);
         objMap = ApplicationContextHolder.getContext().getBean(ObjectMapper.class);
         aDeck = game.getADeck();
-        sDeck = game.getSDeck();
         testPhaseController = new QuestPhaseController();
         testStage = new TestPlayArea();
-        players.add(new Players("Player 1"));
-        players.add(new Players("Player 2"));
-        players.add(new Players("Player 3"));
-        players.add(new Players("Player 4"));
+        session.registerPlayer("Player 1");
+        session.registerPlayer("Player 2");
+        session.registerPlayer("Player 3");
+        session.registerPlayer("Player 4");
+        players.addAll(session.getPlayerMap().values());
         for(Players p : players) {
             game.playerJoin(p);
         }
         game.startGame();
-        assertThat(game.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.DRAW_STORY_CARD);
+        game.drawStoryCard(players.get(0));
+        for(int i=0;i<players.size();++i) {
+            hands.add(players.get(i).getHand());
+            pPlayAreas.add(players.get(i).getPlayArea());
+        }
+        players.addAll(session.getPlayerMap().values());
         objMap.setVisibility(objMap.getSerializationConfig().getDefaultVisibilityChecker()
                 .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
                 .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
                 .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
                 .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
-
-        for(int i=0;i<players.size();++i) {
-            hands.add(players.get(i).getHand());
-            pPlayAreas.add(players.get(i).getPlayArea());
-        }
 
         //setupPlayerPlayAreasToPlayCards();
         //playAllNonDuplicateCardsFromHand();
@@ -170,7 +173,6 @@ class EffectResolverServiceTest {
         HashMap<Players,Integer> drawList = new HashMap<>();
         drawList.put(players.get(0),2);
         drawList.put(players.get(1),0);
-        game.drawStoryCard(game.getPlayerTurnService().getPlayerTurn());
         GeneralStateE currentState = game.getStateMachine().getCurrentState();
         assert(currentState == GeneralStateE.QUEST_PHASE
                 || currentState == GeneralStateE.TOURNAMENT_PHASE
@@ -187,7 +189,6 @@ class EffectResolverServiceTest {
 
     @Test
     void playerDiscardsAllCardsFromPlay() {
-        //game.drawStoryCard(game.getPlayerTurnService().getPlayerTurn());
         HashMap<AdventureDeckCards,Integer> deckList = new HashMap<>();
         deckList.put(AdventureDeckCards.EXCALIBUR,2);
         deckList.put(AdventureDeckCards.LANCE,6);
@@ -333,7 +334,6 @@ class EffectResolverServiceTest {
 
     @Test
     void testQueensFavorCard() {
-        game.drawStoryCard(game.getPlayerTurnService().getPlayerTurn());
         GeneralStateE currentState = game.getStateMachine().getCurrentState();
         CardFactory cf = CardFactory.getInstance();
         CardWithEffect card = (EventCards)cf.createCard(sDeck,StoryDeckCards.QUEENS_FAVOR);
@@ -349,7 +349,6 @@ class EffectResolverServiceTest {
 
     @Test
     void testPoxCard() {
-        game.drawStoryCard(game.getPlayerTurnService().getPlayerTurn());
         GeneralStateE currentState = game.getStateMachine().getCurrentState();
         CardFactory cf = CardFactory.getInstance();
         CardWithEffect card = (EventCards)cf.createCard(sDeck,StoryDeckCards.POX);
@@ -368,7 +367,6 @@ class EffectResolverServiceTest {
 
     @Test
     void testPlagueCard() {
-        game.drawStoryCard(game.getPlayerTurnService().getPlayerTurn());
         GeneralStateE currentState = game.getStateMachine().getCurrentState();
         CardFactory cf = CardFactory.getInstance();
         CardWithEffect card = (EventCards)cf.createCard(sDeck,StoryDeckCards.PLAGUE);
@@ -388,7 +386,6 @@ class EffectResolverServiceTest {
 
     @Test
     void testProsperityThroughtTheRelmCard() {
-        game.drawStoryCard(game.getPlayerTurnService().getPlayerTurn());
         GeneralStateE currentState = game.getStateMachine().getCurrentState();
         CardFactory cf = CardFactory.getInstance();
         CardWithEffect card = (EventCards)cf.createCard(sDeck,StoryDeckCards.PROSPERITY_THROUGHOUT_THE_REALM);
@@ -473,7 +470,6 @@ class EffectResolverServiceTest {
 
     @Test
     void testKingsRecognitionCard() {
-        game.drawStoryCard(game.getPlayerTurnService().getPlayerTurn());
         CardFactory cf = CardFactory.getInstance();
         CardWithEffect card = (EventCards)cf.createCard(sDeck,StoryDeckCards.KINGS_RECOGNITION);
         HashMap<Players,Integer> shieldRewards = new HashMap<>();
