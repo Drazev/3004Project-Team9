@@ -8,10 +8,12 @@ function BigCard(props){
             position="absolute"
             style={{height:68,width:73,margin:"0 auto",float:"left",marginBottom:10,marginLeft:35}}
         >
-            <p style={{
+            {(props.numCards >= 0) &&
+              <p style={{
                 marginLeft: 27,
                 marginBottom: 0
-            }}>x{props.numCards}</p>
+              }}>x{props.numCards}</p>
+            }
           <img 
             id="CardImage"
             src={props.cardImage} 

@@ -3,7 +3,20 @@ import create from 'zustand';
 const useStore = create((set)=> ({
     playerPlayAreas: [{hand: []}, {hand: []}, {hand: []}, {hand: []}], //{hand: []} is temp
     //setPlayerPlayAreas : (playerPlayAreas,index) => set(()=>{playerPlayAreas[index] : playerPlayAreas}),
-    stageAreas: [],
+    stageAreas: [
+        {stageNum: 0, 
+            stageCard: {cardID: 5, cardName: "Boar", imgsrc: "./Assets/Adventure Deck (346x470)/Foe - Boar.png",bpValue: 5, boostedBpValue: 15, isBoosted: true },
+            activeCards: [
+                {cardID:9,cardName:"Horse",imgsrc:"./Assets/Adventure Deck (346x470)/Weapon - Horse.png",battlePoints:10,hasActiveEffect:false},
+                {cardID:10,cardName:"Battle-ax",imgsrc:"./Assets/Adventure Deck (346x470)/Weapon - Battle-ax.png",battlePoints:15,hasActiveEffect:false},
+                {cardID:11,cardName:"Sword",imgsrc:"./Assets/Adventure Deck (346x470)/Weapon - Sword.png",battlePoints:10,hasActiveEffect:false}
+            ]},
+        {stageNum: 1, stageCard: {cardID: 6, cardName: "Saxons", imgsrc: "./Assets/Adventure Deck (346x470)/Foe - Saxons.png",bpValue: 10, boostedBpValue: 20, isBoosted: true, },
+            activeCards: [{cardID:15,cardName:"Battle-ax",imgsrc:"./Assets/Adventure Deck (346x470)/Weapon - Battle-ax.png",battlePoints:15,hasActiveEffect:false}]},
+        {stageNum: 2, stageCard: {cardID: 7, cardName: "Black Knight", imgsrc: "./Assets/Adventure Deck (346x470)/Foe - Black Knight.png",bpValue: 25, boostedBpValue: 35, isBoosted: false },
+            activeCards: []},
+        ],
+    currentStage: 0,
     //setStageAreas : (stageAreas) => set(()=>{stageAreas : stageAreas}),
 
     updatePlayArea: (playAreaData) => set((current) => { 
@@ -125,6 +138,8 @@ function updatePlayArea(playerPlayArea) {
 export const usePlayerPlayAreas = () => useStore((state) => state.playerPlayAreas);
 
 export const useStageAreas = () => useStore((state) => state.stageAreas);
+
+export const useCurrentStage = () => useStore((state) => state.currentStage);
 
 export const useUpdatePlayArea = () => useStore((state) => state.updatePlayArea);
 

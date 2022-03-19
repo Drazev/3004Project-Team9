@@ -3,74 +3,10 @@ import FoeStageDisplay from "./FoeStageDisplay";
 import Card from "./Card";
 import CardImages from "../Images/index";
 import BigCard from "./BigCard";
-import "./GameBoard.css";
+import "./QuestDisplay.css";
+import { useStageAreas, useCurrentStage } from "../Stores/PlayAreaStore";
 
 
-/*
-  currentStage: 3
-  stages: {0: {stageType: "foe", stageCard: {}, activeCards: [], totalBP: 5},1:{stageType: "test", stageCard: {}, highestBid: 10},2:{stageType: "foe"}}
-  playerActiveCards: {playerName: {cardsActive[{},{}]}, playerName2:{}}
-  activePlayers: ["player1","player2"]
-  turns will be managed by overall gamestate store
-  questSponsor: "PlayerName"
-
-
-        long cardID,
-        AllCardCodes cardCode,
-        String cardName,
-        CardTypes subType,
-        String imgSrc,
-        int bids,
-        int battlePoints,
-        String effectDescription,
-        boolean hasActiveEffect
-
-
-public enum CardTypes {
-    FOE,
-    TEST,
-    AMOUR,
-    WEAPON,
-    ALLY,
-    EVENT,
-    QUEST,
-    TOURNAMENT
-}
-    private final int bpValue;
-    private final int boostedBpValue;
-    private boolean isBoosted;
-    private Effects activeEffect; //TODO: Modify for Effect implementation
-
-
-  Overall GameState Store
-    updateTurn
-    endTurn
-  
-  Story Store
-    UpdateStages (get stages from backend)
-    UpdateActivePlayerCards (remove old active cards)
-    GetRewards (distributes reward to players)
-
-    PlayerPlaysCard (Card, PlayerName)
-    PlayerJoinsQuest (PlayerName)
-    StartQuest: {questCard}
-    SponsorStageCard (sponsor plays card to sponsor stage) {stageNo, card, PlayerName}
-*/
-
-const stages = {
-    0: {stageCard: {cardID: 5, cardName: "Boar", imgsrc: "./Assets/Adventure Deck (346x470)/Foe - Boar.png",bpValue: 5, boostedBpValue: 15, isBoosted: true },
-        activeCards: [
-            {cardID:9,cardName:"Horse",imgsrc:"./Assets/Adventure Deck (346x470)/Weapon - Horse.png",battlePoints:10,hasActiveEffect:false},
-            {cardID:9,cardName:"Battle-ax",imgsrc:"./Assets/Adventure Deck (346x470)/Weapon - Battle-ax.png",battlePoints:15,hasActiveEffect:false},
-            {cardID:9,cardName:"Sword",imgsrc:"./Assets/Adventure Deck (346x470)/Weapon - Sword.png",battlePoints:10,hasActiveEffect:false}
-        ]},
-    1: {stageCard: {cardID: 6, cardName: "Saxons", imgsrc: "./Assets/Adventure Deck (346x470)/Foe - Saxons.png",bpValue: 10, boostedBpValue: 20, isBoosted: true, },
-        activeCards: [{cardID:9,cardName:"Battle-ax",imgsrc:"./Assets/Adventure Deck (346x470)/Weapon - Battle-ax.png",battlePoints:15,hasActiveEffect:false}]},
-    2: {stageCard: {cardID: 7, cardName: "Black Knight", imgsrc: "./Assets/Adventure Deck (346x470)/Foe - Black Knight.png",bpValue: 25, boostedBpValue: 35, isBoosted: false },
-        activeCards: []},
-    3: {stageCard: {cardID: 8, cardName: "Dragon", imgsrc: "./Assets/Adventure Deck (346x470)/Foe - Dragon.png",bpValue: 50, boostedBpValue: 70, isBoosted: false },
-        activeCards: []}
-};
 const activePlayers = ["John","Yusuf"];
 const questSponsor = "player3";
 const playerActiveCards = {
@@ -79,29 +15,43 @@ const playerActiveCards = {
     player3: [], 
     player4: []
 };
-let currentStage = 2;
 let currentTurn = "player1";
 
 const QuestDisplay = (props) => {
+    const stages = useStageAreas();
+    const currentStageNum = useCurrentStage();
+    const currentStageObject = stages.find(obj => obj.stageNum === currentStageNum);
+    /*const currentStageObject = stages.filter(obj => {
+        return obj.stageNum === currentStage;
+    });*/
 
-    const RenderStages = Object.keys(stages).map((stageNo) => (
-        (stageNo < currentStage) ? (
-            <BigCard cardId={stages[stageNo].stageCard.cardID} key={stages[stageNo].stageCard.cardID} cardImage={stages[stageNo].stageCard.imgsrc} numCards={stages[stageNo].activeCards.length}></BigCard>
-        ) : (
-            <BigCard cardId={stages[stageNo].stageCard.cardID} key={stages[stageNo].stageCard.cardID} cardImage={CardImages.Back_Adventure} numCards={stages[stageNo].activeCards.length}></BigCard>
-        )
+    
+    const getStages = () => {
+        let x = [];
+        for(let i = 0; i <= props.numStages; i++){
+            let curStage = stages.find(obj => obj.stageNum === i);
+            x.push(curStage);
+        }
+        return x;
+    };
+    const RenderStages = getStages()?.map((stage) => (
+            (currentStageNum < stage.stageNum)? (
+                <BigCard cardId={stage.stageCard.cardID} key={stage.stageCard.cardID} cardImage={CardImages.Back_Adventure} numCards={stage.activeCards.length}></BigCard>
+            ) : (
+                <BigCard cardId={stage.stageCard.cardID} key={stage.stageCard.cardID} cardImage={stage.stageCard.imgsrc} numCards={stage.activeCards.length}></BigCard>
+            )
     ));
 
   return (
     <div>
         <div style={{width:1000,top:60,left:1050,position:'fixed'}}>
-            <h3>Quest Stages</h3>
+            {currentStageObject && <h3>Quest Stages</h3>}
         </div>
         <div style={{width:1000,top:100,left:1300,position:'fixed'}}>
             {RenderStages}
         </div>
         <div>
-            <FoeStageDisplay activePlayers={activePlayers} currentStage={stages[currentStage-1]}></FoeStageDisplay>
+            {currentStageObject && <FoeStageDisplay activePlayers={activePlayers} currentStage={currentStageObject}></FoeStageDisplay>}
         </div>
     </div>
   );

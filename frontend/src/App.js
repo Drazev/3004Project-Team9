@@ -9,7 +9,7 @@ const App = () => {
   const connected = useConnected();
   const gameStarted = useGameStarted();
   return (
-    <div className="App" style={{width:1914,height:975,backgroundImage:`url(${background})`,backgroundSize:"cover",backgroundPosition:"center", backgroundColor:"black"}}>
+    <div className="App" style={{width:1914,height:975,backgroundImage:`url("https://wallpaperaccess.com/full/88167.jpg")`,backgroundSize:"cover",backgroundPosition:"center", backgroundColor:"black"}}>
       {gameStarted ? (
           <GameBoard/>
       ) : <>
