@@ -68,6 +68,7 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
 
 
     client.subscribe("/topic/general/next-turn", (name) => {
+      console.log("Next Turn: " + JSON.stringify(name));
       /**
        * Server informs about the next turn
        * This endpoind is used in all phases (general, quest, event, tournament)

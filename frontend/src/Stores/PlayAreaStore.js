@@ -15,8 +15,6 @@ const useStore = create((set)=> ({
             activeCards: [{cardID:15,cardName:"Battle-ax",imgsrc:"./Assets/Adventure Deck (346x470)/Weapon - Battle-ax.png",battlePoints:15,hasActiveEffect:false}]},
         {stageNum: 2, stageCard: {cardID: 7, cardName: "Black Knight", imgsrc: "./Assets/Adventure Deck (346x470)/Foe - Black Knight.png",bpValue: 25, boostedBpValue: 35, isBoosted: false },
             activeCards: []},
-        {stageNum: 3, stageCard: {cardID: 8, cardName: "Dragon", imgsrc: "./Assets/Adventure Deck (346x470)/Foe - Dragon.png",bpValue: 50, boostedBpValue: 70, isBoosted: false },
-            activeCards: []}
         ],
     currentStage: 0,
     //setStageAreas : (stageAreas) => set(()=>{stageAreas : stageAreas}),
