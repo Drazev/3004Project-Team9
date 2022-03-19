@@ -9,5 +9,5 @@ public interface GamePhases<T extends Cards> extends CardArea<T> {
 
     PlayerRewardData getRewards();
     void startPhase(PlayerTurnService playerTurnService);
-    void onPhaseReset();
+    void endPhase();
 }

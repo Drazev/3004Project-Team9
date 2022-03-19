@@ -98,7 +98,6 @@ public class OutboundService implements ApplicationContextAware {
         LOG.info(String.format("Broadcasting to all players: topic=%s, payload=%s", topic, payload));
         messenger.convertAndSend(topic, payload);
     }
-
     private void sendToAllPlayers(String topic) {
         LOG.info(String.format("Broadcasting to one players: topic=%s", topic));
         messenger.convertAndSend(topic, new EmptyJsonReponse());

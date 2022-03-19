@@ -38,6 +38,7 @@ public class IllegalGameRequest extends RuntimeException{
         this.player=player;
     }
 
+
     Players getPlayer() {
         return player;
     }

@@ -12,6 +12,7 @@ import com.team9.questgame.exception.IllegalCardStateException;
 import com.team9.questgame.exception.IllegalEffectStateException;
 import com.team9.questgame.gamemanager.service.InboundService;
 import com.team9.questgame.gamemanager.service.OutboundService;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +36,7 @@ public class Hand implements CardArea<AdventureCards> {
 
     private boolean isHandOversize;
 
+    @Getter
     private HashSet<AdventureCards> hand;
     private HashSet<CardWithEffect> activatableCards;
 

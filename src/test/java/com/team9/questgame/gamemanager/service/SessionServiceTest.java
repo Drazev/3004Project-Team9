@@ -75,6 +75,17 @@ class SessionServiceTest {
     }
 
     @Test
+    void getPlayerByPlayerId() {
+        int repetitions = 100;
+        sessionService = prepareSession();
+
+       for (int i = 0; i < repetitions; i++) {
+           assertEquals(sessionService.getPlayerByPlayerId(i), sessionService.getPlayerMap().get(Integer.toString(i)));
+       }
+
+    }
+
+    @Test
     void getNumberOfPlayers() {
         sessionService = prepareSession();
 
