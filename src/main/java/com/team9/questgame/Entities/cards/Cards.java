@@ -96,6 +96,8 @@ public abstract class Cards {
 
     abstract public CardData generateCardData();
 
+    abstract public CardData generateObfuscatedCardData();
+
 
     boolean playCard(CardArea cardArea) {
         if(location==cardArea)

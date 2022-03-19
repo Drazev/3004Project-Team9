@@ -4,9 +4,12 @@ import com.team9.questgame.Entities.Players;
 import com.team9.questgame.Entities.cards.*;
 import com.team9.questgame.exception.*;
 import com.team9.questgame.game_phases.GeneralGameController;
+import com.team9.questgame.game_phases.GeneralStateE;
 import com.team9.questgame.game_phases.quest.QuestPhaseStatesE;
 import com.team9.questgame.game_phases.utils.PlayerTurnService;
+import com.team9.questgame.gamemanager.service.InboundService;
 import com.team9.questgame.gamemanager.service.QuestPhaseInboundService;
+import com.team9.questgame.gamemanager.service.SessionService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,19 +39,23 @@ class QuestPhaseControllerTest {
     @Autowired
     private QuestPhaseInboundService inboundService;
 
+    @Autowired
+    SessionService session;
+
     private ArrayList<Players> players;
     private PlayerTurnService turnService;
 
     @BeforeEach
     void setUp(){
         players = new ArrayList<>();
-        players.add(new Players("Player 1"));
-        players.add(new Players("Player 2"));
-        players.add(new Players("Player 3"));
-        players.add(new Players("Player 4"));
-
+        session.registerPlayer("Player 1");
+        session.registerPlayer("Player 2");
+        session.registerPlayer("Player 3");
+        session.registerPlayer("Player 4");
         turnService = new PlayerTurnService(players);
-
+        players.addAll(session.getPlayerMap().values());
+        InboundService.getService().startGame();
+//        generalGameController.drawStoryCard(generalGameController.getPlayerTurnService().getPlayerTurn());
     }
 
     @AfterEach
@@ -169,9 +176,6 @@ class QuestPhaseControllerTest {
 
     @Test
     void playerPlayCard(){
-        // Doesn't allow when not in quest
-        assertThrows(IllegalQuestPhaseStateException.class, () -> controller.sponsorPlayCard(null, 0,0,0));
-
         sponsorQuest(); // Move to SETUP state
 
         // The sponsor setup the quest
@@ -252,6 +256,7 @@ class QuestPhaseControllerTest {
         ArrayList<QuestCards> questCards = getQuestCards();
         controller.receiveCard(questCards.get(0));
         assertThat(controller.getQuestCard()).isNotNull();
+        generalGameController.getStateMachine().setCurrentState(GeneralStateE.QUEST_PHASE);
 
         controller.startPhase(new PlayerTurnService(players));
         assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SPONSOR);

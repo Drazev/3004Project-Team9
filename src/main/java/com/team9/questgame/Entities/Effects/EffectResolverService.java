@@ -3,7 +3,6 @@ package com.team9.questgame.Entities.Effects;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.Entities.cards.CardTypes;
 import com.team9.questgame.game_phases.GeneralGameController;
-import com.team9.questgame.gamemanager.service.InboundService;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;

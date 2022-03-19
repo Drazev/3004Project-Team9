@@ -19,7 +19,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/topic");   // Outbound message from server to client
+        registry.enableSimpleBroker("/topic","/queue/");   // Outbound message from server to client
         registry.setApplicationDestinationPrefixes("/app");             // Inbound message from client to server will be routed to the "/request" handler
     }
 

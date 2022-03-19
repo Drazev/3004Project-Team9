@@ -6,6 +6,8 @@ import com.team9.questgame.exception.IllegalGameStateException;
 import com.team9.questgame.exception.PlayerJoinException;
 import com.team9.questgame.exception.PlayerNotFoundException;
 import com.team9.questgame.game_phases.quest.QuestPhaseStatesE;
+import com.team9.questgame.gamemanager.service.InboundService;
+import com.team9.questgame.gamemanager.service.SessionService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,17 +29,20 @@ class GeneralGameControllerTest {
 
     @Autowired
     private GeneralGameController gameController;
+    @Autowired
+    SessionService session;
 
     private ArrayList<Players> players;
 
     @BeforeEach
     void setUp() {
         players = new ArrayList<>();
-        players.add(new Players("Player 1"));
-        players.add(new Players("Player 2"));
-        players.add(new Players("Player 3"));
-        players.add(new Players("Player 4"));
-        players.add(new Players("Player 5"));
+        session.registerPlayer("Player 1");
+        session.registerPlayer("Player 2");
+        session.registerPlayer("Player 3");
+        session.registerPlayer("Player 4");
+        players.addAll(session.getPlayerMap().values());
+        InboundService.getService().startGame();
     }
 
     @AfterEach
@@ -52,90 +57,18 @@ class GeneralGameControllerTest {
 
     @Test
     void playerJoin() {
-        for (int i = 0; i < GeneralGameController.MAX_PLAYERS; ++i) {
-            gameController.playerJoin(players.get(i));
-        }
-        assertThat(gameController.getPlayers().size()).isEqualTo(GeneralGameController.MAX_PLAYERS);
-
-        // Should not add the same player
-        assertThrows(PlayerJoinException.class, () -> gameController.playerJoin(players.get(0)));
-        assertThat(gameController.getPlayers().size()).isEqualTo(GeneralGameController.MAX_PLAYERS);
-
-        // Should not add more than MAX player
-        assertThrows(PlayerJoinException.class, () -> gameController.playerJoin(players.get(4)));
-        assertThat(gameController.getPlayers().size()).isEqualTo(GeneralGameController.MAX_PLAYERS);
-        assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.SETUP);
-
-        // Enroll player not in setup state
-        gameController.startGame();
-
         assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.DRAW_STORY_CARD);
         assertThrows(IllegalGameStateException.class, () -> gameController.playerJoin(players.get(0)));
     }
 
     @Test
     void removePlayer() {
-        for (int i = 0; i < GeneralGameController.MAX_PLAYERS; ++i) {
-            gameController.playerJoin(players.get(i));
-        }
-
-        // Player not found
-        assertThrows(PlayerNotFoundException.class, () -> gameController.removePlayer(players.get(4)));
-
-        // Successful removal
-        gameController.removePlayer(players.get(0));
-        gameController.removePlayer(players.get(1));
-        gameController.removePlayer(players.get(2));
-        gameController.removePlayer(players.get(3));
-        assertThat(gameController.getPlayers().size()).isEqualTo(0);
-
-        // No player can be found
-        assertThrows(PlayerNotFoundException.class, () -> gameController.removePlayer(players.get(0)));
-        for (int i = 0; i < GeneralGameController.MAX_PLAYERS; ++i) {
-            gameController.playerJoin(players.get(i));
-        }
-
-        // Remove player not in SETUP stage
-        gameController.startGame();
         assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.DRAW_STORY_CARD);
         assertThrows(IllegalGameStateException.class, () -> gameController.removePlayer(players.get(0)));
     }
 
     @Test
-    void startGame() {
-        // No state change when not enough player
-        assertThat(gameController.getPlayers().size()).isEqualTo(0);
-        assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.SETUP);
-        gameController.startGame();
-        assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.SETUP);
-
-        // Can start the game
-        for (int i = 0; i < GeneralGameController.MAX_PLAYERS; ++i) {
-            gameController.playerJoin(players.get(i));
-        }
-        assertThat(gameController.getPlayers().size()).isEqualTo(GeneralGameController.MAX_PLAYERS);
-        gameController.startGame();
-        assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.DRAW_STORY_CARD);
-
-        // Cannot start the game when not in SETUP state
-        assertThrows(IllegalGameStateException.class, () -> gameController.startGame());
-        assertThrows(IllegalGameStateException.class, () -> gameController.startGame());
-        assertThrows(IllegalGameStateException.class, () -> gameController.startGame());
-    }
-
-    @Test
     void receiveCard() {
-        // Cannot receive card when the game is still being set up
-        assertThat(gameController.getPlayers().size()).isEqualTo(0);
-        assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.SETUP);
-
-        assertThat(gameController.receiveCard(null)).isFalse();
-
-        // Allowed receiving card
-        for (int i = 0; i < GeneralGameController.MAX_PLAYERS; ++i) {
-            gameController.playerJoin(players.get(i));
-        }
-        gameController.startGame();
         assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.DRAW_STORY_CARD);
 
         // This function calls receiveCard in the process
@@ -145,16 +78,6 @@ class GeneralGameControllerTest {
 
     @Test
     void playerPlayCard() {
-        // Cannot play card when in SETUP state
-        assertThat(gameController.getPlayers().size()).isEqualTo(0);
-        assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.SETUP);
-        assertThrows(IllegalGameStateException.class, () -> gameController.playerPlayCard(null, 0)); // input param doesn't matter
-
-        // Cannot play card when in DRAW_STORY_CARD phase
-        for (int i = 0; i < GeneralGameController.MAX_PLAYERS; ++i) {
-            gameController.playerJoin(players.get(i));
-        }
-        gameController.startGame();
         assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.DRAW_STORY_CARD);
         assertThrows(IllegalGameStateException.class, () -> gameController.playerPlayCard(null, 0)); // input param doesn't matter
 
@@ -176,17 +99,6 @@ class GeneralGameControllerTest {
 
     @Test
     void discardCard() {
-        // Cannot discard when the game is still being set up
-        assertThat(gameController.getPlayers().size()).isEqualTo(0);
-        assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.SETUP);
-
-        assertThrows(IllegalGameStateException.class, () -> gameController.discardCard(null)); // input param doesn't matter
-
-        // Allow discarding card
-        for (int i = 0; i < GeneralGameController.MAX_PLAYERS; ++i) {
-            gameController.playerJoin(players.get(i));
-        }
-        gameController.startGame();
         assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.DRAW_STORY_CARD);
         gameController.getSDeck().drawCard(gameController);
         assertThat(gameController.getSDeck().getDiscardPile().size()).isEqualTo(0);
@@ -196,17 +108,6 @@ class GeneralGameControllerTest {
 
     @Test
     void drawStoryCard() {
-        // Cannot draw card when the game not in DRAW_STORY_CARD state
-        assertThat(gameController.getPlayers().size()).isEqualTo(0);
-        assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.SETUP);
-
-        assertThrows(IllegalGameStateException.class, () -> gameController.drawStoryCard(null)); // param doesn't matter here
-
-        // Allowed drawing story card
-        for (int i = 0; i < GeneralGameController.MAX_PLAYERS; ++i) {
-            gameController.playerJoin(players.get(i));
-        }
-        gameController.startGame();
         assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.DRAW_STORY_CARD);
 
         // wrong player turn
@@ -223,15 +124,6 @@ class GeneralGameControllerTest {
 
     @Test
     void handlePlayerHandOversize() {
-        // Not allowed in NOT_STARTED, SETUP, DRAW_STORY_CARD
-        assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.SETUP);
-        assertThrows(IllegalGameStateException.class, () -> gameController.handlePlayerHandOversize()); // Params doesn't matter
-
-        // Start the game
-        for (int i = 0; i < GeneralGameController.MAX_PLAYERS; ++i) {
-            gameController.playerJoin(players.get(i));
-        }
-        gameController.startGame();
         assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.DRAW_STORY_CARD);
         assertThrows(IllegalGameStateException.class, () -> gameController.handlePlayerHandOversize()); // Params doesn't matter
 
@@ -270,17 +162,6 @@ class GeneralGameControllerTest {
 
     @Test
     void playCard() {
-        // Cannot draw card when the game not in DRAW_STORY_CARD state
-        assertThat(gameController.getPlayers().size()).isEqualTo(0);
-        assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.SETUP);
-
-        assertThrows(IllegalGameStateException.class, () -> gameController.playCard(null)); // param doesn't matter here
-
-        // Allowed playing card
-        for (int i = 0; i < GeneralGameController.MAX_PLAYERS; ++i) {
-            gameController.playerJoin(players.get(i));
-        }
-        gameController.startGame();
         assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.DRAW_STORY_CARD);
 
         // Get a quest card and generate the quest phase

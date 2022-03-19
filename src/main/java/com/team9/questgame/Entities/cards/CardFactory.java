@@ -6,6 +6,8 @@ import com.team9.questgame.Entities.Effects.Effects;
 
 public class CardFactory {
     private static CardFactory instance=null;
+    private static final String adventureCardImgSrc = "./Assets/Adventure Deck (346x470)/Adventure Deck Card Back.png";
+    private static final String storyCardImgSrc = "./Assets/Story Deck (327x491)/Story Deck Card Back.png";
 
     private CardFactory()
     {
@@ -689,6 +691,10 @@ public class CardFactory {
 
         return card;
     }
+
+    public static String getAdventureCardImageURI() { return adventureCardImgSrc; }
+
+    public static String getStoryCardImageURI() { return storyCardImgSrc; }
 
 
 /**

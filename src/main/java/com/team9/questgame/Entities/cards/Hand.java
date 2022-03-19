@@ -34,11 +34,6 @@ public class Hand implements CardArea<AdventureCards> {
     @JsonIgnore
     private final PlayerPlayAreas playArea;
 
-    @JsonIgnore
-    private final OutboundService outboundService;
-    @JsonIgnore
-    private final InboundService inboundService;
-
     private boolean isHandOversize;
 
     @Getter
@@ -55,13 +50,10 @@ public class Hand implements CardArea<AdventureCards> {
         this.id=nextid++;
         this.playArea = playArea;
         LOG= LoggerFactory.getLogger(Hand.class);
-        this.outboundService = ApplicationContextHolder.getContext().getBean(OutboundService.class);
-        this.inboundService = ApplicationContextHolder.getContext().getBean(InboundService.class);
         this.player=player;
         hand = new HashSet<>();
         activatableCards = new HashSet<>();
         cardIdMap = new HashMap<>();
-        onGameReset();
     }
 
     public boolean isHandOversize() {
@@ -198,12 +190,31 @@ public class Hand implements CardArea<AdventureCards> {
         return handCards;
     }
 
+    public ArrayList<CardData> generateObfuscatedCardData() {
+        ArrayList<CardData> handCards = new ArrayList<>(); //TODO: Switch to only hidden cards
+        for(Cards card : hand) {
+            handCards.add(card.generateObfuscatedCardData());
+        }
+        return handCards;
+    }
+
     public HandData generateHandData() {
         return new HandData(
                 player.getPlayerId(),
+                id,
                 player.getName(),
                 isHandOversize,
                 generateCardData()
+        );
+    }
+
+    public HandData generateObfuscatedHandData() {
+        return new HandData(
+                player.getPlayerId(),
+                id,
+                player.getName(),
+                isHandOversize,
+                generateObfuscatedCardData()
         );
     }
 
@@ -226,12 +237,12 @@ public class Hand implements CardArea<AdventureCards> {
 
     private void notifyHandOversize() {
         HandOversizeData data = new HandOversizeData(player.getPlayerId(),MAX_HAND_SIZE,getHandSize());
-        inboundService.playerNotifyHandOversize();
-        outboundService.broadcastHandOversize(player,data);
+        InboundService.getService().playerNotifyHandOversize();
+        OutboundService.getService().broadcastHandOversize(player,data);
     }
 
     private void notifyHandUpdated() {
-        outboundService.broadcastHandUpdate(generateHandData());
+        OutboundService.getService().broadcastHandUpdate(player,generateHandData(),generateObfuscatedHandData());
     }
 
 }

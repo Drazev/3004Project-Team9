@@ -23,6 +23,7 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
     @Autowired
     private QuestPhaseStateMachine questStateMachine;
 
+    @Setter
     @Getter
     private GeneralStateE currentState;
 

@@ -57,9 +57,11 @@ public class OutboundService implements ApplicationContextAware {
         this.sendToAllPlayers("/topic/general/next-turn", new PlayerNextTurnOutbound(player.getPlayerId(), player.getName()));
     }
 
-    public void broadcastHandUpdate( HandData data) {
-//        HandUpdateOutbound handUpdate = new HandUpdateOutbound(playerData.name(), playerData.);
-        this.sendToAllPlayers("/topic/player/hand-update", data);
+    public void broadcastHandUpdate( Players sourcePlayer, HandData toUser, HandData toOthers) {
+        final String topic = "/topic/player/hand-update";
+        sendToPlayer(topic,sourcePlayer,toUser);
+        sendToAllExceptPlayer(topic,toOthers,sourcePlayer);
+
     }
 
     public void broadcastPlayerDataChanged(Players player,PlayerData playerData) {
@@ -69,7 +71,7 @@ public class OutboundService implements ApplicationContextAware {
 
     private void sendToPlayer(String topic, Players player, Object payload) {
         LOG.info(String.format("Broadcasting to one player: topic=%s, name=%s, payload=%s", topic, player.getName(), payload));
-        messenger.convertAndSendToUser(topic, sessionService.getPlayerSessionId(player.getName()), payload);
+        messenger.convertAndSendToUser(sessionService.getPlayerSessionId(player), topic, payload);
     }
 
     public void broadcastPlayAreaChanged(Players player, PlayAreaData data) {
@@ -89,7 +91,7 @@ public class OutboundService implements ApplicationContextAware {
 
     private void sendToPlayer(String topic, String name, Object payload) {
         LOG.info(String.format("Broadcasting to one player: topic=%s, name=%s, payload=%s", topic, name, payload));
-        messenger.convertAndSendToUser(topic, sessionService.getPlayerSessionId(name), payload);
+        messenger.convertAndSendToUser(sessionService.getPlayerSessionId(name),topic, payload);
     }
 
     private void sendToAllPlayers(String topic, Object payload) {
@@ -99,6 +101,15 @@ public class OutboundService implements ApplicationContextAware {
     private void sendToAllPlayers(String topic) {
         LOG.info(String.format("Broadcasting to one players: topic=%s", topic));
         messenger.convertAndSend(topic, new EmptyJsonReponse());
+    }
+
+    private void sendToAllExceptPlayer(String topic, Object payload, Players excludedPlayer) {
+        LOG.info(String.format("Selective Broadcast to all players except {name: "+excludedPlayer.getName()+", PlayerID: "+excludedPlayer.getPlayerId()+"}, Topic: "+topic+" Payload: "+payload));
+        for(Map.Entry<Players,String> e : sessionService.getPlayerToSessionIdMap().entrySet()) {
+            if(e.getKey()!=excludedPlayer) {
+                messenger.convertAndSendToUser(e.getValue(),topic,payload);
+            }
+        }
     }
 
     @Override
