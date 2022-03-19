@@ -46,11 +46,6 @@ public class Players {
     private Hand hand;
 
     @JsonIgnore
-    private OutboundService outboundService;
-    @JsonIgnore
-    private final InboundService inboundService;
-
-    @JsonIgnore
     private static long nextId = 0;
     @Getter
     @Setter
@@ -63,11 +58,8 @@ public class Players {
         playArea = new PlayerPlayAreas(this);
         rank=PlayerRanks.SQUIRE;
         this.playerId=nextId++;
-        this.outboundService = ApplicationContextHolder.getContext().getBean(OutboundService.class);
-        this.inboundService = ApplicationContextHolder.getContext().getBean(InboundService.class);
         this.isReady = true;
         hand = new Hand(this,playArea);
-        onGameReset();
     }
 
     public PlayerPlayAreas getPlayArea() {
@@ -142,33 +134,24 @@ public class Players {
      * Triggers update event when rank is changed
      */
     private void updateRank() {
-        PlayerRanks nextRank;
-        switch(rank) {
-            case SQUIRE:
-                nextRank=PlayerRanks.KNIGHT;
-                break;
-            case KNIGHT:
-                nextRank=PlayerRanks.CHAMPION_KNIGHT;
-                break;
-            case CHAMPION_KNIGHT:
-                nextRank=PlayerRanks.KNIGHT_OF_ROUND_TABLE;
-            default:
-                LOG.debug("Player rank checked after victory condition set");
-                nextRank=PlayerRanks.KNIGHT_OF_ROUND_TABLE;
+        boolean rankUp=false;
+
+        while(shields>=rank.getNextRankCost()) {
+            rankUp=true;
+            shields-=rank.getNextRankCost();
+            rank=rank.getNextRank();
+            LOG.info("Player "+name+" has attained rank "+rank);
+
         }
 
-        if(shields>=nextRank.getRankShieldCost()) {
-            shields-=nextRank.getRankShieldCost();
-            rank=nextRank;
-            LOG.info("Player "+name+" has attained rank "+rank);
+        if(rankUp) {
             playArea.update();
             notifyPlayerDataChanged();
         }
-
     }
 
     private void notifyPlayerDataChanged() {
-        outboundService.broadcastPlayerDataChanged(this,generatePlayerData());
+        OutboundService.getService().broadcastPlayerDataChanged(this,generatePlayerData());
     }
 
     public PlayerData generatePlayerData() {
@@ -191,6 +174,7 @@ public class Players {
         this.battlePoints=rank.getRankBattlePointValue();
         this.shields=0;
         this.hand.onGameReset();
+        this.playArea.onGameReset();
         LOG.info(name+": Has reset to GAME START state.");
         notifyPlayerDataChanged();
     }

@@ -1,9 +1,13 @@
 package com.team9.questgame.Entities.cards;
 
-import org.springframework.stereotype.Service;
+import com.team9.questgame.Entities.Effects.CardEffects.*;
+import com.team9.questgame.Entities.Effects.Effects;
+
 
 public class CardFactory {
     private static CardFactory instance=null;
+    private static final String adventureCardImgSrc = "./Assets/Adventure Deck (346x470)/Adventure Deck Card Back.png";
+    private static final String storyCardImgSrc = "./Assets/Story Deck (327x491)/Story Deck Card Back.png";
 
     private CardFactory()
     {
@@ -24,6 +28,7 @@ public class CardFactory {
 
     public AdventureCards createCard(Decks assignedDeck,AdventureDeckCards cardEnumId) {
         AdventureCards card=null;
+        Effects effect;
 
         switch(cardEnumId)
         {
@@ -415,9 +420,11 @@ public class CardFactory {
 
     public StoryCards createCard(Decks assignedDeck,StoryDeckCards cardEnumId) {
         StoryCards card=null;
+        Effects effect;
 
         switch(cardEnumId) {
             case CHIVALROUS_DEED:
+                effect = new ChivalrousDeedEffect();
                 card = new EventCards(
                         assignedDeck,
                   "Player(s) with both lowest rank and least amount of shields, recieves 3 shields.",
@@ -425,10 +432,12 @@ public class CardFactory {
                   cardEnumId.getSubType(),
                   "Event - Chivalrous Deed.png",
                         cardEnumId,
-                        null //bind event
+                        effect
                 );
+                effect.setSource(card);
                 break;
             case POX:
+                effect = new PoxEffect();
                 card = new EventCards(
                         assignedDeck,
                         "All players except the player drawing this card loose 1 shield.",
@@ -436,10 +445,12 @@ public class CardFactory {
                         cardEnumId.getSubType(),
                         "Event - Pox.png",
                         cardEnumId,
-                        null //bind event
+                        effect //bind event
                 );
+                effect.setSource(card);
                 break;
             case PLAGUE:
+                effect = new PlagueEffect();
                 card = new EventCards(
                         assignedDeck,
                         "Drawer looses 2 shields if possible.",
@@ -447,10 +458,12 @@ public class CardFactory {
                         cardEnumId.getSubType(),
                         "Event - Plague.png",
                         cardEnumId,
-                        null //bind event
+                        effect //bind event
                 );
+                effect.setSource(card);
                 break;
             case KINGS_RECOGNITION:
+                effect = new KingsRecognitionEffect();
                 card = new EventCards(
                         assignedDeck,
                         "The next player(s) to complete a Quest will receive 2 extra shields.",
@@ -458,10 +471,12 @@ public class CardFactory {
                         cardEnumId.getSubType(),
                         "Event - Kings Recognition.png",
                         cardEnumId,
-                        null //bind event
+                        effect //bind event
                 );
+                effect.setSource(card);
                 break;
             case QUEENS_FAVOR:
+                effect = new QueensFavorEffect();
                 card = new EventCards(
                         assignedDeck,
                         "The lowest ranked player(s) immediately receives 2 adventure cards",
@@ -469,10 +484,12 @@ public class CardFactory {
                         cardEnumId.getSubType(),
                         "Event - Queens Favor.png",
                         cardEnumId,
-                        null //bind event
+                        effect
                 );
+                effect.setSource(card);
                 break;
             case COURT_CALLED_TO_CAMELOT:
+                effect = new CourtCalledToCamelotEffect();
                 card = new EventCards(
                         assignedDeck,
                         "All Allies in play must be discarded.",
@@ -480,8 +497,9 @@ public class CardFactory {
                         cardEnumId.getSubType(),
                         "Event - Court Called to Camelot.png",
                         cardEnumId,
-                        null //bind event
+                        effect //bind event
                 );
+                effect.setSource(card);
                 break;
             case KINGS_CALL_TO_ARMS:
                 card = new EventCards(
@@ -495,6 +513,7 @@ public class CardFactory {
                 );
                 break;
             case PROSPERITY_THROUGHOUT_THE_REALM:
+                effect = new ProsperityThroughtTheRealmEffect();
                 card = new EventCards(
                         assignedDeck,
                         "All players may immediately draw 2 Adventure Cards.",
@@ -502,8 +521,9 @@ public class CardFactory {
                         cardEnumId.getSubType(),
                         "Event - Chivalrous Deed.png",
                         cardEnumId,
-                        null //bind event
+                        effect //bind event
                 );
+                effect.setSource(card);
                 break;
             case JOURNEY_THROUGH_THE_ENCHANTED_FOREST:
                 card = new QuestCards (
@@ -671,6 +691,10 @@ public class CardFactory {
 
         return card;
     }
+
+    public static String getAdventureCardImageURI() { return adventureCardImgSrc; }
+
+    public static String getStoryCardImageURI() { return storyCardImgSrc; }
 
 
 /**

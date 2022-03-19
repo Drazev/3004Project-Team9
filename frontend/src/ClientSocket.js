@@ -48,7 +48,7 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
       console.log(body);
       addNewMessage(body.name, body.message);
     });
-    client.subscribe("/topic/player/hand-update", (message) => {
+    client.subscribe("/user/topic/player/hand-update", (message) => {
         let newHand = JSON.parse(message.body);
         console.log("Received hand update: " + newHand);
         updateHand(newHand);

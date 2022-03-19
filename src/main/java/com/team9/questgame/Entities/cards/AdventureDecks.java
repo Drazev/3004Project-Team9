@@ -1,11 +1,12 @@
 package com.team9.questgame.Entities.cards;
 
 import com.team9.questgame.Entities.DeckTypes;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class AdventureDecks extends Decks<AdventureCards>{
+public class AdventureDecks extends Decks<AdventureCards,AdventureDeckCards>{
 
     public AdventureDecks() {
          super(DeckTypes.ADVENTURE, AdventureDecks.class);
@@ -18,7 +19,7 @@ public class AdventureDecks extends Decks<AdventureCards>{
     }
 
     @Override
-    protected void createDeck() {
+    public void createDeck() {
         HashMap<AdventureDeckCards,Integer> deckList = new HashMap<>();
 
         //Weapons
@@ -67,7 +68,13 @@ public class AdventureDecks extends Decks<AdventureCards>{
         createDeck(deckList);
     }
 
-    protected void createDeck(HashMap<AdventureDeckCards,Integer> deckList) {
+    @Override
+    public void testRebuildDeckWithList(HashMap<AdventureDeckCards, Integer> deckList) {
+        super.testRebuildDeckWithList(deckList);
+        createDeck(deckList);
+    }
+
+    public void createDeck(HashMap<AdventureDeckCards,Integer> deckList) {
 
         //Iterate through each card in list
         for(Map.Entry<AdventureDeckCards,Integer> e : deckList.entrySet()) {

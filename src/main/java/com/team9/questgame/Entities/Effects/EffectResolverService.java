@@ -3,9 +3,11 @@ package com.team9.questgame.Entities.Effects;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.Entities.cards.CardTypes;
 import com.team9.questgame.game_phases.GeneralGameController;
-import com.team9.questgame.gamemanager.service.InboundService;
 import com.team9.questgame.gamemanager.service.OutboundService;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -14,22 +16,22 @@ import java.util.HashSet;
 import java.util.Map;
 
 @Service
-public class EffectResolverService {
+public class EffectResolverService implements ApplicationContextAware {
     @Autowired
     OutboundService outService;
-    @Autowired
-    InboundService inService;
     @Autowired
     GeneralGameController gameController;
 
     HashSet<Effects> triggeredEffects;
 
+    private static ApplicationContext context;
+
     public EffectResolverService() {
         this.triggeredEffects=new HashSet<>();
     }
 
-    public void loadTargetSelector(TargetSelector selector) {
-        selector.setPossibleTargets(gameController.getPlayers());
+    public ArrayList<Players> getPlayerList() {
+        return new ArrayList<>(gameController.getPlayers());
     }
 
     public void playerAwardedShields(HashMap<Players,Integer> targetedPlayers) {
@@ -66,21 +68,27 @@ public class EffectResolverService {
         HashMap<Players,Boolean> results = new HashMap<>();
         for(Players player : targetedPlayers) {
             boolean rc = false; //True if any cards were successfully discarded
+            boolean success = false;
             if(cardTypeList==null) {
-                rc =player.getPlayArea().discardAllCards();
+                success=player.getPlayArea().discardAllCards();
+                rc = rc | success;
                 results.put(player,rc);
                 continue;
             }
             if(cardTypeList.contains(CardTypes.ALLY)) {
-                rc = results.put(player,player.getPlayArea().discardAllAllies()) | rc;
+                success=player.getPlayArea().discardAllAllies();
+                rc = rc ? rc : success;
+
             }
 
             if(cardTypeList.contains(CardTypes.AMOUR)) {
-                rc = results.put(player,player.getPlayArea().discardAllAmour()) | rc;
+                success=player.getPlayArea().discardAllAmour();
+                rc = rc ? rc : success;
             }
 
             if(cardTypeList.contains(CardTypes.WEAPON)) {
-                rc = results.put(player,player.getPlayArea().discardAllWeapons()) | rc;
+                success=player.getPlayArea().discardAllWeapons();
+                rc = rc ? rc : success;
             }
             results.put(player,rc);
         }
@@ -95,10 +103,20 @@ public class EffectResolverService {
         triggeredEffects.remove(effect);
     }
 
-    void onQuestCompleted(ArrayList<Players> targetedPlayers) {
+    void onQuestCompleted(HashMap<Players, Integer> targetedPlayers) {
+        playerAwardedShields(targetedPlayers);
+        ArrayList<Players> questVictors = new ArrayList<>(targetedPlayers.keySet());
         for(Effects e : triggeredEffects) {
-            e.trigger(targetedPlayers);
+            e.trigger(questVictors);
         }
     }
 
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        context = applicationContext;
+    }
+
+    public static EffectResolverService getService() {
+        return context.getBean(EffectResolverService.class);
+    }
 }

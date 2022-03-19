@@ -30,8 +30,6 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
     @JsonIgnore
     private GamePhases phaseController;
     @JsonIgnore
-    private final OutboundService outboundService;
-    @JsonIgnore
     private Logger LOG;
     private PlayAreas<AdventureCards> targetPlayArea;
     private int bids;
@@ -40,12 +38,15 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
     private HashMap<AllCardCodes,AdventureCards> allCards;
     private QuestCards questCard;
     private HashSet<CardTypes> playableCardTypes;
+    private boolean hidePlayedCards;
 
     //Managed by Registration methods and triggered by cards
     private HashMap<AllCardCodes,HashSet<BoostableCard>> cardBoostDependencies;
     private HashSet<CardWithEffect> cardsWithActiveEffects;
     private HashSet<BattlePointContributor> cardsWithBattleValue;
     private HashSet<BidContributor> cardsWithBidValue;
+    private HashSet<BoostableCard> boostableCards;
+    private HashSet<AdventureCards> faceDownCards;
 
     static private long nextid=0;
 
@@ -61,11 +62,12 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         phaseController = null;
         cardsWithBattleValue = new HashSet<>();
         cardsWithBidValue = new HashSet<>();
+        boostableCards = new HashSet<>();
+        faceDownCards = new HashSet<>();
         targetPlayArea=null;
+        hidePlayedCards=false;
         bids=0;
         battlePoints=0;
-
-        this.outboundService = ApplicationContextHolder.getContext().getBean(OutboundService.class);
     }
 
     @Override
@@ -93,7 +95,12 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
     public ArrayList<CardData> getCardData() {
         ArrayList<CardData> handCards = new ArrayList<>();
         for(Cards card : allCards.values()) {
-            handCards.add(card.generateCardData());
+            if(faceDownCards.contains(card)) {
+                handCards.add(card.generateObfuscatedCardData());
+            }
+            else {
+                handCards.add(card.generateCardData());
+            }
         }
         return handCards;
     }
@@ -331,7 +338,14 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         discardAllAmour();
         discardAllWeapons();
         playableCardTypes.clear();
+        faceDownCards.clear();
+        hidePlayedCards=false;
         update();
+    }
+
+    @Override
+    public void registerBoostableCard(BoostableCard card) {
+        boostableCards.add(card);
     }
 
     /**
@@ -346,11 +360,15 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         phaseController = null;
         cardsWithBattleValue.clear();
         cardsWithBidValue.clear();
+        boostableCards.clear();
+        faceDownCards.clear();
+        hidePlayedCards=false;
         bids=0;
         battlePoints=0;
         questCard=null;
         targetPlayArea=null;
         playableCardTypes.clear();
+        update();
     }
 
     /**
@@ -394,7 +412,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
                 boostCard.setBoosted(true);
             }
         }
-
+        hidePlayedCards=false;
     }
 
     /**
@@ -424,6 +442,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         cardsWithActiveEffects.remove(delCard);
         cardsWithBattleValue.remove(delCard);
         cardsWithBidValue.remove(delCard);
+        boostableCards.remove(delCard);
         return true;
     }
 
@@ -472,6 +491,9 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
      */
     private boolean discardCards(HashSet<AdventureCards> cardList)
     {
+        if(cardList==null) {
+            return false;
+        }
         HashSet<AdventureCards> list = new HashSet<>(cardList);
         boolean rc = !list.isEmpty();
         for(AdventureCards card : list) {
@@ -496,7 +518,9 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
             LOG.error("RULE: Player "+player.getName()+" cannot have more than two cards of the same type in play.");
             throw new CardAreaException(CardAreaException.CardAreaExceptionReasonCodes.RULE_CANNOT_HAVE_TWO_OF_SAME_CARD_IN_PLAY);
         }
-
+        if(hidePlayedCards) {
+            faceDownCards.add(card);
+        }
         allCards.put(card.getCardCode(),card);
 
         CardTypes cardType = card.getCardCode().getSubType();
@@ -523,7 +547,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
      * Updates the clients about a play area being changed, sending the new state.
      */
     private void notifyPlayAreaChanged() {
-        outboundService.broadcastPlayAreaChanged(player,getPlayAreaData());
+        OutboundService.getService().broadcastPlayAreaChanged(player,getPlayAreaData());
     }
 
     /**
@@ -539,6 +563,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         }
 
         if(player == this.player && phaseController!=null) {
+            hidePlayedCards=true;
             playableCardTypes.add(CardTypes.ALLY);
             playableCardTypes.add(CardTypes.WEAPON);
             playableCardTypes.add(CardTypes.AMOUR);
@@ -547,6 +572,8 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
             playableCardTypes.remove(CardTypes.ALLY);
             playableCardTypes.remove(CardTypes.WEAPON);
             playableCardTypes.remove(CardTypes.AMOUR);
+            hidePlayedCards=false;
+            faceDownCards.clear();
         }
     }
 }

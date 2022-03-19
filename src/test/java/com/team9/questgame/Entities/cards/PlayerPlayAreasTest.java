@@ -7,11 +7,14 @@ import com.team9.questgame.ApplicationContextHolder;
 import com.team9.questgame.Data.CardData;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.exception.CardAreaException;
+import com.team9.questgame.game_phases.GeneralGameController;
 import com.team9.questgame.game_phases.quest.QuestPhaseController;
+import com.team9.questgame.gamemanager.service.SessionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 
@@ -27,6 +30,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class PlayerPlayAreasTest {
 
     AdventureDecks aDeck;
+    @Autowired
+    GeneralGameController game;
+    @Autowired
+    SessionService session;
 
     ArrayList<Players> players;
     ArrayList<Hand> hands;
@@ -47,33 +54,29 @@ class PlayerPlayAreasTest {
         pPlayAreas = new ArrayList<>();
         LOG = LoggerFactory.getLogger(PlayerPlayAreasTest.class);
         objMap = ApplicationContextHolder.getContext().getBean(ObjectMapper.class);
-        aDeck = new AdventureDecks();
+        aDeck = game.getADeck();
         testPhaseController = new QuestPhaseController();
         testStage = new TestPlayArea();
-        players.add(new Players("Player 1"));
-        players.add(new Players("Player 2"));
-        players.add(new Players("Player 3"));
-        players.add(new Players("Player 4"));
+        session.registerPlayer("Player 1");
+        session.registerPlayer("Player 2");
+        session.registerPlayer("Player 3");
+        session.registerPlayer("Player 4");
+        players.addAll(session.getPlayerMap().values());
+        for(Players p : players) {
+            game.playerJoin(p);
+        }
+        game.startGame();
+        game.drawStoryCard(players.get(0));
+        for(int i=0;i<players.size();++i) {
+            hands.add(players.get(i).getHand());
+            pPlayAreas.add(players.get(i).getPlayArea());
+        }
+        players.addAll(session.getPlayerMap().values());
         objMap.setVisibility(objMap.getSerializationConfig().getDefaultVisibilityChecker()
                 .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
                 .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
                 .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
                 .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
-
-
-
-        for(int i=0;i<players.size();++i) {
-            hands.add(players.get(i).getHand());
-            pPlayAreas.add(players.get(i).getPlayArea());
-        }
-
-
-        for(int i=0;i<Hand.MAX_HAND_SIZE;++i) {
-            for(Players p:players) {
-                aDeck.drawCard(p.getHand());
-            }
-        }
-
         //playAllNonDuplicateCardsFromHand();
     }
 
@@ -193,9 +196,10 @@ class PlayerPlayAreasTest {
 
     @Test
     void testBattlePointAndBidCalculation() {
-        Players player = new Players("test");
+        Players player = players.get(0);
         Hand hand = player.getHand();
         PlayerPlayAreas pa = player.getPlayArea();
+        player.onGameReset();
         pa.registerGamePhase(testPhaseController);
         pa.onPlayAreaChanged(testStage);
         pa.onPhaseNextPlayerTurn(player);

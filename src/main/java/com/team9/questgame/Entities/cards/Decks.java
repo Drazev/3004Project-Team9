@@ -10,10 +10,11 @@ import com.team9.questgame.gamemanager.service.OutboundService;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-public abstract class  Decks<T extends Cards> {
+public abstract class  Decks<T extends Cards,U extends AllCardCodes> {
     final DeckTypes type;
     protected Logger LOG;
     protected HashSet<T> cardsInDeck;
@@ -121,7 +122,23 @@ public abstract class  Decks<T extends Cards> {
         );
     }
 
-    private void notifyDeckChanged() {
+    public void testRebuildDeckWithList(HashMap<U,Integer> deckList) {
+        HashSet<CardArea> ca = new HashSet<>();
+        for(T card : cardsInDeck) {
+            CardArea c = card.getLocation();
+            if(c!=null) {
+                ca.add(card.getLocation());
+            }
+            card.discardCard();
+        }
+        for(CardArea c : ca) {
+            c.onGameReset();
+        }
+        cardsInDeck.clear();
+        onGameReset();
+    }
+
+    protected void notifyDeckChanged() {
         outboundService.broadcastDeckUpdate(generateDeckUpdateData());
     }
 

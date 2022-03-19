@@ -1,5 +1,7 @@
 package com.team9.questgame.Entities.cards;
 
+import com.team9.questgame.Data.CardData;
+
 import java.util.HashSet;
 
 /**
@@ -34,6 +36,22 @@ public abstract class AdventureCards extends Cards {
         return cardsBoostObservers.add(card);
     }
 
+    @Override
+    public CardData generateObfuscatedCardData() {
+        CardData data = new CardData(
+                cardID,
+                null,
+                null,
+                null,
+                CardFactory.getAdventureCardImageURI(),
+                0,
+                0,
+                null,
+                false
+        );
+        return data;
+    }
+
     /**
      * Special case where a card is played into a Hand.
      * Activates a registration process specific to a
@@ -45,7 +63,24 @@ public abstract class AdventureCards extends Cards {
         boolean rc=super.playCard(playArea);
         //Based on card attributes, register with PlayArea
         if(rc) {
+            registerwithNewPlayArea(playArea);
             registerWithNewPlayerPlayArea(playArea);
+        }
+        return rc;
+    }
+
+    /**
+     * General case when card is played into a play area.
+     * Activates a registration process specific to
+     * all play areas card area.
+     * @param playArea The PlayerPlayArea where the card now resides
+     * @return True if the card was accepted into the hand, False otherwise
+     */
+    boolean playCard(PlayAreas playArea) {
+        boolean rc=super.playCard(playArea);
+        //Based on card attributes, register with PlayArea
+        if(rc) {
+            registerwithNewPlayArea(playArea);
         }
         return rc;
     }
@@ -73,6 +108,17 @@ public abstract class AdventureCards extends Cards {
      * @param playArea The player play area where the card now resides
      */
     protected void registerWithNewPlayerPlayArea(PlayerPlayAreas playArea) {
+        return;
+    }
+
+    /**
+     * If placed into a PlayerPlayArea then register to
+     * notify PlayerPlayArea what attributes this card has that must be tracked.
+     * This is optional for subclasses and must be overridden to
+     * have an effect.
+     * @param playArea The player play area where the card now resides
+     */
+    protected void registerwithNewPlayArea(PlayAreas playArea) {
         return;
     }
 

@@ -26,26 +26,35 @@ import java.util.ArrayList;
  * activation until a specific trigger such as the end of a quest phase.
  */
 public abstract class Effects {
-    private final ArrayList<TargetSelector> targetSelectors;
-    private final Cards source;
-    private Players activatedBy;
-    private EffectState state;
+    protected final ArrayList<TargetSelector> targetSelectors;
+    protected Cards source;
+    protected Players activatedBy;
+    protected ArrayList<Players> possibleTargerts;
+    protected EffectState state;
     @JsonIgnore
     static protected Logger LOG= LoggerFactory.getLogger(Effects.class);
-    @JsonIgnore
-    static protected EffectResolverService effectResolver=ApplicationContextHolder.getContext().getBean(EffectResolverService .class);
 
     /**
      * Creates a new Effect Recipe
-     * @param targetSelectors A selector algorithm used by EffectResolutionService to determine those in the effect area.
-     * @param source Card that was the source of the effect.
      */
-    protected Effects(ArrayList<TargetSelector> targetSelectors, Cards source) {
-        this.targetSelectors = targetSelectors;
-        this.source = source;
+    protected Effects() {
+        this.targetSelectors = initTargetSelectors();
+        this.source = null;
         this.activatedBy=null;
+        this.possibleTargerts=null;
         this.state = EffectState.INACTIVE;
     }
+
+
+    public Cards getSource() {
+        return source;
+    }
+
+    public void setSource(Cards source) {
+        this.source = source;
+    }
+
+    abstract protected ArrayList<TargetSelector> initTargetSelectors();
 
     /**
      * Triggers the algorithm that will run the entire effect.
@@ -56,7 +65,6 @@ public abstract class Effects {
             throw new IllegalEffectStateException("An effect cannot be activated without a player source.",this,source);
         }
         this.activatedBy = activatedBy;
-        this.state=EffectState.ACTIVATED;
         LOG.info(source.getCardName()+" has been activated by "+activatedBy.getName());
 
         nextState();
@@ -69,9 +77,7 @@ public abstract class Effects {
         if(state!=EffectState.TARGET_SELECTION_ON_TRIGGER) {
             throw new IllegalEffectStateException("Effect must be waiting on a trigger to be triggered. This effect was in the state: "+state,this,source);
         }
-        for(TargetSelector t : targetSelectors) {
-            t.setPossibleTargets(targetedPlayers);
-        }
+        this.possibleTargerts=new ArrayList<>(targetedPlayers);
         nextState();
     }
 
@@ -80,7 +86,7 @@ public abstract class Effects {
      */
     public void reset() {
         activatedBy=null;
-        effectResolver.unregisterEffectTriggeredOnQuestCompleted(this);
+        EffectResolverService.getService().unregisterEffectTriggeredOnQuestCompleted(this);
         this.state=EffectState.INACTIVE;
     }
 
@@ -105,15 +111,15 @@ public abstract class Effects {
                 LOG.info(source.getCardName()+" state changed to "+this.state+" by "+activatedBy.getName());
                 onTriggered();
             }
-            case TARGET_SELECTION -> {
+            case TARGET_SELECTION,TRIGGERED -> {
                 this.state=EffectState.EFFECT_RESOLUTION;
                 LOG.info(source.getCardName()+" state changed to "+this.state+" by "+activatedBy.getName());
                 onEffectResolution();
             }
-            case RESOLVED -> {
+            case EFFECT_RESOLUTION -> {
                 this.state=EffectState.RESOLVED;
                 LOG.info(source.getCardName()+" state changed to "+this.state+" by "+activatedBy.getName());
-                onEffectResolution();
+                onResolved();
             }
         }
     }
@@ -124,7 +130,7 @@ public abstract class Effects {
         }
         this.state=EffectState.TARGET_SELECTION_ON_TRIGGER;
         LOG.info(source.getCardName()+" state changed to "+this.state+" by "+activatedBy.getName());
-        effectResolver.registerEffectTriggeredOnQuestCompleted(this);
+        EffectResolverService.getService().registerEffectTriggeredOnQuestCompleted(this);
     }
 
     /**
@@ -146,9 +152,7 @@ public abstract class Effects {
      * Automatically gather possible targets from the EffectResolverService
      */
     protected void onTargetSelection() {
-        for(TargetSelector ts : targetSelectors) {
-            effectResolver.loadTargetSelector(ts);
-        }
+        this.possibleTargerts = new ArrayList<>(EffectResolverService.getService().getPlayerList());
         nextState();
     }
 
