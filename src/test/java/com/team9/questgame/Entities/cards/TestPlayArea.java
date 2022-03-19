@@ -44,4 +44,9 @@ public class TestPlayArea implements PlayAreas<AdventureCards>, Serializable {
     public void registerBoostableCard(BoostableCard card) {
 
     }
+
+    @Override
+    public void registerBattlePointContributor(BattlePointContributor card){
+
+    }
 }

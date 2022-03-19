@@ -9,8 +9,10 @@ import com.team9.questgame.Entities.Players;
 import com.team9.questgame.exception.IllegalEffectStateException;
 import com.team9.questgame.exception.CardAreaException;
 import com.team9.questgame.exception.IllegalGamePhaseStateException;
+import com.team9.questgame.game_phases.GamePhaseControllers;
 import com.team9.questgame.game_phases.GamePhases;
 import com.team9.questgame.gamemanager.service.OutboundService;
+import lombok.Getter;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -28,14 +30,17 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
     @JsonIgnore
     private final Players player;
     @JsonIgnore
-    private GamePhases phaseController;
+    @Getter
+    private GamePhaseControllers phaseController;
     @JsonIgnore
     private Logger LOG;
-    private PlayAreas<AdventureCards> targetPlayArea;
+    @Getter
+    private PlayAreas targetPlayArea;
     private int bids;
     private int battlePoints;
     private HashMap<CardTypes, HashSet<AdventureCards>> cardTypeMap;
     private HashMap<AllCardCodes,AdventureCards> allCards;
+    @Getter
     private QuestCards questCard;
     private HashSet<CardTypes> playableCardTypes;
     private boolean hidePlayedCards;
@@ -208,10 +213,11 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         }
         boolean rc = card.playCard(targetPlayArea);
 
-        if(rc) {
+        if(allCards.containsValue(card.cardCode) && rc) {
             rc=removeCard(card);
             update();
         }
+
         return rc;
     }
 
@@ -284,11 +290,11 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
     }
 
     /**
-     * Game Phase Controller registers themselvef as the active game controller.
+     * Game Phase Controller registers themself as the active game controller.
      * This will enable certain features.
      * @param activePhase The active game phase to be set
      */
-    public void registerGamePhase(GamePhases activePhase) {
+    public void registerGamePhase(GamePhaseControllers activePhase) {
         if(activePhase==null)
         {
             throw new IllegalGamePhaseStateException(null,NULL_ACTIVE_PHASE);

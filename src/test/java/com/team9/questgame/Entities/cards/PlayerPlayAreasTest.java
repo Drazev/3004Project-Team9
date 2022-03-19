@@ -11,6 +11,7 @@ import com.team9.questgame.game_phases.GeneralGameController;
 import com.team9.questgame.game_phases.quest.QuestPhaseController;
 import com.team9.questgame.gamemanager.service.SessionService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -110,6 +112,22 @@ class PlayerPlayAreasTest {
         }
     }
 
+//    @Test
+//    void discardAllFoes() {
+//        for(PlayerPlayAreas pa : pPlayAreas) {
+//            HashSet<AdventureCards> cards = pa.getCardTypeMap().get(CardTypes.FOE);
+//            if(cards==null) {
+//                break;
+//            }
+//            int numOfType = cards.size();
+//            LOG.info("Card Area had "+numOfType+" Foes BEFORE discard");
+//            pa.discardAllFoes();
+//            assert(pa.getCardTypeMap().get(CardTypes.FOE).size()==0);
+//        }
+//
+//    }
+
+
     @Test
     void discardAllAllies() {
         setupPlayerPlayAreasToPlayCards();
@@ -141,6 +159,22 @@ class PlayerPlayAreasTest {
             assert(pa.getCardTypeMap().get(CardTypes.WEAPON).size()==0);
         }
     }
+
+
+//    @Test
+//    void discardAllTests() {
+//        for(PlayerPlayAreas pa : pPlayAreas) {
+//            HashSet<AdventureCards> cards = pa.getCardTypeMap().get(CardTypes.TEST);
+//            if(cards==null) {
+//                break;
+//            }
+//            int numOfType = cards.size();
+//            LOG.info("Card Area had "+numOfType+" Foes BEFORE discard");
+//            pa.discardAllTests();
+//            assert(pa.getCardTypeMap().get(CardTypes.TEST).size()==0);
+//        }
+//    }
+
 
     @Test
     void discardAllAmour() {
@@ -201,6 +235,8 @@ class PlayerPlayAreasTest {
         PlayerPlayAreas pa = player.getPlayArea();
         player.onGameReset();
         pa.registerGamePhase(testPhaseController);
+//        ArrayList<QuestCards> questCards = getQuestCards();
+//        StagePlayAreas sa = new StagePlayAreas(questCards.get(0), player,0);
         pa.onPlayAreaChanged(testStage);
         pa.onPhaseNextPlayerTurn(player);
         CardFactory cf = CardFactory.getInstance();
@@ -258,9 +294,9 @@ class PlayerPlayAreasTest {
         }
 
         LOG.info("Checking the play area attributes are correctly calculated.");
-        assert(pa.size()+hand.getHandSize()==cards.size());
-        assert(pa.getBattlePoints()==bp);
-        assert(pa.getBids()==bids);
+        assertThat(pa.size()+hand.getHandSize()).isEqualTo(cards.size());
+        assertThat(pa.getBattlePoints()).isEqualTo(bp);
+        assertThat(pa.getBids()).isEqualTo(bids);
 
         LOG.info("Checking if Boost status on cards was correct");
         for(AdventureCards c : cards) {
@@ -278,6 +314,34 @@ class PlayerPlayAreasTest {
             }
         }
 
+    }
+
+
+    private ArrayList<QuestCards> getQuestCards() {
+        CardFactory cf = CardFactory.getInstance();
+        AdventureDecks testDeck = new AdventureDecks();
+        HashMap<StoryDeckCards,Integer> deckList = new HashMap<>();
+        ArrayList<QuestCards> cards = new ArrayList<>();
+        deckList.put(StoryDeckCards.SEARCH_FOR_THE_HOLY_GRAIL,1);
+        deckList.put(StoryDeckCards.TEST_OF_THE_GREEN_KNIGHT,1);
+        deckList.put(StoryDeckCards.SEARCH_FOR_THE_QUESTING_BEAST,1);
+        deckList.put(StoryDeckCards.DEFEND_THE_QUEENS_HONOR,1);
+        deckList.put(StoryDeckCards.RESCUE_THE_FAIR_MAIDEN,1);
+        deckList.put(StoryDeckCards.JOURNEY_THROUGH_THE_ENCHANTED_FOREST,1);
+        deckList.put(StoryDeckCards.VANQUISH_KING_ARTHURS_ENEMIES,2);
+        deckList.put(StoryDeckCards.SLAY_THE_DRAGON,1);
+        deckList.put(StoryDeckCards.BOAR_HUNT,2);
+        deckList.put(StoryDeckCards.REPEL_THE_SAXON_RAIDERS,2);
+
+        for(Map.Entry<StoryDeckCards,Integer> e : deckList.entrySet()) {
+
+            //Create number of cards as proscribed in list
+            for (int i = 0; i < e.getValue(); ++i) {
+                QuestCards card = (QuestCards) cf.createCard(testDeck, e.getKey());
+                cards.add(card);
+            }
+        }
+        return cards;
     }
 
     @Test
