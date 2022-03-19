@@ -91,6 +91,8 @@ public class GeneralGameController implements CardArea<StoryCards> {
     public void playerJoin(Players player) {
         if (stateMachine.getCurrentState() != GeneralStateE.SETUP) {
             throw new IllegalGameStateException("Player can only join during SETUP state");
+        } else if (stateMachine.isBlocked()) {
+            throw new RuntimeException("The game should not be blocked before started");
         }
 
         if (players.contains(player)) {
@@ -108,6 +110,8 @@ public class GeneralGameController implements CardArea<StoryCards> {
     public void removePlayer(Players player) throws PlayerNotFoundException, IllegalGameRequest {
         if (stateMachine.getCurrentState() != GeneralStateE.SETUP) {
             throw new IllegalGameStateException("Players can only be removed during SETUP state");
+        } else if (stateMachine.isBlocked()) {
+            throw new RuntimeException("The game should not be blocked before started");
         }
 
         if (!players.contains(player)) {
@@ -123,6 +127,8 @@ public class GeneralGameController implements CardArea<StoryCards> {
     public void startGame() {
         if (stateMachine.getCurrentState() != GeneralStateE.SETUP) {
             throw new IllegalGameStateException("Game can only be started during SETUP state");
+        } else if (stateMachine.isBlocked()) {
+            throw new RuntimeException("The game should not be blocked before started");
         }
 
         for (int i = 0; i < Hand.MAX_HAND_SIZE; ++i) {
@@ -141,14 +147,16 @@ public class GeneralGameController implements CardArea<StoryCards> {
     /**
      * Draw a story card from the story deck and play that card (generate the game phase)
      *
-     * @param players the player who requested
+     * @param player the player who requested
      */
-    public void drawStoryCard(Players players) {
+    public void drawStoryCard(Players player) {
         if (stateMachine.getCurrentState() != GeneralStateE.DRAW_STORY_CARD) {
             throw new IllegalGameStateException("Story card can only be drawn during DRAW_STORY_CARD state");
+        } else if (stateMachine.isBlocked()) {
+            throw new IllegalGameRequest("Cannot proceed when the game is blocked", player);
         }
 
-        if (playerTurnService.getPlayerTurn() != players) {
+        if (playerTurnService.getPlayerTurn() != player) {
             // TODO: Throw error because this is client request
             return;
         }
@@ -162,7 +170,10 @@ public class GeneralGameController implements CardArea<StoryCards> {
             sDeck.drawCard(this);
         }
         // Generate the GamePhase that corresponds to the type of story card
-        playCard(this.storyCard);
+        boolean status = playCard(this.storyCard);
+        if (status == false) {
+            throw new RuntimeException("Couldn't play the StoryCard");
+        }
 
         stateMachine.update();
     }
@@ -188,6 +199,7 @@ public class GeneralGameController implements CardArea<StoryCards> {
         stateMachine.update();
     }
 
+
     public void playerPlayCard(Players player, long cardId) {
         if (!getStateMachine().isInPhases()) {
             throw new IllegalGameStateException("Card can only be played in a Game Phases");
@@ -196,7 +208,9 @@ public class GeneralGameController implements CardArea<StoryCards> {
         if (!player.getHand().playCard(cardId)) {
             throw new RuntimeException("Cannot play card, mismatch cardID or unassigned playArea");
         }
-
+        //TODO: uncomment below if you want to pass order to quest
+        //questPhaseController.playerPlayCard(player, cardId, src, dst);
+        player.actionPlayCard(cardId);
         stateMachine.update();
     }
 
@@ -208,7 +222,11 @@ public class GeneralGameController implements CardArea<StoryCards> {
     @Override
     public boolean receiveCard(StoryCards card) {
         if (stateMachine.getCurrentState() != GeneralStateE.DRAW_STORY_CARD) {
-            throw new IllegalGameStateException("Cannot receive story card when it's not DRAW_STORY_CARD state, currentState=" + stateMachine.getCurrentState());
+            // Cannot receive story card when it's not DRAW_STORY_CARD state, currentState=
+            return false;
+        } else if (stateMachine.isBlocked()) {
+            // Cannot receive card when false
+            return false;
         }
 
         discardCard(storyCard);
@@ -228,6 +246,8 @@ public class GeneralGameController implements CardArea<StoryCards> {
     public void discardCard(StoryCards card) {
         if (stateMachine.getCurrentState() != GeneralStateE.DRAW_STORY_CARD) {
             throw new IllegalGameStateException("Cannot receive card when not ");
+        } else if (stateMachine.isBlocked()) {
+            throw new RuntimeException("discardCard should not be called when the game is blocked");
         }
 
         // Ignore if there's no story card
@@ -247,10 +267,13 @@ public class GeneralGameController implements CardArea<StoryCards> {
     public boolean playCard(StoryCards card) {
         if (!stateMachine.isGameStarted()) {
             throw new IllegalGameStateException("Cannot play card before the game is started");
-        } else if (card == null) {
+        } else if (stateMachine.isBlocked()) {
+            throw new RuntimeException("playCard should not be called when the game is blocked");
+        }else if (card == null) {
             throw new NullPointerException("Story card is null");
         }
 
+        boolean status = false;
         PlayerTurnService gamePhaseTurnService = new PlayerTurnService(players);
         gamePhaseTurnService.setPlayerTurn(playerTurnService.getPlayerTurn());
 
@@ -259,19 +282,24 @@ public class GeneralGameController implements CardArea<StoryCards> {
          */
         switch (card.getSubType()) {
             case QUEST:
-                questPhaseController.receiveCard((QuestCards) this.storyCard);
+                status = questPhaseController.receiveCard((QuestCards) this.storyCard);
                 questPhaseController.startPhase(gamePhaseTurnService);
                 break;
             case TOURNAMENT:
-                tournamentPhaseController.receiveCard(this.storyCard);
+                status = tournamentPhaseController.receiveCard(this.storyCard);
                 tournamentPhaseController.startPhase(gamePhaseTurnService);
                 break;
             case EVENT:
-                eventPhaseController.receiveCard(this.storyCard);
+                status = eventPhaseController.receiveCard(this.storyCard);
                 eventPhaseController.startPhase(gamePhaseTurnService);
                 break;
             default:
                 throw new RuntimeException("Unexpected card type, should be a story card");
+        }
+
+        if (status == false) {
+            // GamePhase controller cannot receive the card
+            return false;
         }
 
         stateMachine.setGamePhaseRequested(true);

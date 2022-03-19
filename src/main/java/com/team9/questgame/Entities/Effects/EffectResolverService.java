@@ -96,15 +96,15 @@ public class EffectResolverService implements ApplicationContextAware {
         return results;
     }
 
-    void registerEffectTriggeredOnQuestCompleted(Effects effect) {
+   public void registerEffectTriggeredOnQuestCompleted(Effects effect) {
         triggeredEffects.add(effect);
     }
 
-    void unregisterEffectTriggeredOnQuestCompleted(Effects effect) {
+   public void unregisterEffectTriggeredOnQuestCompleted(Effects effect) {
         triggeredEffects.remove(effect);
     }
 
-    void onQuestCompleted(HashMap<Players, Integer> targetedPlayers) {
+    public void onQuestCompleted(HashMap<Players, Integer> targetedPlayers) {
         playerAwardedShields(targetedPlayers);
         ArrayList<Players> questVictors = new ArrayList<>(targetedPlayers.keySet());
         for(Effects e : triggeredEffects) {

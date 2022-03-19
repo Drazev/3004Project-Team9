@@ -11,6 +11,7 @@ public record StageAreaData(
         int bids,
         int battlePoints,
         HashSet<CardTypes> acceptedCardTypes,
-        ArrayList<CardData> cardsInPlay
+        CardData stageCard,
+        ArrayList<CardData> activeCards
 ) {
 }

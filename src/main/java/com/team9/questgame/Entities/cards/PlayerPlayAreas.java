@@ -208,10 +208,11 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         }
         boolean rc = card.playCard(targetPlayArea);
 
-        if(rc) {
+        if(allCards.containsValue(card.cardCode) && rc) {
             rc=removeCard(card);
             update();
         }
+
         return rc;
     }
 

@@ -6,12 +6,16 @@ import com.team9.questgame.Data.CardData;
 import com.team9.questgame.Data.PlayAreaData;
 import com.team9.questgame.Data.PlayAreaDataSources;
 import com.team9.questgame.Data.StageAreaData;
+import com.team9.questgame.Entities.Players;
+import com.team9.questgame.exception.BadRequestException;
 import com.team9.questgame.exception.CardAreaException;
+import com.team9.questgame.exception.IllegalCardStateException;
 import com.team9.questgame.game_phases.quest.QuestPhaseController;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import com.team9.questgame.gamemanager.service.QuestPhaseOutboundService;
 import lombok.Getter;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,6 +25,7 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
 
     @JsonIgnore
     private final QuestPhaseOutboundService outboundService;
+    private Players sponsor;
     private int stageNum;
     private long id;
     private int battlePoints;
@@ -34,6 +39,9 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
     private HashMap<AllCardCodes,HashSet<BoostableCard>> cardBoostDependencies;
     private HashSet<BattlePointContributor> cardsWithBattleValue;
     private HashSet<BoostableCard> boostableCards;
+    private HashMap<Long, AdventureCards> cardIdMap;
+    private boolean hasFoe;
+    private AdventureCards stageCard;
 
 
     private StagePlayAreas targetPlayArea;
@@ -43,20 +51,25 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
 
     static private int nextid = 0;
 
-    public StagePlayAreas(QuestCards questCard, int stageNum){
+    public StagePlayAreas(QuestCards questCard, Players sponsor, int stageNum){
         this.id = nextid++;
         this.questCard = questCard;
+        this.sponsor = sponsor;
         this.stageNum = stageNum;
-        this.allCards = new HashMap<>();
-        this.battlePoints = 0;
-        this.bids = 0;
-        this.outboundService = ApplicationContextHolder.getContext().getBean(QuestPhaseOutboundService.class);
+        allCards = new HashMap<>();
+        battlePoints = 0;
+        bids = 0;
+        outboundService = ApplicationContextHolder.getContext().getBean(QuestPhaseOutboundService.class);
         cardBoostDependencies = new HashMap<>();
         boostableCards = new HashSet<>();
+        cardIdMap = new HashMap<>();
+        hasFoe = false;
 
         cardsWithBattleValue = new HashSet<>();
 
         this.targetPlayArea=null;
+
+        LOG = LoggerFactory.getLogger(StagePlayAreas.class);
 
     }
 
@@ -78,17 +91,18 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
         if(allCards.containsKey(card.getCardCode())){
             LOG.error("RULE: A stage cannot have two cards of the same type");
             throw new CardAreaException(CardAreaException.CardAreaExceptionReasonCodes.RULE_CANNOT_HAVE_TWO_OF_SAME_CARD_IN_PLAY);
+        }if(hasFoe){
+            LOG.error("RULE: A stage cannot have two cards of the same type");
+            //TODO:change reason code to can't have two foes
+            throw new CardAreaException(CardAreaException.CardAreaExceptionReasonCodes.RULE_CANNOT_HAVE_TWO_OF_SAME_CARD_IN_PLAY);
         }
         allCards.put(card.getCardCode(),  card);
+        cardIdMap.put(card.getCardID(), card);
         if(card.getSubType() == CardTypes.FOE){
-            if(questCard.getBoostedFoe().equals(card.getCardCode())){
-
-                for(BoostableCard boostCard : cardBoostDependencies.get(card.getCardCode())){
-                    boostCard.setBoosted(true);
-                    card.registerBoostedCard(boostCard);
-                }
-            }
+            hasFoe = true;
+            stageCard = card;
         }
+
 
 
         return true;
@@ -106,6 +120,50 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
             updateBattlePoints();
         }
         return rc;
+    }
+
+    public boolean playCard(long cardID, PlayAreas targetPlayArea){
+        AdventureCards card = findCardFromCardId(cardID);
+        if(targetPlayArea == null){
+            return false;
+        }
+        boolean rc = card.playCard(targetPlayArea);
+
+        if(rc){
+            rc=removeCard(card);
+            updateBattlePoints();
+        }
+        return rc;
+
+    }
+    public boolean returnToHand(long cardID){
+        AdventureCards card = findCardFromCardId(cardID);
+        boolean rc = sponsor.getHand().receiveCard(card);
+
+        if(rc){
+            rc = removeCard(card);
+            updateBattlePoints();
+        }
+        return rc;
+
+    }
+
+    /**
+     * Helper method to find the associated adventure card to the cardId within the stage
+     * @param cardId The cardID we want to find
+     * @return found adventure card
+     */
+    private AdventureCards findCardFromCardId(Long cardId) throws BadRequestException, IllegalCardStateException {
+        AdventureCards card = cardIdMap.get(cardId);
+        if(card==null) {
+            //If we get null, determine if it was bad request or internal error
+            if(!cardIdMap.containsKey(cardId))
+            {
+                //The map did not contain the cardId, BAD REQUEST
+                throw new BadRequestException("Provided cardId was not found stage area:  "+this.stageNum);
+            }
+        }
+        return card;
     }
     /**
      * Helper method to remove a card from the PlayerPlayArea and all its tracking data structures.
@@ -128,18 +186,19 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
 
         AllCardCodes cardCode = card.getCardCode();
         allCards.remove(cardCode);
+        cardIdMap.remove(card.getCardID());
         cardBoostDependencies.remove(cardCode);
         cardsWithBattleValue.remove(delCard);
         boostableCards.remove(delCard);
         return true;
     }
 
-    public void onPlayAreaChanges(StagePlayAreas targetPlayArea){
-        if(phaseController == null){
-            throw new CardAreaException(CardAreaException.CardAreaExceptionReasonCodes.GAMEPHASE_NOT_REGISTERED);
-        }
-        this.targetPlayArea=targetPlayArea;
-    }
+//    public void onPlayAreaChanges(StagePlayAreas targetPlayArea){
+//        if(phaseController == null){
+//            throw new CardAreaException(CardAreaException.CardAreaExceptionReasonCodes.GAMEPHASE_NOT_REGISTERED);
+//        }
+//        this.targetPlayArea=targetPlayArea;
+//    }
 
 
     public boolean discardAllCards() {
@@ -197,7 +256,7 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
 
     @Override
     public void onGamePhaseEnded(){
-
+        throw new UnsupportedOperationException();
     }
 
     public int size() {
@@ -210,7 +269,7 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
         notifyStageAreaChanged();
     }
 
-    @Override
+   // @Override
     public void registerBoostableCard(BoostableCard card) {
         boostableCards.add(card);
         if(questCard.getBoostedFoe() == card.getCardCode()){
@@ -236,21 +295,24 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
         HashSet<CardTypes> allowedTypes = new HashSet<>();
         allowedTypes.add(CardTypes.FOE);
         allowedTypes.add(CardTypes.WEAPON);
-        allowedTypes.add(CardTypes.AMOUR);
         StageAreaData data = new StageAreaData(
                 id,
                 stageNum,
                 bids,
                 battlePoints,
                 allowedTypes,
+                stageCard.generateCardData(),
                 getCardData()
         );
         return data;
     }
+
     public ArrayList<CardData> getCardData() {
         ArrayList<CardData> handCards = new ArrayList<>();
         for(Cards card : allCards.values()) {
-            handCards.add(card.generateCardData());
+            if(card.cardCode != stageCard.cardCode){
+                handCards.add(card.generateCardData());
+            }
         }
         return handCards;
     }

@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
@@ -72,7 +73,7 @@ class QuestPhaseControllerTest {
         controller.startPhase(turnService);
         assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SPONSOR);
 
-        assertThrows(IllegalQuestPhaseStateException.class, () -> controller.receiveCard(questCards.get(1)));
+        assertThat(controller.receiveCard(questCards.get(1))).isFalse();
     }
 
     @Test
@@ -145,15 +146,13 @@ class QuestPhaseControllerTest {
         // If a sponsor is found, the quest should start to setting up the stages
         controller.checkSponsorResult(players.get(0), true);
         assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SETUP);
-        // Check if the sponsor's
         assertThat(controller.getSponsor()).isEqualTo(players.get(0));
-        assertThat(controller.getSponsor().getPlayArea().getTargetPlayArea()).isNotNull();
     }
 
     @Test
-    void stageSetupComplete() {
+    void questSetupComplete() {
         // Cannot call stageSetupComplete when not in SETUP stage
-        assertThrows(IllegalQuestPhaseStateException.class, () -> controller.stageSetupComplete());
+        assertThrows(IllegalQuestPhaseStateException.class, () -> controller.questSetupComplete(players.get(0)));
 
         // Can call when in SETUP stage
         ArrayList<QuestCards> questCards = getQuestCards();
@@ -164,26 +163,47 @@ class QuestPhaseControllerTest {
 
         // Cannot complete a stage setup when there's no battle point in that stage (No foe)
         // TODO: This probably has to change with Test card
-        assertThrows(RuntimeException.class, () -> controller.stageSetupComplete());
+        assertThrows(RuntimeException.class, () -> controller.questSetupComplete(players.get(0)));
 
-        // Draw a foe card to the sponsor's hand
-//        Players sponsor = controller.getSponsor();
-//        assertThat(sponsor).isEqualTo(players.get(0));
-//        AdventureDecks aDeck = new AdventureDecks();
-//        ArrayList<AdventureCards> foeCards = new ArrayList<>();
-//        while (foeCards.size() < controller.getStages().size()) {
-//            AdventureCards foeCard = aDeck.drawCard(sponsor.getHand());
-//            if (foeCard.getSubType() == CardTypes.FOE) {
-//                foeCards.add(foeCard);
-//            } else {
-//                continue;
-//            }
-//        }
+    }
 
-        // Can complete when a stage is set up properly
-//        generalGameController.playerPlayCard(controller.getSponsor(), foeCard.getCardID());
-//        assertThat(sponsor.getPlayArea().getBattlePoints()).isGreaterThan(0);
-//        controller.stageSetupComplete();
+    @Test
+    void playerPlayCard(){
+        // Doesn't allow when not in quest
+        assertThrows(IllegalQuestPhaseStateException.class, () -> controller.sponsorPlayCard(null, 0,0,0));
+
+        sponsorQuest(); // Move to SETUP state
+
+        // The sponsor setup the quest
+        Players sponsor = controller.getSponsor();
+        AdventureDecks aDeck = new AdventureDecks();
+
+        AdventureCards drawnCard;
+
+        // Draw 1 foe card
+        do {
+            drawnCard = aDeck.drawCard(sponsor.getHand());
+        } while (drawnCard.getSubType() != CardTypes.FOE);
+        int prevHandSize = sponsor.getHand().getHandSize();
+
+        long cardId = drawnCard.getCardID();
+
+        // Play card from sponsor's hand into stage 0
+        assertThat(controller.getStages().get(0).size()).isEqualTo(0);
+        controller.sponsorPlayCard(sponsor, drawnCard.getCardID(), -1, 0);
+
+        assertThat(controller.getStages().get(0).getAllCards().values().stream().toList().get(0)).isEqualTo(drawnCard);
+        assertThat(sponsor.getHand().getHand().size()).isEqualTo(prevHandSize - 1);
+
+        controller.sponsorPlayCard(sponsor, drawnCard.getCardID(), 0, 1);
+        assertThat(controller.getStages().get(0).size()).isEqualTo(0);
+        assertThat(controller.getStages().get(1).getAllCards().values().stream().toList().get(0)).isEqualTo(drawnCard);
+
+        controller.sponsorPlayCard(sponsor, drawnCard.getCardID(), 1, -1);
+        assertThat(sponsor.getHand().getHand().size()).isEqualTo(prevHandSize);
+        assertThat(controller.getStages().get(1).size()).isEqualTo(0);
+
+        assertThrows(UnsupportedOperationException.class, () -> controller.sponsorPlayCard(sponsor, cardId, -1, -1));
     }
 
     @Test
@@ -223,35 +243,32 @@ class QuestPhaseControllerTest {
         controller.endPhase();
         assertThat(controller.getQuestCard()).isNull();
         controller.getStateMachine().setCurrentState(QuestPhaseStatesE.NOT_STARTED);
-
     }
 
-    //   @Test
-//    void checkJoins(){
-//        assertThat(controller.getPlayers().size()).isEqualTo(0);
-//        assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.NOT_STARTED);
-//        // Get a quest card and generate the quest phase
-//        ArrayList<QuestCards> questCards = getQuestCards();
-//
-//        controller.receiveCard(questCards.get(0));
-//        controller.startPhase(turnService);
-//        assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SPONSOR);
-//
-//        controller.checkSponsorResult(players.get(0), false);
-//        controller.checkSponsorResult(players.get(1), false);
-//        controller.checkSponsorResult(players.get(2), true);
-//        assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SETUP);
-//
-//        controller.setupStage();
-//
-//        assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_JOIN);
-//
-//        controller.checkJoinResult(players.get(0), false);
-//        controller.checkJoinResult(players.get(1), true);
-//        controller.checkJoinResult(players.get(2), true);
-//
-//    }
-    ArrayList<QuestCards> getQuestCards() {
+    /**
+     * Set up the game to reach QUEST_SPONSOR state
+     */
+    private void startQuest() {
+        ArrayList<QuestCards> questCards = getQuestCards();
+        controller.receiveCard(questCards.get(0));
+        assertThat(controller.getQuestCard()).isNotNull();
+
+        controller.startPhase(new PlayerTurnService(players));
+        assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SPONSOR);
+    }
+
+    /**
+     * Set up the game to reach QUEST_SETUP state
+     */
+    private void sponsorQuest() {
+        startQuest();
+        controller.checkSponsorResult(players.get(0), true);
+        assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SETUP);
+        assertThat(controller.getSponsor()).isEqualTo(players.get(0));
+        assertThat(controller.getPlayerTurnService().getPlayerTurn()).isEqualTo(players.get(0));
+    }
+
+    private ArrayList<QuestCards> getQuestCards() {
         CardFactory cf = CardFactory.getInstance();
         AdventureDecks testDeck = new AdventureDecks();
         HashMap<StoryDeckCards,Integer> deckList = new HashMap<>();

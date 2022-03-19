@@ -1,9 +1,6 @@
 package com.team9.questgame.gamemanager.controller;
 
-import com.team9.questgame.gamemanager.record.socket.CardUpdateInbound;
-import com.team9.questgame.gamemanager.record.socket.JoinResponseInbound;
-import com.team9.questgame.gamemanager.record.socket.SponsorResponseInbound;
-import com.team9.questgame.gamemanager.record.socket.SponsorSetupStage;
+import com.team9.questgame.gamemanager.record.socket.*;
 import com.team9.questgame.gamemanager.service.InboundService;
 import com.team9.questgame.gamemanager.service.QuestPhaseInboundService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,18 +17,17 @@ public class QuestPhaseWsController {
         inboundService.checkSponsorResult( sponsorResponseInbound.name(), sponsorResponseInbound.found());
     }
 
-    @MessageMapping("/quest/sponser-setup-stage")
-    private void handleSponsorSetupStage(SponsorSetupStage sponsorSetupStage){
-        inboundService.sponsorSetupStage(sponsorSetupStage.name());
+    @MessageMapping("/quest/setup-complete")
+    private void handleStageSetupComplete(SponsorSetupStage sponsorSetupStage){
+        inboundService.questSetupComplete(sponsorSetupStage.name());
     }
 
     @MessageMapping("/quest/join-response")
     private void handleJoinResponse(JoinResponseInbound joinResponseInbound){
         inboundService.checkJoinResult(joinResponseInbound.name(), joinResponseInbound.joined());
     }
-
-    @MessageMapping("/quest/participant-setup-complete")
-    private void handleParticipantSetupResponse(){
-        inboundService.checkParticipantSetup();
+    @MessageMapping("/quest/sponsor-play-card")
+    public void handlePlayerPlayCard(SponsorPlayCardInbound sponsorPlayCardInbound) {
+        inboundService.sponsorPlayCard(sponsorPlayCardInbound);
     }
 }

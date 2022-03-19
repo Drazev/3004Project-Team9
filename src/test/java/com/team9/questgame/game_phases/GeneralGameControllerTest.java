@@ -129,7 +129,7 @@ class GeneralGameControllerTest {
         assertThat(gameController.getPlayers().size()).isEqualTo(0);
         assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.SETUP);
 
-        assertThrows(IllegalGameStateException.class, () -> gameController.receiveCard(null));
+        assertThat(gameController.receiveCard(null)).isFalse();
 
         // Allowed receiving card
         for (int i = 0; i < GeneralGameController.MAX_PLAYERS; ++i) {
@@ -248,6 +248,7 @@ class GeneralGameControllerTest {
         // Make a hand go oversize
         Players player = gameController.getPlayers().get(0);
         GeneralStateE previousState = gameController.getStateMachine().getCurrentState();
+        QuestPhaseStatesE previousQuestState = gameController.getStateMachine().getQuestStateMachine().getCurrentState();
         AdventureCards lastDrawnCard = null;
         while (player.getHand().getHandSize() <= Hand.MAX_HAND_SIZE) {
             lastDrawnCard = gameController.getADeck().drawCard(player.getHand());
@@ -255,13 +256,16 @@ class GeneralGameControllerTest {
         assertThat(lastDrawnCard).isNotNull();
         assertThat(player.getHand().getHandSize()).isEqualTo(Hand.MAX_HAND_SIZE + 1);
 
+        // TODO: Check if tournament is blocked as well
         gameController.getStateMachine().update();
         assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.PLAYER_HAND_OVERSIZE);
+        assertThat(gameController.getStateMachine().getQuestStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.BLOCKED);
         assertThat(player.getHand().getHandSize()).isEqualTo(Hand.MAX_HAND_SIZE + 1);
 
         // Discard a card, the state should be reset to what was before
         gameController.playerDiscardCard(player, lastDrawnCard.getCardID());
         assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(previousState);
+        assertThat(gameController.getStateMachine().getQuestStateMachine().getCurrentState()).isEqualTo(previousQuestState);
     }
 
     @Test

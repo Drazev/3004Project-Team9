@@ -5,6 +5,8 @@ import com.team9.questgame.game_phases.GeneralGameController;
 import com.team9.questgame.game_phases.quest.QuestPhaseController;
 import com.team9.questgame.gamemanager.record.rest.EmptyJsonReponse;
 import com.team9.questgame.gamemanager.record.socket.HandUpdateOutbound;
+import com.team9.questgame.gamemanager.record.socket.PlayerPlayCardInbound;
+import com.team9.questgame.gamemanager.record.socket.SponsorPlayCardInbound;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,22 +35,22 @@ public class QuestPhaseInboundService {
 
 
     public synchronized void checkSponsorResult(String name, boolean found){
-//        if(found){
-//            //TODO:
-//        }
-//        questController.noSponsor();
-//        return found;
+
         LOG.info(String.format("Receiving Sponsor Result: name=%s, found=%s", name, found));
         Players player = sessionService.getPlayerMap().get(name);
-        System.out.println("session service get player: name =" + player.getName());
+        //System.out.println("session service get player: name =" + player.getName());
         questController.checkSponsorResult(player, found);
         //return found;
     }
 
-    public synchronized void  sponsorSetupStage(String name){
+    public synchronized boolean questSetupComplete(String name){
         LOG.info(String.format("Notification that sponsor has completed stage setup: name=%s, complete=%s", name));
-        //Players player = sessionService.getPlayerMap().get(name);
-        questController.stageSetupComplete();
+        Players player = sessionService.getPlayerMap().get(name);
+        if (player == null) {
+            throw new NullPointerException(String.format("Player with name=%s not found", name));
+        }
+
+        return questController.questSetupComplete(player);
     }
 
     public synchronized void checkJoinResult(String name, boolean joined){
@@ -59,6 +61,11 @@ public class QuestPhaseInboundService {
 
     public synchronized  void checkParticipantSetup(){
         questController.checkParticipantSetup();
+    }
+
+    public synchronized void sponsorPlayCard(SponsorPlayCardInbound sponsorPlayCardInbound) {
+        Players player = sessionService.getPlayerByPlayerId(sponsorPlayCardInbound.playerID());
+        questController.sponsorPlayCard(player, sponsorPlayCardInbound.cardId(),sponsorPlayCardInbound.src(), sponsorPlayCardInbound.dst());
     }
 
 }

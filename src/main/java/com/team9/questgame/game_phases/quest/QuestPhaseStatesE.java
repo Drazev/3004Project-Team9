@@ -9,5 +9,6 @@ public enum QuestPhaseStatesE {
     STAGE_ONE, //stages play out in order
     STAGE_TWO,
     STAGE_THREE,
-    ENDED
+    ENDED,
+    BLOCKED
 }

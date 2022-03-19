@@ -25,54 +25,87 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
     private boolean isPhaseStartRequested;
 
     @Setter
-    private boolean sponsorFoundRequest;
-
-    @Setter
     private boolean isPhaseReset;
+
+    /**
+     * Request to block this state machine
+     */
+    @Setter
+    private boolean isBlockRequested;
+
+    /**
+     * Request to unblock this state machine
+     */
+    @Setter
+    private boolean isUnblockRequested;
 
     public QuestPhaseStateMachine() {
         previousState = null;
         currentState = QuestPhaseStatesE.NOT_STARTED;
         isPhaseStartRequested = false;
-        sponsorFoundRequest = false;
     }
 
     @Override
     public void update() {
-        previousState = currentState;
-        switch (currentState) {
-            case NOT_STARTED:
-                this.currentState = notStartedState();
-                break;
-            case QUEST_SPONSOR:
-                this.currentState = questSponsorState();
-                break;
-            case QUEST_SETUP:
-                this.currentState = questSetupState();
-                //System.out.println(this.currentState +" " +controller.getJoinAttempts());
-                break;
-            case QUEST_JOIN:
-                this.currentState = questJoinState();
-                break;
-            case PARTICIPANT_SETUP:
-                this.currentState = participantSetupState();
-                break;
-            case STAGE_ONE:
-                this.currentState = stageOneState();
-                break;
-            case STAGE_TWO:
-                this.currentState = stageTwoState();
-                break;
-            case STAGE_THREE:
-                this.currentState = stageThreeState();
-                break;
-            case ENDED:
-                this.currentState = endedState();
-                break;
-            default:
-                throw new IllegalStateException("Unknown state: " + currentState);
+        QuestPhaseStatesE tempState = this.currentState;
+        if (isBlockRequested) {
+            // BLOCKED can be transitioned to from every stage
+            this.currentState = QuestPhaseStatesE.BLOCKED;
+        } else {
+            switch (currentState) {
+                case NOT_STARTED:
+                    this.currentState = notStartedState();
+                    break;
+                case QUEST_SPONSOR:
+                    this.currentState = questSponsorState();
+                    break;
+                case QUEST_SETUP:
+                    this.currentState = questSetupState();
+                    break;
+                case QUEST_JOIN:
+                    this.currentState = questJoinState();
+                    break;
+                case PARTICIPANT_SETUP:
+                    this.currentState = participantSetupState();
+                    break;
+                case STAGE_ONE:
+                    this.currentState = stageOneState();
+                    break;
+                case STAGE_TWO:
+                    this.currentState = stageTwoState();
+                    break;
+                case STAGE_THREE:
+                    this.currentState = stageThreeState();
+                    break;
+                case ENDED:
+                    this.currentState = endedState();
+                    break;
+                case BLOCKED:
+                    this.currentState = blockStage();
+                    break;
+                default:
+                    throw new IllegalStateException("Unknown state: " + currentState);
+            }
         }
+
+        if (tempState != currentState) {
+            // Stage changed, update previousState
+            this.previousState = tempState;
+        }
+
         resetAllRequest();
+    }
+
+    private QuestPhaseStatesE blockStage() {
+        QuestPhaseStatesE nextState;
+        if (isUnblockRequested) {
+            // Return to whatever stage is before blocked
+            nextState = this.previousState;
+        } else {
+            nextState = QuestPhaseStatesE.BLOCKED;
+        }
+
+        return nextState;
     }
 
     private QuestPhaseStatesE notStartedState() {
@@ -87,7 +120,10 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
 
     private QuestPhaseStatesE questSponsorState() {
         //System.out.println("in sponsor state" + controller.getSponsor().getName());
-        if (controller.getSponsor() != null) {
+        if (isBlockRequested) {
+            return QuestPhaseStatesE.BLOCKED;
+        }
+        else if (controller.getSponsor() != null) {
             //System.out.println("got sponsor");
             return QuestPhaseStatesE.QUEST_SETUP;
         } else if (controller.getSponsorAttempts() >= controller.getPlayerTurnService().getPlayers().size()) {
@@ -103,7 +139,9 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
     }
 
     public QuestPhaseStatesE questSetupState() {
-        if (controller.getStages().size() >= controller.getQuestCard().getStages()) {
+        //if (controller.getStages().size() >= controller.getQuestCard().getStages()) {
+        //new if all stages are being created simultaneously
+        if(controller.isStagesAreValid()){
             //System.out.println("quest setup state returning join state");
             return QuestPhaseStatesE.QUEST_JOIN;
         }
@@ -141,7 +179,7 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
     }
 
     public QuestPhaseStatesE stageOneState() {
-        //TODO: on stageone complete if more stages return to participant setup state
+        //TODO: on stage one complete if more stages return to participant setup state
         if(controller.getQuestingPlayers().size() == 0){
             return QuestPhaseStatesE.ENDED;
         }
@@ -176,9 +214,18 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
         return this.currentState != QuestPhaseStatesE.NOT_STARTED;
     }
 
+    public boolean isInQuest() {
+        return this.currentState != QuestPhaseStatesE.NOT_STARTED && this.currentState != QuestPhaseStatesE.ENDED;
+    }
+
+    public boolean isBlocked() {
+        return this.currentState == QuestPhaseStatesE.BLOCKED;
+    }
+
     private void resetAllRequest() {
         setPhaseStartRequested(false);
-        setSponsorFoundRequest(false);
         setPhaseReset(false);
+        setBlockRequested(false);
+        setUnblockRequested(false);
     }
 }

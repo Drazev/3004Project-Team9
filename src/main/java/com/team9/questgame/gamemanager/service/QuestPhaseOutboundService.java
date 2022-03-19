@@ -60,8 +60,16 @@ public class QuestPhaseOutboundService {
         this.sendToAllPlayers(("/topic/quest/stage-area-changed"));
     }
 
-    public void broadcastFoeStageStart(ArrayList<Players> questingPlayersList){
+    public void broadcastFoeStageStart(ArrayList<PlayerData> questingPlayersList){
         this.sendToAllPlayers("/topic/quest/foe-stage-start", questingPlayersList);
+    }
+
+    public void broadcastStageResult(ArrayList<PlayerData> remainingPlayers){
+        this.sendToAllPlayers("/topic/quest/stage-ended", remainingPlayers);
+    }
+
+    public void broadcastQuestEnded(ArrayList<PlayerData> remainingPlayers){
+        this.sendToAllPlayers("/topic/quest/stage-ended", remainingPlayers);
     }
 
     public void broadcastParticipantSetup(PlayerData playerData){

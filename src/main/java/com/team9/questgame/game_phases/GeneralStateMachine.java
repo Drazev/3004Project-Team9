@@ -2,6 +2,7 @@ package com.team9.questgame.game_phases;
 
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.Entities.cards.CardTypes;
+import com.team9.questgame.game_phases.quest.QuestPhaseStateMachine;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,10 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
     @Autowired
     @Lazy
     private GeneralGameController controller;
+
+    @Getter
+    @Autowired
+    private QuestPhaseStateMachine questStateMachine;
 
     @Getter
     private GeneralStateE currentState;
@@ -56,6 +61,10 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
 
     public boolean isInPhases() {
         return currentState == GeneralStateE.QUEST_PHASE || currentState == GeneralStateE.TOURNAMENT_PHASE || currentState == GeneralStateE.EVENT_PHASE;
+    }
+
+    public boolean isBlocked() {
+        return currentState == GeneralStateE.PLAYER_HAND_OVERSIZE;
     }
 
     /**
@@ -196,9 +205,17 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
     private GeneralStateE playerHandOversizeState() {
         GeneralStateE nextState;
         if (isAllHandNotOversize()) {
+            // Request to unblock the quest state machine
+            // TODO: Do this for tournament as well
+            questStateMachine.setUnblockRequested(true);
+            questStateMachine.update();
             // Go back to whatever state that was blocked by HAND_OVERSIZE
             nextState = this.previousState;
         } else {
+            // Request to block the quest state machine
+            // TODO: Do this for tournament as well
+            questStateMachine.setBlockRequested(true);
+            questStateMachine.update();
             nextState = GeneralStateE.PLAYER_HAND_OVERSIZE;
         }
         return nextState;
