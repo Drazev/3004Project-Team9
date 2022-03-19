@@ -34,22 +34,20 @@ const WaitingRoom = () => {
             <h2>Welcome to the pregame lobby, {name}</h2>
             {players.length >= 2 ? (
                 <>
-                <p>There Are Enough Players to Begin: {players.length}/4</p>
-                <button
-                onClick={test}
-                className="btn btn-primary"
-                >Ready
-                </button>
+                    <p>There Are Enough Players to Begin: {players.length}/4</p>
+                    <button
+                    onClick={test}
+                    className="btn btn-primary"
+                    >Ready</button>
                 </>
                 ) : (
                     <>
-                    <p> Not Enough Players! only {players.length} / 4</p>               
-                    <button
-                    disabled={true}
-                    onClick={test}
-                    className="btn btn-primary"
-                    >Ready
-                    </button>
+                        <p> Not Enough Players! only {players.length} / 4</p>               
+                        <button
+                        disabled={true}
+                        onClick={test}
+                        className="btn btn-primary"
+                        >Ready</button>
                     </>
                 )}
                 <h3>Players in lobby</h3>

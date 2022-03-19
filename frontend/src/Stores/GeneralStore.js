@@ -5,10 +5,10 @@ const useStore = create((set) => ({
   connected: false,
   gameStarted: false,
   name: "",
-  messages: [],
   players: [],
   hands: [],
   events: "",
+  turn: "John",
   loadPlayers: async () => {
     await handleLoadPlayers(set);
   },
@@ -41,14 +41,12 @@ const useStore = create((set) => ({
   updateHand: (hand) =>
     set((current) => ({
       hands: (() => {
-        //console.log("hand = " + JSON.stringify(hand));
         let playerExist = false;
         for (let i in current.hands) {
           if (current.hands[i].playerName === hand.playerName) {
             playerExist = true;
           }
         }
-        //console.log("playerExist = " + playerExist);
         if (playerExist) {
           return current.hands.map((currHand) => {
             if (currHand.playerName === hand.playerName) {
@@ -85,7 +83,7 @@ export const useName = () => useStore((state) => state.name);
 export const useMessages = () => useStore((state) => state.messages);
 export const useGameStarted = () => useStore((state) => state.gameStarted);
 export const usePlayerHands = () => useStore((state) => state.hands);
-
+export const useTurn = () => useStore((state) => state.turn);
 export const usePlayers = () => useStore((state) => state.players);
 export const useAddNewPlayer = () => useStore((state) => state.addNewPlayer);
 
