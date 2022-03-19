@@ -1,11 +1,14 @@
 import React,{useState} from "react";
 import {Button} from "react-bootstrap";
+import { useStageAreas } from "../Stores/PlayAreaStore";
+import { DropdownButton, Dropdown } from "react-bootstrap";
 import {discardCard, playCard} from "../ClientSocket";
 
 function Card(props){
     const [isBig, setIsBig]=useState(false);
     const [isActiveSelected, setIsActiveSelected]=useState(false);
     const [isSelected, setSelected]=useState(false);
+    const numStages = useStageAreas().length;
 
     //add border around card when selected
     let borderSize;
@@ -65,23 +68,34 @@ function Card(props){
                     >Discard</Button>{' '}
                 </>
             }
-            {isSelected &&
-                <>
-                    <Button 
-                        id="PlayButton"
-                        style={{
-                            width: 30,
-                            height: 10,
-                            fontSize: 5,
-                            marginLeft: 1,
-                            paddingTop: 0,
-                            paddingLeft: 5,
-                            paddingRight: 5,
-                            backgroundColor:"#77a3c9",
-                            borderColor:"#77a3c9",}}
-                        onClick={() => playCard(props.cardOwner, props.card.cardID, props.card, props.playerID)}
-                    >Play</Button>{' '}
-                </>
+            {isSelected && numStages === 0 &&
+                <Button 
+                    id="PlayButton"
+                    style={{
+                        width: 30,
+                        height: 10,
+                        fontSize: 5,
+                        marginLeft: 1,
+                        paddingTop: 0,
+                        paddingLeft: 5,
+                        paddingRight: 5,
+                        backgroundColor:"#77a3c9",
+                        borderColor:"#77a3c9",}}
+                    onClick={() => playCard(props.cardOwner, props.playerID, props.card.cardID, -1, -1)}
+                >Play</Button>
+            }
+            {isSelected && numStages != 0 &&
+                <DropdownButton 
+                id="dropdown-basic-button" 
+                title="Play"
+                size="sm"
+                variant="secondary">
+                    <Dropdown.Item onClick={() => playCard(props.cardOwner, props.playerID, props.card.cardID, -1, -1)}>Your play area</Dropdown.Item>
+                    {(numStages >= 1) && <Dropdown.Item onClick={() => playCard(props.cardOwner, props.playerID, props.card.cardID, -1, 0)}>Stage 1</Dropdown.Item>}
+                    {(numStages >= 2) && <Dropdown.Item onClick={() => playCard(props.cardOwner, props.playerID, props.card.cardID, -1, 1)}>Stage 2</Dropdown.Item>}
+                    {(numStages >= 3) && <Dropdown.Item onClick={() => playCard(props.cardOwner, props.playerID, props.card.cardID, -1, 2)}>Stage 3</Dropdown.Item>}
+                    {(numStages >= 4) && <Dropdown.Item onClick={() => playCard(props.cardOwner, props.playerID, props.card.cardID, -1, 3)}>Stage 4</Dropdown.Item>}
+                </DropdownButton>
             }
             {isActiveSelected &&
                 <>

@@ -43,16 +43,14 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
   client.onConnect = (frame) => {
     console.log("Connection successful");
     setConnected(true);
-    client.subscribe("/topic/message", (message) => {
-      let body = JSON.parse(message.body);
-      console.log(body);
-      addNewMessage(body.name, body.message);
-    });
+
+
     client.subscribe("/user/topic/player/hand-update", (message) => {
         let newHand = JSON.parse(message.body);
         console.log("Received hand update: " + newHand);
         updateHand(newHand);
     });
+
 
     client.subscribe("/topic/general/player-connect", (players) => {
       let body = JSON.parse(players.body);
@@ -62,10 +60,12 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
       setPlayers(bodyKeys);
     });
 
+
     client.subscribe("/topic/general/game-start", () => {
       console.log("setting game started true");
       setGameStarted(true);
     });
+
 
     client.subscribe("/topic/general/next-turn", (name) => {
       /**
@@ -79,6 +79,7 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
       // setTurn(name);
     });
 
+
     client.subscribe("/topic/player/hand-oversize" , (message) => {
       /**
        * Server informs that one player has oversized hand (more than 12 cards)
@@ -89,6 +90,7 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
       console.log("Player Hand Oversize: \n" + body + " \n\n ");
     });
 
+
     client.subscribe("/topic/player/player-update", (message) => {
       /**
        * Server informs about changes in player's state including their rank,
@@ -97,6 +99,7 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
       let body = JSON.parse(message.body);
       updatePlayer(body);
     });
+
 
     client.subscribe("/topic/decks/deck-update", (message) => {
       /**
@@ -107,6 +110,7 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
 
     });
 
+
     client.subscribe("/topic/play-areas/play-area-changed", (data) => {
       /**
        * This represents cards in play. It could be player play areas, or game stages
@@ -115,6 +119,7 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
       // console.log("Play Area Update recieved for playerId: "+body.playerId);
       // updatePlayArea(body);
     });
+
 
     client.subscribe("/topic/quest/sponsor-search", (message) => {
       /**
@@ -148,16 +153,6 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
 
 }
 
-export function sendMessage(name, message) {
-  client.publish({
-    destination: "/app/message",
-    body: JSON.stringify({
-      name: name,
-      message: message,
-    }),
-  });
-}
-
 export function drawCard(name, cardId) {
   console.log("Draw Card: \nName: " + name + "\nCardID: " + cardId);
   client.publish({
@@ -180,15 +175,16 @@ export function discardCard(name, cardId) {
   });
 }
 
-export function playCard(name, cardId, card, playerID) {
-  console.log("Play Card: \nName: " + name + "\nCardID: " + cardId + "\nCard: " + JSON.stringify(card) + "\nPlayerID: " + JSON.stringify(playerID));
+export function playCard(name, playerID, cardId, src, dst) {
+  console.log("Play Card: \nName: " + name + "\nCardID: " + cardId + "\nPlayerID: " + JSON.stringify(playerID) + "\nsrc: " + src + "\ndst: " + dst + "\n");
   client.publish({
     destination: "/app/general/player-play-card",
     body: JSON.stringify({
       name: name,
+      playerID: playerID,
       cardId: cardId,
-      card: card,
-      playerID: playerID
+      src: src,
+      dst: dst
     }),
   });
 }

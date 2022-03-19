@@ -5,7 +5,7 @@ import Popup from "./Popup";
 import Card from "./Card";
 import {drawCard} from "../ClientSocket";
 import {useName, usePlayerHands, usePlayers } from "../Stores/GeneralStore";
-import { useUpdatePlayArea, usePlayerPlayAreas } from "../Stores/PlayAreaStore";
+import { useUpdatePlayArea, usePlayerPlayAreas, useStageAreas } from "../Stores/PlayAreaStore";
 import {Button} from "react-bootstrap";
 import React, { useState } from "react";
 
@@ -16,6 +16,7 @@ function GameBoard(props){
     const allPlayers = usePlayers();
     let hands = usePlayerHands();
     let active = usePlayerPlayAreas();
+    let stageAreas = useStageAreas();
     //const turn = useTurn();
 
     const turn = "PlayerName";
@@ -53,6 +54,7 @@ function GameBoard(props){
                     top={init}
                     left={0}
                     shield={CardImages.Shield_3}
+                    numStages={stageAreas.length}
                     style={{
 
                     }}>
@@ -69,6 +71,7 @@ function GameBoard(props){
                     top={init+jump}
                     left={0}
                     shield={CardImages.Shield_1}
+                    numStages={stageAreas.length}
                     style={{
 
                     }}>
@@ -85,6 +88,7 @@ function GameBoard(props){
                         numShields={5/*hands[2].shields*/}
                         top={init+jump*2}
                         left={0}
+                        numStages={stageAreas.length}
                         shield={CardImages.Shield_8}
                         style={{
 
@@ -103,6 +107,7 @@ function GameBoard(props){
                         numShields={5/*hands[3].shields*/}
                         top={init+jump*3}
                         left={0}
+                        numStages={stageAreas.length}
                         shield={CardImages.Shield_6}
                         style={{
 
@@ -124,7 +129,7 @@ function GameBoard(props){
                 <Popup handleYes={togglePopup} handleNo={togglePopup} popupType={"HANDOVERFLOW"}></Popup>
             </div>
             }
-            <QuestDisplay></QuestDisplay>
+            <QuestDisplay numStages={stageAreas.length-1}></QuestDisplay>
             <Button onClick={() => drawCard(name,0)} >Draw</Button>
             <Button onClick={() => togglePopup()}>End Turn</Button>
         </div>

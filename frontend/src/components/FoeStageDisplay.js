@@ -18,16 +18,16 @@ function FoeStageDisplay(props){
     }
     return totalBP;
   }
-  const RenderActiveCards = props.currentStage.activeCards.map((card) => (
+  const RenderActiveCards = props.currentStage.activeCards?.map((card) => (
     <Card cardId={card.cardID} key={card.cardID} cardImage={card.imgsrc}></Card>
 ));
-  const RenderPlayerCurrentBP = hands.map((hand) => (
+  const RenderPlayerCurrentBP = hands?.map((hand) => (
     (props.activePlayers.includes(hand.name)) ? (
       <h4 style={{textAlign: "left"}}>{hand.name} Current BP: {getBP(hand.name)}</h4>
     ):(<></>)
   ));
     let x = 0;
-    for(let i = 0; i < props.currentStage.activeCards.length; i++){
+    for(let i = 0; i < props.currentStage.activeCards?.length; i++){
       x += props.currentStage.activeCards[i].battlePoints;
     }
     let y = 0;
