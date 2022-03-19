@@ -49,7 +49,7 @@ public class SessionService implements ApplicationContextAware {
             playerMap.put(name, newPlayer);
             sessionToPlayerMap.put(randomId,newPlayer);
             playerToSessionMap.put(newPlayer,randomId);
-            newPlayer.onGameReset(); //Reset's game state, and brodcasts
+            //newPlayer.onGameReset(); //Reset's game state, and brodcasts
             return true;
         }
     }

@@ -105,10 +105,10 @@ public class OutboundService implements ApplicationContextAware {
     }
 
     private void sendToAllExceptPlayer(String topic, Object payload, Players excludedPlayer) {
-        LOG.info(String.format("Selective Broadcast to all players except {name: "+excludedPlayer.getName()+", PlayerID: "+excludedPlayer.getPlayerId()+"}, Topic: "+topic));
-        for(Map.Entry<String,Players> e : sessionService.getPlayerMap().entrySet()) {
-            if(e.getValue()!=excludedPlayer) {
-                messenger.convertAndSendToUser(e.getKey(),topic,payload);
+        LOG.info(String.format("Selective Broadcast to all players except {name: "+excludedPlayer.getName()+", PlayerID: "+excludedPlayer.getPlayerId()+"}, Topic: "+topic+" Payload: "+payload));
+        for(Map.Entry<Players,String> e : sessionService.getPlayerToSessionIdMap().entrySet()) {
+            if(e.getKey()!=excludedPlayer) {
+                messenger.convertAndSendToUser(e.getValue(),topic,payload);
             }
         }
     }

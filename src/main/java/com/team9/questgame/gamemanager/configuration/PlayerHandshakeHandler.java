@@ -27,6 +27,7 @@ public class PlayerHandshakeHandler extends DefaultHandshakeHandler {
     @Autowired
     private SessionService sessionService;
 
+
     @Override
     protected Principal determineUser(ServerHttpRequest request, WebSocketHandler wsHandler, Map<String, Object> attributes) {
         LOG.info(request.getURI().getQuery());
