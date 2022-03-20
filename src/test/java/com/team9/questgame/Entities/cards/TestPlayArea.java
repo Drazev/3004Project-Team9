@@ -7,7 +7,7 @@ public class TestPlayArea implements PlayAreas<AdventureCards>, Serializable {
     int bp=0;
     @Override
     public boolean receiveCard(AdventureCards card) {
-        return true;
+        return false;
     }
 
     @Override
