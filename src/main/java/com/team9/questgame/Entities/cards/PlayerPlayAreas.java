@@ -14,6 +14,7 @@ import com.team9.questgame.game_phases.GamePhases;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import lombok.Getter;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -73,6 +74,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         hidePlayedCards=false;
         bids=0;
         battlePoints=0;
+        LOG = LoggerFactory.getLogger(PlayerPlayAreas.class);
     }
 
     @Override
@@ -189,7 +191,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
             }
         }
 
-        if(card.getSubType()==CardTypes.FOE || card.getSubType()==CardTypes.TEST) {
+        if(card.getSubType()==CardTypes.FOE || card.getSubType()==CardTypes.TEST || card.getSubType()==CardTypes.WEAPON) {
             if(targetPlayArea==null) {
                 throw new CardAreaException("A FOE or TEST card was played, but targetPlayArea was null. When FOE and TEST cards are allowed the targetPlayArea should never be null!",CardAreaException.CardAreaExceptionReasonCodes.UNEXPECTED_STATE);
             }

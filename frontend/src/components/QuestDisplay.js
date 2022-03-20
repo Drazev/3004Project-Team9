@@ -19,6 +19,7 @@ let currentTurn = "player1";
 
 const QuestDisplay = (props) => {
     const stages = useStageAreas();
+    console.log("Stages: " + JSON.stringify(stages))
     const currentStageNum = useCurrentStage();
     const currentStageObject = stages.find(obj => obj.stageNum === currentStageNum);
     /*const currentStageObject = stages.filter(obj => {
@@ -34,13 +35,19 @@ const QuestDisplay = (props) => {
         }
         return x;
     };
-    const RenderStages = getStages()?.map((stage) => (
-            (currentStageNum < stage.stageNum)? (
-                <BigCard cardId={stage.stageCard.cardID} key={stage.stageCard.cardID} cardImage={CardImages.Back_Adventure} numCards={stage.activeCards.length}></BigCard>
-            ) : (
-                <BigCard cardId={stage.stageCard.cardID} key={stage.stageCard.cardID} cardImage={stage.stageCard.imgsrc} numCards={stage.activeCards.length}></BigCard>
+    const RenderStages = getStages()?.map((stage) => {
+        if (stage.stageCard == null) {
+            return <></>
+        } else {
+            return (
+                (currentStageNum < stage.stageNum)? (
+                    <BigCard cardId={stage.stageCard.cardID} key={stage.stageCard.cardID} cardImage={CardImages.Back_Adventure} numCards={stage.activeCards.length}></BigCard>
+                ) : (
+                    <BigCard cardId={stage.stageCard.cardID} key={stage.stageCard.cardID} cardImage={stage.stageCard.imgSrc} numCards={stage.activeCards.length}></BigCard>
+                )
             )
-    ));
+        }
+    });
 
   return (
     <div>
@@ -51,7 +58,7 @@ const QuestDisplay = (props) => {
             {RenderStages}
         </div>
         <div>
-            {currentStageObject && <FoeStageDisplay activePlayers={activePlayers} currentStage={currentStageObject}></FoeStageDisplay>}
+            {currentStageObject && currentStageObject.isBoosted != null && <FoeStageDisplay activePlayers={activePlayers} currentStage={currentStageObject}></FoeStageDisplay>}
         </div>
     </div>
   );

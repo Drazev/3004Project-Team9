@@ -16,7 +16,7 @@ public class GameWsController {
 
     @MessageMapping("/general/player-draw-card")
     public void handlePlayerDrawCard(CardUpdateInbound cardUpdateInbound) {
-        inboundService.playerDrawCard(cardUpdateInbound.name(), cardUpdateInbound.cardId());
+        inboundService.playerDrawStoryCard(cardUpdateInbound.name(), cardUpdateInbound.cardId());
     }
 
     @MessageMapping("/general/player-discard-card")

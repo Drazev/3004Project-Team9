@@ -14,6 +14,8 @@ import com.team9.questgame.game_phases.GamePhases;
 import com.team9.questgame.game_phases.GeneralGameController;
 import com.team9.questgame.exception.IllegalQuestPhaseStateException;
 import com.team9.questgame.game_phases.utils.PlayerTurnService;
+import com.team9.questgame.gamemanager.record.socket.QuestEndedOutbound;
+import com.team9.questgame.gamemanager.record.socket.RemainingQuestorsOutbound;
 import com.team9.questgame.gamemanager.service.QuestPhaseOutboundService;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -195,7 +197,7 @@ public class QuestPhaseController implements GamePhaseControllers {
     public boolean questSetupComplete(Players player){
         if(stateMachine.getCurrentState() != QuestPhaseStatesE.QUEST_SETUP){
             throw new IllegalQuestPhaseStateException("Cannot set up a stage when not in QUEST_SETUP phase");
-        } else if (player.getPlayerId() == this.sponsor.getPlayerId()) {
+        } else if (player.getPlayerId() != this.sponsor.getPlayerId()) {
             throw new IllegalGameRequest("Only the sponsor can setup the quest", player);
         } else if(stateMachine.isBlocked()){
             throw new IllegalGameRequest("Cannot proceed when the quest phase is blocked", player);
@@ -206,8 +208,9 @@ public class QuestPhaseController implements GamePhaseControllers {
             return false;
         }
         stagesAreValid = true;
-        // TODO: set the quest stages
-        // this.stages = ...
+        //sponsor should no longer be able to play cards after stage setup
+        sponsor.getPlayArea().onPhaseNextPlayerTurn(null);
+
         stateMachine.update();
 
         switch (stateMachine.getCurrentState()) {
@@ -320,18 +323,23 @@ public class QuestPhaseController implements GamePhaseControllers {
 
     private void participantSetup(){
         dealAdventureCard();
-        outboundService.broadcastFoeStageStart(generateQuestorData());
+        //TODO: for all players allow them to play cards via player.getPlayerArea().onPhaseNextPlayerTurn(player)
+        for(Players player : playerTurnService.getPlayers()){
+            player.getPlayArea().onPhaseNextPlayerTurn(player);
+        }
+        outboundService.broadcastFoeStageStart(new RemainingQuestorsOutbound(generateQuestorData()));
     }
 
     /**
      * A quest participant informs that their stage setup is complete
      */
-    public void checkParticipantSetup(){
+    public void checkParticipantSetup(Players player){
         if (stateMachine.getCurrentState() != QuestPhaseStatesE.PARTICIPANT_SETUP) {
             throw new IllegalQuestPhaseStateException("A player can only setup their area when the quest is in PARTICIPANT_SETUP state");
         }
 
         participantSetupResponses++;
+        player.getPlayArea().onPhaseNextPlayerTurn(null);
         stateMachine.update();
         switch (stateMachine.getCurrentState()){
             case PARTICIPANT_SETUP -> {
@@ -359,7 +367,7 @@ public class QuestPhaseController implements GamePhaseControllers {
             player.getPlayArea().discardAllWeapons();
         }
 
-        outboundService.broadcastStageResult(generateQuestorData());
+        outboundService.broadcastStageResult(new RemainingQuestorsOutbound(generateQuestorData()));
 
         participantSetupResponses=0;
         curStageIndex++;
@@ -403,6 +411,8 @@ public class QuestPhaseController implements GamePhaseControllers {
             //TODO: broadcast no sponsor found
         }
 
+        outboundService.broadcastQuestEnded(new QuestEndedOutbound(generateQuestorData()));
+//        effectResolverService.onQuestCompleted(questingPlayers);
         this.questCard.discardCard();
         this.questCard = null;
         this.stages.clear();
@@ -466,6 +476,7 @@ public class QuestPhaseController implements GamePhaseControllers {
         } else if(player.getPlayerId() != sponsor.getPlayerId()){
             throw new RuntimeException("Only the sponsor can play cards during quest setup");
         }
+        LOG.info(String.format("Player %s play card %d from src=%d to dst=%d", player.getName(), cardId, src, dst));
 
         if(src < 0 && dst < 0){
             //play card to playerPlayArea

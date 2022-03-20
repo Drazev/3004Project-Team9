@@ -2,6 +2,7 @@ package com.team9.questgame.gamemanager.service;
 
 import com.team9.questgame.Data.*;
 import com.team9.questgame.Entities.Players;
+import com.team9.questgame.Entities.cards.StoryCards;
 import com.team9.questgame.gamemanager.record.rest.EmptyJsonReponse;
 import com.team9.questgame.gamemanager.record.socket.HandUpdateOutbound;
 import com.team9.questgame.gamemanager.record.socket.PlayerNextTurnOutbound;
@@ -87,6 +88,10 @@ public class OutboundService implements ApplicationContextAware {
     public void broadcastDeckUpdate(DeckUpdateData data) {
         LOG.info(String.format("Broadcasting \"deck-update\" for deck %s",data.deckType()));
         this.sendToAllPlayers("/topic/decks/deck-update",data);
+    }
+
+    public void broadcastStoryCard(CardData storyCardData) {
+        this.sendToAllPlayers("/topic/general/player-draw-card", storyCardData);
     }
 
     private void sendToPlayer(String topic, String name, Object payload) {

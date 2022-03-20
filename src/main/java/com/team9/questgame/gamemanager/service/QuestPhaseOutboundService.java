@@ -4,6 +4,8 @@ import com.team9.questgame.Data.*;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.gamemanager.record.rest.EmptyJsonReponse;
 import com.team9.questgame.gamemanager.record.socket.HandUpdateOutbound;
+import com.team9.questgame.gamemanager.record.socket.QuestEndedOutbound;
+import com.team9.questgame.gamemanager.record.socket.RemainingQuestorsOutbound;
 import lombok.AllArgsConstructor;
 import lombok.extern.java.Log;
 import org.slf4j.Logger;
@@ -28,7 +30,7 @@ public class QuestPhaseOutboundService {
     private SessionService sessionService;
 
     public QuestPhaseOutboundService() {
-        this.LOG = LoggerFactory.getLogger(OutboundService.class);
+        this.LOG = LoggerFactory.getLogger(QuestPhaseOutboundService.class);
     }
 
     private void sendToAllPlayers(String topic) {
@@ -56,26 +58,26 @@ public class QuestPhaseOutboundService {
         this.sendToAllPlayers("/topic/quest/sponsor-setup", playerData);
     }
     public void broadcastStageChanged(StageAreaData stageAreaData) {
-        LOG.info(String.format("Broadcast Stage Data for stage %d", stageAreaData.stageNum()));
-        this.sendToAllPlayers(("/topic/quest/stage-area-changed"));
+        LOG.info(String.format("Broadcast Stage Data: %s", stageAreaData));
+        this.sendToAllPlayers("/topic/quest/stage-area-changed", stageAreaData);
     }
 
-    public void broadcastFoeStageStart(ArrayList<PlayerData> questingPlayersList){
-        this.sendToAllPlayers("/topic/quest/foe-stage-start", questingPlayersList);
+    public void broadcastFoeStageStart(RemainingQuestorsOutbound remainingQuestorsOutbound){
+        this.sendToAllPlayers("/topic/quest/foe-stage-start", remainingQuestorsOutbound);
     }
 
-    public void broadcastStageResult(ArrayList<PlayerData> remainingPlayers){
-        this.sendToAllPlayers("/topic/quest/stage-ended", remainingPlayers);
+    public void broadcastStageResult(RemainingQuestorsOutbound remainingQuestorsOutbound){
+        this.sendToAllPlayers("/topic/quest/stage-end", remainingQuestorsOutbound);
     }
 
-    public void broadcastQuestEnded(ArrayList<PlayerData> remainingPlayers){
-        this.sendToAllPlayers("/topic/quest/stage-ended", remainingPlayers);
+    public void broadcastQuestEnded(QuestEndedOutbound questEndedOutbound){
+        this.sendToAllPlayers("/topic/quest/end", questEndedOutbound);
     }
 
-    public void broadcastParticipantSetup(PlayerData playerData){
-        LOG.info(String.format("Broadcast to Participant %s to setup for quest stage", playerData.name()));
-        this.sendToAllPlayers("/topic/quest/participant-setup");
-    }
+//    public void broadcastParticipantSetup(PlayerData playerData){
+//        LOG.info(String.format("Broadcast to Participant %s to setup for quest stage", playerData.name()));
+//        this.sendToAllPlayers("/topic/quest/participant-setup");
+//    }
 
     public void broadcastJoinRequest(PlayerData playerData){
         LOG.info(String.format("Broadcast join request"));

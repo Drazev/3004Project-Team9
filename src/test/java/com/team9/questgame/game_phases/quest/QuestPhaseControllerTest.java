@@ -170,7 +170,7 @@ class QuestPhaseControllerTest {
 
         // Cannot complete a stage setup when there's no battle point in that stage (No foe)
         // TODO: This probably has to change with Test card
-        assertThrows(RuntimeException.class, () -> controller.questSetupComplete(players.get(0)));
+        assertThat(controller.questSetupComplete(players.get(0))).isFalse();
 
     }
 

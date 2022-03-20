@@ -10,10 +10,13 @@ import {
   useSetPlayers,
   useSetGameStarted,
   useUpdateHand,
-  useUpdatePlayer
+  useUpdatePlayer,
+  useSetTurn,
+  useSetSponsorRequest,
 } from "../Stores/GeneralStore";
 import {
-  useUpdatePlayArea
+  useUpdateStageArea,
+  useUpdatePlayerPlayArea
 } from "../Stores/PlayAreaStore"
 
 const ConnectForm = () => {
@@ -24,8 +27,11 @@ const ConnectForm = () => {
   const setConnected = useSetConnected();
   const setGameStarted = useSetGameStarted();
   const updateHand = useUpdateHand();
-  const updatePlayArea = useUpdatePlayArea();
+  const updateStageArea = useUpdateStageArea();
   const updatePlayer = useUpdatePlayer();
+  const setTurn = useSetTurn();
+  const notifySponsorRequest = useSetSponsorRequest();
+  const updatePlayerPlayArea = useUpdatePlayerPlayArea();
 
   const setName = useSetName();
   // Preprocess before making connection request
@@ -35,7 +41,7 @@ const ConnectForm = () => {
       alert("Please enter your name");
       return;
     }
-    if (connect(setConnected, setGameStarted, addNewMessage, setPlayers, name, updateHand, updatePlayer) === false) {
+    if (connect(setConnected, setGameStarted, addNewMessage, setPlayers, name, updateHand, updatePlayer, setTurn, notifySponsorRequest, updateStageArea, updatePlayerPlayArea) === false) {
       alert("Name already taken, please choose a different one")
     }
   };
