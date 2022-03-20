@@ -11,7 +11,7 @@ const CardImages = {
     Ally_SirLancelot: "./Assets/Adventure Deck (346x470)/Ally - Sir Lancelot.png",
     Ally_SirPercival: "./Assets/Adventure Deck (346x470)/Ally - Sir Percival.png",
     Ally_SirTristan: "./Assets/Adventure Deck (346x470)/Ally - Sir Tristan.png",
-    Ally_QueenIseult: "./Assets/Adventure Deck (346x470)/Ally - Queen Iseult.png",
+    Ally_QueenIseult: "./Assets/Adventure Deck (346x470)/Ally - Queen Iselut.png",
     Amour: "./Assets/Adventure Deck (346x470)/Amour.png",
     Foe_Boar: "./Assets/Adventure Deck (346x470)/Foe - Boar.png",
     Foe_EvilKnight: "./Assets/Adventure Deck (346x470)/Foe - Evil Knight.png",

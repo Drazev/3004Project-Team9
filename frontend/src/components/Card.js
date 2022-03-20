@@ -1,7 +1,6 @@
 import React,{useState} from "react";
-import {Button} from "react-bootstrap";
 import { useStageAreas } from "../Stores/PlayAreaStore";
-import { DropdownButton, Dropdown } from "react-bootstrap";
+import { Button, DropdownButton, Dropdown } from "react-bootstrap";
 import {discardCard, playCard} from "../ClientSocket";
 
 function Card(props){
@@ -68,7 +67,7 @@ function Card(props){
                     >Discard</Button>{' '}
                 </>
             }
-            {/* {isSelected && numStages === 0 &&
+            {isSelected && numStages === 0 &&
                 <Button 
                     id="PlayButton"
                     style={{
@@ -83,12 +82,12 @@ function Card(props){
                         borderColor:"#77a3c9",}}
                     onClick={() => playCard(props.cardOwner, props.playerID, props.card.cardID, -1, -1)}
                 >Play</Button>
-            } */}
-            {isSelected &&
+            } 
+            {isSelected && numStages !== 0 &&
                 <DropdownButton 
                 id="dropdown-basic-button" 
                 title="Play"
-                size="sm"
+                size="10"
                 variant="secondary">
                     <Dropdown.Item onClick={() => playCard(props.cardOwner, props.playerID, props.card.cardID, -1, -1)}>Your play area</Dropdown.Item>
                     {(numStages >= 1) && <Dropdown.Item onClick={() => playCard(props.cardOwner, props.playerID, props.card.cardID, -1, 0)}>Stage 1</Dropdown.Item>}

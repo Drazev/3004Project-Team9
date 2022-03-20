@@ -24,6 +24,7 @@ function GameBoard(props){
     const setPopupType = useSetPopupType();
 
     const [popup, setPopup] = useState(true);
+    const [isHidden, setIsHidden] = useState(false);
 
     const togglePopup = () => {
       setPopup(!popup);
@@ -135,10 +136,15 @@ function GameBoard(props){
                     <Popup popupType={popupType} setPopup={setPopup}></Popup>
                 </div>
             }
-            {(name === sponsorRequest) &&
-                <div>
-                    <Button onClick={() => setupComplete(name, myPlayerID)} style={{}}>Finished Sponsoring</Button>
-                </div>
+            {(name === sponsorRequest) && !isHidden &&
+                (<div>
+                    <Button 
+                        onClick={() => {
+                            setIsHidden(true); 
+                            setupComplete(name, myPlayerID);
+                        }} style={{}}>Finished Sponsoring
+                    </Button>
+                </div>)
             }
         </div>
     );
