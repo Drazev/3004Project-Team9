@@ -21,11 +21,10 @@ function GameBoard(props) {
     let stageAreas = useStageAreas();
     const turn = useTurn();
     let sponsorRequest = useSponsorRequest();
-    const setPopupType = useSetPopupType();
+    // const setPopupType = useSetPopupType();
     const isSponsoring = useIsSponsoring();
     const setIsSponsoring = useSetIsSponsoring();
     const joinRequest = useJoinRequest();
-    const setJoinRequest = useSetJoinRequest();
 
         console.log("Is Sponsoring right now: " + isSponsoring);
 
@@ -36,15 +35,15 @@ function GameBoard(props) {
         console.log("trigger popup: " + popup);
     }
 
-    useEffect(() => {
-        setPopupType("SPONSORQUEST")
-    }, [])
+    // useEffect(() => {
+    //     setPopupType("SPONSORQUEST")
+    // }, [])
 
-    useEffect(() => {
-        if (joinRequest) {
-            setPopupType("JOINQUEST")
-        }
-    }, [joinRequest])
+    // useEffect(() => {
+    //     if (joinRequest) {
+    //         setPopupType("JOINQUEST")
+    //     }
+    // }, [joinRequest])
 
 
     // hands = [{name:"Test1",isTurn:true,hand:[{cardId:1,cardImage:CardImages.Ally_KingArthur}],cardsInPlay:[],rank:CardImages.Rank_Squire,shields:54},
@@ -138,7 +137,7 @@ function GameBoard(props) {
 
             {(popup && name === sponsorRequest) &&
                 <div>
-                    <Popup popupType={popupType} setPopup={setPopup}></Popup>
+                    <Popup popupType="SPONSORQUEST" setPopup={setPopup}></Popup>
                 </div>
             }
             {(name === sponsorRequest) && isSponsoring &&
@@ -152,7 +151,7 @@ function GameBoard(props) {
             }
             { (joinRequest && name !== sponsorRequest) && 
                 <div>
-                    <Popup popupType={popupType} setPopup={setPopup}></Popup>
+                    <Popup popupType="JOINQUEST" setPopup={setPopup}></Popup>
                 </div>
             }
         </div>

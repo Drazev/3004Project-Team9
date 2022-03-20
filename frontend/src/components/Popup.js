@@ -1,19 +1,33 @@
 import React from "react";
 import {Button} from "react-bootstrap";
-import { sponsorRespond, } from "../ClientSocket";
+import { sponsorRespond, joinRespond } from "../ClientSocket";
 import { useName, useSetIsSponsoring, useSetJoinRequest } from "../Stores/GeneralStore";
 import "./Popup.css"
  
 const Popup = props => {
   let name = useName();
   const setIsSponsoring = useSetIsSponsoring();
+  const setJoinRequest = useSetJoinRequest();
   const handleYes = () => {
-    sponsorRespond(name, true);
+    if (props.popupType === "JOINQUEST") {
+      joinRespond(name, true)
+      setJoinRequest(false);
+    } else if (props.popupType === "SPONSORQUEST") {
+      sponsorRespond(name, true);
+      setIsSponsoring(true);
+    } else if (props.popupType === "HANDOVERFLOW") {
+    }
     props.setPopup(false);
-    setIsSponsoring(true);
   }
   const handleNo = () => {
-    sponsorRespond(name, false);
+    if (props.popupType === "JOINQUEST") {
+      joinRespond(name, false)
+      
+    } else if (props.popupType === "SPONSORQUEST") {
+      sponsorRespond(name, false);
+    } else if (props.popupType === "HANDOVERFLOW") {
+
+    }
     props.setPopup(false);
   }
   return (
