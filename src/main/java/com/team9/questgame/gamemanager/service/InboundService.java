@@ -73,7 +73,7 @@ public class InboundService implements ApplicationContextAware {
     }
 
     public synchronized void playerDiscardCard(String name, long cardId) {
-        LOG.info(String.format("Player named %s requested to discard a card with id %ld", name, cardId));
+        LOG.info(String.format("Player named %s requested to discard a card with id %d", name, cardId));
         gameController.playerDiscardCard(sessionService.getPlayerMap().get(name), cardId);
     }
 

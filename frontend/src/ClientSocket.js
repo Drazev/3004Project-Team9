@@ -1,6 +1,6 @@
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import { setGameStarted } from "./Stores/GeneralStore";
+import { setGameStarted, useSetIsSponsoring } from "./Stores/GeneralStore";
 import { useUpdatePlayArea } from "./Stores/PlayAreaStore";
 
 
@@ -78,7 +78,7 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
        */
 
       let body = JSON.parse(message.body)
-      console.log("Received player-next-turn" + body.name);
+      console.log("Received player-next-turn " + body.name);
       setTurn(body.name);
     });
 
@@ -110,6 +110,7 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
        * in a deck draw pile without revealing the cards.
        * This is to be used for visualization
        */
+      console.log("/topic/decks/deck-update" + message);
 
     });
 
@@ -146,6 +147,7 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
 
 
     client.subscribe("/topic/quest/join-request", (message) => {
+      console.log("/topic/quest/join-request: " + message);
       /**
        * Server is querying for players to join quest
        * This happens after the quest has been setup and a quest stage has started
@@ -262,6 +264,11 @@ export async function setupComplete(name, playerID) {
 
   let body = await response.json();
   console.log(`Player name=${body.name} has finished setting up: ${body.confirmed}`);
+  if(body.confirmed === true){
+    //setIsSponsoring(false);
+  }else{
+
+  }
 }
 
 export function disconnect() {

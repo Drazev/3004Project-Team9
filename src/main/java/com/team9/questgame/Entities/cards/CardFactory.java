@@ -150,7 +150,7 @@ public class CardFactory {
                         "4 Bids when Tristan is in play",
                         "Queen Iselut",
                         cardEnumId.getSubType(),
-                        "Ally - Queen Iselut.png",
+                        "Ally - Queen Iseult.png",
                         cardEnumId,
                         0,
                         2,

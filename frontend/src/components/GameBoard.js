@@ -4,7 +4,7 @@ import CardImages from "../Images/index";
 import Popup from "./Popup";
 import Card from "./Card";
 import {drawCard, sponsorRespond, setupComplete} from "../ClientSocket";
-import {useName, usePlayerHands, usePlayers, useTurn, useSponsorRequest, useSetPopupType, usePopupType } from "../Stores/GeneralStore";
+import {useName, usePlayerHands, usePlayers, useTurn, useSponsorRequest, useSetPopupType, usePopupType, useIsSponsoring } from "../Stores/GeneralStore";
 import { useUpdatePlayArea, usePlayerPlayAreas, useStageAreas } from "../Stores/PlayAreaStore";
 import {Button} from "react-bootstrap";
 import React, { useState, useEffect } from "react";
@@ -22,6 +22,8 @@ function GameBoard(props){
     const turn = useTurn();
     let sponsorRequest = useSponsorRequest();
     const setPopupType = useSetPopupType();
+    const isSponsoring = useIsSponsoring();
+    console.log("Is Sponsoring right now: " + isSponsoring);
 
     const [popup, setPopup] = useState(true);
 
@@ -45,13 +47,6 @@ function GameBoard(props){
             myPlayerID = hands[i].playerId;
         }
     }
-
-    
-    
-    // if(sponsorRequest === name && popup === false){
-    //     setPopup(true);
-    //     setPopupType("SPONSORQUEST")
-    // }
 
     return (
         <div id="GameBoard">
@@ -124,7 +119,7 @@ function GameBoard(props){
             </div>
 
             <div className="questDisplay">
-                <QuestDisplay numStages={stageAreas.length-1}></QuestDisplay>
+                <QuestDisplay></QuestDisplay>
             </div>
 
             {/* <Button onClick={() => drawCard(name,0)} >Draw</Button>
@@ -135,10 +130,14 @@ function GameBoard(props){
                     <Popup popupType={popupType} setPopup={setPopup}></Popup>
                 </div>
             }
-            {(name === sponsorRequest) &&
-                <div>
-                    <Button onClick={() => setupComplete(name, myPlayerID)} style={{}}>Finished Sponsoring</Button>
-                </div>
+            {(name === sponsorRequest) && isSponsoring &&
+                (<div>
+                    <Button 
+                        onClick={() => {
+                            setupComplete(name, myPlayerID);
+                        }} style={{}}>Finished Sponsoring
+                    </Button>
+                </div>)
             }
         </div>
     );

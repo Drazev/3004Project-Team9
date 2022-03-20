@@ -11,12 +11,14 @@ const useStore = create((set) => ({
   popupType: "",
   turn: "",
   sponsorRequest: "",
+  isSponsoring: false,
   loadPlayers: async () => {
     await handleLoadPlayers(set);
   },
   setConnected: (connected) => set(() => ({ connected: connected })),
   setName: (name) => set(() => ({ name: name })),
   setTurn: (name) => set(() => ({ turn: name })),
+  setIsSponsoring: (x) => set(() => ({isSponsoring: x})),
   setPopupType: (type) => set(() => ({ popupType: type })),
   setSponsorRequest: (name) => set(() => ({ sponsorRequest: name })),
   setGameStarted: (gameStarted) => set(() => ({ gameStarted: gameStarted })),
@@ -101,6 +103,9 @@ export const useUpdateHand = () => useStore((state) => state.updateHand);
 export const useUpdatePlayer = () => useStore((state) => state.updatePlayer);
 
 export const useSetPlayers = () => useStore((state) => state.setPlayers);
+
+export const useSetIsSponsoring = () => useStore((state) => state.setIsSponsoring);
+export const useIsSponsoring = () => useStore((state) => state.isSponsoring);
 
 export const useLoadPlayers = () => useStore((state) => state.loadPlayers);
 
