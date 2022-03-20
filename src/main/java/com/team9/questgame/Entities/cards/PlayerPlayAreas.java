@@ -132,12 +132,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
     public ArrayList<CardData> getCardData() {
         ArrayList<CardData> handCards = new ArrayList<>();
         for(Cards card : allCards.values()) {
-            if(faceDownCards.contains(card)) {
-                handCards.add(card.generateObfuscatedCardData());
-            }
-            else {
-                handCards.add(card.generateCardData());
-            }
+            handCards.add(card.generateCardData());
         }
         return handCards;
     }
