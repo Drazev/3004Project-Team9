@@ -46,6 +46,18 @@ public class PlayerTurnService {
         notifyTurnChange();
     }
 
+    public void nextPlayerExcept(Players p) {
+        // TODO: Make test case for this
+        if (players.size() == 0) {
+            throw new RuntimeException("No player found");
+        }
+        do {
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
+        } while (getPlayerTurn().getPlayerId() == p.getPlayerId());
+
+        notifyTurnChange();
+    }
+
     public boolean setPlayerTurn(int i) {
         if (i >= 0 && i < players.size()) {
             currentPlayerIndex = i;

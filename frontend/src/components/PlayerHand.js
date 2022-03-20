@@ -1,13 +1,16 @@
 import Card from "./Card";
 import CardImages from "../Images/index";
+import { useHandOversize } from "../Stores/GeneralStore"
 
 function PlayerHand(props){
+    const handOversize = useHandOversize();
+    console.log(`handOversize=${handOversize}`);
 
     const Rendercards = props.cardsInHand?.map((card) => (
         props.isMyHand ? (
-           <Card playerID={props.playerID} card={card} key={card.cardID} cardImage={card.imgSrc} selectedAllowed={props.isTurn && props.isMyHand} canGrow={props.isMyHand} cardOwner={props.playerName} isActive={false}></Card>
+           <Card playerID={props.playerID} card={card} key={card.cardID} cardImage={card.imgSrc} selectedAllowed={(/*props.isTurn &&*/ props.isMyHand) || (props.isMyHand && handOversize)} canGrow={props.isMyHand} cardOwner={props.playerName} isActive={false}></Card>
         ) : (
-            <Card playerID={props.playerID} card={card} key={card.cardID} cardImage={CardImages.Back_Adventure} selectedAllowed={props.isTurn && props.isMyHand} canGrow={props.isMyHand} cardOwner={props.playerName} isActive={false}></Card>
+            <Card playerID={props.playerID} card={card} key={card.cardID} cardImage={CardImages.Back_Adventure} selectedAllowed={/*props.isTurn &&*/ props.isMyHand} canGrow={props.isMyHand} cardOwner={props.playerName} isActive={false}></Card>
         )
     ));
 
@@ -26,7 +29,7 @@ function PlayerHand(props){
         <div>
             <div
             style={{
-                position: "fixed",
+                position: "absolute",
                 top: props.top-70,
                 left: props.left
             }}>

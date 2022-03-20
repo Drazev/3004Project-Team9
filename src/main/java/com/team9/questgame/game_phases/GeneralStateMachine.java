@@ -3,6 +3,7 @@ package com.team9.questgame.game_phases;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.Entities.cards.CardTypes;
 import com.team9.questgame.game_phases.quest.QuestPhaseStateMachine;
+import com.team9.questgame.gamemanager.service.OutboundService;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,9 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
     @Getter
     @Autowired
     private QuestPhaseStateMachine questStateMachine;
+
+    @Autowired
+    private OutboundService outboundService;
 
     @Setter
     @Getter
@@ -210,7 +214,8 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
             // TODO: Do this for tournament as well
             questStateMachine.setUnblockRequested(true);
             questStateMachine.update();
-            // Go back to whatever state that was blocked by HAND_OVERSIZE
+            // Let client know and go back to whatever state that was blocked by HAND_OVERSIZE
+            outboundService.broadcastHandNotOversize();
             nextState = this.previousState;
         } else {
             // Request to block the quest state machine

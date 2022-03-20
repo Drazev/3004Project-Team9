@@ -79,8 +79,8 @@ public class QuestPhaseOutboundService {
 //        this.sendToAllPlayers("/topic/quest/participant-setup");
 //    }
 
-    public void broadcastJoinRequest(PlayerData playerData){
+    public void broadcastJoinRequest(){
         LOG.info(String.format("Broadcast join request"));
-        this.sendToAllPlayers("/topic/quest/join-request", playerData);
+        this.sendToAllPlayers("/topic/quest/join-request");
     }
 }

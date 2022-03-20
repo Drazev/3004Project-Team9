@@ -4,7 +4,7 @@ import CardImages from "../Images/index";
 import Popup from "./Popup";
 import Card from "./Card";
 import { drawCard, sponsorRespond, setupComplete } from "../ClientSocket";
-import { useName, usePlayerHands, usePlayers, useTurn, useSponsorRequest, useSetPopupType, usePopupType, useIsSponsoring, useSetIsSponsoring, useJoinRequest, useSetJoinRequest } from "../Stores/GeneralStore";
+import { useName, usePlayerHands, usePlayers, useTurn, useSponsorRequest, useActivePlayers, useSetPopupType, usePopupType, useIsSponsoring, useSetIsSponsoring, useJoinRequest, useSetJoinRequest } from "../Stores/GeneralStore";
 import { useUpdatePlayArea, usePlayerPlayAreas, useStageAreas } from "../Stores/PlayAreaStore";
 import { Button } from "react-bootstrap";
 import React, { useState, useEffect } from "react";
@@ -25,8 +25,8 @@ function GameBoard(props) {
     const isSponsoring = useIsSponsoring();
     const setIsSponsoring = useSetIsSponsoring();
     const joinRequest = useJoinRequest();
-
-        console.log("Is Sponsoring right now: " + isSponsoring);
+    const activePlayers = useActivePlayers();
+    console.log("Active Players are: " + JSON.stringify(activePlayers));
 
     const [popup, setPopup] = useState(true);
 
@@ -136,12 +136,12 @@ function GameBoard(props) {
             <Button onClick={() => togglePopup()}>End Turn</Button> */}
 
             {(popup && name === sponsorRequest) &&
-                <div>
+                <div id="sponsor-popup">
                     <Popup popupType="SPONSORQUEST" setPopup={setPopup}></Popup>
                 </div>
             }
             {(name === sponsorRequest) && isSponsoring &&
-                (<div>
+                (<div id="finish-setup">
                     <Button
                         onClick={() => {
                             setupComplete(name, myPlayerID, setIsSponsoring);
@@ -150,7 +150,7 @@ function GameBoard(props) {
                 </div>)
             }
             { (popup && joinRequest && name !== sponsorRequest) && 
-                <div>
+                <div id="join-popup">
                     <Popup popupType="JOINQUEST" setPopup={setPopup}></Popup>
                 </div>
             }

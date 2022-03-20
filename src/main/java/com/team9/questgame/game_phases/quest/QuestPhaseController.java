@@ -18,6 +18,7 @@ import com.team9.questgame.gamemanager.record.socket.QuestEndedOutbound;
 import com.team9.questgame.gamemanager.record.socket.RemainingQuestorsOutbound;
 import com.team9.questgame.gamemanager.service.QuestPhaseOutboundService;
 import lombok.Getter;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,7 +128,6 @@ public class QuestPhaseController implements GamePhaseControllers {
         }
     }
 
-
     /**
      * Check client sponsor result
      * @param player the player who made the sponsor request
@@ -218,7 +218,7 @@ public class QuestPhaseController implements GamePhaseControllers {
                 outboundService.broadcastSponsorFound(sponsor.generatePlayerData());
                 this.setupStage();
             } case QUEST_JOIN -> {
-                this.checkJoins();
+                outboundService.broadcastJoinRequest();
             } default -> {
                 throw new IllegalQuestPhaseStateException("Unknown state");
             }
@@ -273,20 +273,6 @@ public class QuestPhaseController implements GamePhaseControllers {
     }
 
     /**
-     * Called by stageSetup to ask players to join a Quest Stage
-     */
-    private void checkJoins(){
-        if(joinAttempts == 0){ playerTurnService.setPlayerTurn(sponsor);
-            playerTurnService.nextPlayer();
-        }
-        Players player = playerTurnService.getPlayerTurn();
-        outboundService.broadcastJoinRequest(player.generatePlayerData());
-        playerTurnService.nextPlayer();
-        this.joinAttempts++;
-
-    }
-
-    /**
      * Player's decision to join a quest stage or not
      * @param player the player who sent this request
      * @param joined true if they want to join this stage, false otherwise
@@ -298,18 +284,18 @@ public class QuestPhaseController implements GamePhaseControllers {
             throw new IllegalGameRequest("The sponsor cannot join quest stages", player);
         }
 
+        // Increment this counter so that the stateMachine knows when all players replied
+        this.joinAttempts++;
+
         if(joined){
             minJoin = true;
             questingPlayers.add(player);
-            if(joinAttempts == playerTurnService.getPlayers().size()-1){
-                joinTurnService = new PlayerTurnService(questingPlayers);
-            }
         }
 
         stateMachine.update();
         switch (stateMachine.getCurrentState()) {
             case QUEST_JOIN -> {
-                this.checkJoins();
+                // Do nothing since the broadcast already sent to all players
             } case PARTICIPANT_SETUP -> {
                 curStageIndex=0;
                 participantSetup();

@@ -85,6 +85,11 @@ public class OutboundService implements ApplicationContextAware {
         this.sendToAllPlayers("/topic/player/hand-oversize",data);
     }
 
+    public void broadcastHandNotOversize() {
+        LOG.info("Broadcasting \"hand-not-oversize\"");
+        this.sendToAllPlayers("/topic/player/hand-not-oversize");
+    }
+
     public void broadcastDeckUpdate(DeckUpdateData data) {
         LOG.info(String.format("Broadcasting \"deck-update\" for deck %s",data.deckType()));
         this.sendToAllPlayers("/topic/decks/deck-update",data);

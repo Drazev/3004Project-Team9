@@ -10,14 +10,14 @@ const REGISTRATION_URL = "http://localhost:8080/api/register"
 const SOCK_SERVER = "http://localhost:8080/quest-game-websocket"
 const START_URL = "http://localhost:8080/api/start"
 
-export async function connect(setConnected,setGameStarted, addNewMessage, setPlayers, name, updateHand, updatePlayer, setTurn, notifySponsorRequest, updateStageArea, updatePlayerPlayArea, setJoinRequest) {
+export async function connect(connectFunctions) {
   console.log("Attempt connection");
 
   // Register player name
   let response = await fetch(REGISTRATION_URL, {
     method: "POST",
     body: JSON.stringify({
-      name: name
+      name: connectFunctions.name
     }),
     headers: {
       "Content-Type": "application/json"
@@ -25,7 +25,7 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
   })
 
   let body = await response.json();
-  if (!body.confirmed || body.name !== name) {
+  if (!body.confirmed || body.name !== connectFunctions.name) {
     console.log("Connection declined or unmatch name");
     return false;
   }
@@ -33,7 +33,7 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
   // Perform handshake with the registered name
   client = new Client({
     webSocketFactory: () => {
-      return new SockJS(`${SOCK_SERVER}?name=${name}`);
+      return new SockJS(`${SOCK_SERVER}?name=${connectFunctions.name}`);
     },
     reconnectDelay: 50000,
     heartbeatIncoming: 4000,
@@ -43,13 +43,13 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
 
   client.onConnect = (frame) => {
     console.log("Connection successful");
-    setConnected(true);
+    connectFunctions.setConnected(true);
 
 
     client.subscribe("/user/topic/player/hand-update", (message) => {
         let newHand = JSON.parse(message.body);
         console.log("Received hand update: " + newHand);
-        updateHand(newHand);
+        connectFunctions.updateHand(newHand);
     });
 
 
@@ -58,13 +58,13 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
       console.log("clientsocket players.body: " + players.body);
       const bodyKeys = Object.keys(body);
       console.log(bodyKeys);
-      setPlayers(bodyKeys);
+      connectFunctions.setPlayers(bodyKeys);
     });
 
 
     client.subscribe("/topic/general/game-start", () => {
       console.log("setting game started true");
-      setGameStarted(true);
+      connectFunctions.setGameStarted(true);
     });
 
     // client.subscribe("/topic/general/")
@@ -79,7 +79,7 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
 
       let body = JSON.parse(message.body)
       console.log("Received player-next-turn " + body.name);
-      setTurn(body.name);
+      connectFunctions.setTurn(body.name);
     });
 
 
@@ -90,9 +90,23 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
        * the card(s) until their hand has <= 12 cards to proceed
        */
       let body = JSON.parse(message.body);
-      console.log("Player Hand Oversize: \n" + body + " \n\n ");
+      connectFunctions.setHandOversize(true);
+      console.log("Player Hand Oversize: ");
+      console.log(body);
+      
     });
 
+    client.subscribe("/topic/player/hand-not-oversize", (message) => {
+      /**
+       * Server informs that one player has oversized hand (more than 12 cards)
+       * All activity in the game is blocked, this player must discard or play 
+       * the card(s) until their hand has <= 12 cards to proceed
+       */
+      let body = JSON.parse(message.body);
+      connectFunctions.setHandOversize(false);
+      console.log("Player Hand Not Oversize: ");
+      console.log(body);
+    })
 
     client.subscribe("/topic/player/player-update", (message) => {
       /**
@@ -100,7 +114,7 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
        * rankBattlePoint and the number of shield
        */
       let body = JSON.parse(message.body);
-      updatePlayer(body);
+      connectFunctions.updatePlayer(body);
     });
 
 
@@ -110,8 +124,13 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
        * in a deck draw pile without revealing the cards.
        * This is to be used for visualization
        */
-      console.log("/topic/decks/deck-update" + message);
+      console.log("/topic/decks/deck-update: " + message);
 
+    });
+
+    client.subscribe("/topic/quest/foe-stage-start", (players) => {
+      console.log("Active players: " + players);
+      connectFunctions.setActivePlayers(players);
     });
 
 
@@ -121,7 +140,7 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
        */
       let body = JSON.parse(data.body);
       console.log("Play Area Update recieved: "+JSON.stringify(body));
-      updatePlayerPlayArea(body);
+      connectFunctions.updatePlayerPlayArea(body);
     });
 
     client.subscribe("/topic/quest/stage-area-changed", (data) => {
@@ -130,7 +149,7 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
        */
       let body = JSON.parse(data.body);
       console.log("Stage Area Update recieved: " + JSON.stringify(body));
-      updateStageArea(body);
+      connectFunctions.updateStageArea(body);
     });
 
 
@@ -141,8 +160,8 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
        * phase
        */
       console.log("Sponsor Search: " + message);
-      let x = JSON.parse(message.body);
-      notifySponsorRequest(x.name);
+      let body = JSON.parse(message.body);
+      connectFunctions.notifySponsorRequest(body.name);
     });
 
 
@@ -152,13 +171,13 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
        * This happens after the quest has been setup and a quest stage has started
        */
       console.log("/topic/quest/join-request: " + message);
-      setJoinRequest(true);
+      connectFunctions.setJoinRequest(true);
     });
   };
 
   client.onDisconnect = () => {
     disconnect();
-    setConnected(false);
+    connectFunctions.setConnected(false);
   };
 
   client.onStompError = function (frame) {

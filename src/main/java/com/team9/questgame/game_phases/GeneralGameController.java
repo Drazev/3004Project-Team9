@@ -205,17 +205,17 @@ public class GeneralGameController implements CardArea<StoryCards> {
 
 
     public void playerPlayCard(Players player, long cardId) {
-        if (!getStateMachine().isInPhases()) {
-            throw new IllegalGameStateException("Card can only be played in a Game Phases");
+        if (!getStateMachine().isInPhases() && !getStateMachine().isBlocked()) {
+            throw new IllegalGameStateException("Card can only be played in a Game Phases or when it's HAND_OVERSIZE");
         }
 
         if (!player.getHand().playCard(cardId)) {
             throw new RuntimeException("Cannot play card, mismatch cardID or unassigned playArea");
         }
         //should check for player turn
-        if(playerTurnService.getPlayerTurn().getPlayerId() != player.getPlayerId()){
-            throw new RuntimeException("Cannot play card outside of your turn.");
-        }
+//        if(playerTurnService.getPlayerTurn().getPlayerId() != player.getPlayerId()){
+//            throw new RuntimeException("Cannot play card outside of your turn.");
+//        }
         player.getPlayArea().onPhaseNextPlayerTurn(player);
         player.actionPlayCard(cardId);
         player.getPlayArea().onPhaseNextPlayerTurn(null);
@@ -243,7 +243,6 @@ public class GeneralGameController implements CardArea<StoryCards> {
         stateMachine.update();
         return true;
     }
-
 
     /**
      * Discard the story card to the discard pile

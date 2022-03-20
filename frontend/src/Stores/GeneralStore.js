@@ -13,6 +13,8 @@ const useStore = create((set) => ({
   sponsorRequest: "",
   isSponsoring: false,
   joinRequest: false,
+  handOversize: false,
+  activePlayers: [],
   loadPlayers: async () => {
     await handleLoadPlayers(set);
   },
@@ -25,6 +27,8 @@ const useStore = create((set) => ({
   setGameStarted: (gameStarted) => set(() => ({ gameStarted: gameStarted })),
   setPlayers: (players) => set(() => ({ players: players })),
   setJoinRequest: (status) => set(() => ({joinRequest: status})),
+  setHandOversize: (status) => set(() => ({handOversize: status})),
+  setActivePlayers: (players) => set(() => ({activePlayers: players})),
   updatePlayer: (player) => set((current) => ({
     players: (() => {
       let playerExist = false;
@@ -95,31 +99,26 @@ export const usePlayers = () => useStore((state) => state.players);
 export const useAddNewPlayer = () => useStore((state) => state.addNewPlayer);
 export const useSponsorRequest = () => useStore((state) => state.sponsorRequest);
 export const useJoinRequest = () => useStore((state) => state.joinRequest);
+export const useHandOversize = () => useStore((state) => state.handOversize);
 
 export const useSetConnected = () => useStore((state) => state.setConnected);
 export const useSetGameStarted = () => useStore((state) => state.setGameStarted);
 export const useSetName = () => useStore((state) => state.setName);
 export const useAddNewMessage = () => useStore((state) => state.addNewMessage);
-
 export const useUpdateHand = () => useStore((state) => state.updateHand);
-
 export const useUpdatePlayer = () => useStore((state) => state.updatePlayer);
-
 export const useSetPlayers = () => useStore((state) => state.setPlayers);
-
 export const useSetIsSponsoring = () => useStore((state) => state.setIsSponsoring);
 export const useIsSponsoring = () => useStore((state) => state.isSponsoring);
-
 export const useLoadPlayers = () => useStore((state) => state.loadPlayers);
-
 export const useSetTurn = () => useStore((state) => state.setTurn);
-
 export const useSetSponsorRequest = () => useStore((state) => state.setSponsorRequest);
-
 export const usePopupType = () => useStore((state) => state.popupType);
-
 export const useSetPopupType = () => useStore((state) => state.setPopupType);
-
 export const useSetJoinRequest = () => useStore((state) => state.setJoinRequest);
+export const useSetHandOversize = () => useStore((state) => state.setHandOversize);
+
+export const useSetActivePlayers = () => useStore((state) => state.setActivePlayers);
+export const useActivePlayers = () => useStore((state) => state.activePlayers);
 
 export default useStore;

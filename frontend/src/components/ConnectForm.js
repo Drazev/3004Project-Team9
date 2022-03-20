@@ -14,7 +14,9 @@ import {
   useSetTurn,
   useSetSponsorRequest,
   useSetIsSponsoring,
-  useSetJoinRequest
+  useSetJoinRequest,
+  useSetHandOversize,
+  useSetActivePlayers
 } from "../Stores/GeneralStore";
 import {
   useUpdateStageArea,
@@ -35,6 +37,25 @@ const ConnectForm = () => {
   const notifySponsorRequest = useSetSponsorRequest();
   const updatePlayerPlayArea = useUpdatePlayerPlayArea();
   const setJoinRequest = useSetJoinRequest();
+  const setHandOversize = useSetHandOversize();
+  const setActivePlayers = useSetActivePlayers();
+
+  const connectFunctions = {
+    name,
+    setConnected,
+    setGameStarted,
+    addNewMessage,
+    setPlayers,
+    updateHand,
+    updatePlayer,
+    setTurn,
+    notifySponsorRequest,
+    updateStageArea,
+    updatePlayerPlayArea,
+    setJoinRequest,
+    setHandOversize,
+    setActivePlayers
+  }
 
   const setName = useSetName();
   // Preprocess before making connection request
@@ -44,7 +65,7 @@ const ConnectForm = () => {
       alert("Please enter your name");
       return;
     }
-    if (connect(setConnected, setGameStarted, addNewMessage, setPlayers, name, updateHand, updatePlayer, setTurn, notifySponsorRequest, updateStageArea, updatePlayerPlayArea, setJoinRequest) === false) {
+    if (connect(connectFunctions) === false) {
       alert("Name already taken, please choose a different one")
     }
   };
