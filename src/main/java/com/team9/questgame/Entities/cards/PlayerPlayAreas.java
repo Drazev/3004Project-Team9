@@ -192,8 +192,10 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         }
 
         if(card.getSubType()==CardTypes.FOE || card.getSubType()==CardTypes.TEST || card.getSubType()==CardTypes.WEAPON) {
-            if(targetPlayArea==null) {
+            if(targetPlayArea==null && card.getSubType() != CardTypes.WEAPON) {
                 throw new CardAreaException("A FOE or TEST card was played, but targetPlayArea was null. When FOE and TEST cards are allowed the targetPlayArea should never be null!",CardAreaException.CardAreaExceptionReasonCodes.UNEXPECTED_STATE);
+            }else if (targetPlayArea == null){
+                return addToPlayArea(card);
             }
             return playCard(card);
         }

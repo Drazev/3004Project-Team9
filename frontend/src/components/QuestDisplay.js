@@ -36,7 +36,7 @@ const QuestDisplay = (props) => {
         return x;
     };
     const RenderStages = getStages()?.map((stage) => {
-        if (stage.stageCard == null) {
+        if (stage.stageCard == null || stage == null) {
             return <></>
         } else {
             return (

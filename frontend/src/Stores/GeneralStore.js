@@ -12,6 +12,7 @@ const useStore = create((set) => ({
   turn: "",
   sponsorRequest: "",
   isSponsoring: false,
+  joinRequest: false,
   loadPlayers: async () => {
     await handleLoadPlayers(set);
   },
@@ -23,6 +24,7 @@ const useStore = create((set) => ({
   setSponsorRequest: (name) => set(() => ({ sponsorRequest: name })),
   setGameStarted: (gameStarted) => set(() => ({ gameStarted: gameStarted })),
   setPlayers: (players) => set(() => ({ players: players })),
+  setJoinRequest: (status) => set(() => ({joinRequest: status})),
   updatePlayer: (player) => set((current) => ({
     players: (() => {
       let playerExist = false;
@@ -92,6 +94,7 @@ export const useTurn = () => useStore((state) => state.turn);
 export const usePlayers = () => useStore((state) => state.players);
 export const useAddNewPlayer = () => useStore((state) => state.addNewPlayer);
 export const useSponsorRequest = () => useStore((state) => state.sponsorRequest);
+export const useJoinRequest = () => useStore((state) => state.joinRequest);
 
 export const useSetConnected = () => useStore((state) => state.setConnected);
 export const useSetGameStarted = () => useStore((state) => state.setGameStarted);
@@ -116,5 +119,7 @@ export const useSetSponsorRequest = () => useStore((state) => state.setSponsorRe
 export const usePopupType = () => useStore((state) => state.popupType);
 
 export const useSetPopupType = () => useStore((state) => state.setPopupType);
+
+export const useSetJoinRequest = () => useStore((state) => state.setJoinRequest);
 
 export default useStore;

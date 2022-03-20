@@ -10,7 +10,7 @@ const REGISTRATION_URL = "http://localhost:8080/api/register"
 const SOCK_SERVER = "http://localhost:8080/quest-game-websocket"
 const START_URL = "http://localhost:8080/api/start"
 
-export async function connect(setConnected,setGameStarted, addNewMessage, setPlayers, name, updateHand, updatePlayer, setTurn, notifySponsorRequest, updateStageArea, updatePlayerPlayArea) {
+export async function connect(setConnected,setGameStarted, addNewMessage, setPlayers, name, updateHand, updatePlayer, setTurn, notifySponsorRequest, updateStageArea, updatePlayerPlayArea, setJoinRequest) {
   console.log("Attempt connection");
 
   // Register player name
@@ -147,11 +147,12 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
 
 
     client.subscribe("/topic/quest/join-request", (message) => {
-      console.log("/topic/quest/join-request: " + message);
       /**
        * Server is querying for players to join quest
        * This happens after the quest has been setup and a quest stage has started
        */
+      console.log("/topic/quest/join-request: " + message);
+      setJoinRequest(true);
     });
   };
 
@@ -246,7 +247,7 @@ export function joinRespond(name, joinDecision) {
 }
 
 
-export async function setupComplete(name, playerID) {
+export async function setupComplete(name, playerID, setIsSponsoring) {
   /**
    * Respond to a quest stage join request from the server
    */
@@ -265,9 +266,8 @@ export async function setupComplete(name, playerID) {
   let body = await response.json();
   console.log(`Player name=${body.name} has finished setting up: ${body.confirmed}`);
   if(body.confirmed === true){
-    //setIsSponsoring(false);
-  }else{
-
+    console.log("Sponsor request accepted")
+    setIsSponsoring(false);
   }
 }
 
