@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Component
 public class QuestPhaseController implements GamePhaseControllers {
@@ -44,7 +45,7 @@ public class QuestPhaseController implements GamePhaseControllers {
     @Lazy
     private EffectResolverService effectResolverService;
     @Getter
-    private ArrayList<Players> questingPlayers;
+    private CopyOnWriteArrayList<Players> questingPlayers;
     @Getter
     private PlayerTurnService playerTurnService;
     private PlayerTurnService joinTurnService;
@@ -70,7 +71,7 @@ public class QuestPhaseController implements GamePhaseControllers {
 
     public QuestPhaseController() {
         LOG = LoggerFactory.getLogger(QuestPhaseController.class);
-        this.questingPlayers = new ArrayList<>();
+        this.questingPlayers = new CopyOnWriteArrayList<>();
         this.stages = new ArrayList<>();
         playerTurnService = null;
         sponsor = null;
@@ -328,12 +329,8 @@ public class QuestPhaseController implements GamePhaseControllers {
         switch (stateMachine.getCurrentState()){
             case PARTICIPANT_SETUP -> {
                 return;
-            } case STAGE_ONE -> {
-                resolveStage(0);
-            } case STAGE_TWO -> {
-                resolveStage(1);
-            } case STAGE_THREE -> {
-                resolveStage(2);
+            } case IN_STAGE -> {
+                resolveStage(curStageIndex);
             } case ENDED -> {
                 endPhase();
             } default -> {

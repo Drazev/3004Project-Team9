@@ -209,9 +209,6 @@ public class GeneralGameController implements CardArea<StoryCards> {
             throw new IllegalGameStateException("Card can only be played in a Game Phases or when it's HAND_OVERSIZE");
         }
 
-        if (!player.getHand().playCard(cardId)) {
-            throw new RuntimeException("Cannot play card, mismatch cardID or unassigned playArea");
-        }
 
         player.actionPlayCard(cardId);
         stateMachine.update();

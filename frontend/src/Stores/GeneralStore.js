@@ -14,6 +14,7 @@ const useStore = create((set) => ({
   isSponsoring: false,
   joinRequest: false,
   handOversize: false,
+  foeStageStart: false,
   activePlayers: [],
   loadPlayers: async () => {
     await handleLoadPlayers(set);
@@ -29,6 +30,7 @@ const useStore = create((set) => ({
   setJoinRequest: (status) => set(() => ({joinRequest: status})),
   setHandOversize: (status) => set(() => ({handOversize: status})),
   setActivePlayers: (players) => set(() => ({activePlayers: players})),
+  setFoeStageStart: (status) => set(() => ({foeStageStart: status})),
   updatePlayer: (player) => set((current) => ({
     players: (() => {
       let playerExist = false;
@@ -100,6 +102,8 @@ export const useAddNewPlayer = () => useStore((state) => state.addNewPlayer);
 export const useSponsorRequest = () => useStore((state) => state.sponsorRequest);
 export const useJoinRequest = () => useStore((state) => state.joinRequest);
 export const useHandOversize = () => useStore((state) => state.handOversize);
+export const useActivePlayers = () => useStore((state) => state.activePlayers);
+export const useFoeStageStart = () => useStore((state) => state.foeStageStart);
 
 export const useSetConnected = () => useStore((state) => state.setConnected);
 export const useSetGameStarted = () => useStore((state) => state.setGameStarted);
@@ -117,8 +121,7 @@ export const usePopupType = () => useStore((state) => state.popupType);
 export const useSetPopupType = () => useStore((state) => state.setPopupType);
 export const useSetJoinRequest = () => useStore((state) => state.setJoinRequest);
 export const useSetHandOversize = () => useStore((state) => state.setHandOversize);
-
 export const useSetActivePlayers = () => useStore((state) => state.setActivePlayers);
-export const useActivePlayers = () => useStore((state) => state.activePlayers);
+export const useSetFoeStageStart= () => useStore((state) => state.setFoeStageStart);
 
 export default useStore;

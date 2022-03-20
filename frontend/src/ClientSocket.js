@@ -134,7 +134,7 @@ export async function connect(connectFunctions) {
     });
 
 
-    client.subscribe("/topic/play-areas/play-area-changed", (data) => {
+    client.subscribe("/user/topic/play-areas/play-area-changed", (data) => {
       /**
        * This represents cards in play. It could be player play areas, or game stages
        */
@@ -172,6 +172,11 @@ export async function connect(connectFunctions) {
        */
       console.log("/topic/quest/join-request: " + message);
       connectFunctions.setJoinRequest(true);
+    });
+
+    client.subscribe("/topic/quest/foe-stage-start", (message) => {
+      console.log("/topic/quest/foe-stage-start: " + message);
+      connectFunctions.setFoeStageStart(true);
     });
   };
 
@@ -288,6 +293,17 @@ export async function setupComplete(name, playerID, setIsSponsoring) {
     console.log("Sponsor request accepted")
     setIsSponsoring(false);
   }
+}
+
+export function participantSetupComplete(name, playerID) {
+  console.log(`participantSetupComplete name=${name} playerID=${playerID}`);
+  client.publish({
+    destination: "/app/quest/participant-setup-complete",
+    body: JSON.stringify({
+      name: name,
+      playerID: playerID
+    })
+  });
 }
 
 export function disconnect() {

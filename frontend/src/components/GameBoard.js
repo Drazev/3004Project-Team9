@@ -3,8 +3,8 @@ import QuestDisplay from "./QuestDisplay";
 import CardImages from "../Images/index";
 import Popup from "./Popup";
 import Card from "./Card";
-import { drawCard, sponsorRespond, setupComplete } from "../ClientSocket";
-import { useName, usePlayerHands, usePlayers, useTurn, useSponsorRequest, useActivePlayers, useSetPopupType, usePopupType, useIsSponsoring, useSetIsSponsoring, useJoinRequest, useSetJoinRequest } from "../Stores/GeneralStore";
+import { drawCard, sponsorRespond, setupComplete, participantSetupComplete } from "../ClientSocket";
+import { useName, usePlayerHands, usePlayers, useTurn, useSponsorRequest, useActivePlayers, useSetPopupType, usePopupType, useIsSponsoring, useSetIsSponsoring, useJoinRequest, useSetJoinRequest, useFoeStageStart } from "../Stores/GeneralStore";
 import { useUpdatePlayArea, usePlayerPlayAreas, useStageAreas } from "../Stores/PlayAreaStore";
 import { Button } from "react-bootstrap";
 import React, { useState, useEffect } from "react";
@@ -27,8 +27,8 @@ function GameBoard(props) {
     const joinRequest = useJoinRequest();
     const activePlayers = useActivePlayers();
     console.log("Active Players are: " + JSON.stringify(activePlayers));
-
     const [popup, setPopup] = useState(true);
+    const foeStageStart = useFoeStageStart();
 
     // const togglePopup = () => {
     //     setPopup(!popup);
@@ -58,6 +58,21 @@ function GameBoard(props) {
         }
     }
 
+    const findPlayAreaById = (id) => {
+        const finder = (playArea) => {
+            if (playArea.id === id) {
+                return true;
+            }
+            return false;
+        }
+        return finder
+    }
+
+    const getActiveCard = (playerId) => {
+        return active.find(findPlayAreaById(playerId)) != undefined
+            ? active.find(findPlayAreaById(playerId)).cardsInPlay : []
+    }
+
     return (
         <div id="GameBoard">
             <div id="allHands">
@@ -67,7 +82,7 @@ function GameBoard(props) {
                     isTurn={(hands[0].playerName === turn)}
                     isMyHand={myHandArr[0]}
                     cardsInHand={hands[0].hand}
-                    activeCards={active[0].hand}
+                    activeCards={getActiveCard(hands[0].playerId)}
                     rank={CardImages.Rank_Squire/*hands[0].rank*/}
                     numShields={5/*hands[0].shields*/}
                     top={init}
@@ -81,7 +96,7 @@ function GameBoard(props) {
                     isTurn={(hands[1].playerName === turn)}
                     isMyHand={myHandArr[1]}
                     cardsInHand={hands[1].hand}
-                    activeCards={active[1].hand}
+                    activeCards={getActiveCard(hands[1].playerId)}
                     rank={CardImages.Rank_Squire/*hands[1].rank*/}
                     numShields={5/*hands[1].shields*/}
                     top={init + jump}
@@ -96,7 +111,7 @@ function GameBoard(props) {
                         isTurn={(hands[2].playerName === turn)}
                         isMyHand={myHandArr[2]}
                         cardsInHand={hands[2].hand}
-                        activeCards={active[2].hand}
+                        activeCards={getActiveCard(hands[2].playerId)}
                         rank={CardImages.Rank_Squire/*hands[2].rank*/}
                         numShields={5/*hands[2].shields*/}
                         top={init + jump * 2}
@@ -112,7 +127,7 @@ function GameBoard(props) {
                         isTurn={(hands[3].playerName === turn)}
                         isMyHand={myHandArr[3]}
                         cardsInHand={hands[3].hand}
-                        activeCards={active[3].hand}
+                        activeCards={getActiveCard(hands[3].playerId)}
                         rank={CardImages.Rank_Squire/*hands[3].rank*/}
                         numShields={5/*hands[3].shields*/}
                         top={init + jump * 3}
@@ -149,10 +164,19 @@ function GameBoard(props) {
                     </Button>
                 </div>)
             }
-            { (popup && joinRequest && name !== sponsorRequest) && 
+            {(popup && joinRequest && name !== sponsorRequest) &&
                 <div id="join-popup">
                     <Popup popupType="JOINQUEST" setPopup={setPopup}></Popup>
                 </div>
+            }
+            {(name !== sponsorRequest && foeStageStart) &&
+                (<div id="finish-setup">
+                    <Button
+                        onClick={() => {
+                            participantSetupComplete(name, myPlayerID);
+                        }} style={{}}>Participant Setup Complete
+                    </Button>
+                </div>)
             }
         </div>
     );

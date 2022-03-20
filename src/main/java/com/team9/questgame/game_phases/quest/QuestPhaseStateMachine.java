@@ -68,15 +68,18 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
                 case PARTICIPANT_SETUP:
                     this.currentState = participantSetupState();
                     break;
-                case STAGE_ONE:
-                    this.currentState = stageOneState();
+                case IN_STAGE:
+                    this.currentState = inStageState();
                     break;
-                case STAGE_TWO:
-                    this.currentState = stageTwoState();
-                    break;
-                case STAGE_THREE:
-                    this.currentState = stageThreeState();
-                    break;
+//                case STAGE_ONE:
+//                    this.currentState = stageOneState();
+//                    break;
+//                case STAGE_TWO:
+//                    this.currentState = stageTwoState();
+//                    break;
+//                case STAGE_THREE:
+//                    this.currentState = stageThreeState();
+//                    break;
                 case ENDED:
                     this.currentState = endedState();
                     break;
@@ -163,44 +166,52 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
             if(controller.getQuestingPlayers().size() == 0){
                 return QuestPhaseStatesE.ENDED;
             }
-            switch(controller.getCurStageIndex()){
-                  case 0 -> {
-                    return QuestPhaseStatesE.STAGE_ONE;
-                } case 1 ->{
-                    return QuestPhaseStatesE.STAGE_TWO;
-                } case 2 -> {
-                    return QuestPhaseStatesE.STAGE_THREE;
-                } default -> {
-                    throw new IllegalQuestPhaseStateException("CurStageIndex is out of bounds");
-                }
-            }
+            return QuestPhaseStatesE.IN_STAGE;
+//            switch(controller.getCurStageIndex()){
+//                  case 0 -> {
+//                    return QuestPhaseStatesE.STAGE_ONE;
+//                } case 1 ->{
+//                    return QuestPhaseStatesE.STAGE_TWO;
+//                } case 2 -> {
+//                    return QuestPhaseStatesE.STAGE_THREE;
+//                } default -> {
+//                    throw new IllegalQuestPhaseStateException("CurStageIndex is out of bounds");
+//                }
+//            }
         }
         return QuestPhaseStatesE.PARTICIPANT_SETUP;
     }
 
-    public QuestPhaseStatesE stageOneState() {
-        //TODO: on stage one complete if more stages return to participant setup state
-        if(controller.getQuestingPlayers().size() == 0){
+    public QuestPhaseStatesE inStageState() {
+        if(controller.getCurStageIndex() >= controller.getQuestCard().getStages() || controller.getQuestingPlayers().size() == 0){
             return QuestPhaseStatesE.ENDED;
         }
         return QuestPhaseStatesE.PARTICIPANT_SETUP;
     }
 
-    public QuestPhaseStatesE stageTwoState() {
-        if (controller.getQuestCard().getStages() < 2 || controller.getQuestingPlayers().size() == 0) {
-            return QuestPhaseStatesE.ENDED;
-        }
-
-        return QuestPhaseStatesE.STAGE_TWO;
-    }
-
-    public QuestPhaseStatesE stageThreeState() {
-        if (controller.getQuestCard().getStages() < 3 || controller.getQuestingPlayers().size() == 0) {
-            return QuestPhaseStatesE.ENDED;
-        }
-
-        return QuestPhaseStatesE.STAGE_THREE;
-    }
+//    public QuestPhaseStatesE stageOneState() {
+//        //TODO: on stage one complete if more stages return to participant setup state
+//        if(controller.getQuestingPlayers().size() == 0){
+//            return QuestPhaseStatesE.ENDED;
+//        }
+//        return QuestPhaseStatesE.PARTICIPANT_SETUP;
+//    }
+//
+//    public QuestPhaseStatesE stageTwoState() {
+//        if (controller.getQuestCard().getStages() < 2 || controller.getQuestingPlayers().size() == 0) {
+//            return QuestPhaseStatesE.ENDED;
+//        }
+//
+//        return QuestPhaseStatesE.PARTICIPANT_SETUP;
+//    }
+//
+//    public QuestPhaseStatesE stageThreeState() {
+//        if (controller.getQuestCard().getStages() < 3 || controller.getQuestingPlayers().size() == 0) {
+//            return QuestPhaseStatesE.ENDED;
+//        }
+//
+//        return QuestPhaseStatesE.PARTICIPANT_SETUP;
+//    }
 
     public QuestPhaseStatesE endedState() {
         if (isPhaseReset) {

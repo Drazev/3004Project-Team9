@@ -16,7 +16,8 @@ import {
   useSetIsSponsoring,
   useSetJoinRequest,
   useSetHandOversize,
-  useSetActivePlayers
+  useSetActivePlayers,
+  useSetFoeStageStart
 } from "../Stores/GeneralStore";
 import {
   useUpdateStageArea,
@@ -39,6 +40,7 @@ const ConnectForm = () => {
   const setJoinRequest = useSetJoinRequest();
   const setHandOversize = useSetHandOversize();
   const setActivePlayers = useSetActivePlayers();
+  const setFoeStageStart = useSetFoeStageStart();
 
   const connectFunctions = {
     name,
@@ -54,7 +56,8 @@ const ConnectForm = () => {
     updatePlayerPlayArea,
     setJoinRequest,
     setHandOversize,
-    setActivePlayers
+    setActivePlayers,
+    setFoeStageStart
   }
 
   const setName = useSetName();
