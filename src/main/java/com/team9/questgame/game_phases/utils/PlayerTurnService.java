@@ -4,6 +4,7 @@ import com.team9.questgame.ApplicationContextHolder;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 

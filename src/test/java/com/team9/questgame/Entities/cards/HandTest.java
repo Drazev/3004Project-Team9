@@ -21,9 +21,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -93,8 +91,8 @@ class HandTest {
     void setupPlayerPlayAreasToPlayCards() {
         for(Players p : players) {
             p.getPlayArea().registerGamePhase(testPhaseController);
-            p.getPlayArea().onPlayAreaChanged(testStage);
-            p.getPlayArea().onPhaseNextPlayerTurn(p);
+            p.getPlayArea().onStageChanged(testStage);
+            p.getPlayArea().setPlayerTurn(true);
         }
     }
 
@@ -130,8 +128,8 @@ class HandTest {
         QuestPhaseController testPhaseController = new QuestPhaseController();
         TestPlayArea testStage = new TestPlayArea();
         pa.registerGamePhase(testPhaseController);
-        pa.onPlayAreaChanged(testStage);
-        pa.onPhaseNextPlayerTurn(player);
+        pa.onStageChanged(testStage);
+        pa.setPlayerTurn(true);
         for(int i=0;i<Hand.MAX_HAND_SIZE;++i) {
             aDeck.drawCard(hand);
         }

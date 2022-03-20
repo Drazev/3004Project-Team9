@@ -228,7 +228,7 @@ class QuestPhaseControllerTest {
         assertThrows(IllegalQuestPhaseStateException.class, () -> controller.endPhase());
         ArrayList<QuestCards> questCards = getQuestCards();
         controller.receiveCard(questCards.get(0));
-
+        controller.startPhase(new PlayerTurnService(players));
         controller.getStateMachine().setCurrentState(QuestPhaseStatesE.QUEST_SPONSOR);
         assertThrows(IllegalQuestPhaseStateException.class, () -> controller.endPhase());
         controller.getStateMachine().setCurrentState(QuestPhaseStatesE.QUEST_SETUP);

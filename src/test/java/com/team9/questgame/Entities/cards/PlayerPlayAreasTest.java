@@ -11,7 +11,6 @@ import com.team9.questgame.game_phases.GeneralGameController;
 import com.team9.questgame.game_phases.quest.QuestPhaseController;
 import com.team9.questgame.gamemanager.service.SessionService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,10 +82,14 @@ class PlayerPlayAreasTest {
     }
 
     void setupPlayerPlayAreasToPlayCards() {
+        //Vanquish Arthur's enemies is the only quest that doesn't boost anyone
+        CardFactory cf = CardFactory.getInstance();
+        StoryCards storyCard = cf.createCard(aDeck,StoryDeckCards.VANQUISH_KING_ARTHURS_ENEMIES);
         for(Players p : players) {
             p.getPlayArea().registerGamePhase(testPhaseController);
-            p.getPlayArea().onPlayAreaChanged(testStage);
-            p.getPlayArea().onPhaseNextPlayerTurn(p);
+            p.getPlayArea().onQuestStarted(storyCard);
+            p.getPlayArea().onStageChanged(testStage);
+            p.getPlayArea().setPlayerTurn(true);
         }
     }
 
@@ -235,11 +238,11 @@ class PlayerPlayAreasTest {
         PlayerPlayAreas pa = player.getPlayArea();
         player.onGameReset();
         pa.registerGamePhase(testPhaseController);
-//        ArrayList<QuestCards> questCards = getQuestCards();
-//        StagePlayAreas sa = new StagePlayAreas(questCards.get(0), player,0);
-        pa.onPlayAreaChanged(testStage);
-        pa.onPhaseNextPlayerTurn(player);
         CardFactory cf = CardFactory.getInstance();
+        StoryCards storyCard = cf.createCard(aDeck,StoryDeckCards.VANQUISH_KING_ARTHURS_ENEMIES);
+        pa.onQuestStarted(storyCard);
+        pa.onStageChanged(testStage);
+        pa.setPlayerTurn(true);
         AdventureDecks testDeck = new AdventureDecks();
         HashMap<AdventureDeckCards,Integer> deckList = new HashMap<>();
         HashSet<AdventureCards> cards = new HashSet<>();

@@ -11,6 +11,7 @@ public class CardAreaException extends RuntimeException{
     public enum CardAreaExceptionReasonCodes {
         UNEXPECTED_STATE,
         GAMEPHASE_NOT_REGISTERED,
+        STAGE_PLAY_AREA_NOT_SET,
         NULL_CARD,
         DUPLICATE_CARD_INSTANCE,
         RULE_CANNOT_HAVE_TWO_OF_SAME_CARD_IN_PLAY,
