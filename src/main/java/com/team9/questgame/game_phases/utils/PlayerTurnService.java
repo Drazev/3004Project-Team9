@@ -43,8 +43,7 @@ public class PlayerTurnService {
         }
         currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
 
-        // TODO: Add test for this broadcast in the OutboundServiceTest or WSControllerTest
-        outboundService.broadcastNextTurn(getPlayerTurn());
+        notifyTurnChange();
     }
 
     public boolean setPlayerTurn(int i) {
@@ -66,6 +65,11 @@ public class PlayerTurnService {
 
     public void onGameReset() {
         currentPlayerIndex = 0;
+    }
+
+    public void notifyTurnChange() {
+        // TODO: Add test for this broadcast in the OutboundServiceTest or WSControllerTest
+        outboundService.broadcastNextTurn(getPlayerTurn());
     }
 
 }

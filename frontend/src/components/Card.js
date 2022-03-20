@@ -68,7 +68,7 @@ function Card(props){
                     >Discard</Button>{' '}
                 </>
             }
-            {isSelected && numStages === 0 &&
+            {/* {isSelected && numStages === 0 &&
                 <Button 
                     id="PlayButton"
                     style={{
@@ -83,8 +83,8 @@ function Card(props){
                         borderColor:"#77a3c9",}}
                     onClick={() => playCard(props.cardOwner, props.playerID, props.card.cardID, -1, -1)}
                 >Play</Button>
-            }
-            {isSelected && numStages != 0 &&
+            } */}
+            {isSelected &&
                 <DropdownButton 
                 id="dropdown-basic-button" 
                 title="Play"
@@ -95,6 +95,7 @@ function Card(props){
                     {(numStages >= 2) && <Dropdown.Item onClick={() => playCard(props.cardOwner, props.playerID, props.card.cardID, -1, 1)}>Stage 2</Dropdown.Item>}
                     {(numStages >= 3) && <Dropdown.Item onClick={() => playCard(props.cardOwner, props.playerID, props.card.cardID, -1, 2)}>Stage 3</Dropdown.Item>}
                     {(numStages >= 4) && <Dropdown.Item onClick={() => playCard(props.cardOwner, props.playerID, props.card.cardID, -1, 3)}>Stage 4</Dropdown.Item>}
+                    {(numStages >= 5) && <Dropdown.Item onClick={() => playCard(props.cardOwner, props.playerID, props.card.cardID, -1, 3)}>Stage 5</Dropdown.Item>}
                 </DropdownButton>
             }
             {isActiveSelected &&

@@ -61,10 +61,10 @@ public class InboundService implements ApplicationContextAware {
         }
     }
 
-    public synchronized void playerDrawCard(String name, long cardId) {
+    public synchronized void playerDrawStoryCard(String name, long cardId) {
         // Note: cardId is unused
         Players player = sessionService.getPlayerMap().get(name);
-        gameController.dealCard(player);
+        gameController.drawStoryCard(player);
     }
 
     public synchronized void playerPlayCard(PlayerPlayCardInbound playerPlayCardInbound) {

@@ -56,6 +56,7 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
         this.questCard = questCard;
         this.sponsor = sponsor;
         this.stageNum = stageNum;
+        this.stageCard = null;
         allCards = new HashMap<>();
         battlePoints = 0;
         bids = 0;
@@ -71,6 +72,7 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
 
         LOG = LoggerFactory.getLogger(StagePlayAreas.class);
 
+        notifyStageAreaChanged();
     }
 
     @Override
@@ -91,19 +93,19 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
         if(allCards.containsKey(card.getCardCode())){
             LOG.error("RULE: A stage cannot have two cards of the same type");
             throw new CardAreaException(CardAreaException.CardAreaExceptionReasonCodes.RULE_CANNOT_HAVE_TWO_OF_SAME_CARD_IN_PLAY);
-        }if(hasFoe){
+        }if(hasFoe && card.getSubType() == CardTypes.FOE){
             LOG.error("RULE: A stage cannot have two cards of the same type");
             //TODO:change reason code to can't have two foes
             throw new CardAreaException(CardAreaException.CardAreaExceptionReasonCodes.RULE_CANNOT_HAVE_TWO_OF_SAME_CARD_IN_PLAY);
         }
         allCards.put(card.getCardCode(),  card);
         cardIdMap.put(card.getCardID(), card);
+
         if(card.getSubType() == CardTypes.FOE){
             hasFoe = true;
             stageCard = card;
         }
-
-
+        updateBattlePoints();
 
         return true;
     }
@@ -199,7 +201,7 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
 //        }
 //        this.targetPlayArea=targetPlayArea;
 //    }
-
+//
 
     public boolean discardAllCards() {
         HashSet<AdventureCards> cardList = new HashSet<>(allCards.values());
@@ -293,6 +295,12 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
 
     public StageAreaData getStageAreaData() {
         HashSet<CardTypes> allowedTypes = new HashSet<>();
+        CardData stageCardData = null;
+
+        if (this.stageCard != null) {
+            stageCardData = this.stageCard.generateCardData();
+        }
+
         allowedTypes.add(CardTypes.FOE);
         allowedTypes.add(CardTypes.WEAPON);
         StageAreaData data = new StageAreaData(
@@ -301,7 +309,7 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
                 bids,
                 battlePoints,
                 allowedTypes,
-                stageCard.generateCardData(),
+                stageCardData,
                 getCardData()
         );
         return data;
@@ -310,7 +318,7 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
     public ArrayList<CardData> getCardData() {
         ArrayList<CardData> handCards = new ArrayList<>();
         for(Cards card : allCards.values()) {
-            if(card.cardCode != stageCard.cardCode){
+            if(this.stageCard == null || card.cardCode != stageCard.cardCode){
                 handCards.add(card.generateCardData());
             }
         }

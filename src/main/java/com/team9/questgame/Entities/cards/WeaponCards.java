@@ -43,4 +43,11 @@ public class WeaponCards extends AdventureCards implements BattlePointContributo
         }
     }
 
+    @Override
+    protected void registerwithNewPlayArea(PlayAreas stage) {
+        stage.registerBattlePointContributor(this);
+    }
+
+
+
 }

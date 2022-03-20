@@ -1,6 +1,7 @@
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { setGameStarted } from "./Stores/GeneralStore";
+import { useUpdatePlayArea } from "./Stores/PlayAreaStore";
 
 
 let client;
@@ -9,7 +10,7 @@ const REGISTRATION_URL = "http://localhost:8080/api/register"
 const SOCK_SERVER = "http://localhost:8080/quest-game-websocket"
 const START_URL = "http://localhost:8080/api/start"
 
-export async function connect(setConnected,setGameStarted, addNewMessage, setPlayers, name, updateHand, updatePlayer) {
+export async function connect(setConnected,setGameStarted, addNewMessage, setPlayers, name, updateHand, updatePlayer, setTurn, notifySponsorRequest, updateStageArea, updatePlayerPlayArea) {
   console.log("Attempt connection");
 
   // Register player name
@@ -66,9 +67,9 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
       setGameStarted(true);
     });
 
+    // client.subscribe("/topic/general/")
 
-    client.subscribe("/topic/general/next-turn", (name) => {
-      console.log("Next Turn: " + JSON.stringify(name));
+    client.subscribe("/topic/general/next-turn", (message) => {
       /**
        * Server informs about the next turn
        * This endpoind is used in all phases (general, quest, event, tournament)
@@ -76,8 +77,9 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
        * after the game has started
        */
 
-      console.log("Turn is now: " + name.body);
-      // setTurn(name);
+      let body = JSON.parse(message.body)
+      console.log("Received player-next-turn" + body.name);
+      setTurn(body.name);
     });
 
 
@@ -116,9 +118,18 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
       /**
        * This represents cards in play. It could be player play areas, or game stages
        */
-      // let body = JSON.parse(data.body);
-      // console.log("Play Area Update recieved for playerId: "+body.playerId);
-      // updatePlayArea(body);
+      let body = JSON.parse(data.body);
+      console.log("Play Area Update recieved: "+JSON.stringify(body));
+      updatePlayerPlayArea(body);
+    });
+
+    client.subscribe("/topic/quest/stage-area-changed", (data) => {
+      /**
+       * This represents cards in play. It could be player play areas, or game stages
+       */
+      let body = JSON.parse(data.body);
+      console.log("Stage Area Update recieved: " + JSON.stringify(body));
+      updateStageArea(body);
     });
 
 
@@ -128,6 +139,9 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
        * This happens right after a player drawn a quest card which started the quest
        * phase
        */
+      console.log("Sponsor Search: " + message);
+      let x = JSON.parse(message.body);
+      notifySponsorRequest(x.name);
     });
 
 
@@ -154,13 +168,13 @@ export async function connect(setConnected,setGameStarted, addNewMessage, setPla
 
 }
 
-export function drawCard(name, cardId) {
-  console.log("Draw Card: \nName: " + name + "\nCardID: " + cardId);
+export function drawCard(name, playerID) {
+  console.log("Draw Story Card: \nName: " + name + "\nPlayerID: " + playerID);
   client.publish({
     destination: "/app/general/player-draw-card",
     body: JSON.stringify({
       name: name,
-      cardId: cardId, //server will not care about this
+      playerID: playerID,
     }),
   });
 }
@@ -178,16 +192,27 @@ export function discardCard(name, cardId) {
 
 export function playCard(name, playerID, cardId, src, dst) {
   console.log("Play Card: \nName: " + name + "\nCardID: " + cardId + "\nPlayerID: " + JSON.stringify(playerID) + "\nsrc: " + src + "\ndst: " + dst + "\n");
-  client.publish({
-    destination: "/app/general/player-play-card",
-    body: JSON.stringify({
-      name: name,
-      playerID: playerID,
-      cardId: cardId,
-      src: src,
-      dst: dst
-    }),
-  });
+  if (src === -1 && dst === -1) {
+    client.publish({
+      destination: "/app/general/player-play-card",
+      body: JSON.stringify({
+        name: name,
+        playerID: playerID,
+        cardId: cardId,
+      }),
+    });
+  } else {
+    client.publish({
+      destination: "/app/quest/sponsor-play-card",
+      body: JSON.stringify({
+        name: name,
+        playerID: playerID,
+        cardId: cardId,
+        src: src,
+        dst: dst
+      }),
+    });
+  }
 }
 
 export function sponsorRespond(name, sponsorDecision) {
@@ -216,6 +241,27 @@ export function joinRespond(name, joinDecision) {
       joined: joinDecision
     })
   });
+}
+
+
+export async function setupComplete(name, playerID) {
+  /**
+   * Respond to a quest stage join request from the server
+   */
+  console.log(`name=${name} playerID=${playerID}`);
+  let response = await fetch("http://localhost:8080/api/quest/setup-complete", {
+    method: "POST",
+    body: JSON.stringify({
+      name: name,
+      playerID: playerID
+    }),
+    headers: {
+      "Content-Type": "application/json"
+    }
+  })
+
+  let body = await response.json();
+  console.log(`Player name=${body.name} has finished setting up: ${body.confirmed}`);
 }
 
 export function disconnect() {

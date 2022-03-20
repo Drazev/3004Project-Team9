@@ -229,7 +229,7 @@ public class Hand implements CardArea<AdventureCards> {
             if(!cardIdMap.containsKey(cardId))
             {
                 //The map did not contain the cardId, BAD REQUEST
-                throw new BadRequestException("Provided cardId was not found in players hand:  "+player.getName());
+                throw new BadRequestException(String.format("Provided cardId %d was not found in players %s's hand", cardId, player.getName()));
             }
         }
         return card;

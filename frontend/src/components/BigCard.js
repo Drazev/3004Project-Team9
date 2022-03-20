@@ -22,7 +22,7 @@ function BigCard(props){
                 height:size.height,
                 borderRadius:10,
             }}
-            alt="ohno"
+            alt="nonono"
           />
         </div>
       );

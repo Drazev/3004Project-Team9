@@ -3,40 +3,55 @@ import QuestDisplay from "./QuestDisplay";
 import CardImages from "../Images/index";
 import Popup from "./Popup";
 import Card from "./Card";
-import {drawCard} from "../ClientSocket";
-import {useName, usePlayerHands, usePlayers, useTurn } from "../Stores/GeneralStore";
+import {drawCard, sponsorRespond, setupComplete} from "../ClientSocket";
+import {useName, usePlayerHands, usePlayers, useTurn, useSponsorRequest, useSetPopupType, usePopupType } from "../Stores/GeneralStore";
 import { useUpdatePlayArea, usePlayerPlayAreas, useStageAreas } from "../Stores/PlayAreaStore";
 import {Button} from "react-bootstrap";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./GameBoard.css";
 
 function GameBoard(props){
     let init = 80;
     let jump = 240;
     const name = useName();
+    const popupType = usePopupType();
     const allPlayers = usePlayers();
     let hands = usePlayerHands();
     let active = usePlayerPlayAreas();
     let stageAreas = useStageAreas();
     const turn = useTurn();
+    let sponsorRequest = useSponsorRequest();
+    const setPopupType = useSetPopupType();
 
-    const [popup, setPopup] = useState(false);
- 
+    const [popup, setPopup] = useState(true);
+
     const togglePopup = () => {
       setPopup(!popup);
       console.log("trigger popup: " + popup);
     }
-  
+
+    useEffect(() => {
+        setPopupType("SPONSORQUEST")
+    }, [])
 
     // hands = [{name:"Test1",isTurn:true,hand:[{cardId:1,cardImage:CardImages.Ally_KingArthur}],cardsInPlay:[],rank:CardImages.Rank_Squire,shields:54},
     // {name:"Test2",isTurn:true,hand:[{cardId:2,cardImage:CardImages.Ally_KingArthur}],cardsInPlay:[],rank:CardImages.Rank_Squire,shields:5}];
 
     let myHandArr = [false,false,false,false];
+    let myPlayerID = -1;
     for(let i = 0; i < hands.length; i++){
         if(hands[i].playerName === name){
             myHandArr[i] = true;
+            myPlayerID = hands[i].playerId;
         }
     }
+
+    
+    
+    // if(sponsorRequest === name && popup === false){
+    //     setPopup(true);
+    //     setPopupType("SPONSORQUEST")
+    // }
 
     return (
         <div id="GameBoard">
@@ -102,23 +117,27 @@ function GameBoard(props){
                     </PlayerHand>
                 }
             </div>
-            <div class="decks">
-                <img src={CardImages.Back_Adventure} class="deck"></img>
-                <img src={CardImages.Back_Story} class="deck"></img>
-                <button class="drawButton" style={{left: "24px"}}>Draw</button>
-                <button class="drawButton" style={{left: "123px"}}>Draw</button>
+            <div className="decks">
+                <img src={CardImages.Back_Adventure} className="deck"></img>
+                <img src={CardImages.Back_Story} className="deck"></img>
+                <button className="drawButton" onClick={() => drawCard(name,myPlayerID)} style={{left: "123px"}}>Draw</button>
             </div>
 
-            <div class="questDisplay">
+            <div className="questDisplay">
                 <QuestDisplay numStages={stageAreas.length-1}></QuestDisplay>
             </div>
 
             {/* <Button onClick={() => drawCard(name,0)} >Draw</Button>
             <Button onClick={() => togglePopup()}>End Turn</Button> */}
 
-            {(popup) && 
+            {(popup && name === sponsorRequest) && 
                 <div>
-                    <Popup handleYes={togglePopup} handleNo={togglePopup} popupType={"HANDOVERFLOW"}></Popup>
+                    <Popup popupType={popupType} setPopup={setPopup}></Popup>
+                </div>
+            }
+            {(name === sponsorRequest) &&
+                <div>
+                    <Button onClick={() => setupComplete(name, myPlayerID)} style={{}}>Finished Sponsoring</Button>
                 </div>
             }
         </div>

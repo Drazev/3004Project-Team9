@@ -140,6 +140,7 @@ public class GeneralGameController implements CardArea<StoryCards> {
         stateMachine.setGameStartRequested(true);
         stateMachine.update();
         if (stateMachine.getCurrentState() != GeneralStateE.SETUP) {
+            playerTurnService.notifyTurnChange();
             outboundService.broadcastGameStart();
         }
     }
@@ -169,6 +170,9 @@ public class GeneralGameController implements CardArea<StoryCards> {
             this.discardCard(this.storyCard);
             sDeck.drawCard(this);
         }
+
+        outboundService.broadcastStoryCard(this.storyCard.generateCardData());
+
         // Generate the GamePhase that corresponds to the type of story card
         boolean status = playCard(this.storyCard);
         if (status == false) {
@@ -208,9 +212,13 @@ public class GeneralGameController implements CardArea<StoryCards> {
         if (!player.getHand().playCard(cardId)) {
             throw new RuntimeException("Cannot play card, mismatch cardID or unassigned playArea");
         }
-        //TODO: uncomment below if you want to pass order to quest
-        //questPhaseController.playerPlayCard(player, cardId, src, dst);
+        //should check for player turn
+        if(playerTurnService.getPlayerTurn().getPlayerId() != player.getPlayerId()){
+            throw new RuntimeException("Cannot play card outside of your turn.");
+        }
+        player.getPlayArea().onPhaseNextPlayerTurn(player);
         player.actionPlayCard(cardId);
+        player.getPlayArea().onPhaseNextPlayerTurn(null);
         stateMachine.update();
     }
 

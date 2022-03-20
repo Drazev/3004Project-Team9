@@ -30,7 +30,7 @@ public class QuestPhaseInboundService {
     private QuestPhaseController questController;
 
     public QuestPhaseInboundService() {
-        this.LOG = LoggerFactory.getLogger(InboundService.class);
+        this.LOG = LoggerFactory.getLogger(QuestPhaseInboundService.class);
     }
 
 
@@ -44,7 +44,7 @@ public class QuestPhaseInboundService {
     }
 
     public synchronized boolean questSetupComplete(String name){
-        LOG.info(String.format("Notification that sponsor has completed stage setup: name=%s, complete=%s", name));
+        LOG.info(String.format("Notification that sponsor has completed stage setup: name=%s", name));
         Players player = sessionService.getPlayerMap().get(name);
         if (player == null) {
             throw new NullPointerException(String.format("Player with name=%s not found", name));
@@ -59,8 +59,9 @@ public class QuestPhaseInboundService {
         questController.checkJoinResult(player, joined);
     }
 
-    public synchronized  void checkParticipantSetup(){
-        questController.checkParticipantSetup();
+    public synchronized  void checkParticipantSetup(String name){
+        Players player = sessionService.getPlayerMap().get(name);
+        questController.checkParticipantSetup(player);
     }
 
     public synchronized void sponsorPlayCard(SponsorPlayCardInbound sponsorPlayCardInbound) {
