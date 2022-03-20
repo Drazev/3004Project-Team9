@@ -158,6 +158,8 @@ public class Players {
 
         PlayerData data = new PlayerData(
         playerId,
+        hand.getHandId(),
+        playArea.getPlayAreaId(),
         name,
         rank,
         battlePoints,

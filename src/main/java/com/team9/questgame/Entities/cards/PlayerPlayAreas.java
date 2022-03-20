@@ -94,6 +94,10 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         return isPlayersTurn;
     }
 
+    public long getPlayAreaId() {
+        return id;
+    }
+
     public void setPlayerTurn(boolean isTurn) {
         if(phaseController==null) {
             throw new CardAreaException(GAMEPHASE_NOT_REGISTERED);
