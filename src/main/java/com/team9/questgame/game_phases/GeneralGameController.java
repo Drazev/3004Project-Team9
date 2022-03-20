@@ -212,13 +212,7 @@ public class GeneralGameController implements CardArea<StoryCards> {
         if (!player.getHand().playCard(cardId)) {
             throw new RuntimeException("Cannot play card, mismatch cardID or unassigned playArea");
         }
-        //should check for player turn
-        if(playerTurnService.getPlayerTurn().getPlayerId() != player.getPlayerId()){
-            throw new RuntimeException("Cannot play card outside of your turn.");
-        }
-//        if(playerTurnService.getPlayerTurn().getPlayerId() != player.getPlayerId()){
-//            throw new RuntimeException("Cannot play card outside of your turn.");
-//        }
+
         player.actionPlayCard(cardId);
         stateMachine.update();
     }
