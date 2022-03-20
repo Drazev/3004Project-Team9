@@ -1,14 +1,16 @@
 import React from "react";
 import {Button} from "react-bootstrap";
 import { sponsorRespond, } from "../ClientSocket";
-import { useName } from "../Stores/GeneralStore";
+import { useName, useSetIsSponsoring } from "../Stores/GeneralStore";
 import "./Popup.css"
  
 const Popup = props => {
   let name = useName();
+  const setIsSponsoring = useSetIsSponsoring();
   const handleYes = () => {
     sponsorRespond(name, true);
     props.setPopup(false);
+    setIsSponsoring(true);
   }
   const handleNo = () => {
     sponsorRespond(name, false);

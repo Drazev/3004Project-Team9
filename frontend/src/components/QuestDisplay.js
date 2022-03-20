@@ -19,17 +19,17 @@ let currentTurn = "player1";
 
 const QuestDisplay = (props) => {
     const stages = useStageAreas();
-    console.log("Stages: " + JSON.stringify(stages))
+    const numStages = stages.length-1;
     const currentStageNum = useCurrentStage();
     const currentStageObject = stages.find(obj => obj.stageNum === currentStageNum);
-    /*const currentStageObject = stages.filter(obj => {
-        return obj.stageNum === currentStage;
-    });*/
 
-    
+    console.log("Current Stage: " + JSON.stringify(currentStageObject));
+    if(currentStageObject){
+        console.log("Current Stage Object isBoosted: " + currentStageObject.isBoosted);
+    }
     const getStages = () => {
         let x = [];
-        for(let i = 0; i <= props.numStages; i++){
+        for(let i = 0; i <= numStages; i++){
             let curStage = stages.find(obj => obj.stageNum === i);
             x.push(curStage);
         }
@@ -58,7 +58,7 @@ const QuestDisplay = (props) => {
             {RenderStages}
         </div>
         <div>
-            {currentStageObject && currentStageObject.isBoosted != null && <FoeStageDisplay activePlayers={activePlayers} currentStage={currentStageObject}></FoeStageDisplay>}
+            {currentStageObject && <FoeStageDisplay activePlayers={activePlayers} currentStage={currentStageObject}></FoeStageDisplay>}
         </div>
     </div>
   );

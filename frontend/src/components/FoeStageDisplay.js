@@ -19,28 +19,18 @@ function FoeStageDisplay(props){
     return totalBP;
   }
   const RenderActiveCards = props.currentStage.activeCards?.map((card) => (
-    <Card cardId={card.cardID} key={card.cardID} cardImage={card.imgsrc}></Card>
+    <Card cardId={card.cardID} key={card.cardID} cardImage={card.imgSrc}></Card>
 ));
   const RenderPlayerCurrentBP = hands?.map((hand) => (
     (props.activePlayers.includes(hand.name)) ? (
       <h4 style={{textAlign: "left"}}>{hand.name} Current BP: {getBP(hand.name)}</h4>
     ):(<></>)
   ));
-    let x = 0;
-    for(let i = 0; i < props.currentStage.activeCards?.length; i++){
-      x += props.currentStage.activeCards[i].battlePoints;
-    }
-    let y = 0;
-    if(props.currentStage.stageCard.isBoosted){
-      y= props.currentStage.stageCard.boostedBpValue;
-    }else{
-      y = props.currentStage.stageCard.bpValue;
-    }
-    const totalBP = y + x;
+    const totalBP = props.currentStage.battlePoints;
   return (
     <div>
       <div style={{position: "absolute", left:1300, top:283}}>
-        <BigCard cardId={props.currentStage.stageCard.cardID} key={props.currentStage.stageCard.cardID} cardImage={props.currentStage.stageCard.imgsrc}></BigCard>
+        {(props.currentStage.stageCard != null) && <BigCard cardId={props.currentStage.stageCard.cardID} key={props.currentStage.stageCard.cardID} cardImage={props.currentStage.stageCard.imgSrc}></BigCard>}
       </div>
       <div style={{position: "absolute", left:1397, top:397}}>
         {RenderActiveCards}
@@ -49,9 +39,9 @@ function FoeStageDisplay(props){
         <h4 style={{color: "white"}}>Total Battle Points: {totalBP}</h4>
       </div>
       <div style={{position: "absolute", left:1450, top:335}}>
-        {props.currentStage.stageCard.isBoosted && (
+        {/* {props.currentStage.stageCard.isBoosted && (
           <h4 style={{color: "white"}}>Foe is Boosted</h4>
-        )}
+        )} */}
       </div>
       <div style={{position: "absolute", left:1340, top:480}}>
         {RenderPlayerCurrentBP}

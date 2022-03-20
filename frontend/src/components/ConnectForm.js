@@ -13,6 +13,7 @@ import {
   useUpdatePlayer,
   useSetTurn,
   useSetSponsorRequest,
+  useSetIsSponsoring,
 } from "../Stores/GeneralStore";
 import {
   useUpdateStageArea,
