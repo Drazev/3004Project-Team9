@@ -75,9 +75,11 @@ public class OutboundService implements ApplicationContextAware {
         messenger.convertAndSendToUser(sessionService.getPlayerSessionId(player), topic, payload);
     }
 
-    public void broadcastPlayAreaChanged(Players player, PlayAreaData data) {
+    public void broadcastPlayAreaChanged(Players player, PlayAreaData toPlayer,PlayAreaData toOthers) {
         LOG.info(String.format("Broadcasting \"play-area-changed\", Source: %s, ID: %d",player.getName(),player.getPlayerId()));
-        this.sendToAllPlayers("/topic/play-areas/play-area-changed",data);
+        final String topic = "/topic/play-areas/play-area-changed";
+        this.sendToPlayer(topic,player,toPlayer);
+        this.sendToAllExceptPlayer(topic,toOthers,player);
     }
 
     public void broadcastHandOversize(Players player, HandOversizeData data) {

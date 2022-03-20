@@ -106,6 +106,9 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         targetPlayArea=null;
         isSponsorMode=false;
         isPlayersTurn=isTurn;
+        if(!isPlayersTurn) {
+            faceDownCards.clear();
+        }
     }
 
     /**
@@ -140,17 +143,46 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
     }
 
     public PlayAreaData getPlayAreaData() {
-        HashSet<CardTypes> allowedTypes = new HashSet<>();
-        allowedTypes.add(CardTypes.ALLY);
-        allowedTypes.add(CardTypes.WEAPON);
-        allowedTypes.add(CardTypes.AMOUR);
         PlayAreaData data = new PlayAreaData(
                 PlayAreaDataSources.PLAYER,
                 id,
                 bids,
                 battlePoints,
-                allowedTypes,
                 getCardData()
+        );
+        return data;
+    }
+
+    public PlayAreaData getObfuscatedPlayAreaData() {
+        ArrayList<CardData> cardData = new ArrayList<>();
+        HashSet<Long> faceDownCardIds = new HashSet<>();
+        for(Cards card : allCards.values()) {
+            if(faceDownCards.contains(card)) {
+                cardData.add(card.generateObfuscatedCardData());
+                faceDownCardIds.add(card.getCardID());
+            }
+            else {
+                cardData.add(card.generateCardData());
+            }
+        }
+        int lessHiddenBP=0;
+        int lessHiddenBids=0;
+        for(BattlePointContributor c : cardsWithBattleValue) {
+            if(faceDownCardIds.contains(c.getCardID())) {
+                lessHiddenBP+=c.getBattlePoints();
+            }
+        }
+        for(BidContributor c : cardsWithBidValue) {
+            if(faceDownCardIds.contains(c.getCardID())) {
+                lessHiddenBids+=c.getBids();
+            }
+        }
+        PlayAreaData data = new PlayAreaData(
+                PlayAreaDataSources.PLAYER,
+                id,
+                bids-lessHiddenBids,
+                battlePoints-lessHiddenBP,
+                cardData
         );
         return data;
     }
@@ -589,6 +621,6 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
      * Updates the clients about a play area being changed, sending the new state.
      */
     private void notifyPlayAreaChanged() {
-        OutboundService.getService().broadcastPlayAreaChanged(player,getPlayAreaData());
+        OutboundService.getService().broadcastPlayAreaChanged(player,getPlayAreaData(),getObfuscatedPlayAreaData());
     }
 }

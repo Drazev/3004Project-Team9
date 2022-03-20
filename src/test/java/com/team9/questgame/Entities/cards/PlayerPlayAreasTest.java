@@ -72,7 +72,7 @@ class PlayerPlayAreasTest {
             hands.add(players.get(i).getHand());
             pPlayAreas.add(players.get(i).getPlayArea());
         }
-        players.addAll(session.getPlayerMap().values());
+//        players.addAll(session.getPlayerMap().values());
         objMap.setVisibility(objMap.getSerializationConfig().getDefaultVisibilityChecker()
                 .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
                 .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
@@ -349,6 +349,26 @@ class PlayerPlayAreasTest {
 
     @Test
     void getPlayAreaData() throws JsonProcessingException {
+        setupPlayerPlayAreasToPlayCards();
+        int i=0;
+        boolean isReset=false;
+        for(Hand h : hands) {
+            HashSet<AllCardCodes> uniqueCardCodes = new HashSet<>();
+            for(CardData card : h.generateCardData()) {
+                if(!uniqueCardCodes.contains(card.cardCode())) {
+                    if(!isReset && i>1) { //first two cards will not be hidden
+                        pPlayAreas.get(0).setPlayerTurn(false);
+                        pPlayAreas.get(0).setPlayerTurn(true);
+                        isReset=true;
+                    }
+                    if(h.playCard(card.cardID())) {
+                        ++i;
+                    }
+                    uniqueCardCodes.add(card.cardCode());
+                }
+            }
+        }
+        LOG.info(objMap.writerWithDefaultPrettyPrinter().writeValueAsString(pPlayAreas.get(0).getObfuscatedPlayAreaData()));
         LOG.info(objMap.writerWithDefaultPrettyPrinter().writeValueAsString(pPlayAreas.get(0).getPlayAreaData()));
     }
 
