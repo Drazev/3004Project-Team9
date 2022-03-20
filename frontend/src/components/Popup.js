@@ -22,7 +22,6 @@ const Popup = props => {
   const handleNo = () => {
     if (props.popupType === "JOINQUEST") {
       joinRespond(name, false)
-      
     } else if (props.popupType === "SPONSORQUEST") {
       sponsorRespond(name, false);
     } else if (props.popupType === "HANDOVERFLOW") {

@@ -30,10 +30,10 @@ function GameBoard(props) {
 
     const [popup, setPopup] = useState(true);
 
-    const togglePopup = () => {
-        setPopup(!popup);
-        console.log("trigger popup: " + popup);
-    }
+    // const togglePopup = () => {
+    //     setPopup(!popup);
+    //     console.log("trigger popup: " + popup);
+    // }
 
     // useEffect(() => {
     //     setPopupType("SPONSORQUEST")
@@ -149,7 +149,7 @@ function GameBoard(props) {
                     </Button>
                 </div>)
             }
-            { (joinRequest && name !== sponsorRequest) && 
+            { (popup && joinRequest && name !== sponsorRequest) && 
                 <div>
                     <Popup popupType="JOINQUEST" setPopup={setPopup}></Popup>
                 </div>
