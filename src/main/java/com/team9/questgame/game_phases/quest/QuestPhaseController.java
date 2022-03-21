@@ -405,6 +405,9 @@ public class QuestPhaseController implements GamePhaseControllers {
         }
         this.questCard.discardCard();
         this.questCard = null;
+        for(StagePlayAreas stage : stages){
+            stage.onGameReset();
+        }
         this.stages.clear();
         stateMachine.setPhaseReset(true);
         stateMachine.update();
