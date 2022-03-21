@@ -316,7 +316,7 @@ public class QuestPhaseController implements GamePhaseControllers {
         for(Players player : playerTurnService.getPlayers()){
             player.getPlayArea().setPlayerTurn(questingPlayers.contains(player));
         }
-        outboundService.broadcastFoeStageStart(new RemainingQuestorsOutbound(generateQuestorData()));
+        outboundService.broadcastFoeStageStart(new RemainingQuestorsOutbound(generateQuestorData(), curStageIndex));
     }
 
     /**
@@ -353,7 +353,7 @@ public class QuestPhaseController implements GamePhaseControllers {
             player.getPlayArea().discardAllWeapons();
         }
 
-        outboundService.broadcastStageResult(new RemainingQuestorsOutbound(generateQuestorData()));
+        outboundService.broadcastStageResult(new RemainingQuestorsOutbound(generateQuestorData(), curStageIndex));
 
         participantSetupResponses=0;
         curStageIndex++;

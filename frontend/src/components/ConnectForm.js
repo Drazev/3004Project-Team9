@@ -17,7 +17,13 @@ import {
   useSetJoinRequest,
   useSetHandOversize,
   useSetActivePlayers,
-  useSetFoeStageStart
+  useSetFoeStageStart,
+  useSetStoryCard,
+  useSetNotifyStageStart,
+  useSetNotifyStageEnd,
+  useSetNotifyQuestEnd,
+  useSetNotifyHandOversize,
+  useSetNotifyHandNotOversize
 } from "../Stores/GeneralStore";
 import {
   useUpdateStageArea,
@@ -41,6 +47,12 @@ const ConnectForm = () => {
   const setHandOversize = useSetHandOversize();
   const setActivePlayers = useSetActivePlayers();
   const setFoeStageStart = useSetFoeStageStart();
+  const setStoryCard = useSetStoryCard();
+  const setNotifyStageStart = useSetNotifyStageStart();
+  const setNotifyStageEnd = useSetNotifyStageEnd();
+  const setNotifyQuestEnd = useSetNotifyQuestEnd();
+  const setNotifyHandOversize = useSetNotifyHandOversize();
+  const setNotifyHandNotOversize = useSetNotifyHandNotOversize();
 
   const connectFunctions = {
     name,
@@ -57,7 +69,13 @@ const ConnectForm = () => {
     setJoinRequest,
     setHandOversize,
     setActivePlayers,
-    setFoeStageStart
+    setFoeStageStart,
+    setStoryCard,
+    setNotifyStageStart,
+    setNotifyStageEnd,
+    setNotifyQuestEnd,
+    setNotifyHandOversize,
+    setNotifyHandNotOversize,
   }
 
   const setName = useSetName();

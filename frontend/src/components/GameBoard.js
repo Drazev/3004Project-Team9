@@ -4,7 +4,7 @@ import CardImages from "../Images/index";
 import Popup from "./Popup";
 import Card from "./Card";
 import { drawCard, sponsorRespond, setupComplete, participantSetupComplete } from "../ClientSocket";
-import { useName, usePlayerHands, usePlayers, useTurn, useSponsorRequest, useActivePlayers, useSetPopupType, usePopupType, useIsSponsoring, useSetIsSponsoring, useJoinRequest, useSetJoinRequest, useFoeStageStart } from "../Stores/GeneralStore";
+import { useName, usePlayerHands, usePlayers, useTurn, useSponsorRequest, useActivePlayers, useSetPopupType, usePopupType, useIsSponsoring, useSetIsSponsoring, useJoinRequest, useSetJoinRequest, useFoeStageStart, useStoryCard, useHandOversize, useSetFoeStageStart, useNotifyStageStart, useNotifyStageEnd, useNotifyQuestEnd, useSetNotifyStageStart, useSetNotifyStageEnd, useSetNotifyQuestEnd, useNotifyHandOversize, useSetNotifyHandOversize, useNotifyHandNotOversize, useSetNotifyHandNotOversize} from "../Stores/GeneralStore";
 import { useUpdatePlayArea, usePlayerPlayAreas, useStageAreas } from "../Stores/PlayAreaStore";
 import { Button } from "react-bootstrap";
 import React, { useState, useEffect } from "react";
@@ -28,7 +28,25 @@ function GameBoard(props) {
     const activePlayers = useActivePlayers();
     console.log("Active Players are: " + JSON.stringify(activePlayers));
     const [popup, setPopup] = useState(true);
-    const foeStageStart = useFoeStageStart();
+    const [foeStageStartPopup, setFoeStageStartPopup] = useState(true);
+    // const [popup, setPopup] = useState(true);
+    const [foeStageStart, setFoeStageStart] = [useFoeStageStart(), useSetFoeStageStart()];
+    const storyCard = useStoryCard();
+    // const handOversize = useHandOversize();
+    const [notifyStageStart, setNotifyStageStart] = [useNotifyStageStart(), useSetNotifyStageStart()];
+    const [notifyStageEnd, setNotifyStageEnd] = [useNotifyStageEnd(), useSetNotifyStageEnd()];
+    const [notifyQuestEnd, setNotifyQuestEnd] = [useNotifyQuestEnd(), useSetNotifyQuestEnd()];
+    const [notifyHandOversize, setNotifyHandOversize] = [useNotifyHandOversize(), useSetNotifyHandOversize()];
+    const [notifyHandNotOverSize, setNotifyHandNotOversize] = [useNotifyHandNotOversize(), useSetNotifyHandNotOversize()];
+
+    // useEffect(() => {
+        // if (handOversize) {
+        //     setPopup(true);
+        // }
+        // if (foeStageStart) {
+        //     setFoeStageStartPopup(true);
+        // }
+    // }, [handOversize, foeStageStart])
 
     // const togglePopup = () => {
     //     setPopup(!popup);
@@ -75,6 +93,8 @@ function GameBoard(props) {
 
     return (
         <div id="GameBoard">
+            { storyCard && <img src={storyCard.imgSrc} alt="Story Card"/> }
+
             <div id="allHands">
                 <PlayerHand
                     playerName={hands[0].playerName}
@@ -178,6 +198,32 @@ function GameBoard(props) {
                     </Button>
                 </div>)
             }
+            {(notifyStageStart) &&
+                <div id="foe-stage-start-popup">
+                    <Popup popupType="FOESTAGESTART" setPopup={setNotifyStageStart}></Popup>
+                </div>
+            }
+            {(notifyStageEnd) &&
+                <div id="foe-stage-end-popup">
+                    <Popup popupType="FOESTAGEEND" setPopup={setNotifyStageEnd}></Popup>
+                </div>
+            }
+            {(notifyQuestEnd) &&
+                <div id="quest-end-popup">
+                    <Popup popupType="QUESTEND" setPopup={setNotifyQuestEnd}></Popup>
+                </div>
+            }
+            {(notifyHandOversize) &&
+                <div id="hand-oversize-popup">
+                    <Popup popupType="HANDOVERSIZE" setPopup={setNotifyHandOversize}></Popup>
+                </div>
+            }
+            {(notifyHandNotOverSize) &&
+                <div id="hand-not-oversize-popup">
+                    <Popup popupType="HANDNOTOVERSIZE" setPopup={setNotifyHandNotOversize}></Popup>
+                </div>
+            }
+
         </div>
     );
 }

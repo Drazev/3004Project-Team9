@@ -46,9 +46,33 @@ const Popup = props => {
                 <Button onClick={handleNo} style={{backgroundColor: "red", marginLeft: "10px"}}>Nay</Button>
             </div>
           }
-          {props.popupType === "HANDOVERFLOW" && 
+          {props.popupType === "HANDOVERSIZE" && 
             <div>
                 <h4>You have too many cards in your hand!</h4>
+                <Button onClick={handleYes} style={{backgroundColor: "green", marginRight: "10px"}}>Okay!</Button>
+            </div>
+          }
+          {props.popupType === "HANDNOTOVERSIZE" && 
+            <div>
+                <h4>Your hand is not oversized anymore, you can continue!</h4>
+                <Button onClick={handleYes} style={{backgroundColor: "green", marginRight: "10px"}}>Okay!</Button>
+            </div>
+          }
+          {props.popupType === "FOESTAGESTART" && 
+            <div>
+                <h4>Foe stage started!</h4>
+                <Button onClick={handleYes} style={{backgroundColor: "green", marginRight: "10px"}}>Okay!</Button>
+            </div>
+          }
+          {props.popupType === "FOESTAGEEND" && 
+            <div>
+                <h4>Foe stage ended!</h4>
+                <Button onClick={handleYes} style={{backgroundColor: "green", marginRight: "10px"}}>Okay!</Button>
+            </div>
+          }
+          {props.popupType === "QUESTEND" && 
+            <div>
+                <h4>Quest ended!</h4>
                 <Button onClick={handleYes} style={{backgroundColor: "green", marginRight: "10px"}}>Okay!</Button>
             </div>
           }

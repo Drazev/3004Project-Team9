@@ -82,6 +82,15 @@ export async function connect(connectFunctions) {
       connectFunctions.setTurn(body.name);
     });
 
+    client.subscribe("/topic/general/player-draw-card", (message) => {
+      /**
+       * Server informs about the drawn story card
+       */
+      let body = JSON.parse(message.body)
+      console.log("Received from /topic/general/player-draw-card:")
+      console.log(body)
+      connectFunctions.setStoryCard(body);
+    });
 
     client.subscribe("/topic/player/hand-oversize" , (message) => {
       /**
@@ -90,20 +99,19 @@ export async function connect(connectFunctions) {
        * the card(s) until their hand has <= 12 cards to proceed
        */
       let body = JSON.parse(message.body);
-      connectFunctions.setHandOversize(true);
       console.log("Player Hand Oversize: ");
       console.log(body);
-      
+      connectFunctions.setHandOversize(true);
+      connectFunctions.setNotifyHandOversize(true);
     });
 
     client.subscribe("/topic/player/hand-not-oversize", (message) => {
       /**
-       * Server informs that one player has oversized hand (more than 12 cards)
-       * All activity in the game is blocked, this player must discard or play 
-       * the card(s) until their hand has <= 12 cards to proceed
+       * Server informs that no player has oversized hand (more than 12 cards)
        */
       let body = JSON.parse(message.body);
       connectFunctions.setHandOversize(false);
+      connectFunctions.setNotifyHandNotOversize(true);
       console.log("Player Hand Not Oversize: ");
       console.log(body);
     })
@@ -131,8 +139,22 @@ export async function connect(connectFunctions) {
     client.subscribe("/topic/quest/foe-stage-start", (players) => {
       console.log("Active players: " + players);
       connectFunctions.setActivePlayers(players);
+      connectFunctions.setFoeStageStart(true);
+      connectFunctions.setNotifyStageStart(true);
     });
 
+    client.subscribe("/topic/quest/stage-end", (players) => {
+      console.log("Stage ended: " + players);
+      connectFunctions.setActivePlayers(players);
+      connectFunctions.setFoeStageStart(false);
+      connectFunctions.setNotifyStageEnd(true);
+    });
+
+    client.subscribe("/topic/quest/end", (players) => {
+      console.log("Quest ended: " + players);
+      connectFunctions.setFoeStageStart(false);
+      connectFunctions.setNotifyQuestEnd(true);
+    });
 
     client.subscribe("/user/topic/play-areas/play-area-changed", (data) => {
       /**
@@ -151,6 +173,7 @@ export async function connect(connectFunctions) {
       console.log("Stage Area Update recieved: " + JSON.stringify(body));
       connectFunctions.updateStageArea(body);
     });
+
 
 
     client.subscribe("/topic/quest/sponsor-search", (message) => {
@@ -174,10 +197,6 @@ export async function connect(connectFunctions) {
       connectFunctions.setJoinRequest(true);
     });
 
-    client.subscribe("/topic/quest/foe-stage-start", (message) => {
-      console.log("/topic/quest/foe-stage-start: " + message);
-      connectFunctions.setFoeStageStart(true);
-    });
   };
 
   client.onDisconnect = () => {
