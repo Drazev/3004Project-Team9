@@ -1,7 +1,6 @@
 package com.team9.questgame.Entities.cards;
 
 import com.fasterxml.jackson.annotation.*;
-import com.team9.questgame.ApplicationContextHolder;
 import com.team9.questgame.Data.CardData;
 import com.team9.questgame.Data.PlayAreaData;
 import com.team9.questgame.Data.PlayAreaDataSources;
@@ -10,7 +9,6 @@ import com.team9.questgame.exception.IllegalEffectStateException;
 import com.team9.questgame.exception.CardAreaException;
 import com.team9.questgame.exception.IllegalGamePhaseStateException;
 import com.team9.questgame.game_phases.GamePhaseControllers;
-import com.team9.questgame.game_phases.GamePhases;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -19,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 import static com.team9.questgame.exception.CardAreaException.CardAreaExceptionReasonCodes.GAMEPHASE_NOT_REGISTERED;
+import static com.team9.questgame.exception.CardAreaException.CardAreaExceptionReasonCodes.STAGE_PLAY_AREA_NOT_SET;
 import static com.team9.questgame.exception.IllegalGamePhaseStateException.GamePhaseExceptionReasonCodes.NULL_ACTIVE_PHASE;
 
 @JsonIdentityInfo(
@@ -39,12 +38,12 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
     private PlayAreas targetPlayArea;
     private int bids;
     private int battlePoints;
+    private boolean isSponsorMode;
     private HashMap<CardTypes, HashSet<AdventureCards>> cardTypeMap;
     private HashMap<AllCardCodes,AdventureCards> allCards;
     @Getter
-    private QuestCards questCard;
-    private HashSet<CardTypes> playableCardTypes;
-    private boolean hidePlayedCards;
+    private StoryCards questCard;
+    private boolean isPlayersTurn;
 
     //Managed by Registration methods and triggered by cards
     private HashMap<AllCardCodes,HashSet<BoostableCard>> cardBoostDependencies;
@@ -62,7 +61,6 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         cardTypeMap = new HashMap<>();
         allCards = new HashMap<>();
         questCard=null;
-        playableCardTypes = new HashSet<>();
         cardBoostDependencies = new HashMap<>();
         cardsWithActiveEffects = new HashSet<>();
         phaseController = null;
@@ -71,7 +69,8 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         boostableCards = new HashSet<>();
         faceDownCards = new HashSet<>();
         targetPlayArea=null;
-        hidePlayedCards=false;
+        isPlayersTurn =false;
+        isSponsorMode=false;
         bids=0;
         battlePoints=0;
         LOG = LoggerFactory.getLogger(PlayerPlayAreas.class);
@@ -92,7 +91,38 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
     }
 
     public boolean isPlayersTurn() {
-        return !playableCardTypes.isEmpty();
+        return isPlayersTurn;
+    }
+
+    public long getPlayAreaId() {
+        return id;
+    }
+
+    public void setPlayerTurn(boolean isTurn) {
+        if(phaseController==null) {
+            throw new CardAreaException(GAMEPHASE_NOT_REGISTERED);
+        }
+        //If this is called, then the sponsor phase is over and cards should only be played into players play area
+        targetPlayArea=null;
+        isSponsorMode=false;
+        isPlayersTurn=isTurn;
+        if(!isPlayersTurn) {
+            faceDownCards.clear();
+        }
+    }
+
+    /**
+     * Sets PlayerPlayArea to sponsor mode.
+     * All Weapon, Foe, and Test cards are directed to the target
+     * play area which must be set through the onStageChanged function.
+     * @param isInSponsorMode The new sponsor mode status
+     */
+    public void setSponsorMode(boolean isInSponsorMode) {
+        if(phaseController==null) {
+            throw new CardAreaException(GAMEPHASE_NOT_REGISTERED);
+        }
+        this.isSponsorMode=isInSponsorMode;
+        this.isPlayersTurn=false;
     }
 
     /**
@@ -102,28 +132,52 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
     public ArrayList<CardData> getCardData() {
         ArrayList<CardData> handCards = new ArrayList<>();
         for(Cards card : allCards.values()) {
-            if(faceDownCards.contains(card)) {
-                handCards.add(card.generateObfuscatedCardData());
-            }
-            else {
-                handCards.add(card.generateCardData());
-            }
+            handCards.add(card.generateCardData());
         }
         return handCards;
     }
 
     public PlayAreaData getPlayAreaData() {
-        HashSet<CardTypes> allowedTypes = new HashSet<>();
-        allowedTypes.add(CardTypes.ALLY);
-        allowedTypes.add(CardTypes.WEAPON);
-        allowedTypes.add(CardTypes.AMOUR);
         PlayAreaData data = new PlayAreaData(
                 PlayAreaDataSources.PLAYER,
                 id,
                 bids,
                 battlePoints,
-                allowedTypes,
                 getCardData()
+        );
+        return data;
+    }
+
+    public PlayAreaData getObfuscatedPlayAreaData() {
+        ArrayList<CardData> cardData = new ArrayList<>();
+        HashSet<Long> faceDownCardIds = new HashSet<>();
+        for(Cards card : allCards.values()) {
+            if(faceDownCards.contains(card)) {
+                cardData.add(card.generateObfuscatedCardData());
+                faceDownCardIds.add(card.getCardID());
+            }
+            else {
+                cardData.add(card.generateCardData());
+            }
+        }
+        int lessHiddenBP=0;
+        int lessHiddenBids=0;
+        for(BattlePointContributor c : cardsWithBattleValue) {
+            if(faceDownCardIds.contains(c.getCardID())) {
+                lessHiddenBP+=c.getBattlePoints();
+            }
+        }
+        for(BidContributor c : cardsWithBidValue) {
+            if(faceDownCardIds.contains(c.getCardID())) {
+                lessHiddenBids+=c.getBids();
+            }
+        }
+        PlayAreaData data = new PlayAreaData(
+                PlayAreaDataSources.PLAYER,
+                id,
+                bids-lessHiddenBids,
+                battlePoints-lessHiddenBP,
+                cardData
         );
         return data;
     }
@@ -183,22 +237,35 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         if(card==null) {
             throw new CardAreaException(CardAreaException.CardAreaExceptionReasonCodes.NULL_CARD);
         }
+        boolean rc = false;
 
-        if(!playableCardTypes.contains(card.getSubType())) {
-            //RULE: If hand is oversize the player can discard a card or play Ally card
-            if( !( card.getSubType()==CardTypes.ALLY && player.getHand().isHandOversize() ) ) {
-                throw new CardAreaException("Card {"+card.getCardCode()+","+card.getSubType()+"} cannot be played at this time.", CardAreaException.CardAreaExceptionReasonCodes.RULE_VIOLATION_CANNOT_PLAY_OR_DISCARD_OUT_OF_TURN);
-            }
+        switch(card.getSubType()) {
+            case FOE:
+            case TEST:
+            case WEAPON:
+                if(isSponsorMode) {
+                    if(targetPlayArea==null) {
+                        rc=false;
+                        throw new CardAreaException("A FOE or TEST card was played, but targetPlayArea was null. When FOE and TEST cards are allowed the targetPlayArea should never be null!",CardAreaException.CardAreaExceptionReasonCodes.UNEXPECTED_STATE);
+                    }
+                    else {
+                        rc=card.playCard(targetPlayArea);
+                        break;
+                    }
+                } //This should flow through to default and check non-sponsor play conditions
+            default:
+                if(isPlayersTurn) {
+                    rc = addToPlayArea(card);
+                }
+                else if(player.getHand().isHandOversize() && card.getSubType()==CardTypes.ALLY) {
+                    rc = addToPlayArea(card); //Player's can play allies instead of discarding if hand oversized
+                }
+                else {
+                    return false; //Not your turn. Go fly a kite!
+                }
         }
 
-        if(card.getSubType()==CardTypes.FOE || card.getSubType()==CardTypes.TEST || card.getSubType()==CardTypes.WEAPON) {
-            if(targetPlayArea==null) {
-                throw new CardAreaException("A FOE or TEST card was played, but targetPlayArea was null. When FOE and TEST cards are allowed the targetPlayArea should never be null!",CardAreaException.CardAreaExceptionReasonCodes.UNEXPECTED_STATE);
-            }
-            return playCard(card);
-        }
-
-        return addToPlayArea(card);
+        return rc;
     }
 
 
@@ -324,6 +391,66 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
        return false;
     }
 
+
+    @Override
+    public void registerBoostableCard(BoostableCard card) {
+        boostableCards.add(card);
+    }
+
+    /**
+     * Can be called to return the player play area so a new game can be played
+     */
+    @Override
+    public void onGameReset() {
+        cardTypeMap.clear();
+        allCards.clear();
+        cardBoostDependencies.clear();
+        cardsWithActiveEffects.clear();
+        phaseController = null;
+        cardsWithBattleValue.clear();
+        cardsWithBidValue.clear();
+        boostableCards.clear();
+        faceDownCards.clear();
+        isPlayersTurn =false;
+        bids=0;
+        battlePoints=0;
+        questCard=null;
+        targetPlayArea=null;
+        isSponsorMode=false;
+        update();
+    }
+
+    /**
+     * Called by the Game Phase controller to declare the active game phase a quest phase.
+     * This will trigger boost conditions on cards that are quest boosted.
+     *
+     * It is cleared when onGamePhaseEnded() is called
+     * @param questCard
+     */
+    public void onQuestStarted(StoryCards questCard) {
+        if(phaseController==null) {
+            throw new CardAreaException(GAMEPHASE_NOT_REGISTERED);
+        }
+
+        this.questCard=questCard;
+
+        //Find any cards that are boosted by quest and set boost
+        if(cardBoostDependencies.containsKey(questCard.getCardCode())) {
+            for(BoostableCard boostCard : cardBoostDependencies.get(questCard.getCardCode())) {
+                boostCard.setBoosted(true);
+            }
+        }
+        isPlayersTurn =false;
+        isSponsorMode=false;
+    }
+
+    public void onStageChanged(PlayAreas targetStage) {
+        if(phaseController==null) {
+            throw new CardAreaException(GAMEPHASE_NOT_REGISTERED);
+        }
+        this.targetPlayArea = targetStage;
+    }
+
     /**
      * To be called by Game Phase Controllers when a game phase ends.
      * This will clear Game Phase properties and enable restrictions on
@@ -345,82 +472,10 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
         questCard=null;
         discardAllAmour();
         discardAllWeapons();
-        playableCardTypes.clear();
         faceDownCards.clear();
-        hidePlayedCards=false;
+        isPlayersTurn =false;
+        isSponsorMode=false;
         update();
-    }
-
-    @Override
-    public void registerBoostableCard(BoostableCard card) {
-        boostableCards.add(card);
-    }
-
-    /**
-     * Can be called to return the player play area so a new game can be played
-     */
-    @Override
-    public void onGameReset() {
-        cardTypeMap.clear();
-        allCards.clear();
-        cardBoostDependencies.clear();
-        cardsWithActiveEffects.clear();
-        phaseController = null;
-        cardsWithBattleValue.clear();
-        cardsWithBidValue.clear();
-        boostableCards.clear();
-        faceDownCards.clear();
-        hidePlayedCards=false;
-        bids=0;
-        battlePoints=0;
-        questCard=null;
-        targetPlayArea=null;
-        playableCardTypes.clear();
-        update();
-    }
-
-    /**
-     * This is to be called by Game Phase controllers in order to enable players
-     * to play cards into a stage PlayArea. This is generally only active for the quest sponsor.
-     * @param targetPlayArea An active play area representing a game stage for a game phase
-     */
-    public void onPlayAreaChanged(PlayAreas targetPlayArea) {
-        if(phaseController==null) {
-            throw new CardAreaException(GAMEPHASE_NOT_REGISTERED);
-        }
-
-        this.targetPlayArea=targetPlayArea;
-        if(targetPlayArea!=null) {
-            playableCardTypes.add(CardTypes.FOE);
-            playableCardTypes.add(CardTypes.TEST);
-        }
-        else {
-            playableCardTypes.remove(CardTypes.FOE);
-            playableCardTypes.remove(CardTypes.TEST);
-        }
-    }
-
-    /**
-     * Called by the Game Phase controller to declare the active game phase a quest phase.
-     * This will trigger boost conditions on cards that are quest boosted.
-     *
-     * It is cleared when onGamePhaseEnded() is called
-     * @param questCard
-     */
-    public void onQuestStarted(QuestCards questCard) {
-        if(phaseController==null) {
-            throw new CardAreaException(GAMEPHASE_NOT_REGISTERED);
-        }
-
-        this.questCard=questCard;
-
-        //Find any cards that are boosted by quest and set boost
-        if(cardBoostDependencies.containsKey(questCard.getCardCode())) {
-            for(BoostableCard boostCard : cardBoostDependencies.get(questCard.getCardCode())) {
-                boostCard.setBoosted(true);
-            }
-        }
-        hidePlayedCards=false;
     }
 
     /**
@@ -526,7 +581,13 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
             LOG.error("RULE: Player "+player.getName()+" cannot have more than two cards of the same type in play.");
             throw new CardAreaException(CardAreaException.CardAreaExceptionReasonCodes.RULE_CANNOT_HAVE_TWO_OF_SAME_CARD_IN_PLAY);
         }
-        if(hidePlayedCards) {
+
+        if(card.getSubType() == CardTypes.FOE || card.getSubType() == CardTypes.TEST) {
+            LOG.info("Player attempted to play an invalid card type "+card.getSubType()+" from card "+card.getCardName());
+            return false;
+        }
+
+        if(isPlayersTurn) {
             faceDownCards.add(card);
         }
         allCards.put(card.getCardCode(),card);
@@ -555,33 +616,6 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
      * Updates the clients about a play area being changed, sending the new state.
      */
     private void notifyPlayAreaChanged() {
-        OutboundService.getService().broadcastPlayAreaChanged(player,getPlayAreaData());
-    }
-
-    /**
-     * Used by the Game Phase Controller to signify a players turn. If the PlayerPlayArea's player
-     * matches the current player then some card types are enabled. Otherwise those card types are disabled.
-     *
-     * RULE: Players must only play cards on their turn unless the hand is oversize, and they are forced to play an Ally card.
-     * @param player The player whom has the active turn
-     */
-    public void onPhaseNextPlayerTurn(Players player) {
-        if(phaseController==null) {
-            throw new CardAreaException(GAMEPHASE_NOT_REGISTERED);
-        }
-
-        if(player == this.player && phaseController!=null) {
-            hidePlayedCards=true;
-            playableCardTypes.add(CardTypes.ALLY);
-            playableCardTypes.add(CardTypes.WEAPON);
-            playableCardTypes.add(CardTypes.AMOUR);
-        }
-        else {
-            playableCardTypes.remove(CardTypes.ALLY);
-            playableCardTypes.remove(CardTypes.WEAPON);
-            playableCardTypes.remove(CardTypes.AMOUR);
-            hidePlayedCards=false;
-            faceDownCards.clear();
-        }
+        OutboundService.getService().broadcastPlayAreaChanged(player,getPlayAreaData(),getObfuscatedPlayAreaData());
     }
 }

@@ -22,9 +22,7 @@ function FoeStageDisplay(props){
     <Card cardId={card.cardID} key={card.cardID} cardImage={card.imgSrc}></Card>
 ));
   const RenderPlayerCurrentBP = hands?.map((hand) => (
-    (props.activePlayers.includes(hand.name)) ? (
-      <h4 style={{textAlign: "left"}}>{hand.name} Current BP: {getBP(hand.name)}</h4>
-    ):(<></>)
+    (props.activePlayers.includes(hand.name)) && <h4 key={hand.name} style={{textAlign: "left"}}>{hand.name} Current BP: {getBP(hand.name)}</h4>
   ));
     const totalBP = props.currentStage.battlePoints;
   return (

@@ -4,6 +4,7 @@ import com.team9.questgame.ApplicationContextHolder;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 
@@ -42,6 +43,18 @@ public class PlayerTurnService {
             throw new RuntimeException("No player found");
         }
         currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
+
+        notifyTurnChange();
+    }
+
+    public void nextPlayerExcept(Players p) {
+        // TODO: Make test case for this
+        if (players.size() == 0) {
+            throw new RuntimeException("No player found");
+        }
+        do {
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
+        } while (getPlayerTurn().getPlayerId() == p.getPlayerId());
 
         notifyTurnChange();
     }

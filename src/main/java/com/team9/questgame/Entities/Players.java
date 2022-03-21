@@ -41,7 +41,6 @@ public class Players {
     private final PlayerPlayAreas playArea;
     private String name;
     private PlayerRanks rank;
-    private int battlePoints;
     private int shields;
     private Hand hand;
 
@@ -158,9 +157,11 @@ public class Players {
 
         PlayerData data = new PlayerData(
         playerId,
+        hand.getHandId(),
+        playArea.getPlayAreaId(),
         name,
         rank,
-        battlePoints,
+        rank.getRankBattlePointValue(),
         shields
         );
         return data;
@@ -171,7 +172,6 @@ public class Players {
      */
     public void onGameReset() {
         this.rank=PlayerRanks.SQUIRE;
-        this.battlePoints=rank.getRankBattlePointValue();
         this.shields=0;
         this.hand.onGameReset();
         this.playArea.onGameReset();

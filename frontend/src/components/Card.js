@@ -1,5 +1,6 @@
 import React,{useState} from "react";
 import { useStageAreas } from "../Stores/PlayAreaStore";
+import { useIsSponsoring } from "../Stores/GeneralStore";
 import { Button, DropdownButton, Dropdown } from "react-bootstrap";
 import {discardCard, playCard} from "../ClientSocket";
 
@@ -8,14 +9,15 @@ function Card(props){
     const [isActiveSelected, setIsActiveSelected]=useState(false);
     const [isSelected, setSelected]=useState(false);
     const numStages = useStageAreas().length;
+    const isSponsoring = useIsSponsoring();
 
     //add border around card when selected
     let borderSize;
-    if(isSelected && props.selectedAllowed){
+    if (isSelected && props.selectedAllowed) {
         borderSize = "2px solid #e9eb6e";
-    }else if(props.isActive && isActiveSelected){
+    } else if (props.isActive && isActiveSelected) {
         borderSize = "2px solid red";
-    }else{
+    } else {
         borderSize = "";
     }
 
@@ -67,7 +69,7 @@ function Card(props){
                     >Discard</Button>{' '}
                 </>
             }
-            {isSelected && numStages === 0 &&
+            {isSelected && (numStages === 0 || !isSponsoring) &&
                 <Button 
                     id="PlayButton"
                     style={{
@@ -83,11 +85,13 @@ function Card(props){
                     onClick={() => playCard(props.cardOwner, props.playerID, props.card.cardID, -1, -1)}
                 >Play</Button>
             } 
-            {isSelected && numStages !== 0 &&
+            {isSelected && numStages !== 0 && isSponsoring &&
                 <DropdownButton 
                 id="dropdown-basic-button" 
                 title="Play"
                 size="10"
+                drop="up"
+                autoClose="inside"
                 variant="secondary">
                     <Dropdown.Item onClick={() => playCard(props.cardOwner, props.playerID, props.card.cardID, -1, -1)}>Your play area</Dropdown.Item>
                     {(numStages >= 1) && <Dropdown.Item onClick={() => playCard(props.cardOwner, props.playerID, props.card.cardID, -1, 0)}>Stage 1</Dropdown.Item>}

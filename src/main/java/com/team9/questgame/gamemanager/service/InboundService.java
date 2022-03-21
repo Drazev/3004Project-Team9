@@ -96,6 +96,8 @@ public class InboundService implements ApplicationContextAware {
         context = applicationContext;
     }
 
+    public void setPhaseEnded(){gameController.requestPhaseEnd();}
+
     public static InboundService getService() {
         return context.getBean(InboundService.class);
     }

@@ -1,19 +1,32 @@
 import React from "react";
 import {Button} from "react-bootstrap";
-import { sponsorRespond, } from "../ClientSocket";
-import { useName, useSetIsSponsoring } from "../Stores/GeneralStore";
+import { sponsorRespond, joinRespond } from "../ClientSocket";
+import { useName, useSetIsSponsoring, useSetJoinRequest } from "../Stores/GeneralStore";
 import "./Popup.css"
  
 const Popup = props => {
   let name = useName();
   const setIsSponsoring = useSetIsSponsoring();
+  const setJoinRequest = useSetJoinRequest();
   const handleYes = () => {
-    sponsorRespond(name, true);
+    if (props.popupType === "JOINQUEST") {
+      joinRespond(name, true)
+      setJoinRequest(false);
+    } else if (props.popupType === "SPONSORQUEST") {
+      sponsorRespond(name, true);
+      setIsSponsoring(true);
+    } else if (props.popupType === "HANDOVERFLOW") {
+    }
     props.setPopup(false);
-    setIsSponsoring(true);
   }
   const handleNo = () => {
-    sponsorRespond(name, false);
+    if (props.popupType === "JOINQUEST") {
+      joinRespond(name, false)
+    } else if (props.popupType === "SPONSORQUEST") {
+      sponsorRespond(name, false);
+    } else if (props.popupType === "HANDOVERFLOW") {
+
+    }
     props.setPopup(false);
   }
   return (
@@ -22,8 +35,8 @@ const Popup = props => {
           {props.popupType === "JOINQUEST" && 
             <div>
                 <h4>Will you join this quest?</h4>
-                <Button onClick={props.handleYes} style={{backgroundColor: "red", marginRight: "10px"}}>Aye</Button>
-                <Button onClick={props.handleNo} style={{backgroundColor: "green", marginLeft: "10px"}}>Nay</Button>
+                <Button onClick={handleYes} style={{backgroundColor: "green", marginRight: "10px"}}>Aye</Button>
+                <Button onClick={handleNo} style={{backgroundColor: "red", marginLeft: "10px"}}>Nay</Button>
             </div>
           }
           {props.popupType === "SPONSORQUEST" && 
@@ -33,10 +46,34 @@ const Popup = props => {
                 <Button onClick={handleNo} style={{backgroundColor: "red", marginLeft: "10px"}}>Nay</Button>
             </div>
           }
-          {props.popupType === "HANDOVERFLOW" && 
+          {props.popupType === "HANDOVERSIZE" && 
             <div>
                 <h4>You have too many cards in your hand!</h4>
-                <Button onClick={props.handleYes} style={{backgroundColor: "green", marginRight: "10px"}}>Okay!</Button>
+                <Button onClick={handleYes} style={{backgroundColor: "green", marginRight: "10px"}}>Okay!</Button>
+            </div>
+          }
+          {props.popupType === "HANDNOTOVERSIZE" && 
+            <div>
+                <h4>Your hand is not oversized anymore, you can continue!</h4>
+                <Button onClick={handleYes} style={{backgroundColor: "green", marginRight: "10px"}}>Okay!</Button>
+            </div>
+          }
+          {props.popupType === "FOESTAGESTART" && 
+            <div>
+                <h4>Foe stage started!</h4>
+                <Button onClick={handleYes} style={{backgroundColor: "green", marginRight: "10px"}}>Okay!</Button>
+            </div>
+          }
+          {props.popupType === "FOESTAGEEND" && 
+            <div>
+                <h4>Foe stage ended!</h4>
+                <Button onClick={handleYes} style={{backgroundColor: "green", marginRight: "10px"}}>Okay!</Button>
+            </div>
+          }
+          {props.popupType === "QUESTEND" && 
+            <div>
+                <h4>Quest ended!</h4>
+                <Button onClick={handleYes} style={{backgroundColor: "green", marginRight: "10px"}}>Okay!</Button>
             </div>
           }
       </div>

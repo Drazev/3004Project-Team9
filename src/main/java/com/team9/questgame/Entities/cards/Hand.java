@@ -64,6 +64,11 @@ public class Hand implements CardArea<AdventureCards> {
         return hand.size();
     }
 
+
+    public long getHandId() {
+        return id;
+    }
+
     public HashMap<CardTypes,HashMap<AllCardCodes,Integer>> getNumberOfEachCardCodeBySubType() {
         HashMap<CardTypes,HashMap<AllCardCodes,Integer>> cardList = new HashMap<>();
 
@@ -130,6 +135,7 @@ public class Hand implements CardArea<AdventureCards> {
         AdventureCards card = findCardFromCardId(cardId);
         discardCard(card);
     }
+
 
     @Override
     public boolean playCard(AdventureCards card) throws CardAreaException {

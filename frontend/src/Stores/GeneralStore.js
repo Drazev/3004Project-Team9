@@ -12,6 +12,16 @@ const useStore = create((set) => ({
   turn: "",
   sponsorRequest: "",
   isSponsoring: false,
+  joinRequest: false,
+  handOversize: false,
+  foeStageStart: false,
+  notifyStageStart: false,
+  notifyStageEnd: false,
+  notifyQuestEnd: false,
+  notifyHandOversize: false,
+  notifyHandNotOversize: false,
+  storyCard: null,
+  activePlayers: [],
   loadPlayers: async () => {
     await handleLoadPlayers(set);
   },
@@ -23,6 +33,16 @@ const useStore = create((set) => ({
   setSponsorRequest: (name) => set(() => ({ sponsorRequest: name })),
   setGameStarted: (gameStarted) => set(() => ({ gameStarted: gameStarted })),
   setPlayers: (players) => set(() => ({ players: players })),
+  setJoinRequest: (status) => set(() => ({joinRequest: status})),
+  setHandOversize: (status) => set(() => ({handOversize: status})),
+  setActivePlayers: (players) => set(() => ({activePlayers: players})),
+  setFoeStageStart: (status) => set(() => ({foeStageStart: status})),
+  setStoryCard: (storyCard) => set(() => ({storyCard: storyCard})),
+  setNotifyStageStart: (status) => set(() => ({notifyStageStart: status})),
+  setNotifyStageEnd: (status) => set(() => ({notifyStageEnd: status})),
+  setNotifyQuestEnd: (status) => set(() => ({notifyQuestEnd: status})),
+  setNotifyHandOversize: (status) => set(() => ({notifyHandOversize: status})),
+  setNotifyHandNotOversize: (status) => set(() => ({notifyHandNotOversize: status})),
   updatePlayer: (player) => set((current) => ({
     players: (() => {
       let playerExist = false;
@@ -92,29 +112,40 @@ export const useTurn = () => useStore((state) => state.turn);
 export const usePlayers = () => useStore((state) => state.players);
 export const useAddNewPlayer = () => useStore((state) => state.addNewPlayer);
 export const useSponsorRequest = () => useStore((state) => state.sponsorRequest);
+export const useJoinRequest = () => useStore((state) => state.joinRequest);
+export const useHandOversize = () => useStore((state) => state.handOversize);
+export const useActivePlayers = () => useStore((state) => state.activePlayers);
+export const useFoeStageStart = () => useStore((state) => state.foeStageStart);
+export const useStoryCard = () => useStore((state) => state.storyCard);
+export const useNotifyStageStart = () => useStore((state) => state.notifyStageStart);
+export const useNotifyStageEnd = () => useStore((state) => state.notifyStageEnd);
+export const useNotifyQuestEnd = () => useStore((state) => state.notifyQuestEnd);
+export const useNotifyHandOversize = () => useStore((state) => state.notifyHandOversize)
+export const useNotifyHandNotOversize = () => useStore((state) => state.notifyHandNotOversize)
 
 export const useSetConnected = () => useStore((state) => state.setConnected);
 export const useSetGameStarted = () => useStore((state) => state.setGameStarted);
 export const useSetName = () => useStore((state) => state.setName);
 export const useAddNewMessage = () => useStore((state) => state.addNewMessage);
-
 export const useUpdateHand = () => useStore((state) => state.updateHand);
-
 export const useUpdatePlayer = () => useStore((state) => state.updatePlayer);
-
 export const useSetPlayers = () => useStore((state) => state.setPlayers);
-
 export const useSetIsSponsoring = () => useStore((state) => state.setIsSponsoring);
 export const useIsSponsoring = () => useStore((state) => state.isSponsoring);
-
 export const useLoadPlayers = () => useStore((state) => state.loadPlayers);
-
 export const useSetTurn = () => useStore((state) => state.setTurn);
-
 export const useSetSponsorRequest = () => useStore((state) => state.setSponsorRequest);
-
 export const usePopupType = () => useStore((state) => state.popupType);
-
 export const useSetPopupType = () => useStore((state) => state.setPopupType);
+export const useSetJoinRequest = () => useStore((state) => state.setJoinRequest);
+export const useSetHandOversize = () => useStore((state) => state.setHandOversize);
+export const useSetActivePlayers = () => useStore((state) => state.setActivePlayers);
+export const useSetFoeStageStart= () => useStore((state) => state.setFoeStageStart);
+export const useSetStoryCard = () => useStore((state) => state.setStoryCard)
+export const useSetNotifyStageStart = () => useStore((state) => state.setNotifyStageStart);
+export const useSetNotifyStageEnd = () => useStore((state) => state.setNotifyStageEnd);
+export const useSetNotifyQuestEnd = () => useStore((state) => state.setNotifyQuestEnd);
+export const useSetNotifyHandOversize = () => useStore((state) => state.setNotifyHandOversize);
+export const useSetNotifyHandNotOversize = () => useStore((state) => state.setNotifyHandNotOversize);
 
 export default useStore;

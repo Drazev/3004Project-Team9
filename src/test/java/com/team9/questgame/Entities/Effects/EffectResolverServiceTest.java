@@ -26,7 +26,6 @@ import java.util.HashSet;
 import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -101,8 +100,8 @@ class EffectResolverServiceTest {
     void setupPlayerPlayAreasToPlayCards() {
         for(Players p : players) {
             p.getPlayArea().registerGamePhase(testPhaseController);
-            p.getPlayArea().onPlayAreaChanged(testStage);
-            p.getPlayArea().onPhaseNextPlayerTurn(p);
+            p.getPlayArea().onStageChanged(testStage);
+            p.getPlayArea().setPlayerTurn(true);
         }
     }
 

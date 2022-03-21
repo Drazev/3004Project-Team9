@@ -14,6 +14,16 @@ import {
   useSetTurn,
   useSetSponsorRequest,
   useSetIsSponsoring,
+  useSetJoinRequest,
+  useSetHandOversize,
+  useSetActivePlayers,
+  useSetFoeStageStart,
+  useSetStoryCard,
+  useSetNotifyStageStart,
+  useSetNotifyStageEnd,
+  useSetNotifyQuestEnd,
+  useSetNotifyHandOversize,
+  useSetNotifyHandNotOversize
 } from "../Stores/GeneralStore";
 import {
   useUpdateStageArea,
@@ -33,6 +43,40 @@ const ConnectForm = () => {
   const setTurn = useSetTurn();
   const notifySponsorRequest = useSetSponsorRequest();
   const updatePlayerPlayArea = useUpdatePlayerPlayArea();
+  const setJoinRequest = useSetJoinRequest();
+  const setHandOversize = useSetHandOversize();
+  const setActivePlayers = useSetActivePlayers();
+  const setFoeStageStart = useSetFoeStageStart();
+  const setStoryCard = useSetStoryCard();
+  const setNotifyStageStart = useSetNotifyStageStart();
+  const setNotifyStageEnd = useSetNotifyStageEnd();
+  const setNotifyQuestEnd = useSetNotifyQuestEnd();
+  const setNotifyHandOversize = useSetNotifyHandOversize();
+  const setNotifyHandNotOversize = useSetNotifyHandNotOversize();
+
+  const connectFunctions = {
+    name,
+    setConnected,
+    setGameStarted,
+    addNewMessage,
+    setPlayers,
+    updateHand,
+    updatePlayer,
+    setTurn,
+    notifySponsorRequest,
+    updateStageArea,
+    updatePlayerPlayArea,
+    setJoinRequest,
+    setHandOversize,
+    setActivePlayers,
+    setFoeStageStart,
+    setStoryCard,
+    setNotifyStageStart,
+    setNotifyStageEnd,
+    setNotifyQuestEnd,
+    setNotifyHandOversize,
+    setNotifyHandNotOversize,
+  }
 
   const setName = useSetName();
   // Preprocess before making connection request
@@ -42,7 +86,7 @@ const ConnectForm = () => {
       alert("Please enter your name");
       return;
     }
-    if (connect(setConnected, setGameStarted, addNewMessage, setPlayers, name, updateHand, updatePlayer, setTurn, notifySponsorRequest, updateStageArea, updatePlayerPlayArea) === false) {
+    if (connect(connectFunctions) === false) {
       alert("Name already taken, please choose a different one")
     }
   };

@@ -228,19 +228,19 @@ class QuestPhaseControllerTest {
         assertThrows(IllegalQuestPhaseStateException.class, () -> controller.endPhase());
         ArrayList<QuestCards> questCards = getQuestCards();
         controller.receiveCard(questCards.get(0));
-
+        controller.startPhase(new PlayerTurnService(players));
         controller.getStateMachine().setCurrentState(QuestPhaseStatesE.QUEST_SPONSOR);
         assertThrows(IllegalQuestPhaseStateException.class, () -> controller.endPhase());
         controller.getStateMachine().setCurrentState(QuestPhaseStatesE.QUEST_SETUP);
         assertThrows(IllegalQuestPhaseStateException.class, () -> controller.endPhase());
         controller.getStateMachine().setCurrentState(QuestPhaseStatesE.QUEST_JOIN);
         assertThrows(IllegalQuestPhaseStateException.class, () -> controller.endPhase());
-        controller.getStateMachine().setCurrentState(QuestPhaseStatesE.STAGE_ONE);
+        controller.getStateMachine().setCurrentState(QuestPhaseStatesE.IN_STAGE);
         assertThrows(IllegalQuestPhaseStateException.class, () -> controller.endPhase());
-        controller.getStateMachine().setCurrentState(QuestPhaseStatesE.STAGE_TWO);
-        assertThrows(IllegalQuestPhaseStateException.class, () -> controller.endPhase());
-        controller.getStateMachine().setCurrentState(QuestPhaseStatesE.STAGE_THREE);
-        assertThrows(IllegalQuestPhaseStateException.class, () -> controller.endPhase());
+//        controller.getStateMachine().setCurrentState(QuestPhaseStatesE.STAGE_TWO);
+//        assertThrows(IllegalQuestPhaseStateException.class, () -> controller.endPhase());
+//        controller.getStateMachine().setCurrentState(QuestPhaseStatesE.STAGE_THREE);
+//        assertThrows(IllegalQuestPhaseStateException.class, () -> controller.endPhase());
 
         // Can end in ENDED state and should result in NOT_STARTED state
         controller.getStateMachine().setCurrentState(QuestPhaseStatesE.ENDED);

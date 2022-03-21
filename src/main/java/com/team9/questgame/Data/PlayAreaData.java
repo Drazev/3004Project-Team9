@@ -10,7 +10,6 @@ public record PlayAreaData(
         long id,
         int bids,
         int battlePoints,
-        HashSet<CardTypes> acceptedCardTypes,
         ArrayList<CardData> cardsInPlay
 ) {
 }
