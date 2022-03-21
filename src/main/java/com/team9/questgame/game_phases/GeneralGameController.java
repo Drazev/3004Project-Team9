@@ -307,6 +307,11 @@ public class GeneralGameController implements CardArea<StoryCards> {
         return true;
     }
 
+    public void requestPhaseEnd(){
+        stateMachine.setPhaseEndRequested(true);
+        stateMachine.update();
+    }
+
     @Override
     public void onGameReset() {
         aDeck.onGameReset();

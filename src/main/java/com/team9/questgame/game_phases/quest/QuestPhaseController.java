@@ -14,6 +14,7 @@ import com.team9.questgame.exception.IllegalQuestPhaseStateException;
 import com.team9.questgame.game_phases.utils.PlayerTurnService;
 import com.team9.questgame.gamemanager.record.socket.QuestEndedOutbound;
 import com.team9.questgame.gamemanager.record.socket.RemainingQuestorsOutbound;
+import com.team9.questgame.gamemanager.service.InboundService;
 import com.team9.questgame.gamemanager.service.QuestPhaseOutboundService;
 import lombok.Getter;
 import lombok.Setter;
@@ -41,6 +42,8 @@ public class QuestPhaseController implements GamePhaseControllers {
 
     @Autowired
     private QuestPhaseOutboundService outboundService;
+//    @Autowired
+//    private InboundService generalInboundService;
     @Autowired
     @Lazy
     private EffectResolverService effectResolverService;
@@ -309,6 +312,7 @@ public class QuestPhaseController implements GamePhaseControllers {
     private void participantSetup(){
         dealAdventureCard();
         //TODO: for all players allow them to play cards via player.getPlayerArea().onPhaseNextPlayerTurn(player)
+        LOG.info(String.format("STARTING A NEW STAGE: STAGE %d", curStageIndex+1));
         for(Players player : playerTurnService.getPlayers()){
             player.getPlayArea().setPlayerTurn(questingPlayers.contains(player));
         }
@@ -384,16 +388,17 @@ public class QuestPhaseController implements GamePhaseControllers {
             throw new IllegalQuestPhaseStateException("Cannot end phase when it's not in ENDED state");
         }
 
-        if(questingPlayers.size() == 0 && sponsor != null && minJoin){
+        if(questingPlayers.size() > 0 ||(sponsor != null && minJoin)){
             distributeRewards();
-            // TODO: broadcast everyone failed quest
-        }else if(sponsor != null && !minJoin){
+            outboundService.broadcastQuestEnded(new QuestEndedOutbound(generateQuestorData()));
+        } else if(sponsor != null && !minJoin){
             // TODO: broadcast no one joined quest, so quest ended
+            outboundService.broadcastQuestEnded(new QuestEndedOutbound(generateQuestorData()));
         }else {
             //TODO: broadcast no sponsor found
         }
 
-        outboundService.broadcastQuestEnded(new QuestEndedOutbound(generateQuestorData()));
+
 //        effectResolverService.onQuestCompleted(questingPlayers);
         for(Players p : this.playerTurnService.getPlayers()) {
             p.getPlayArea().onGamePhaseEnded();
@@ -403,6 +408,7 @@ public class QuestPhaseController implements GamePhaseControllers {
         this.stages.clear();
         stateMachine.setPhaseReset(true);
         stateMachine.update();
+        generalController.requestPhaseEnd();
     }
 
     /**

@@ -71,6 +71,7 @@ public class QuestPhaseOutboundService {
     }
 
     public void broadcastQuestEnded(QuestEndedOutbound questEndedOutbound){
+
         this.sendToAllPlayers("/topic/quest/end", questEndedOutbound);
     }
 
