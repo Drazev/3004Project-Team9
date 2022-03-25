@@ -1,7 +1,7 @@
 import React from "react";
 import {Button} from "react-bootstrap";
-import { sponsorRespond, joinRespond } from "../ClientSocket";
-import { useName, useSetIsSponsoring, useSetJoinRequest } from "../Stores/GeneralStore";
+import { sponsorRespond, joinRespond } from "../../services/clientSocket";
+import { useName, useSetIsSponsoring, useSetJoinRequest } from "../../stores/generalStore";
 import "./Popup.css"
  
 const Popup = props => {

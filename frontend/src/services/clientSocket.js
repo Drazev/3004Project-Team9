@@ -1,7 +1,7 @@
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import { setGameStarted, useSetIsSponsoring } from "./Stores/GeneralStore";
-import { useUpdatePlayArea } from "./Stores/PlayAreaStore";
+import { setGameStarted, useSetIsSponsoring } from "../stores/generalStore";
+import { useUpdatePlayArea } from "../stores/playAreaStore";
 
 
 let client;

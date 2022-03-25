@@ -1,6 +1,6 @@
-import Card from "./Card";
-import CardImages from "../Images/index";
-import { useHandOversize } from "../Stores/GeneralStore"
+import Card from "../cards/Card";
+import CardImages from "../../assets/images/index";
+import { useHandOversize } from "../../stores/generalStore"
 
 function PlayerHand(props){
     const handOversize = useHandOversize();

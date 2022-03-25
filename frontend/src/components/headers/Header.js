@@ -1,4 +1,4 @@
-import { useTitle } from "../Stores/GeneralStore";
+import { useTitle } from "../../stores/GeneralStore";
 
 const Header = ({}) => {
   const title = useTitle();

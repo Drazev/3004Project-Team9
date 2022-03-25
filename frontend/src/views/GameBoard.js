@@ -1,11 +1,11 @@
-import PlayerHand from "./PlayerHand";
-import QuestDisplay from "./QuestDisplay";
-import CardImages from "../Images/index";
-import Popup from "./Popup";
-import Card from "./Card";
-import { drawCard, sponsorRespond, setupComplete, participantSetupComplete } from "../ClientSocket";
-import { useName, usePlayerHands, usePlayers, useTurn, useSponsorRequest, useActivePlayers, useSetPopupType, usePopupType, useIsSponsoring, useSetIsSponsoring, useJoinRequest, useSetJoinRequest, useFoeStageStart, useStoryCard, useHandOversize, useSetFoeStageStart, useNotifyStageStart, useNotifyStageEnd, useNotifyQuestEnd, useSetNotifyStageStart, useSetNotifyStageEnd, useSetNotifyQuestEnd, useNotifyHandOversize, useSetNotifyHandOversize, useNotifyHandNotOversize, useSetNotifyHandNotOversize} from "../Stores/GeneralStore";
-import { useUpdatePlayArea, usePlayerPlayAreas, useStageAreas } from "../Stores/PlayAreaStore";
+import PlayerHand from "../components/player/PlayerHand";
+import QuestDisplay from "./quest/QuestDisplay";
+import CardImages from "../assets/images/index";
+import Popup from "../components/popups/Popup";
+import Card from "../components/cards/Card";
+import { drawCard, sponsorRespond, setupComplete, participantSetupComplete } from "../services/clientSocket";
+import { useName, usePlayerHands, usePlayers, useTurn, useSponsorRequest, useActivePlayers, useSetPopupType, usePopupType, useIsSponsoring, useSetIsSponsoring, useJoinRequest, useSetJoinRequest, useFoeStageStart, useStoryCard, useHandOversize, useSetFoeStageStart, useNotifyStageStart, useNotifyStageEnd, useNotifyQuestEnd, useSetNotifyStageStart, useSetNotifyStageEnd, useSetNotifyQuestEnd, useNotifyHandOversize, useSetNotifyHandOversize, useNotifyHandNotOversize, useSetNotifyHandNotOversize} from "../stores/generalStore";
+import { useUpdatePlayArea, usePlayerPlayAreas, useStageAreas } from "../stores/playAreaStore";
 import { Button } from "react-bootstrap";
 import React, { useState, useEffect } from "react";
 import "./GameBoard.css";
@@ -26,7 +26,6 @@ function GameBoard(props) {
     const setIsSponsoring = useSetIsSponsoring();
     const joinRequest = useJoinRequest();
     const activePlayers = useActivePlayers();
-    console.log("Active Players are: " + JSON.stringify(activePlayers));
     const [popup, setPopup] = useState(true);
     const [foeStageStartPopup, setFoeStageStartPopup] = useState(true);
     // const [popup, setPopup] = useState(true);

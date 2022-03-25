@@ -1,21 +1,11 @@
 import React from "react";
 import FoeStageDisplay from "./FoeStageDisplay";
-import Card from "./Card";
-import CardImages from "../Images/index";
-import BigCard from "./BigCard";
+import CardImages from "../../assets/images/index";
+import BigCard from "../../components/cards/BigCard";
 import "./QuestDisplay.css";
-import { useStageAreas, useCurrentStage } from "../Stores/PlayAreaStore";
-
+import { useStageAreas, useCurrentStage } from "../../stores/playAreaStore";
 
 const activePlayers = ["John","Yusuf"];
-const questSponsor = "player3";
-const playerActiveCards = {
-    player1: [], 
-    player2: [], 
-    player3: [], 
-    player4: []
-};
-let currentTurn = "player1";
 
 const QuestDisplay = (props) => {
     const stages = useStageAreas();
