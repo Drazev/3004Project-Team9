@@ -33,6 +33,7 @@ const ConnectForm = () => {
     setNotifyQuestEnd: notificationStore.useSetNotifyQuestEnd(),
     setNotifyHandOversize: notificationStore.useSetNotifyHandNotOversize(),
     setNotifyHandNotOversize: notificationStore.useSetNotifyHandNotOversize(),
+    addNewNotification: notificationStore.useAddNewNotification()
   }
 
   const setName = generalStore.useSetName();
