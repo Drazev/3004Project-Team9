@@ -4,14 +4,6 @@ import * as generalStore from "../../stores/generalStore";
 import * as playAreaStore from "../../stores/playAreaStore"
 import * as notificationStore from "../../stores/notificationStore"
 
-import {
-  useSetNotifyStageStart,
-  useSetNotifyStageEnd,
-  useSetNotifyQuestEnd,
-  useSetNotifyHandOversize,
-  useSetNotifyHandNotOversize
-} from "../../stores/notificationStore"
-
 const ConnectForm = () => {
 
   const connectFunctions = {
@@ -35,6 +27,7 @@ const ConnectForm = () => {
     setFoeStageStart: generalStore.useSetFoeStageStart(),
 
     notifySponsorRequest: generalStore.useSetSponsorRequest(),
+
     setNotifyStageStart: notificationStore.useSetNotifyStageStart(),
     setNotifyStageEnd: notificationStore.useSetNotifyStageEnd(),
     setNotifyQuestEnd: notificationStore.useSetNotifyQuestEnd(),
