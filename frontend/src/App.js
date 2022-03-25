@@ -1,11 +1,11 @@
 import "./App.css";
 import React from "react";
-import ConnectForm from "./components/ConnectForm";
-import GameBoard from "./components/GameBoard";
-import { useConnected, useGameStarted } from "./Stores/GeneralStore";
-import { useStageAreas } from "./Stores/PlayAreaStore";
-import WaitingRoom from "./components/WaitingRoom";
-import background from "./Images/Quest Background.png";
+import ConnectForm from "./components/forms/ConnectForm";
+import GameBoard from "./views/GameBoard";
+import { useConnected, useGameStarted } from "./stores/generalStore";
+import { useStageAreas } from "./stores/playAreaStore";
+import WaitingRoom from "./views/waitingroom/WaitingRoom";
+
 const App = () => {
   const stagePlayArea = useStageAreas();
   const connected = useConnected();

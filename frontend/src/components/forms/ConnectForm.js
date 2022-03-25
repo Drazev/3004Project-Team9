@@ -1,11 +1,9 @@
-import React, { useState } from "react";
-import { connect } from "../ClientSocket";
+import { connect } from "../../services/clientSocket";
 
 import {
   useName,
   useSetConnected,
   useSetName,
-  useAddNewMessage,
   useAddNewPlayer,
   useSetPlayers,
   useSetGameStarted,
@@ -24,15 +22,14 @@ import {
   useSetNotifyQuestEnd,
   useSetNotifyHandOversize,
   useSetNotifyHandNotOversize
-} from "../Stores/GeneralStore";
+} from "../../stores/generalStore";
 import {
   useUpdateStageArea,
   useUpdatePlayerPlayArea
-} from "../Stores/PlayAreaStore"
+} from "../../stores/playAreaStore"
 
 const ConnectForm = () => {
   const name = useName();
-  const addNewMessage = useAddNewMessage();
   const addNewPlayer =  useAddNewPlayer();
   const setPlayers = useSetPlayers();
   const setConnected = useSetConnected();
@@ -58,7 +55,6 @@ const ConnectForm = () => {
     name,
     setConnected,
     setGameStarted,
-    addNewMessage,
     setPlayers,
     updateHand,
     updatePlayer,

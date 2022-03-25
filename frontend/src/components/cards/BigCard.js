@@ -1,4 +1,3 @@
-import React,{useState} from "react";
 
 function BigCard(props){
     const size = {width: "100px", height: "135px"};
