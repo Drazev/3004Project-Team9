@@ -1,39 +1,10 @@
 import create from 'zustand';
 
 const useStore = create((set) => ({
-    playerPlayAreas: [], //{hand: []} is temp
-    //setPlayerPlayAreas : (playerPlayAreas,index) => set(()=>{playerPlayAreas[index] : playerPlayAreas}),
+    playerPlayAreas: [],
     stageAreas: [],
     currentStage: 0,
-    //setStageAreas : (stageAreas) => set(()=>{stageAreas : stageAreas}),
-    //playerPlayAreas: [{ hand: [] }, { hand: [] }, { hand: [] }, { hand: [] }],
     updatePlayerArea: (playAreaData) => set((current) => ({
-        /*
-        {
-            "source": "PLAYER",
-            "id": 2,
-            "bids": 0,
-            "battlePoints": 15,
-            "acceptedCardTypes": [
-              "WEAPON",
-              "ALLY",
-              "AMOUR"
-            ],
-            "cardsInPlay": [
-              {
-                "cardID": 111,
-                "cardCode": null,
-                "cardName": null,
-                "subType": null,
-                "imgSrc": "./Assets/Adventure Deck (346x470)/Adventure Deck Card Back.png",
-                "bids": 0,
-                "battlePoints": 0,
-                "effectDescription": null,
-                "hasActiveEffect": false
-              }
-            ]
-          }
-        */
         playerPlayAreas: (() => {
             let playerExist = false;
             for (let i in current.playerPlayAreas) {

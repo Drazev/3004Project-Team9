@@ -2,6 +2,15 @@ import { connect } from "../../services/clientSocket";
 
 import * as generalStore from "../../stores/generalStore";
 import * as playAreaStore from "../../stores/playAreaStore"
+import * as notificationStore from "../../stores/notificationStore"
+
+import {
+  useSetNotifyStageStart,
+  useSetNotifyStageEnd,
+  useSetNotifyQuestEnd,
+  useSetNotifyHandOversize,
+  useSetNotifyHandNotOversize
+} from "../../stores/notificationStore"
 
 const ConnectForm = () => {
 
@@ -26,11 +35,11 @@ const ConnectForm = () => {
     setFoeStageStart: generalStore.useSetFoeStageStart(),
 
     notifySponsorRequest: generalStore.useSetSponsorRequest(),
-    setNotifyStageStart: generalStore.useSetNotifyStageStart(),
-    setNotifyStageEnd: generalStore.useSetNotifyStageEnd(),
-    setNotifyQuestEnd: generalStore.useSetNotifyQuestEnd(),
-    setNotifyHandOversize: generalStore.useSetNotifyHandNotOversize(),
-    setNotifyHandNotOversize: generalStore.useSetNotifyHandNotOversize(),
+    setNotifyStageStart: notificationStore.useSetNotifyStageStart(),
+    setNotifyStageEnd: notificationStore.useSetNotifyStageEnd(),
+    setNotifyQuestEnd: notificationStore.useSetNotifyQuestEnd(),
+    setNotifyHandOversize: notificationStore.useSetNotifyHandNotOversize(),
+    setNotifyHandNotOversize: notificationStore.useSetNotifyHandNotOversize(),
   }
 
   const setName = generalStore.useSetName();
