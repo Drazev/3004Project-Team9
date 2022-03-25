@@ -10,8 +10,8 @@ import React, { useState, useEffect } from "react";
 import "./GameBoard.css";
 
 function GameBoard(props) {
-    let init = 80;
-    let jump = 240;
+    let init = 30;
+    let jump = 230;
     const name = useName();
     const popupType = usePopupType();
     const allPlayers = usePlayers();
@@ -64,21 +64,22 @@ function GameBoard(props) {
     const renderAllHands = () => {
         var allHands = [];
         for (var i = 0; i < hands.length; i++){
+            var curTop = init+jump*i;
             allHands.push(
-                <PlayerHand
-                    playerName={hands[i].playerName}
-                    playerID={hands[i].playerId}
-                    isTurn={(hands[0].playerName === turn)}
-                    isMyHand={myHandArr[i]}
-                    cardsInHand={hands[i].hand}
-                    activeCards={getActiveCard(hands[i].playerId)}
-                    rank={CardImages.Rank_Squire/*hands[0].rank*/}
-                    numShields={5/*hands[0].shields*/}
-                    top={init + jump*i}
-                    left={i}
-                    shield={CardImages.Shield_3}
-                    numStages={stageAreas.length}
-                ></PlayerHand>
+                <div style={{position:"fixed",top:curTop,left:10}}>
+                    <PlayerHand
+                        playerName={hands[i].playerName}
+                        playerID={hands[i].playerId}
+                        isTurn={(hands[0].playerName === turn)}
+                        isMyHand={myHandArr[i]}
+                        cardsInHand={hands[i].hand}
+                        activeCards={getActiveCard(hands[i].playerId)}
+                        rank={CardImages.Rank_Squire/*hands[0].rank*/}
+                        numShields={5/*hands[0].shields*/}
+                        shield={CardImages.Shield_3}
+                        numStages={stageAreas.length}
+                    ></PlayerHand>
+                </div>
             );
         }
         return <tbody>{allHands}</tbody>;
@@ -100,9 +101,6 @@ function GameBoard(props) {
             <div className="questDisplay">
                 <QuestDisplay></QuestDisplay>
             </div>
-
-            {/* <Button onClick={() => drawCard(name,0)} >Draw</Button>
-            <Button onClick={() => togglePopup()}>End Turn</Button> */}
 
             {(popup && name === sponsorRequest) &&
                 <div id="sponsor-popup">
