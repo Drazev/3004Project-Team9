@@ -3,11 +3,9 @@ import React from "react";
 import ConnectForm from "./components/forms/ConnectForm";
 import GameBoard from "./views/GameBoard";
 import { useConnected, useGameStarted } from "./stores/generalStore";
-import { useStageAreas } from "./stores/playAreaStore";
 import WaitingRoom from "./views/waitingroom/WaitingRoom";
 
 const App = () => {
-  const stagePlayArea = useStageAreas();
   const connected = useConnected();
   const gameStarted = useGameStarted();
   return (
