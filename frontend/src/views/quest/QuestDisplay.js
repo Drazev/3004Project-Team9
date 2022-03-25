@@ -3,11 +3,14 @@ import FoeStageDisplay from "./FoeStageDisplay";
 import CardImages from "../../assets/images/index";
 import BigCard from "../../components/cards/BigCard";
 import "./QuestDisplay.css";
+import { useIsSponsoring, useFoeStageStart } from "../../stores/generalStore";
 import { useStageAreas, useCurrentStage } from "../../stores/playAreaStore";
 
 const activePlayers = ["John","Yusuf"];
 
 const QuestDisplay = (props) => {
+    const isSponsoring = useIsSponsoring();
+    const foeStageStart = useFoeStageStart();
     const stages = useStageAreas();
     const numStages = stages.length-1;
     const currentStageNum = useCurrentStage();
@@ -30,10 +33,10 @@ const QuestDisplay = (props) => {
             return;
         } else {
             return (
-                (currentStageNum < stage.stageNum)? (
-                    <BigCard cardId={stage.stageCard.cardID} key={stage.stageCard.cardID} cardImage={CardImages.Back_Adventure} numCards={stage.activeCards.length}></BigCard>
-                ) : (
+                ((currentStageNum >= stage.stageNum && foeStageStart == true) || (isSponsoring == true))? (
                     <BigCard cardId={stage.stageCard.cardID} key={stage.stageCard.cardID} cardImage={stage.stageCard.imgSrc} numCards={stage.activeCards.length}></BigCard>
+                ) : (
+                    <BigCard cardId={stage.stageCard.cardID} key={stage.stageCard.cardID} cardImage={CardImages.Back_Adventure} numCards={stage.activeCards.length}></BigCard>
                 )
             )
         }
@@ -48,7 +51,7 @@ const QuestDisplay = (props) => {
             {RenderStages}
         </div>
         <div>
-            {currentStageObject && <FoeStageDisplay activePlayers={activePlayers} currentStage={currentStageObject}></FoeStageDisplay>}
+            {(currentStageObject && foeStageStart == true) && <FoeStageDisplay activePlayers={activePlayers} currentStage={currentStageObject}></FoeStageDisplay>}
         </div>
     </div>
   );
