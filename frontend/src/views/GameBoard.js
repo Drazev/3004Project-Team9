@@ -87,8 +87,6 @@ function GameBoard(props) {
 
     return (
         <div id="GameBoard">
-            { storyCard && <img src={storyCard.imgSrc} alt="Story Card"/> }
-
             <div id="allHands">
                 {renderAllHands()}
             </div>
