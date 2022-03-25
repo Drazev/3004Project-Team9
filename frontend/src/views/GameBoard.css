@@ -49,8 +49,9 @@ li {
 }
 
 .questDisplay {
-    top: 10px;
-    left: 10px;
+    position: "fixed";
+    top: 60px;
+    left: 1050px;
     width: 10px;
     height: 10px;
 }

@@ -77,7 +77,7 @@ function GameBoard(props) {
                 </div>
             );
         }
-        return <tbody>{allHands}</tbody>;
+        return <div>{allHands}</div>;
     }
 
     return (
@@ -91,7 +91,7 @@ function GameBoard(props) {
                 <button className="drawButton" onClick={() => drawCard(name, myPlayerID)} style={{ left: "123px" }}>Draw</button>
             </div>
 
-            <div className="questDisplay">
+            <div className="questDisplay" style={{left:1150,top:100,position:"fixed"}}>
                 <QuestDisplay></QuestDisplay>
             </div>
 

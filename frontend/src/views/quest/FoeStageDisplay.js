@@ -1,10 +1,11 @@
 import React from "react";
-import { usePlayerHands } from "../../stores/generalStore";
+import { usePlayerHands, useActivePlayers } from "../../stores/generalStore";
 import BigCard from "../../components/cards/BigCard";
 import Card from "../../components/cards/Card";
 import "../GameBoard.css";
 
 function FoeStageDisplay(props){
+  const activePlayers = useActivePlayers().remainingPlayers;
   const hands = usePlayerHands();
   const getBP = (name) => {
     let totalBP = 5
@@ -21,28 +22,37 @@ function FoeStageDisplay(props){
   const RenderActiveCards = props.currentStage.activeCards?.map((card) => (
     <Card cardId={card.cardID} key={card.cardID} cardImage={card.imgSrc}></Card>
 ));
-  const RenderPlayerCurrentBP = hands?.map((hand) => (
-    (props.activePlayers.includes(hand.name)) && <h4 key={hand.name} style={{textAlign: "left"}}>{hand.name} Current BP: {getBP(hand.name)}</h4>
-  ));
+  const RenderPlayerCurrentBP = () => {
+    let render = [];
+    console.log("this one tom" + JSON.stringify(activePlayers));
+    activePlayers.forEach(player => {
+      hands.forEach(hand => {
+        if(hand.name === player.name) {
+          render.push(<h4 key={hand.name} style={{textAlign: "left"}}>{hand.name} Current BP: {hand.battlePoints}</h4>)
+        }
+      });
+    });
+    return <div>{render}</div>
+  }
     const totalBP = props.currentStage.battlePoints;
   return (
     <div>
-      <div style={{position: "absolute", left:1300, top:283}}>
+      <div style={{position: "absolute"}}>
         {(props.currentStage.stageCard != null) && <BigCard cardId={props.currentStage.stageCard.cardID} key={props.currentStage.stageCard.cardID} cardImage={props.currentStage.stageCard.imgSrc}></BigCard>}
       </div>
-      <div style={{position: "absolute", left:1397, top:397}}>
+      <div style={{position: "absolute"}}>
         {RenderActiveCards}
       </div>
-      <div style={{position: "absolute", left:1450, top:297}}>
+      <div style={{position: "absolute"}}>
         <h4 style={{color: "white"}}>Total Battle Points: {totalBP}</h4>
       </div>
-      <div style={{position: "absolute", left:1450, top:335}}>
+      <div style={{position: "absolute"}}>
         {/* {props.currentStage.stageCard.isBoosted && (
           <h4 style={{color: "white"}}>Foe is Boosted</h4>
         )} */}
       </div>
-      <div style={{position: "absolute", left:1340, top:480}}>
-        {RenderPlayerCurrentBP}
+      <div style={{position: "absolute"}}>
+        {RenderPlayerCurrentBP()}
       </div>
     </div>
   );

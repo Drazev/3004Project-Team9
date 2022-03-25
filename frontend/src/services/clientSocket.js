@@ -1,8 +1,5 @@
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import { setGameStarted, useSetIsSponsoring } from "../stores/generalStore";
-import { useUpdatePlayArea } from "../stores/playAreaStore";
-
 
 let client;
 
@@ -67,7 +64,6 @@ export async function connect(connectFunctions) {
       connectFunctions.setGameStarted(true);
     });
 
-    // client.subscribe("/topic/general/")
 
     client.subscribe("/topic/general/next-turn", (message) => {
       /**
@@ -136,21 +132,24 @@ export async function connect(connectFunctions) {
 
     });
 
-    client.subscribe("/topic/quest/foe-stage-start", (players) => {
+    client.subscribe("/topic/quest/foe-stage-start", (playersJ) => {
+      let players = JSON.parse(playersJ.body);
       console.log("Active players: " + players);
       connectFunctions.setActivePlayers(players);
       connectFunctions.setFoeStageStart(true);
       connectFunctions.setNotifyStageStart(true);
     });
 
-    client.subscribe("/topic/quest/stage-end", (players) => {
+    client.subscribe("/topic/quest/stage-end", (playersJ) => {
+      let players = JSON.parse(playersJ.body);
       console.log("Stage ended: " + players);
       connectFunctions.setActivePlayers(players);
       connectFunctions.setFoeStageStart(false);
       connectFunctions.setNotifyStageEnd(true);
     });
 
-    client.subscribe("/topic/quest/end", (players) => {
+    client.subscribe("/topic/quest/end", (playersJ) => {
+      let players = JSON.parse(playersJ.body);
       console.log("Quest ended: " + players);
       connectFunctions.setFoeStageStart(false);
       connectFunctions.setNotifyQuestEnd(true);
@@ -197,6 +196,60 @@ export async function connect(connectFunctions) {
       connectFunctions.setJoinRequest(true);
     });
 
+    /**
+     * Notifications
+     * Payload:
+     * {
+     *    "title": string (Optional)  // Title of the notification, default will be the empty string
+     *    "message": string           // custom message
+     *    "imgSrc": string            // image source to show alongside the message
+     *     "action": string           // (optional - TBD) the action that server wants the client to do
+     * }
+     */
+    client.subscribe("/user/topic/notification/good", (message) => {
+      /**
+       * Server is notifying clients of a good notification
+       */
+      let body = JSON.parse(message.body);
+      console.log("/user/topic/notification: " + JSON.stringify(body));
+      connectFunctions.addNewNotification(body)
+    });
+
+    client.subscribe("/user/topic/notification/warning", (message) => {
+      /**
+       * Server is notifying clients of a warning notification
+       */
+      let body = JSON.parse(message.body);
+      console.log("/user/topic/notification: " + JSON.stringify(body));
+      connectFunctions.addNewNotification(body)
+    });
+
+    client.subscribe("/user/topic/notification/bad", (message) => {
+      /**
+       * Server is notifying clients of a bad notification
+       */
+      let body = JSON.parse(message.body);
+      console.log("/user/topic/notification: " + JSON.stringify(body));
+      connectFunctions.addNewNotification(body)
+    });
+
+    client.subscribe("/user/topic/notification/info", (message) => {
+      /**
+       * Server is notifying clients of a info notification
+       */
+      let body = JSON.parse(message.body);
+      console.log("/user/topic/notification: " + JSON.stringify(body));
+      connectFunctions.addNewNotification(body)
+    });
+
+    client.subscribe("/user/topic/notification/debug", (message) => {
+      /**
+       * Server is notifying clients of a debug notification
+       */
+      let body = JSON.parse(message.body);
+      console.log("/user/topic/notification: " + JSON.stringify(body));
+      connectFunctions.addNewNotification(body)
+    });
   };
 
   client.onDisconnect = () => {
