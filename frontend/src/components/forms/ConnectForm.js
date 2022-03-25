@@ -1,84 +1,43 @@
 import { connect } from "../../services/clientSocket";
 
-import {
-  useName,
-  useSetConnected,
-  useSetName,
-  useAddNewPlayer,
-  useSetPlayers,
-  useSetGameStarted,
-  useUpdateHand,
-  useUpdatePlayer,
-  useSetTurn,
-  useSetSponsorRequest,
-  useSetIsSponsoring,
-  useSetJoinRequest,
-  useSetHandOversize,
-  useSetActivePlayers,
-  useSetFoeStageStart,
-  useSetStoryCard,
-  useSetNotifyStageStart,
-  useSetNotifyStageEnd,
-  useSetNotifyQuestEnd,
-  useSetNotifyHandOversize,
-  useSetNotifyHandNotOversize
-} from "../../stores/generalStore";
-import {
-  useUpdateStageArea,
-  useUpdatePlayerPlayArea
-} from "../../stores/playAreaStore"
+import * as generalStore from "../../stores/generalStore";
+import * as playAreaStore from "../../stores/playAreaStore"
 
 const ConnectForm = () => {
-  const name = useName();
-  const addNewPlayer =  useAddNewPlayer();
-  const setPlayers = useSetPlayers();
-  const setConnected = useSetConnected();
-  const setGameStarted = useSetGameStarted();
-  const updateHand = useUpdateHand();
-  const updateStageArea = useUpdateStageArea();
-  const updatePlayer = useUpdatePlayer();
-  const setTurn = useSetTurn();
-  const notifySponsorRequest = useSetSponsorRequest();
-  const updatePlayerPlayArea = useUpdatePlayerPlayArea();
-  const setJoinRequest = useSetJoinRequest();
-  const setHandOversize = useSetHandOversize();
-  const setActivePlayers = useSetActivePlayers();
-  const setFoeStageStart = useSetFoeStageStart();
-  const setStoryCard = useSetStoryCard();
-  const setNotifyStageStart = useSetNotifyStageStart();
-  const setNotifyStageEnd = useSetNotifyStageEnd();
-  const setNotifyQuestEnd = useSetNotifyQuestEnd();
-  const setNotifyHandOversize = useSetNotifyHandOversize();
-  const setNotifyHandNotOversize = useSetNotifyHandNotOversize();
 
   const connectFunctions = {
-    name,
-    setConnected,
-    setGameStarted,
-    setPlayers,
-    updateHand,
-    updatePlayer,
-    setTurn,
-    notifySponsorRequest,
-    updateStageArea,
-    updatePlayerPlayArea,
-    setJoinRequest,
-    setHandOversize,
-    setActivePlayers,
-    setFoeStageStart,
-    setStoryCard,
-    setNotifyStageStart,
-    setNotifyStageEnd,
-    setNotifyQuestEnd,
-    setNotifyHandOversize,
-    setNotifyHandNotOversize,
+    name: generalStore.useName(),
+
+    addNewPlayer: generalStore.useAddNewPlayer(),
+    setConnected: generalStore.useSetConnected(),
+    setPlayers: generalStore.useSetPlayers(),
+    setGameStarted: generalStore.useSetGameStarted(),
+    setTurn: generalStore.useSetTurn(),
+    setJoinRequest: generalStore.useSetJoinRequest(),
+
+    updateHand: generalStore.useUpdateHand(),
+    updatePlayer: generalStore.useUpdatePlayer(),
+    updateStageArea: playAreaStore.useUpdateStageArea(),
+    updatePlayerPlayArea: playAreaStore.useUpdatePlayerPlayArea(),
+
+    setHandOversize: generalStore.useSetHandOversize(),
+    setStoryCard: generalStore.useSetStoryCard(),
+    setActivePlayers: generalStore.useSetActivePlayers(),
+    setFoeStageStart: generalStore.useSetFoeStageStart(),
+
+    notifySponsorRequest: generalStore.useSetSponsorRequest(),
+    setNotifyStageStart: generalStore.useSetNotifyStageStart(),
+    setNotifyStageEnd: generalStore.useSetNotifyStageEnd(),
+    setNotifyQuestEnd: generalStore.useSetNotifyQuestEnd(),
+    setNotifyHandOversize: generalStore.useSetNotifyHandNotOversize(),
+    setNotifyHandNotOversize: generalStore.useSetNotifyHandNotOversize(),
   }
 
-  const setName = useSetName();
+  const setName = generalStore.useSetName();
   // Preprocess before making connection request
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!name) {
+    if (!connectFunctions.name) {
       alert("Please enter your name");
       return;
     }
@@ -94,7 +53,7 @@ const ConnectForm = () => {
           type="text"
           className="form-control"
           placeholder="Enter your name"
-          value={name}
+          value={connectFunctions.name}
           onChange={(e) => {
             setName(e.target.value);
           }}
