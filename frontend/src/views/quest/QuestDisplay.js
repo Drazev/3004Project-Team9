@@ -55,17 +55,17 @@ const QuestDisplay = (props) => {
     }
 
   return (
-    <div>
-        <div style={{position:'absolute',top:30,left:10,width:160}}>
-            {currentStageObject && <h3>Quest Stage</h3>}
+    <div style={{backgroundColor: "rgba(30, 30, 30, .4)", width:600, height:700, borderRadius:30}}>
+        <div style={{position:'absolute',top:50,left:30,width:360}}>
+            {currentStageObject && <h1 style={{textDecoration: "underline",fontFamily: "Apple Chancery", fontSize:60}}>Quest Stage</h1>}
         </div>
-        <div style={{position:'absolute',top:0,left:170}}>
+        <div style={{position:'absolute',top:20,left:440}}>
             {(storyCard != null) && <BigCard cardId={storyCard.cardID} cardImage={storyCard.imgSrc}></BigCard>}
         </div>
-        <div style={{position:'absolute',top:140}}>
+        <div style={{position:'absolute',top:170}}>
             {RenderStages()}
         </div>
-        <div style={{position:'absolute',top:80,left:0}}>
+        <div style={{position:'absolute',top:120,left:0}}>
             {(currentStageObject && foeStageStart == true) && <FoeStageDisplay currentStage={currentStageObject}></FoeStageDisplay>}
         </div>
     </div>

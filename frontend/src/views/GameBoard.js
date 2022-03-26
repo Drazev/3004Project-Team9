@@ -11,8 +11,6 @@ import React, { useState } from "react";
 import "./GameBoard.css";
 
 function GameBoard(props) {
-    const init = 80;
-    const jump = 240;
     const name = useName();
     const hands = usePlayerHands();
     const active = usePlayerPlayAreas();
@@ -57,6 +55,8 @@ function GameBoard(props) {
     }
 
     const renderAllHands = () => {
+        const init = 60;
+        const jump = 230;
         var allHands = [];
         for (var i = 0; i < hands.length; i++){
             var curTop = init+jump*i;
