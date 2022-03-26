@@ -1,29 +1,38 @@
 import create from 'zustand';
+
 const useStore = create((set) => ({
-  notifyStageStart: false,
-  notifyStageEnd: false,
-  notifyQuestEnd: false,
-  notifyHandOversize: false,
-  notifyHandNotOversize: false,
-  notificationQueue: [],
-  setNotifyStageStart: (status) => set(() => ({notifyStageStart: status})),
-  setNotifyStageEnd: (status) => set(() => ({notifyStageEnd: status})),
-  setNotifyQuestEnd: (status) => set(() => ({notifyQuestEnd: status})),
-  setNotifyHandOversize: (status) => set(() => ({notifyHandOversize: status})),
-  setNotifyHandNotOversize: (status) => set(() => ({notifyHandNotOversize: status})),
-  addNewNotification: (status) => set(({notificationQueue}) => ({notificationQueue: [...notificationQueue, status]})),
+    notificationDelay: 3000,
+    maxNotifications: 5,
+    // notifyStageStart: false,
+    // notifyStageEnd: false,
+    // notifyQuestEnd: false,
+    // notifyHandOversize: false,
+    // notifyHandNotOversize: false,
+    notificationQueue: [
+        // { id: 0, "type": "BAD", "body": { "title": "This is a bad notification", "message": "You suk", "imgSrc": "", "action": "" } },
+        // { id: 1, "type": "GOOD", "body": { "title": "This is a good notification", "message": "You suk", "imgSrc": "", "action": "" } },
+        // { id: 2, "type": "DEBUG", "body": { "title": "This is a debug notification", "message": "You suk", "imgSrc": "", "action": "" } },
+        // { id: 3, "type": "WARNING", "body": { "title": "This is a warning notification", "message": "You suk", "imgSrc": "", "action": "" } },
+        // { id: 4, "type": "INFO", "body": { "title": "This is an info notification", "message": "You suk", "imgSrc": "", "action": "" } },
+        // { id: 6, "type": "INFO", "body": { "title": "This is an info notification", "message": "You suk", "imgSrc": "", "action": "" } },
+        // { id: 7, "type": "INFO", "body": { "title": "This is an info notification", "message": "You suk", "imgSrc": "", "action": "" } },
+        // { id: 8, "type": "INFO", "body": { "title": "This is an info notification", "message": "You suk", "imgSrc": "", "action": "" } },
+        // { id: 9, "type": "INFO", "body": { "title": "This is an info notification", "message": "You suk", "imgSrc": "", "action": "" } },
+        // { id: 10, "type": "INFO", "body": { "title": "This is an info notification", "message": "You suk", "imgSrc": "", "action": "" } },
+    ],
+    pushNotification: (newNotification) => set((current) => ({
+        // Add the new notification to the back of the queue
+        notificationQueue: [...(current.notificationQueue.slice(-current.maxNotifications)), newNotification],
+    })),
+    removeNotification: (notificationId) => set((current) => ({
+        // Remove a notification from the queue by id
+        notificationQueue: current.notificationQueue.filter((notification) => notification.id !== notificationId)
+    })),
 }));
 
-export const useNotifyStageStart = () => useStore((state) => state.notifyStageStart);
-export const useNotifyStageEnd = () => useStore((state) => state.notifyStageEnd);
-export const useNotifyQuestEnd = () => useStore((state) => state.notifyQuestEnd);
-export const useNotifyHandOversize = () => useStore((state) => state.notifyHandOversize);
-export const useNotifyHandNotOversize = () => useStore((state) => state.notifyHandNotOversize);
+export const useMaxNotifications = () => useStore((state) => state.maxNotifications);
+export const useNotificationDelay = () => useStore((state) => state.notificationDelay);
 export const useNotificationQueue = () => useStore((state) => state.notificationQueue);
 
-export const useSetNotifyStageStart = () => useStore((state) => state.setNotifyStageStart);
-export const useSetNotifyStageEnd = () => useStore((state) => state.setNotifyStageEnd);
-export const useSetNotifyQuestEnd = () => useStore((state) => state.setNotifyQuestEnd);
-export const useSetNotifyHandOversize = () => useStore((state) => state.setNotifyHandOversize);
-export const useSetNotifyHandNotOversize = () => useStore((state) => state.setNotifyHandNotOversize);
-export const useAddNewNotification = () => useStore((state) => state.addNewNotification);
+export const usePushNotification = () => useStore((state) => state.pushNotification);
+export const useRemoveNotification = () => useStore((state) => state.removeNotification);

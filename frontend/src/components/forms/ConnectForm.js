@@ -11,7 +11,7 @@ const ConnectForm = () => {
   const connectFunctions = {
     name: generalStore.useName(),
 
-    addNewPlayer: generalStore.useAddNewPlayer(),
+    // addNewPlayer: generalStore.useAddNewPlayer(),
     setConnected: generalStore.useSetConnected(),
     setPlayers: generalStore.useSetPlayers(),
     setGameStarted: generalStore.useSetGameStarted(),
@@ -30,12 +30,13 @@ const ConnectForm = () => {
 
     notifySponsorRequest: generalStore.useSetSponsorRequest(),
 
-    setNotifyStageStart: notificationStore.useSetNotifyStageStart(),
-    setNotifyStageEnd: notificationStore.useSetNotifyStageEnd(),
-    setNotifyQuestEnd: notificationStore.useSetNotifyQuestEnd(),
-    setNotifyHandOversize: notificationStore.useSetNotifyHandNotOversize(),
-    setNotifyHandNotOversize: notificationStore.useSetNotifyHandNotOversize(),
-    addNewNotification: notificationStore.useAddNewNotification()
+    // setNotifyStageStart: notificationStore.useSetNotifyStageStart(),
+    // setNotifyStageEnd: notificationStore.useSetNotifyStageEnd(),
+    // setNotifyQuestEnd: notificationStore.useSetNotifyQuestEnd(),
+    // setNotifyHandOversize: notificationStore.useSetNotifyHandNotOversize(),
+    // setNotifyHandNotOversize: notificationStore.useSetNotifyHandNotOversize(),
+  
+    pushNotification: notificationStore.usePushNotification(),
   }
 
   const setName = generalStore.useSetName();
