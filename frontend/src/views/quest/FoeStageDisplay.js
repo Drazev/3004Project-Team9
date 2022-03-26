@@ -3,7 +3,7 @@ import { usePlayerHands, useActivePlayers } from "../../stores/generalStore";
 import { usePlayerPlayAreas } from "../../stores/playAreaStore";
 import BigCard from "../../components/cards/BigCard";
 import Card from "../../components/cards/Card";
-import "../GameBoard.css";
+import "./FoeStageDisplay.css";
 
 function FoeStageDisplay(props){
   const activePlayers = useActivePlayers().remainingPlayers;
@@ -45,7 +45,7 @@ function FoeStageDisplay(props){
     activePlayers.forEach(player => {
       hands.forEach(hand => {
         if(hand.playerName === player.name) {
-          render.push(<h4 key={hand.playerName} style={{textAlign: "left", color:"white",width:600}}>{hand.playerName} Current BP: {getBP(hand.playerId)}</h4>)
+          render.push(<h4 key={hand.playerName} style={{textAlign: "left",width:600}}>{hand.playerName} Current BP: {getBP(hand.playerId)}</h4>)
         }
       });
     });

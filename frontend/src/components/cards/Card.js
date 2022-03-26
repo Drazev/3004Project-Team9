@@ -3,6 +3,7 @@ import { useStageAreas } from "../../stores/playAreaStore";
 import { useIsSponsoring } from "../../stores/generalStore";
 import { Button, DropdownButton, Dropdown } from "react-bootstrap";
 import {discardCard, playCard} from "../../services/clientSocket";
+import "./Card.css";
 
 function Card(props){
     const [isBig, setIsBig]=useState(false);

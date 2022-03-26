@@ -1,8 +1,10 @@
 import { connect } from "../../services/clientSocket";
 
+import "./ConnectForm.css";
+
 import * as generalStore from "../../stores/generalStore";
-import * as playAreaStore from "../../stores/playAreaStore"
-import * as notificationStore from "../../stores/notificationStore"
+import * as playAreaStore from "../../stores/playAreaStore";
+import * as notificationStore from "../../stores/notificationStore";
 
 const ConnectForm = () => {
 
