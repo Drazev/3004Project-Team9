@@ -67,7 +67,9 @@ public class QuestPhaseController implements GamePhaseControllers {
     private int participantSetupResponses;
     @Getter
     private int curStageIndex;
-    private boolean minJoin;
+    //private boolean minJoin;
+    @Getter
+    private boolean nextStageTest;
     @Getter
     private boolean stagesAreValid;
 
@@ -81,8 +83,9 @@ public class QuestPhaseController implements GamePhaseControllers {
         sponsorAttempts = 0;
         this.outboundService = ApplicationContextHolder.getContext().getBean(QuestPhaseOutboundService.class);
         numParticipants = 0;
-        minJoin = false;
+        //minJoin = false;
         stagesAreValid = false;
+        nextStageTest = false;
     }
 
     /**
@@ -209,6 +212,7 @@ public class QuestPhaseController implements GamePhaseControllers {
             return false;
         }
         stagesAreValid = true;
+        curStageIndex=0;
         //sponsor should no longer be able to play cards after stage setup
         sponsor.getPlayArea().setSponsorMode(false);
         sponsor.getPlayArea().onStageChanged(null);
@@ -274,6 +278,12 @@ public class QuestPhaseController implements GamePhaseControllers {
         return true;
     }
 
+    private void checkForTest(){
+        if(stages.get(curStageIndex).getStageCard().getSubType() == CardTypes.TEST){
+            nextStageTest = true;
+        }
+    }
+
     /**
      * Player's decision to join a quest stage or not
      * @param player the player who sent this request
@@ -290,7 +300,7 @@ public class QuestPhaseController implements GamePhaseControllers {
         this.joinAttempts++;
 
         if(joined){
-            minJoin = true;
+            //minJoin = true;
             questingPlayers.add(player);
         }
 
@@ -298,11 +308,13 @@ public class QuestPhaseController implements GamePhaseControllers {
         switch (stateMachine.getCurrentState()) {
             case QUEST_JOIN -> {
                 // Do nothing since the broadcast already sent to all players
+            } case IN_TEST -> {
+                //TODO: Broadcast Test start... maybe just go into participant setup
             } case PARTICIPANT_SETUP -> {
-                curStageIndex=0;
                 participantSetup();
                 //resolveStage(0);
             } case ENDED -> {
+                endPhase();
             } default -> {
                 throw new IllegalQuestPhaseStateException("Unknown state");
             }
@@ -388,16 +400,22 @@ public class QuestPhaseController implements GamePhaseControllers {
             throw new IllegalQuestPhaseStateException("Cannot end phase when it's not in ENDED state");
         }
 
-        if(questingPlayers.size() > 0 ||(sponsor != null && minJoin)){
+//        if(questingPlayers.size() > 0 ||(sponsor != null && minJoin)){
+//            distributeRewards();
+//            outboundService.broadcastQuestEnded(new QuestEndedOutbound(generateQuestorData()));
+//        } else if(sponsor != null && !minJoin){
+//            distributeRewards();
+//            // TODO: broadcast no one joined quest, so quest ended
+//            outboundService.broadcastQuestEnded(new QuestEndedOutbound(generateQuestorData()));
+//        }else {
+//            //TODO: broadcast no sponsor found
+//        }
+        if(sponsor != null){
             distributeRewards();
-            outboundService.broadcastQuestEnded(new QuestEndedOutbound(generateQuestorData()));
-        } else if(sponsor != null && !minJoin){
-            // TODO: broadcast no one joined quest, so quest ended
-            outboundService.broadcastQuestEnded(new QuestEndedOutbound(generateQuestorData()));
-        }else {
-            //TODO: broadcast no sponsor found
         }
 
+
+        outboundService.broadcastQuestEnded(new QuestEndedOutbound(generateQuestorData()));
 
 //        effectResolverService.onQuestCompleted(questingPlayers);
         for(Players p : this.playerTurnService.getPlayers()) {
@@ -412,6 +430,7 @@ public class QuestPhaseController implements GamePhaseControllers {
         stateMachine.setPhaseReset(true);
         stateMachine.update();
         generalController.requestPhaseEnd();
+
     }
 
     /**

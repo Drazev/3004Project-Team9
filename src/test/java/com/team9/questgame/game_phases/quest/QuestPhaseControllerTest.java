@@ -5,7 +5,6 @@ import com.team9.questgame.Entities.cards.*;
 import com.team9.questgame.exception.*;
 import com.team9.questgame.game_phases.GeneralGameController;
 import com.team9.questgame.game_phases.GeneralStateE;
-import com.team9.questgame.game_phases.quest.QuestPhaseStatesE;
 import com.team9.questgame.game_phases.utils.PlayerTurnService;
 import com.team9.questgame.gamemanager.service.InboundService;
 import com.team9.questgame.gamemanager.service.QuestPhaseInboundService;
@@ -19,7 +18,6 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -247,6 +245,45 @@ class QuestPhaseControllerTest {
         controller.endPhase();
         assertThat(controller.getQuestCard()).isNull();
         controller.getStateMachine().setCurrentState(QuestPhaseStatesE.NOT_STARTED);
+    }
+
+    @Test
+    void questCompletion(){
+        ArrayList<QuestCards> questCards = getQuestCards();
+        QuestCards qcard = questCards.get(0);
+        controller.receiveCard(qcard);
+        assertThat(controller.getQuestCard()).isNotNull();
+        generalGameController.getStateMachine().setCurrentState(GeneralStateE.QUEST_PHASE);
+
+        controller.startPhase(new PlayerTurnService(players));
+        assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SPONSOR);
+
+        controller.checkSponsorResult(players.get(0), true);
+        assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SETUP);
+        assertThat(controller.getSponsor()).isEqualTo(players.get(0));
+        assertThat(controller.getPlayerTurnService().getPlayerTurn()).isEqualTo(players.get(0));
+
+        assertThat(generalGameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.QUEST_PHASE);
+
+
+        assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SETUP);
+        controller.getStateMachine().setCurrentState(QuestPhaseStatesE.QUEST_JOIN);
+
+        for(Players player : players){
+            if(player.getPlayerId() != controller.getSponsor().getPlayerId()){
+                controller.checkJoinResult(player, false);
+            }
+        }
+        assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.BLOCKED);
+
+        for(int i = 0; i < qcard.getStages(); i++){
+            AdventureCards card = controller.getSponsor().getHand().getHand().iterator().next();
+//            controller.getSponsor().getHand().discardCard(card);
+            generalGameController.playerDiscardCard(controller.getSponsor(), card.getCardID());
+        }
+        assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.NOT_STARTED);
+        assertThat(generalGameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.DRAW_STORY_CARD);
+
     }
 
     /**

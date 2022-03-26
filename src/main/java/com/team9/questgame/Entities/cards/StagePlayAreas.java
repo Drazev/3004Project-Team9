@@ -41,6 +41,9 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
     private HashSet<BoostableCard> boostableCards;
     private HashMap<Long, AdventureCards> cardIdMap;
     private boolean hasFoe;
+    @Getter
+    private boolean hasTest;
+    @Getter
     private AdventureCards stageCard;
 
 
@@ -65,6 +68,7 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
         boostableCards = new HashSet<>();
         cardIdMap = new HashMap<>();
         hasFoe = false;
+        hasTest = false;
 
         cardsWithBattleValue = new HashSet<>();
 
@@ -95,14 +99,19 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
             throw new CardAreaException(CardAreaException.CardAreaExceptionReasonCodes.RULE_CANNOT_HAVE_TWO_OF_SAME_CARD_IN_PLAY);
         }if(hasFoe && card.getSubType() == CardTypes.FOE){
             LOG.error("RULE: A stage cannot have two cards of the same type");
-            //TODO:change reason code to can't have two foes
-            throw new CardAreaException(CardAreaException.CardAreaExceptionReasonCodes.RULE_CANNOT_HAVE_TWO_OF_SAME_CARD_IN_PLAY);
+            throw new CardAreaException(CardAreaException.CardAreaExceptionReasonCodes.RULE_STAGE_CANNOT_HAVE_MORE_THAN_ONE_FOE);
+        }if(card.getSubType()==CardTypes.TEST &&(!(allCards.isEmpty()) || hasTest)){
+            LOG.error("RULE: A test card must be the only card in the stage");
+            throw new CardAreaException(CardAreaException.CardAreaExceptionReasonCodes.RULE_TEST_MUST_BE_ONLY_CARD_IN_STAGE);
         }
         allCards.put(card.getCardCode(),  card);
         cardIdMap.put(card.getCardID(), card);
 
         if(card.getSubType() == CardTypes.FOE){
             hasFoe = true;
+            stageCard = card;
+        }else if(card.getSubType() == CardTypes.TEST){
+            hasTest = true;
             stageCard = card;
         }
         updateBattlePoints();
@@ -273,7 +282,11 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
         notifyStageAreaChanged();
     }
 
-   // @Override
+    public void registerMinBid(TestCards card){
+        bids = card.getMinimumBids();
+    }
+
+    @Override
     public void registerBoostableCard(BoostableCard card) {
         boostableCards.add(card);
         if(questCard.getBoostedFoe() == card.getCardCode()){

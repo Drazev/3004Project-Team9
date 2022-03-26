@@ -138,6 +138,7 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
 
     private GeneralStateE drawStoryCardState() {
         GeneralStateE nextState;
+        setPhaseEndRequested(false);
         if (!isAllHandNotOversize() || isHandOversizeRequested) {
             nextState = GeneralStateE.PLAYER_HAND_OVERSIZE;
         } else if (controller.getStoryCard() != null && isGamePhaseRequested) {
@@ -214,9 +215,14 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
             // TODO: Do this for tournament as well
             questStateMachine.setUnblockRequested(true);
             questStateMachine.update();
+
             // Let client know and go back to whatever state that was blocked by HAND_OVERSIZE
             outboundService.broadcastHandNotOversize();
-            nextState = this.previousState;
+            if(isPhaseEndRequested){
+                nextState = GeneralStateE.DRAW_STORY_CARD;
+            }else{
+                nextState = this.previousState;
+            }
         } else {
             // Request to block the quest state machine
             // TODO: Do this for tournament as well
@@ -224,6 +230,7 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
             questStateMachine.update();
             nextState = GeneralStateE.PLAYER_HAND_OVERSIZE;
         }
+
         return nextState;
     }
 
@@ -261,6 +268,6 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
         setHandOversizeRequested(false);
         setGamePhaseRequested(false);
         setGameStartRequested(false);
-        setPhaseEndRequested(false);
+        //setPhaseEndRequested(false);
     }
 }
