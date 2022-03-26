@@ -544,9 +544,9 @@ class EffectResolverServiceTest {
         p1TestVals.put(CardTypes.WEAPON,0);
 
         //Player 2 has both Foes and Weapons in hand
-        HashMap<CardTypes,HashMap<AllCardCodes,Integer>> p2List = players.get(1).getHand().getNumberOfEachCardCodeBySubType();
-        HashMap<AllCardCodes,Integer> p2Weapons = p2List.get(CardTypes.WEAPON);
-        HashMap<AllCardCodes,Integer> p2Foes = p2List.get(CardTypes.FOE);
+        HashMap<CardTypes,HashMap<AllCardCodes<AdventureDeckCards>,Integer>> p2List = players.get(1).getHand().getNumberOfEachCardCodeBySubType();
+        HashMap<AllCardCodes<AdventureDeckCards>,Integer> p2Weapons = p2List.get(CardTypes.WEAPON);
+        HashMap<AllCardCodes<AdventureDeckCards>,Integer> p2Foes = p2List.get(CardTypes.FOE);
         int p2W=0;
         int p2F=0;
         if(p2Weapons!=null) {
@@ -598,8 +598,8 @@ class EffectResolverServiceTest {
         p2TestVals.put(CardTypes.WEAPON,p2w);
 
         //Player 3 has Weapons but no Foes
-        HashMap<CardTypes,HashMap<AllCardCodes,Integer>> p3List = players.get(2).getHand().getNumberOfEachCardCodeBySubType();
-        HashMap<AllCardCodes,Integer> p3Weapons = p3List.get(CardTypes.WEAPON);
+        HashMap<CardTypes,HashMap<AllCardCodes<AdventureDeckCards>,Integer>> p3List = players.get(2).getHand().getNumberOfEachCardCodeBySubType();
+        HashMap<AllCardCodes<AdventureDeckCards>,Integer> p3Weapons = p3List.get(CardTypes.WEAPON);
         int p3W=0;
         if(p3Weapons!=null) {
             for(Integer i : p3Weapons.values()) {
@@ -638,8 +638,8 @@ class EffectResolverServiceTest {
 
 
         //Player 4 has Foes but no Weapons
-        HashMap<CardTypes,HashMap<AllCardCodes,Integer>> p4List = players.get(3).getHand().getNumberOfEachCardCodeBySubType();
-        HashMap<AllCardCodes,Integer> p4Foes = p4List.get(CardTypes.FOE);
+        HashMap<CardTypes,HashMap<AllCardCodes<AdventureDeckCards>,Integer>> p4List = players.get(3).getHand().getNumberOfEachCardCodeBySubType();
+        HashMap<AllCardCodes<AdventureDeckCards>,Integer> p4Foes = p4List.get(CardTypes.FOE);
         int p4F=0;
         if(p4Foes!=null) {
             for(Integer i : p4Foes.values()) {
@@ -705,8 +705,8 @@ class EffectResolverServiceTest {
                 }
             }
         }
-        HashMap<AllCardCodes,Integer> p3Weap = players.get(2).getHand().getNumberOfEachCardCodeBySubType().get(CardTypes.WEAPON);
-        HashMap<AllCardCodes,Integer> p4Foe = players.get(3).getHand().getNumberOfEachCardCodeBySubType().get(CardTypes.FOE);
+        HashMap<AllCardCodes<AdventureDeckCards>,Integer> p3Weap = players.get(2).getHand().getNumberOfEachCardCodeBySubType().get(CardTypes.WEAPON);
+        HashMap<AllCardCodes<AdventureDeckCards>,Integer> p4Foe = players.get(3).getHand().getNumberOfEachCardCodeBySubType().get(CardTypes.FOE);
         int p3TotWeap=0;
         int p4TotFoe=0;
         if(p3Weap!=null) {

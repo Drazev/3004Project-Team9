@@ -331,6 +331,16 @@ public class GeneralGameController implements CardArea<StoryCards> {
         stateMachine.update();
     }
 
+    public Players findPlayerWithID(long playerID) {
+        Players player=null;
+        for(Players p : players) {
+            if(p.getPlayerId()==playerID){
+                player=p;
+            }
+        }
+        return player;
+    }
+
     // Only here to support backward dependency
     // TODO: Remove after Iteration 1 test
     public void dealCard(Players player) {

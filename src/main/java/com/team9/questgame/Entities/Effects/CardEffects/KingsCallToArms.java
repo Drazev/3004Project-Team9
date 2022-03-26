@@ -5,6 +5,8 @@ import com.team9.questgame.Entities.Effects.Effects;
 import com.team9.questgame.Entities.Effects.TargetSelector;
 import com.team9.questgame.Entities.Effects.TargetSelectors.HighestRankSelector;
 import com.team9.questgame.Entities.Players;
+import com.team9.questgame.Entities.cards.AdventureCards;
+import com.team9.questgame.Entities.cards.AdventureDeckCards;
 import com.team9.questgame.Entities.cards.AllCardCodes;
 import com.team9.questgame.Entities.cards.CardTypes;
 
@@ -27,10 +29,9 @@ public class KingsCallToArms extends Effects {
     @Override
     protected void onEffectResolution() {
         HashMap<Players, HashMap<CardTypes,Integer>> discardList = new HashMap<>();
-        this.possibleTargerts=this.targetSelectors.get(0).selectTargets(possibleTargerts);
-
+        this.possibleTargerts=this.targetSelectors.get(0)  .selectTargets(possibleTargerts);
         for(Players p : possibleTargerts) {
-            HashMap<CardTypes,HashMap<AllCardCodes,Integer>> cardsOnHand = p.getHand().getNumberOfEachCardCodeBySubType();
+            HashMap<CardTypes,HashMap<AllCardCodes<AdventureDeckCards>,Integer>> cardsOnHand = p.getHand().getNumberOfEachCardCodeBySubType();
             HashMap<CardTypes,Integer> list = new HashMap<>();
             if(cardsOnHand.containsKey(CardTypes.WEAPON) && cardsOnHand.get(CardTypes.WEAPON).size()>0) {
                 list.put(CardTypes.WEAPON,1);

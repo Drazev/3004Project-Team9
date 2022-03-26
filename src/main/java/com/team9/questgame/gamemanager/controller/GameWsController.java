@@ -1,7 +1,10 @@
 package com.team9.questgame.gamemanager.controller;
 
+import com.team9.questgame.Entities.Effects.EffectResolverService;
+import com.team9.questgame.gamemanager.record.socket.CardTargetSelectionResponse;
 import com.team9.questgame.gamemanager.record.socket.CardUpdateInbound;
 import com.team9.questgame.gamemanager.record.socket.PlayerPlayCardInbound;
+import com.team9.questgame.gamemanager.record.socket.StageTargetSelectionResponse;
 import com.team9.questgame.gamemanager.service.InboundService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +18,8 @@ public class GameWsController {
 
     @Autowired
     private InboundService inboundService;
+    @Autowired
+    EffectResolverService effectService;
     private Logger LOG = LoggerFactory.getLogger(GameRestController.class);
 
 
@@ -32,6 +37,24 @@ public class GameWsController {
     public void handlePlayerPlayCard(PlayerPlayCardInbound playerPlayCardInbound) {
         LOG.info(String.format("P"));
         inboundService.playerPlayCard(playerPlayCardInbound);
+    }
+
+    @MessageMapping("/effects/card-target-selection-response")
+    public void handleEffectsCardTargetSelectionResponse(CardTargetSelectionResponse data) {
+        LOG.info(String.format("Card Target Received for playerID %d, requestID: %d.Target CardID: %d",data.requestPlayerID(),data.requestID(),data.targetCardID()));
+        if(!effectService.handleCardTargetSelectionResponse(data))
+        {
+            throw new RuntimeException("Card Target Selection data is invalid or malformed");
+        }
+    }
+
+    @MessageMapping("/effects/stage-target-selection-response")
+    public void handleEffectsStageTargetSelectionResponse(StageTargetSelectionResponse data) {
+        LOG.info(String.format("Stage Target Received for playerID %d, requestID: %d, targetStageID: %d",data.requestPlayerID(),data.requestID(),data.targetStageID()));
+        if(!effectService.handleStageTargetSelectionResponse(data))
+        {
+            throw new RuntimeException("Stage Target Selection data is invalid or malformed");
+        }
     }
 
 }

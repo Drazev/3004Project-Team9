@@ -178,9 +178,7 @@ class HandTest {
         playAllNonDuplicateCardsFromHand();
         assert(hand.getHandSize()+area.size()==(Hand.MAX_HAND_SIZE));
         LOG.info("Hand Printout: \n"+objMap.writerWithDefaultPrettyPrinter().writeValueAsString(hand));
-        assertThrows(BadRequestException.class,()->
-                hand.playCard(141098754)
-        );
+        assertFalse(hand.playCard(141098754));
 
     }
 

@@ -1,14 +1,12 @@
 package com.team9.questgame.Entities.cards;
 
 import com.fasterxml.jackson.annotation.*;
-import com.team9.questgame.ApplicationContextHolder;
 import com.team9.questgame.Data.CardData;
 import com.team9.questgame.Data.HandData;
 import com.team9.questgame.Data.HandOversizeData;
 import com.team9.questgame.Entities.Effects.DiscardObserver;
 import com.team9.questgame.Entities.Effects.DiscardSubject;
 import com.team9.questgame.Entities.Effects.EffectObserver;
-import com.team9.questgame.Entities.Effects.EffectResolverService;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.exception.BadRequestException;
 import com.team9.questgame.exception.CardAreaException;
@@ -26,12 +24,12 @@ import java.util.HashSet;
 
 @JsonIdentityInfo(
         generator = ObjectIdGenerators.PropertyGenerator.class,
-        property="id"
+        property="handID"
 )
 public class Hand implements CardArea<AdventureCards>, EffectObserver<AdventureCards>, DiscardSubject {
     @JsonIgnore
-    private Logger LOG;
-    private long id;
+    private final Logger LOG;
+    private final long handID;
     static private long nextid=0;
     @JsonIgnore
     private final Players player;
@@ -41,18 +39,18 @@ public class Hand implements CardArea<AdventureCards>, EffectObserver<AdventureC
     private boolean isHandOversize;
 
     @Getter
-    private HashSet<AdventureCards> hand;
-    private HashSet<CardWithEffect> activatableCards;
-    private HashSet<DiscardObserver> discardObservers;
+    private final HashSet<AdventureCards> hand;
+    private final HashSet<CardWithEffect> activatableCards;
+    private final HashSet<DiscardObserver> discardObservers;
 
-    private HashMap<Long,AdventureCards> cardIdMap;
+    private final HashMap<Long,AdventureCards> cardIdMap;
 
     @JsonIgnore
     static public final int MAX_HAND_SIZE = 12;
 
 
     public Hand(Players player, PlayerPlayAreas playArea) {
-        this.id=nextid++;
+        this.handID =nextid++;
         this.playArea = playArea;
         LOG= LoggerFactory.getLogger(Hand.class);
         this.player=player;
@@ -72,14 +70,14 @@ public class Hand implements CardArea<AdventureCards>, EffectObserver<AdventureC
 
 
     public long getHandId() {
-        return id;
+        return handID;
     }
 
-    public HashMap<CardTypes,HashMap<AllCardCodes,Integer>> getNumberOfEachCardCodeBySubType() {
-        HashMap<CardTypes,HashMap<AllCardCodes,Integer>> cardList = new HashMap<>();
+    public HashMap<CardTypes,HashMap<AllCardCodes<AdventureDeckCards>,Integer>> getNumberOfEachCardCodeBySubType() {
+        HashMap<CardTypes,HashMap<AllCardCodes<AdventureDeckCards>,Integer>> cardList = new HashMap<>();
 
         for(AdventureCards card : hand) {
-            HashMap<AllCardCodes,Integer> cardMap;
+            HashMap<AllCardCodes<AdventureDeckCards>,Integer> cardMap;
             CardTypes type = card.getSubType();
             int numCards=0;
             if(!cardList.containsKey(type)) {
@@ -137,10 +135,14 @@ public class Hand implements CardArea<AdventureCards>, EffectObserver<AdventureC
         notifyHandUpdated();
     }
 
-    public void discardCard(long cardId) throws BadRequestException,IllegalCardStateException {
-        AdventureCards card = findCardFromCardId(cardId);
+    public boolean discardCard(long cardId) throws BadRequestException,IllegalCardStateException {
+        AdventureCards card = cardIdMap.get(cardId);
+        if(card==null) {
+            return false;
+        }
         discardCard(card);
         notifyDiscardObservers(card);
+        return true;
     }
 
 
@@ -164,7 +166,10 @@ public class Hand implements CardArea<AdventureCards>, EffectObserver<AdventureC
     }
 
     public boolean playCard(long cardId) throws BadRequestException,IllegalCardStateException {
-        AdventureCards card = findCardFromCardId(cardId);
+        AdventureCards card = cardIdMap.get(cardId);
+        if(card==null) {
+            return false;
+        }
         return playCard(card);
     }
 
@@ -213,7 +218,7 @@ public class Hand implements CardArea<AdventureCards>, EffectObserver<AdventureC
     public HandData generateHandData() {
         return new HandData(
                 player.getPlayerId(),
-                id,
+                handID,
                 player.getName(),
                 isHandOversize,
                 generateCardData()
@@ -223,7 +228,7 @@ public class Hand implements CardArea<AdventureCards>, EffectObserver<AdventureC
     public HandData generateObfuscatedHandData() {
         return new HandData(
                 player.getPlayerId(),
-                id,
+                handID,
                 player.getName(),
                 isHandOversize,
                 generateObfuscatedCardData()
@@ -232,19 +237,6 @@ public class Hand implements CardArea<AdventureCards>, EffectObserver<AdventureC
 
     public void registerCardWithEffect(CardWithEffect card) {
         activatableCards.add(card);
-    }
-
-    private AdventureCards findCardFromCardId(Long cardId) throws BadRequestException,IllegalCardStateException{
-        AdventureCards card = cardIdMap.get(cardId);
-        if(card==null) {
-            //If we get null, determine if it was bad request or internal error
-            if(!cardIdMap.containsKey(cardId))
-            {
-                //The map did not contain the cardId, BAD REQUEST
-                throw new BadRequestException(String.format("Provided cardId %d was not found in players %s's hand", cardId, player.getName()));
-            }
-        }
-        return card;
     }
 
     private void notifyHandOversize() {
@@ -259,7 +251,7 @@ public class Hand implements CardArea<AdventureCards>, EffectObserver<AdventureC
 
     @Override
     public void onEffectResolved(CardWithEffect resolvedCard) {
-        if(hand.contains(resolvedCard)) {
+        if(hand.contains((AdventureCards) resolvedCard)) {
             AdventureCards card = (AdventureCards) resolvedCard;
             card.discardCard();
             activatableCards.remove(card);

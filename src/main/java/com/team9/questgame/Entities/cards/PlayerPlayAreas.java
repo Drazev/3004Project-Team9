@@ -22,11 +22,11 @@ import static com.team9.questgame.exception.IllegalGamePhaseStateException.GameP
 
 @JsonIdentityInfo(
         generator = ObjectIdGenerators.PropertyGenerator.class,
-        property="id"
+        property="playAreaID"
 )
 public class PlayerPlayAreas implements PlayAreas<AdventureCards>, EffectObserver<AdventureCards> {
 
-    private long id;
+    private long playAreaID;
     @JsonIgnore
     private final Players player;
     @JsonIgnore
@@ -56,7 +56,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards>, EffectObserve
     static private long nextid=0;
 
     public PlayerPlayAreas(Players player) {
-        this.id = nextid++;
+        this.playAreaID = nextid++;
         this.player = player;
         cardTypeMap = new HashMap<>();
         allCards = new HashMap<>();
@@ -95,7 +95,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards>, EffectObserve
     }
 
     public long getPlayAreaId() {
-        return id;
+        return playAreaID;
     }
 
     public void setPlayerTurn(boolean isTurn) {
@@ -140,7 +140,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards>, EffectObserve
     public PlayAreaData getPlayAreaData() {
         PlayAreaData data = new PlayAreaData(
                 PlayAreaDataSources.PLAYER,
-                id,
+                playAreaID,
                 bids,
                 battlePoints,
                 getCardData()
@@ -174,7 +174,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards>, EffectObserve
         }
         PlayAreaData data = new PlayAreaData(
                 PlayAreaDataSources.PLAYER,
-                id,
+                playAreaID,
                 bids-lessHiddenBids,
                 battlePoints-lessHiddenBP,
                 cardData
@@ -207,6 +207,19 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards>, EffectObserve
     public boolean discardAllAmour() {
         HashSet<AdventureCards> cardList = cardTypeMap.get(CardTypes.AMOUR);
         return discardCards(cardList);
+    }
+
+    public boolean destroyAllyCard(long cardID) {
+        boolean rc = false;
+        for(AdventureCards c : allCards.values()) {
+            if(c.getCardID()==cardID && c.getSubType()==CardTypes.ALLY) {
+                rc=removeCard(c);
+            }
+        }
+        if(rc) {
+            notifyPlayAreaChanged();
+        }
+        return rc;
     }
 
     /**
@@ -620,7 +633,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards>, EffectObserve
     @Override
     public void onEffectResolved(CardWithEffect resolvedCard) {
         if(cardsWithActiveEffects.contains(resolvedCard)) {
-            removeCard((AdventureCards)resolvedCard);
+//            removeCard((AdventureCards)resolvedCard); //Comment out because Merlin doesn't say he is discarded
         }
         else {
             LOG.warn("PlayerPlayAreas::onEffectResolved returned a CardWithEffect that was not in the play area!, "+resolvedCard.getCardCode());

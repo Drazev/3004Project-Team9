@@ -112,6 +112,10 @@ public class OutboundService implements ApplicationContextAware {
         this.sendToAllPlayers("/topic/general/player-draw-card", storyCardData);
     }
 
+    public void sendTargetSelectionRequest(TargetSelectionRequest request,Players requestPlayer) {
+        sendToPlayer("/topic/effects/target-selection-request",requestPlayer,request);
+    }
+
     private void sendToPlayer(String topic, String name, Object payload) {
         LOG.info(String.format("Broadcasting to one player: topic=%s, name=%s, payload=%s", topic, name, payload));
         messenger.convertAndSendToUser(sessionService.getPlayerSessionId(name),topic, payload);

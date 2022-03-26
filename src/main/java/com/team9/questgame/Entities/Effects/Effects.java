@@ -31,6 +31,7 @@ public abstract class Effects {
     protected ArrayList<Players> possibleTargerts;
     protected EffectState state;
     protected EffectObserver observer;
+    protected long pendingRequestID;
     @JsonIgnore
     static protected Logger LOG= LoggerFactory.getLogger(Effects.class);
 
@@ -50,9 +51,19 @@ public abstract class Effects {
         return source;
     }
 
+    public Players getActivatedBy() {
+        return activatedBy;
+    }
+
+    public EffectState getState() {
+        return state;
+    }
+
     public void setSource(CardWithEffect source) {
         this.source = source;
     }
+
+
 
     abstract protected ArrayList<TargetSelector> initTargetSelectors();
 
@@ -81,7 +92,7 @@ public abstract class Effects {
     public void trigger(ArrayList<Players> targetedPlayers) throws IllegalEffectStateException {
         if(state!=EffectState.TRIGGER_TARGET_SELECTION) {
             reset();
-            throw new IllegalEffectStateException("Effect must be waiting on a trigger to be triggered. This effect was in the state: "+state,this,source);
+            throw new IllegalEffectStateException(String.format("Effect must be in state %s  to be triggered with a target list but was in state %s",EffectState.TRIGGER_TARGET_SELECTION,state),this,source);
         }
         this.possibleTargerts=new ArrayList<>(targetedPlayers);
         nextState();
@@ -93,7 +104,19 @@ public abstract class Effects {
     public void trigger() throws IllegalEffectStateException {
         if(state!=EffectState.EFFECT_RESOLUTION_PLAYER_RESPONSE) {
             reset();
-            throw new IllegalEffectStateException("Effect must be waiting on a trigger to be triggered. This effect was in the state: "+state,this,source);
+            throw new IllegalEffectStateException(String.format("Effect must be in state %s  to be triggered with no args but was in state %s",EffectState.EFFECT_RESOLUTION_PLAYER_RESPONSE,state),this,source);
+        }
+        nextState();
+    }
+
+    public void trigger(long resolvedRequestID) {
+        if(state!=EffectState.TRIGGER_TARGET_SELECTION_REQUEST_SUBMITTED) {
+            reset();
+            throw new IllegalEffectStateException(String.format("Effect must be in state %s  to be triggered with a resolvedRequestID but was in state %s",EffectState.TRIGGER_TARGET_SELECTION_REQUEST_SUBMITTED,state),this,source);
+        }
+        else if(resolvedRequestID==pendingRequestID) {
+            reset();
+            throw new IllegalEffectStateException(String.format("Effect triggered using a different request id (%d) than the original request (%d).",resolvedRequestID,pendingRequestID),this,source);
         }
         nextState();
     }
@@ -135,7 +158,7 @@ public abstract class Effects {
                 LOG.info(source.getCardName()+" state changed to "+this.state+" by "+activatedBy.getName());
                 onEffectResolution();
             }
-            case EFFECT_RESOLUTION,EFFECT_RESOLUTION_PLAYER_RESPONSE -> {
+            case EFFECT_RESOLUTION,EFFECT_RESOLUTION_PLAYER_RESPONSE,TRIGGER_TARGET_SELECTION_REQUEST_SUBMITTED -> {
                 this.state=EffectState.RESOLVED;
                 LOG.info(source.getCardName()+" state changed to "+this.state+" by "+activatedBy.getName());
                 onResolved();
@@ -157,6 +180,15 @@ public abstract class Effects {
         EffectResolverService.getService().registerEffectTriggeredOnQuestCompleted(this);
 
         observer.onEffectResolvedWithDelayedTrigger(source);
+    }
+
+    protected void waitForTargetSelectionRequest(TargetSelectionRequestTypes type,String message) {
+        if(this.state!=EffectState.ACTIVATED) {
+            throw new IllegalEffectStateException("Effect must be in state "+EffectState.ACTIVATED+" to wait for trigger, but was in "+this.state,this,source);
+        }
+        this.state=EffectState.TRIGGER_TARGET_SELECTION_REQUEST_SUBMITTED;
+        LOG.info(source.getCardName()+" state changed to "+this.state+" by "+activatedBy.getName());
+        pendingRequestID=EffectResolverService.getService().targetSelectionRequest(this,type,message);
     }
 
     protected void waitForResolutionTrigger() {
@@ -204,7 +236,5 @@ public abstract class Effects {
         LOG.info(source.getCardName()+" has had it's trigger resolved by "+activatedBy.getName());
         reset();
     }
-
-
 
 }
