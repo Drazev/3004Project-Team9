@@ -215,7 +215,6 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
             // TODO: Do this for tournament as well
             questStateMachine.setUnblockRequested(true);
             questStateMachine.update();
-            questStateMachine.update();
 
             // Let client know and go back to whatever state that was blocked by HAND_OVERSIZE
             outboundService.broadcastHandNotOversize();

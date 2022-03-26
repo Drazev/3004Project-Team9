@@ -430,6 +430,7 @@ public class QuestPhaseController implements GamePhaseControllers {
         stateMachine.setPhaseReset(true);
         stateMachine.update();
         generalController.requestPhaseEnd();
+
     }
 
     /**

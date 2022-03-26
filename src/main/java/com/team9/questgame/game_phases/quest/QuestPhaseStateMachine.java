@@ -105,7 +105,12 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
         QuestPhaseStatesE nextState;
         if (isUnblockRequested) {
             // Return to whatever stage is before blocked
-            nextState = this.previousState;
+
+            if (isPhaseReset) {
+                nextState = QuestPhaseStatesE.NOT_STARTED;
+            }else{
+                nextState = this.previousState;
+            }
         } else {
             nextState = QuestPhaseStatesE.BLOCKED;
         }
@@ -115,6 +120,7 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
 
     private QuestPhaseStatesE notStartedState() {
         QuestPhaseStatesE nextState;
+        setPhaseReset(false);
         if (isPhaseStartRequested && controller.getQuestCard() != null) {
             nextState = QuestPhaseStatesE.QUEST_SPONSOR;
         } else {

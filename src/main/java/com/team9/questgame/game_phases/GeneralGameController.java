@@ -202,7 +202,6 @@ public class GeneralGameController implements CardArea<StoryCards> {
 
         stateMachine.setHandOversizeRequested(true);
         stateMachine.update();
-        stateMachine.update();
     }
 
 
