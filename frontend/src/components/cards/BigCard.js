@@ -1,3 +1,5 @@
+import "./BigCard.css";
+
 
 function BigCard(props){
     const size = {width: "100px", height: "135px"};

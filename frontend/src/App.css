@@ -36,3 +36,46 @@
     transform: rotate(360deg);
   }
 }
+
+p {
+  color: white;
+  font-size: 25px;
+  font-family: Luminari;
+}
+
+h1 {
+  color: white;
+  text-decoration:  underline;
+  font-family: Luminari;
+  font-size: 80;
+}
+
+h2 {
+  color: white;
+  font-family: Luminari;
+}
+
+h3 {
+  color: white;
+  font-family: Luminari;
+}
+
+h4 {
+  color: white;
+  font-family: Luminari;
+}
+
+h5 {
+  color: white;
+  font-family: Luminari;
+}
+
+h6 {
+  color: white;
+  font-family: Luminari;
+}
+
+li {
+  color: white;
+  font-family: Luminari;
+}

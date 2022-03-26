@@ -23,12 +23,23 @@ function GameBoard(props) {
     const activePlayers = useActivePlayers();
     const storyCard = useStoryCard();
     const [popup, setPopup] = useState(true);
+    // const [partSetupButton, setPartSetupButton] = useState(false);
+    // const [hasSetup, setHasSetup] = useState(false);
     const [foeStageStart, setFoeStageStart] = [useFoeStageStart(), useSetFoeStageStart()];
     const [notifyStageStart, setNotifyStageStart] = [useNotifyStageStart(), useSetNotifyStageStart()];
     const [notifyStageEnd, setNotifyStageEnd] = [useNotifyStageEnd(), useSetNotifyStageEnd()];
     const [notifyQuestEnd, setNotifyQuestEnd] = [useNotifyQuestEnd(), useSetNotifyQuestEnd()];
     const [notifyHandOversize, setNotifyHandOversize] = [useNotifyHandOversize(), useSetNotifyHandOversize()];
     const [notifyHandNotOverSize, setNotifyHandNotOversize] = [useNotifyHandNotOversize(), useSetNotifyHandNotOversize()];
+
+    // if(notifyStageEnd){
+    //     setHasSetup(false);
+    // }
+
+    // if(name !== sponsorRequest && foeStageStart && hasSetup == false){
+    //     setPartSetupButton(true);
+    //     setHasSetup(true);
+    // }
 
     let myHandArr = [false, false, false, false];
     let myPlayerID = -1;
@@ -55,8 +66,8 @@ function GameBoard(props) {
     }
 
     const renderAllHands = () => {
-        const init = 60;
-        const jump = 230;
+        const init = 20;
+        const jump = 240;
         var allHands = [];
         for (var i = 0; i < hands.length; i++){
             var curTop = init+jump*i;
@@ -114,12 +125,13 @@ function GameBoard(props) {
                     <Popup popupType="JOINQUEST" setPopup={setPopup}></Popup>
                 </div>
             }
-            {(name !== sponsorRequest && foeStageStart) &&
+            {(name !== sponsorRequest && foeStageStart /*&& partSetupButton*/) &&
                 (<div id="finish-setup">
                     <Button
                         onClick={() => {
                             participantSetupComplete(name, myPlayerID);
-                        }} style={{}}>Participant Setup Complete
+                            // setPartSetupButton(false);
+                        }}>Participant Setup Complete
                     </Button>
                 </div>)
             }

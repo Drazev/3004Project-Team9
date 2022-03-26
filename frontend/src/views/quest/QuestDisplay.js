@@ -57,7 +57,7 @@ const QuestDisplay = (props) => {
   return (
     <div style={{backgroundColor: "rgba(30, 30, 30, .4)", width:600, height:700, borderRadius:30}}>
         <div style={{position:'absolute',top:50,left:30,width:360}}>
-            {currentStageObject && <h1 style={{textDecoration: "underline",fontFamily: "Apple Chancery", fontSize:60}}>Quest Stage</h1>}
+            {currentStageObject && <h1>Quest Stage</h1>}
         </div>
         <div style={{position:'absolute',top:20,left:440}}>
             {(storyCard != null) && <BigCard cardId={storyCard.cardID} cardImage={storyCard.imgSrc}></BigCard>}
