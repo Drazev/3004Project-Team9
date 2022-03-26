@@ -709,11 +709,15 @@ class EffectResolverServiceTest {
         HashMap<AllCardCodes,Integer> p4Foe = players.get(3).getHand().getNumberOfEachCardCodeBySubType().get(CardTypes.FOE);
         int p3TotWeap=0;
         int p4TotFoe=0;
-        for(Integer i : p3Weap.values()) {
-            p3TotWeap+=i;
+        if(p3Weap!=null) {
+            for(Integer i : p3Weap.values()) {
+                p3TotWeap+=i;
+            }
         }
-        for(Integer i : p4Foe.values()) {
-            p4TotFoe+=i;
+        if(p4Foe!=null){
+            for(Integer i : p4Foe.values()) {
+                p4TotFoe+=i;
+            }
         }
         assert((p3TestVals.get(CardTypes.WEAPON)==p3TotWeap+1) || p3TotWeap==0);
         assert((p4TestVals.get(CardTypes.FOE)==p4TotFoe+2) || p4TotFoe==0);
