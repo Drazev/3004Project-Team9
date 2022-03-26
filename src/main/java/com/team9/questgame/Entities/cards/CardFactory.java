@@ -531,7 +531,7 @@ public class CardFactory {
                         null,
                         "Journey through the Enchanted Forest",
                         cardEnumId.getSubType(),
-                        "Event - Journey through the Enchanted Forest.png",
+                        "Quest - Journey through the Enchanted Forest.png",
                         cardEnumId,
                         3,
                         AdventureDeckCards.EVIL_KNIGHT
@@ -543,7 +543,7 @@ public class CardFactory {
                         null,
                         "Vanquish King Arthur's Enemies",
                         cardEnumId.getSubType(),
-                        "Event - Vanquish King Arthur's Enemies.png",
+                        "Quest - Vanquish King Arthur's Enemies.png",
                         cardEnumId,
                         3
                 );
@@ -554,7 +554,7 @@ public class CardFactory {
                         null,
                         "Repel the Saxon Raiders",
                         cardEnumId.getSubType(),
-                        "Event - Repel the Saxon Raiders.png",
+                        "Quest - Repel the Saxon Raiders.png",
                         cardEnumId,
                         2,
                         GlobalCardTargets.ALL_SAXONS
@@ -566,7 +566,7 @@ public class CardFactory {
                         null,
                         "Boar Hunt",
                         cardEnumId.getSubType(),
-                        "Event - Boar Hunt.png",
+                        "Quest - Boar Hunt.png",
                         cardEnumId,
                         2,
                         AdventureDeckCards.BOAR
@@ -578,7 +578,7 @@ public class CardFactory {
                         null,
                         "Search for the Questing Beast",
                         cardEnumId.getSubType(),
-                        "Event - Search for the Questing Beast.png",
+                        "Quest - Search for the Questing Beast.png",
                         cardEnumId,
                         4
                 );
@@ -589,7 +589,7 @@ public class CardFactory {
                         null,
                         "Defend the Queen's Honor",
                         cardEnumId.getSubType(),
-                        "Event - Defend the Queen's Honor.png",
+                        "Quest - Defend the Queen's Honor.png",
                         cardEnumId,
                         4,
                         GlobalCardTargets.ALL_FOES
@@ -601,7 +601,7 @@ public class CardFactory {
                         null,
                         "Slay the Dragon",
                         cardEnumId.getSubType(),
-                        "Event - Slay the Dragon.png",
+                        "Quest - Slay the Dragon.png",
                         cardEnumId,
                         3,
                         AdventureDeckCards.DRAGON
@@ -613,7 +613,7 @@ public class CardFactory {
                         null,
                         "Rescue the Fair Maiden",
                         cardEnumId.getSubType(),
-                        "Event - Rescue the Fair Maiden.png",
+                        "Quest - Rescue the Fair Maiden.png",
                         cardEnumId,
                         3,
                         AdventureDeckCards.BLACK_KNIGHT
@@ -625,7 +625,7 @@ public class CardFactory {
                         null,
                         "Search for the Holy Grail",
                         cardEnumId.getSubType(),
-                        "Event - Search for the Holy Grail.png",
+                        "Quest - Search for the Holy Grail.png",
                         cardEnumId,
                         5,
                         GlobalCardTargets.ALL_FOES
@@ -637,7 +637,7 @@ public class CardFactory {
                         null,
                         "Test of the Green Knight",
                         cardEnumId.getSubType(),
-                        "Event - Test of the Green Knight.png",
+                        "Quest - Test of the Green Knight.png",
                         cardEnumId,
                         4,
                         AdventureDeckCards.GREEN_KNIGHT

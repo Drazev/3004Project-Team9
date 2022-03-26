@@ -1,8 +1,9 @@
 import React,{useState} from "react";
-import { useStageAreas } from "../Stores/PlayAreaStore";
-import { useIsSponsoring } from "../Stores/GeneralStore";
+import { useStageAreas } from "../../stores/playAreaStore";
+import { useIsSponsoring } from "../../stores/generalStore";
 import { Button, DropdownButton, Dropdown } from "react-bootstrap";
-import {discardCard, playCard} from "../ClientSocket";
+import {discardCard, playCard} from "../../services/clientSocket";
+import "./Card.css";
 
 function Card(props){
     const [isBig, setIsBig]=useState(false);

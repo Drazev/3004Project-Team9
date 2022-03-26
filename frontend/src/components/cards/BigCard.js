@@ -1,12 +1,12 @@
-import React,{useState} from "react";
+import "./BigCard.css";
+
 
 function BigCard(props){
     const size = {width: "100px", height: "135px"};
     return (
         <div 
             id="CardSection"
-            position="absolute"
-            style={{height:68,width:73,margin:"0 auto",float:"left",marginBottom:10,marginLeft:35}}
+            style={{position:"absolute",height:68,width:73,marginBottom:10,marginLeft:40,float:"left"}}
         >
             {(props.numCards >= 0) &&
               <p style={{
