@@ -1,7 +1,9 @@
 package com.team9.questgame.Entities.cards;
 
+import com.team9.questgame.Entities.Effects.EffectObserver;
 import com.team9.questgame.Entities.Effects.Effects;
 import com.team9.questgame.Entities.Players;
+import com.team9.questgame.game_phases.event.EventPhaseController;
 
 /**
  * Entity representing Event Cards
@@ -11,18 +13,7 @@ import com.team9.questgame.Entities.Players;
  * subclasses.
  */
 public class EventCards extends StoryCards implements CardWithEffect {
-    final Effects activeEffect;
-
-    @Override
-    public String toString() {
-        return super.toString()+", EventCards{" +
-                "activeEffect=" + activeEffect +
-                '}';
-    }
-
-    protected void onLocationChanged() {
-
-    }
+    private final Effects activeEffect;
 
     /**
      *
@@ -36,10 +27,26 @@ public class EventCards extends StoryCards implements CardWithEffect {
     public EventCards(Decks assignedDeck,String activeAbilityDescription, String cardName, CardTypes subType, String fileName, StoryDeckCards cardCode, Effects activeEffect) {
         super(assignedDeck,activeAbilityDescription, cardName, subType, fileName, cardCode);
         this.activeEffect = activeEffect;
+        if(activeEffect!=null) {
+            activeEffect.setSource(this);
+        }
     }
 
     @Override
-    public void activate(Players activatingPlayer) {
-        activeEffect.activate(activatingPlayer);
+    public String toString() {
+        return super.toString()+", EventCards{" +
+                "activeEffect=" + activeEffect +
+                '}';
+    }
+
+    protected void onLocationChanged() {
+
+    }
+
+
+
+    @Override
+    public void activate(EffectObserver observer, Players activatingPlayer) {
+        activeEffect.activate(observer,activatingPlayer);
     }
 }

@@ -291,7 +291,7 @@ public class GeneralGameController implements CardArea<StoryCards> {
                 tournamentPhaseController.startPhase(gamePhaseTurnService);
                 break;
             case EVENT:
-                status = eventPhaseController.receiveCard(this.storyCard);
+                status = this.storyCard.playCard(eventPhaseController);
                 eventPhaseController.startPhase(gamePhaseTurnService);
                 break;
             default:
@@ -330,6 +330,16 @@ public class GeneralGameController implements CardArea<StoryCards> {
 
 
         stateMachine.update();
+    }
+
+    public Players findPlayerWithID(long playerID) {
+        Players player=null;
+        for(Players p : players) {
+            if(p.getPlayerId()==playerID){
+                player=p;
+            }
+        }
+        return player;
     }
 
     // Only here to support backward dependency

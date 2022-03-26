@@ -1,23 +1,23 @@
 package com.team9.questgame.game_phases.quest;
 
 import com.team9.questgame.ApplicationContextHolder;
+import com.team9.questgame.Data.PlayAreaData;
 import com.team9.questgame.Data.PlayerData;
-import com.team9.questgame.Data.PlayerRewardData;
+import com.team9.questgame.Data.StageAreaData;
 import com.team9.questgame.Entities.Effects.EffectResolverService;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.Entities.cards.*;
 import com.team9.questgame.exception.IllegalGameRequest;
 import com.team9.questgame.exception.SponsorAlreadyExistsException;
-import com.team9.questgame.game_phases.GamePhaseControllers;
+import com.team9.questgame.game_phases.GamePhases;
 import com.team9.questgame.game_phases.GeneralGameController;
 import com.team9.questgame.exception.IllegalQuestPhaseStateException;
 import com.team9.questgame.game_phases.utils.PlayerTurnService;
 import com.team9.questgame.gamemanager.record.socket.QuestEndedOutbound;
 import com.team9.questgame.gamemanager.record.socket.RemainingQuestorsOutbound;
-import com.team9.questgame.gamemanager.service.InboundService;
+import com.team9.questgame.gamemanager.service.OutboundService;
 import com.team9.questgame.gamemanager.service.QuestPhaseOutboundService;
 import lombok.Getter;
-import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Component
-public class QuestPhaseController implements GamePhaseControllers {
+public class QuestPhaseController implements GamePhases<QuestCards> {
     Logger LOG;
     @Getter
     @Autowired
@@ -55,6 +55,9 @@ public class QuestPhaseController implements GamePhaseControllers {
     @Getter
     private ArrayList<StagePlayAreas> stages;
     private StagePlayAreas newStage;
+    private HashMap<StagePlayAreas,HashSet<Players>> stageVisibleToPlayersList;
+    private HashSet<Long> cardIDUsedToRevealStage;
+
     @Getter
     private Players sponsor;
     @Getter
@@ -78,6 +81,8 @@ public class QuestPhaseController implements GamePhaseControllers {
         LOG = LoggerFactory.getLogger(QuestPhaseController.class);
         this.questingPlayers = new CopyOnWriteArrayList<>();
         this.stages = new ArrayList<>();
+        stageVisibleToPlayersList = new HashMap<>();
+        cardIDUsedToRevealStage = new HashSet<>();
         playerTurnService = null;
         sponsor = null;
         sponsorAttempts = 0;
@@ -105,6 +110,16 @@ public class QuestPhaseController implements GamePhaseControllers {
 
         stateMachine.update();
         return true;
+    }
+
+    @Override
+    public void discardCard(QuestCards card) {
+        //Not Used
+    }
+
+    @Override
+    public boolean playCard(QuestCards card) {
+        return false; //Not Used
     }
 
     /**
@@ -187,9 +202,12 @@ public class QuestPhaseController implements GamePhaseControllers {
         //make as many stages as are stages in the quest and add them to the array
         this.sponsor.getPlayArea().setSponsorMode(true);
         for(int i = 0; i < questCard.getStages(); i++){
-            stages.add(new StagePlayAreas(questCard, sponsor,i));
+            stages.add(new StagePlayAreas(this,questCard, sponsor,i));
         }
+        this.stageVisibleToPlayersList.clear();
+        this.cardIDUsedToRevealStage.clear();
         stateMachine.update();
+
     }
 
     /**
@@ -427,6 +445,8 @@ public class QuestPhaseController implements GamePhaseControllers {
             stage.onGameReset();
         }
         this.stages.clear();
+        this.stageVisibleToPlayersList.clear();
+        this.cardIDUsedToRevealStage.clear();
         stateMachine.setPhaseReset(true);
         stateMachine.update();
         generalController.requestPhaseEnd();
@@ -440,19 +460,11 @@ public class QuestPhaseController implements GamePhaseControllers {
 
     }
 
-    @Override
-    public boolean cardPlayRequest(Cards card){return false;}
-
     private void registerPlayerPlayAreas(QuestCards card){
         for(Players player : playerTurnService.getPlayers()){
             player.getPlayArea().registerGamePhase(this);
             player.getPlayArea().onQuestStarted(card);
         }
-    }
-
-    @Override
-    public PlayerRewardData getRewardData(){
-        return null;
     }
 
     private void distributeRewards(){
@@ -470,11 +482,6 @@ public class QuestPhaseController implements GamePhaseControllers {
         }
         sponsorRewards.put(sponsor, sumCards+questCard.getStages());
         effectResolverService.drawAdventureCards(sponsorRewards);
-    }
-
-    @Override
-    public StoryDeckCards getPhaseCardCode(){
-        return null;
     }
 
     private void dealAdventureCard(){
@@ -520,6 +527,51 @@ public class QuestPhaseController implements GamePhaseControllers {
      * @return
      */
     private boolean validateSponsor(Players player){
+        return true;
+    }
+
+    /**
+     * Makes a stage visible to a specific player for the duration of this quest phase.
+     * Card ID's can only be used once per quest.
+     * @param stageID A unique identifier for the stage that should be revealed to the player
+     * @param player A player which should see all the data available for a given stage.
+     * @param cardIDUsed The cardID used to trigger this effect. It can only be used once per quest phase.
+     * @return True if successful, False if it was denied
+     */
+    public boolean makeStageVisibleToPlayer(long stageID, Players player, long cardIDUsed) {
+        if(cardIDUsedToRevealStage.contains(cardIDUsed)) {
+            LOG.warn(String.format("PlayerID %d attempted to make stage %d visible, but cardID %d has already been used! Rejected request."),player.getPlayerId(),stageID,cardIDUsed);
+            return false;
+        }
+
+        for(StagePlayAreas s : stages) {
+            if(s.getStageID()==stageID) {
+                cardIDUsedToRevealStage.add(cardIDUsed);
+                HashSet<Players> playerVisibilityList = stageVisibleToPlayersList.get(s);
+                if(playerVisibilityList == null) {
+                    playerVisibilityList = new HashSet<>();
+                    stageVisibleToPlayersList.put(s,playerVisibilityList);
+                }
+                playerVisibilityList.add(player);
+                LOG.info(String.format("Quest Phase has made stageID %d visible to playerID %d (Name: %s).",stageID,player.getPlayerId(),player.getName()));
+                return true;
+            }
+        }
+        LOG.warn(String.format("PlayerID %d attempted to make stage %d visible, but stage was not found. Rejected request!"),player.getPlayerId(),stageID);
+        return false;
+    }
+
+    public boolean notifyStageAreaChanged(StagePlayAreas stage,StageAreaData fullData, StageAreaData obfsucatedData) {
+        //Find out which stages are visible to someone.
+        if(!stages.contains(stage)) {
+            return false;
+        }
+
+        HashSet<Players> visibleList = stageVisibleToPlayersList.get(stage);
+        if(visibleList==null) {
+            visibleList = new HashSet<>();
+        }
+        outboundService.broadcastStageChanged(visibleList,fullData,obfsucatedData);
         return true;
     }
 

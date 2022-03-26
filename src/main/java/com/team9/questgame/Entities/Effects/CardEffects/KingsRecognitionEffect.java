@@ -16,7 +16,7 @@ public class KingsRecognitionEffect extends Effects {
 
     @Override
     protected void onActivated() {
-        waitForTrigger();
+        waitForTargetTrigger();
     }
 
     @Override

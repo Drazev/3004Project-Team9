@@ -27,13 +27,12 @@ public class CardFactory {
     }
 
     public AdventureCards createCard(Decks assignedDeck,AdventureDeckCards cardEnumId) {
-        AdventureCards card=null;
         Effects effect;
 
-        switch(cardEnumId)
+        return switch(cardEnumId)
         {
-            case EXCALIBUR:
-                card = new WeaponCards(
+            case EXCALIBUR -> {
+                WeaponCards card = new WeaponCards(
                         assignedDeck,
                         null,
                         "Excalibur",
@@ -42,9 +41,10 @@ public class CardFactory {
                         cardEnumId,
                         30
                 );
-                break;
-            case LANCE:
-                card = new WeaponCards(
+                yield card;
+            }
+            case LANCE -> {
+                WeaponCards card = new WeaponCards(
                         assignedDeck,
                         null,
                         "Lance",
@@ -53,9 +53,10 @@ public class CardFactory {
                         cardEnumId,
                         20
                 );
-                break;
-            case BATTLE_AX:
-                card = new WeaponCards(
+                yield card;
+            }
+            case BATTLE_AX -> {
+                WeaponCards card = new WeaponCards(
                         assignedDeck,
                         null,
                         "Battle-ax",
@@ -64,9 +65,10 @@ public class CardFactory {
                         cardEnumId,
                         15
                 );
-                break;
-            case SWORD:
-                card = new WeaponCards(
+                yield card;
+            }
+            case SWORD -> {
+                WeaponCards card = new WeaponCards(
                         assignedDeck,
                         null,
                         "Sword",
@@ -75,9 +77,10 @@ public class CardFactory {
                         cardEnumId,
                         10
                 );
-                break;
-            case HORSE:
-                card = new WeaponCards(
+                yield card;
+            }
+            case HORSE-> {
+                WeaponCards card = new WeaponCards(
                         assignedDeck,
                         null,
                         "Horse",
@@ -86,9 +89,10 @@ public class CardFactory {
                         cardEnumId,
                         10
                 );
-                break;
-            case DAGGER:
-                card = new WeaponCards(
+                yield card;
+            }
+            case DAGGER -> {
+                WeaponCards card = new WeaponCards(
                         assignedDeck,
                         null,
                         "Dagger",
@@ -97,9 +101,10 @@ public class CardFactory {
                         cardEnumId,
                         5
                 );
-                break;
-            case TEST_OF_THE_QUESTING_BEAST:
-                card = new TestCards(
+                yield card;
+            }
+            case TEST_OF_THE_QUESTING_BEAST -> {
+                TestCards card = new TestCards(
                         assignedDeck,
                         "Minimum 4 Bid on the Search for the Questing Best Quest",
                         "Test of the Questing Beast",
@@ -110,9 +115,10 @@ public class CardFactory {
                         4,
                         StoryDeckCards.SEARCH_FOR_THE_QUESTING_BEAST
                 );
-                break;
-            case TEST_OF_TEMPTATION:
-                card = new TestCards(
+                yield card;
+        }
+            case TEST_OF_TEMPTATION -> {
+                TestCards card = new TestCards(
                         assignedDeck,
                         null,
                         "Test of Temptation",
@@ -121,9 +127,10 @@ public class CardFactory {
                         cardEnumId,
                         0
                 );
-                break;
-            case TEST_OF_VALOR:
-                card = new TestCards(
+                yield card;
+            }
+            case TEST_OF_VALOR -> {
+                TestCards card = new TestCards(
                         assignedDeck,
                         null,
                         "Test of Valor",
@@ -132,9 +139,10 @@ public class CardFactory {
                         cardEnumId,
                         0
                 );
-                break;
-            case TEST_OF_MORGAN_LE_FEY:
-                card = new TestCards(
+                yield card;
+            }
+            case TEST_OF_MORGAN_LE_FEY -> {
+                TestCards card = new TestCards(
                         assignedDeck,
                         null,
                         "Test of Morgan Le Fey",
@@ -143,9 +151,10 @@ public class CardFactory {
                         cardEnumId,
                         3
                 );
-                break;
-            case QUEEN_ISEULT:
-                card = new AllyCards(
+                yield card;
+            }
+            case QUEEN_ISEULT -> {
+                AllyCards card = new AllyCards(
                         assignedDeck,
                         "4 Bids when Tristan is in play",
                         "Queen Iselut",
@@ -156,11 +165,13 @@ public class CardFactory {
                         2,
                         0,
                         4,
-                        AdventureDeckCards.SIR_TRISTAN
+                        AdventureDeckCards.SIR_TRISTAN,
+                        null
                 );
-                break;
-            case SIR_LANCELOT:
-                card = new AllyCards(
+                yield card;
+            }
+            case SIR_LANCELOT -> {
+                AllyCards card = new AllyCards(
                         assignedDeck,
                         "+25 when on the Quest to Defend the Queen's Honor",
                         "Sir Lancelot",
@@ -171,11 +182,13 @@ public class CardFactory {
                         0,
                         25,
                         0,
-                        StoryDeckCards.DEFEND_THE_QUEENS_HONOR
+                        StoryDeckCards.DEFEND_THE_QUEENS_HONOR,
+                        null
                 );
-                break;
-            case SIR_GALAHAD:
-                card = new AllyCards(
+                yield card;
+            }
+            case SIR_GALAHAD -> {
+                AllyCards card = new AllyCards(
                         assignedDeck,
                         null,
                         "Sir Galahad",
@@ -185,9 +198,10 @@ public class CardFactory {
                         15,
                         0
                 );
-                break;
-            case SIR_GAWAIN:
-                card = new AllyCards(
+                yield card;
+            }
+            case SIR_GAWAIN -> {
+                AllyCards card = new AllyCards(
                         assignedDeck,
                         "+20 on the Test of the Green Knight Quest",
                         "Sir Gawain",
@@ -198,11 +212,13 @@ public class CardFactory {
                         0,
                         20,
                         0,
-                        StoryDeckCards.TEST_OF_THE_GREEN_KNIGHT
+                        StoryDeckCards.TEST_OF_THE_GREEN_KNIGHT,
+                        null
                 );
-                break;
-            case KING_PELLINORE:
-                card = new AllyCards(
+                yield card;
+            }
+            case KING_PELLINORE -> {
+                AllyCards card = new AllyCards(
                         assignedDeck,
                         "4 Bids on the Search for the Questing Beast Quest",
                         "King Pellinore",
@@ -213,11 +229,13 @@ public class CardFactory {
                         0,
                         0,
                         4,
-                        StoryDeckCards.SEARCH_FOR_THE_HOLY_GRAIL
+                        StoryDeckCards.SEARCH_FOR_THE_HOLY_GRAIL,
+                        null
                 );
-                break;
-            case SIR_PERCIVAL:
-                card = new AllyCards(
+                yield card;
+            }
+            case SIR_PERCIVAL -> {
+                AllyCards card = new AllyCards(
                         assignedDeck,
                         "+20 on the Search for the Holy Grail Quest",
                         "Sir Percival",
@@ -228,11 +246,13 @@ public class CardFactory {
                         0,
                         20,
                         0,
-                        StoryDeckCards.SEARCH_FOR_THE_HOLY_GRAIL
+                        StoryDeckCards.SEARCH_FOR_THE_HOLY_GRAIL,
+                        null
                 );
-                break;
-            case SIR_TRISTAN:
-                card = new AllyCards(
+                yield card;
+            }
+            case SIR_TRISTAN -> {
+                AllyCards card = new AllyCards(
                         assignedDeck,
                         "+20 when Queen Iseult is in Play",
                         "Sir Tristan",
@@ -243,11 +263,13 @@ public class CardFactory {
                         0,
                         20,
                         0,
-                        AdventureDeckCards.QUEEN_ISEULT
+                        AdventureDeckCards.QUEEN_ISEULT,
+                        null
                 );
-                break;
-            case KING_ARTHUR:
-                card = new AllyCards(
+                yield card;
+            }
+            case KING_ARTHUR -> {
+                AllyCards card = new AllyCards(
                         assignedDeck,
                         "2 Bids",
                         "King Arthur",
@@ -257,9 +279,10 @@ public class CardFactory {
                         10,
                         2
                 );
-                break;
-            case QUEEN_GUINEVERE:
-                card = new AllyCards(
+                yield card;
+            }
+            case QUEEN_GUINEVERE -> {
+                AllyCards card = new AllyCards(
                         assignedDeck,
                         "3 Bids",
                         "Queen Guinevere",
@@ -269,9 +292,11 @@ public class CardFactory {
                         0,
                         3
                 );
-                break;
-            case MERLIN:
-                card = new AllyCards(
+                yield card;
+            }
+            case MERLIN -> {
+                effect = new MerlinEffect();
+                AllyCards card = new AllyCards(
                         assignedDeck,
                         "Player may preview any one stage per quest",
                         "Merlin",
@@ -279,25 +304,34 @@ public class CardFactory {
                         "Ally - Merlin.png",
                         cardEnumId,
                         0,
-                        0
+                        0,
+                        0,
+                        0,
+                        null,
+                        effect
                 );
-                break;
-            case AMOUR:
-                card = new AmourCards(assignedDeck,"Amour.png");
-                break;
-            case MORDRED:
-                card = new FoeCards(
+                effect.setSource(card);
+                yield card;
+            }
+            case AMOUR -> new AmourCards(assignedDeck, "Amour.png");
+            case MORDRED-> {
+                effect = new MordredEffect();
+                FoeCards card = new FoeCards(
                         assignedDeck,
-                  "Use as a Foe or sacrifice at any time to remove any player's Ally from play",
-                  "Mordred",
-                  cardEnumId.getSubType(),
+                        "Use as a Foe or sacrifice at any time to remove any player's Ally from play",
+                        "Mordred",
+                        cardEnumId.getSubType(),
                         "Foe - Mordred.png",
                         cardEnumId,
-                        30
+                        30,
+                        0,
+                        effect
                 );
-                break;
-            case GIANT:
-                card = new FoeCards(
+                effect.setSource(card);
+                yield card;
+            }
+            case GIANT -> {
+                FoeCards card = new FoeCards(
                         assignedDeck,
                         null,
                         "Giant",
@@ -306,9 +340,10 @@ public class CardFactory {
                         cardEnumId,
                         40
                 );
-                break;
-            case DRAGON:
-                card = new FoeCards(
+                yield card;
+            }
+            case DRAGON -> {
+                FoeCards card = new FoeCards(
                         assignedDeck,
                         null,
                         "Dragon",
@@ -318,9 +353,9 @@ public class CardFactory {
                         50,
                         70
                 );
-                break;
-            case THIEVES:
-                card = new FoeCards(
+                yield card;
+            }
+            case THIEVES -> new FoeCards(
                         assignedDeck,
                         null,
                         "Thieves",
@@ -329,9 +364,7 @@ public class CardFactory {
                         cardEnumId,
                         5
                 );
-                break;
-            case BOAR:
-                card = new FoeCards(
+            case BOAR -> new FoeCards(
                         assignedDeck,
                         null,
                         "Boar",
@@ -341,9 +374,7 @@ public class CardFactory {
                         5,
                         15
                 );
-                break;
-            case SAXONS:
-                card = new FoeCards(
+            case SAXONS -> new FoeCards(
                         assignedDeck,
                         null,
                         "Saxons",
@@ -353,9 +384,7 @@ public class CardFactory {
                         10,
                         20
                 );
-                break;
-            case ROBBER_KNIGHT:
-                card = new FoeCards(
+            case ROBBER_KNIGHT -> new FoeCards(
                         assignedDeck,
                         null,
                         "Robber Knight",
@@ -364,9 +393,7 @@ public class CardFactory {
                         cardEnumId,
                         15
                 );
-                break;
-            case GREEN_KNIGHT:
-                card = new FoeCards(
+            case GREEN_KNIGHT -> new FoeCards(
                         assignedDeck,
                         null,
                         "Green Knight",
@@ -376,9 +403,7 @@ public class CardFactory {
                         25,
                         40
                 );
-                break;
-            case BLACK_KNIGHT:
-                card = new FoeCards(
+            case BLACK_KNIGHT-> new FoeCards(
                         assignedDeck,
                         null,
                         "Black Knight",
@@ -388,9 +413,7 @@ public class CardFactory {
                         25,
                         35
                 );
-                break;
-            case EVIL_KNIGHT:
-                card = new FoeCards(
+            case EVIL_KNIGHT-> new FoeCards(
                         assignedDeck,
                         null,
                         "Evil Knight",
@@ -400,9 +423,7 @@ public class CardFactory {
                         20,
                         30
                 );
-                break;
-            case SAXON_KNIGHT:
-                card = new FoeCards(
+            case SAXON_KNIGHT -> new FoeCards(
                         assignedDeck,
                         null,
                         "Saxon Knight",
@@ -412,10 +433,7 @@ public class CardFactory {
                         15,
                         25
                 );
-                break;
-        }
-
-        return card;
+        };
     }
 
     public StoryCards createCard(Decks assignedDeck,StoryDeckCards cardEnumId) {
@@ -434,7 +452,7 @@ public class CardFactory {
                         cardEnumId,
                         effect
                 );
-                effect.setSource(card);
+                effect.setSource((CardWithEffect) card);
                 break;
             case POX:
                 effect = new PoxEffect();
@@ -447,7 +465,7 @@ public class CardFactory {
                         cardEnumId,
                         effect //bind event
                 );
-                effect.setSource(card);
+                effect.setSource((CardWithEffect) card);
                 break;
             case PLAGUE:
                 effect = new PlagueEffect();
@@ -460,7 +478,7 @@ public class CardFactory {
                         cardEnumId,
                         effect //bind event
                 );
-                effect.setSource(card);
+                effect.setSource((CardWithEffect) card);
                 break;
             case KINGS_RECOGNITION:
                 effect = new KingsRecognitionEffect();
@@ -473,7 +491,7 @@ public class CardFactory {
                         cardEnumId,
                         effect //bind event
                 );
-                effect.setSource(card);
+                effect.setSource((CardWithEffect) card);
                 break;
             case QUEENS_FAVOR:
                 effect = new QueensFavorEffect();
@@ -486,7 +504,7 @@ public class CardFactory {
                         cardEnumId,
                         effect
                 );
-                effect.setSource(card);
+                effect.setSource((CardWithEffect) card);
                 break;
             case COURT_CALLED_TO_CAMELOT:
                 effect = new CourtCalledToCamelotEffect();
@@ -499,9 +517,10 @@ public class CardFactory {
                         cardEnumId,
                         effect //bind event
                 );
-                effect.setSource(card);
+                effect.setSource((CardWithEffect) card);
                 break;
             case KINGS_CALL_TO_ARMS:
+                effect = new KingsCallToArms();
                 card = new EventCards(
                         assignedDeck,
                         "The highest ranked player(s) must place 1 weapon in the discard pile. If unable to do so, 2 Foe Cards must be discarded.",
@@ -509,8 +528,9 @@ public class CardFactory {
                         cardEnumId.getSubType(),
                         "Event - Kings Call to Arms.png",
                         cardEnumId,
-                        null //bind event
+                        effect //bind event
                 );
+                effect.setSource((CardWithEffect) card);
                 break;
             case PROSPERITY_THROUGHOUT_THE_REALM:
                 effect = new ProsperityThroughtTheRealmEffect();
@@ -523,7 +543,7 @@ public class CardFactory {
                         cardEnumId,
                         effect //bind event
                 );
-                effect.setSource(card);
+                effect.setSource((CardWithEffect) card);
                 break;
             case JOURNEY_THROUGH_THE_ENCHANTED_FOREST:
                 card = new QuestCards (
@@ -688,7 +708,6 @@ public class CardFactory {
                 );
                 break;
         }
-
         return card;
     }
 
