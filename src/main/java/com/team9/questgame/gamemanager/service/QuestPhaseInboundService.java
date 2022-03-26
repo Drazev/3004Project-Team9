@@ -54,7 +54,7 @@ public class QuestPhaseInboundService {
     }
 
     public synchronized void checkJoinResult(String name, boolean joined){
-
+        LOG.info(String.format("JOIN RESULT: %s joined? %s", name, joined));
         Players player = sessionService.getPlayerMap().get(name);
         questController.checkJoinResult(player, joined);
     }

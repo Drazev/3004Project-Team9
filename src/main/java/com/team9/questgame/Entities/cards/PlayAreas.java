@@ -5,5 +5,6 @@ public interface PlayAreas<T extends Cards> extends CardArea<T> {
     int getBids();
     void onGamePhaseEnded();
     void registerBoostableCard(BoostableCard card);
+    void registerMinBid(TestCards card);
     void  registerBattlePointContributor(BattlePointContributor card);
 }

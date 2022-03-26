@@ -71,6 +71,8 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
                 case IN_STAGE:
                     this.currentState = inStageState();
                     break;
+                case IN_TEST:
+                    this.currentState = inTestState();
 //                case STAGE_ONE:
 //                    this.currentState = stageOneState();
 //                    break;
@@ -156,6 +158,9 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
             if (controller.getQuestingPlayers().size() == 0) {
                 return QuestPhaseStatesE.ENDED;
             }
+            if(controller.isNextStageTest()){
+                return QuestPhaseStatesE.IN_TEST;
+            }
             return QuestPhaseStatesE.PARTICIPANT_SETUP;
         }
         return QuestPhaseStatesE.QUEST_JOIN;
@@ -187,6 +192,13 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
             return QuestPhaseStatesE.ENDED;
         }
         return QuestPhaseStatesE.PARTICIPANT_SETUP;
+    }
+
+    public QuestPhaseStatesE inTestState(){
+        if(!controller.isNextStageTest()){
+            //TODO:if that was the last stage go to ended, if theres more then go to participant setup
+        }
+        return QuestPhaseStatesE.IN_TEST;
     }
 
 //    public QuestPhaseStatesE stageOneState() {
@@ -235,7 +247,7 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
 
     private void resetAllRequest() {
         setPhaseStartRequested(false);
-        setPhaseReset(false);
+        //setPhaseReset(false);
         setBlockRequested(false);
         setUnblockRequested(false);
     }

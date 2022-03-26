@@ -46,6 +46,11 @@ public class TestPlayArea implements PlayAreas<AdventureCards>, Serializable {
     }
 
     @Override
+    public void registerMinBid(TestCards card){
+
+    }
+
+    @Override
     public void registerBattlePointContributor(BattlePointContributor card){
 
     }
