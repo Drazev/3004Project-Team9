@@ -2,22 +2,19 @@ package com.team9.questgame.game_phases.quest;
 
 import com.team9.questgame.ApplicationContextHolder;
 import com.team9.questgame.Data.PlayerData;
-import com.team9.questgame.Data.PlayerRewardData;
 import com.team9.questgame.Entities.Effects.EffectResolverService;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.Entities.cards.*;
 import com.team9.questgame.exception.IllegalGameRequest;
 import com.team9.questgame.exception.SponsorAlreadyExistsException;
-import com.team9.questgame.game_phases.GamePhaseControllers;
+import com.team9.questgame.game_phases.GamePhases;
 import com.team9.questgame.game_phases.GeneralGameController;
 import com.team9.questgame.exception.IllegalQuestPhaseStateException;
 import com.team9.questgame.game_phases.utils.PlayerTurnService;
 import com.team9.questgame.gamemanager.record.socket.QuestEndedOutbound;
 import com.team9.questgame.gamemanager.record.socket.RemainingQuestorsOutbound;
-import com.team9.questgame.gamemanager.service.InboundService;
 import com.team9.questgame.gamemanager.service.QuestPhaseOutboundService;
 import lombok.Getter;
-import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +25,7 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Component
-public class QuestPhaseController implements GamePhaseControllers {
+public class QuestPhaseController implements GamePhases<QuestCards> {
     Logger LOG;
     @Getter
     @Autowired
@@ -102,6 +99,16 @@ public class QuestPhaseController implements GamePhaseControllers {
 
         stateMachine.update();
         return true;
+    }
+
+    @Override
+    public void discardCard(QuestCards card) {
+        //Not Used
+    }
+
+    @Override
+    public boolean playCard(QuestCards card) {
+        return false; //Not Used
     }
 
     /**
@@ -421,19 +428,11 @@ public class QuestPhaseController implements GamePhaseControllers {
 
     }
 
-    @Override
-    public boolean cardPlayRequest(Cards card){return false;}
-
     private void registerPlayerPlayAreas(QuestCards card){
         for(Players player : playerTurnService.getPlayers()){
             player.getPlayArea().registerGamePhase(this);
             player.getPlayArea().onQuestStarted(card);
         }
-    }
-
-    @Override
-    public PlayerRewardData getRewardData(){
-        return null;
     }
 
     private void distributeRewards(){
@@ -451,11 +450,6 @@ public class QuestPhaseController implements GamePhaseControllers {
         }
         sponsorRewards.put(sponsor, sumCards+questCard.getStages());
         effectResolverService.drawAdventureCards(sponsorRewards);
-    }
-
-    @Override
-    public StoryDeckCards getPhaseCardCode(){
-        return null;
     }
 
     private void dealAdventureCard(){

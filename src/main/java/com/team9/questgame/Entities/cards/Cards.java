@@ -99,7 +99,7 @@ public abstract class Cards {
     abstract public CardData generateObfuscatedCardData();
 
 
-    boolean playCard(CardArea cardArea) {
+    public boolean playCard(CardArea cardArea) {
         if(location==cardArea)
         {
             throw new IllegalCardStateException("Card cannot be played into the same area.");
@@ -111,7 +111,7 @@ public abstract class Cards {
         return cardArea.receiveCard(this);
     }
 
-    boolean playCard(PlayAreas playArea) {
+    public boolean playCard(PlayAreas playArea) {
         CardArea tmp = playArea;
         boolean rc = playCard(tmp);
         if(rc) {

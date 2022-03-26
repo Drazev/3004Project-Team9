@@ -1,6 +1,7 @@
 package com.team9.questgame.Entities.cards;
 
 import com.team9.questgame.Data.CardData;
+import com.team9.questgame.Entities.Effects.EffectObserver;
 import com.team9.questgame.Entities.Effects.Effects;
 import com.team9.questgame.Entities.Players;
 
@@ -32,7 +33,7 @@ public class AllyCards <T extends Enum<T> & AllCardCodes> extends AdventureCards
      * @param bids The bids this ally contributes
      */
     public AllyCards(Decks assignedDeck,String activeAbilityDescription, String cardName, CardTypes subType, String fileName, AdventureDeckCards cardCode, int bonusBp, int bids) {
-        this(assignedDeck,activeAbilityDescription, cardName, subType, fileName, cardCode,bonusBp,bids,0,0,null);
+        this(assignedDeck,activeAbilityDescription, cardName, subType, fileName, cardCode,bonusBp,bids,0,0,null,null);
     }
 
     /**
@@ -48,7 +49,7 @@ public class AllyCards <T extends Enum<T> & AllCardCodes> extends AdventureCards
      * @param boostBids The total number of bids this ally contributes if the boost condition was met.
      * @param boostConditionCardCode The target card that will trigger this ally's boost effect.
      */
-    public AllyCards(Decks assignedDeck,String activeAbilityDescription, String cardName, CardTypes subType, String fileName, AdventureDeckCards cardCode, int bonusBp, int bids, int boostBonusBp, int boostBids,T boostConditionCardCode) {
+    public AllyCards(Decks assignedDeck,String activeAbilityDescription, String cardName, CardTypes subType, String fileName, AdventureDeckCards cardCode, int bonusBp, int bids, int boostBonusBp, int boostBids,T boostConditionCardCode, Effects effect) {
         super(assignedDeck,activeAbilityDescription, cardName, subType, fileName, cardCode);
         this.bonusBp = bonusBp;
         this.bids = bids;
@@ -56,7 +57,10 @@ public class AllyCards <T extends Enum<T> & AllCardCodes> extends AdventureCards
         this.boostBids=boostBids;
         this.isBoosted=false;
         this.boostConditionCardCode = boostConditionCardCode;
-        this.activeEffect=null; //TODO: Change when Effects implemented
+        this.activeEffect=effect;
+        if(effect!=null) {
+            effect.setSource(this);
+        }
 
     }
 
@@ -163,13 +167,13 @@ public class AllyCards <T extends Enum<T> & AllCardCodes> extends AdventureCards
         super.discardCard();
     }
 
+
     @Override
-    public void activate(Players activatingPlayer) {
+    public void activate(EffectObserver observer, Players activatingPlayer) {
         if(activeEffect==null) {
             LOG.error("Player "+ activatingPlayer.getName()+ " activated "+this.cardCode+", but it has no Effect to activate!");
             return;
         }
-        activeEffect.activate(activatingPlayer);
-        discardCard();
+        activeEffect.activate(observer,activatingPlayer);
     }
 }

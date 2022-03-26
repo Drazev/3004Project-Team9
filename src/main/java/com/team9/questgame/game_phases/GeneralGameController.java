@@ -290,7 +290,7 @@ public class GeneralGameController implements CardArea<StoryCards> {
                 tournamentPhaseController.startPhase(gamePhaseTurnService);
                 break;
             case EVENT:
-                status = eventPhaseController.receiveCard(this.storyCard);
+                status = this.storyCard.playCard(eventPhaseController);
                 eventPhaseController.startPhase(gamePhaseTurnService);
                 break;
             default:

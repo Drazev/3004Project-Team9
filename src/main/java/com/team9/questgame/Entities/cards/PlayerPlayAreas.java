@@ -4,11 +4,12 @@ import com.fasterxml.jackson.annotation.*;
 import com.team9.questgame.Data.CardData;
 import com.team9.questgame.Data.PlayAreaData;
 import com.team9.questgame.Data.PlayAreaDataSources;
+import com.team9.questgame.Entities.Effects.EffectObserver;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.exception.IllegalEffectStateException;
 import com.team9.questgame.exception.CardAreaException;
 import com.team9.questgame.exception.IllegalGamePhaseStateException;
-import com.team9.questgame.game_phases.GamePhaseControllers;
+import com.team9.questgame.game_phases.GamePhases;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -17,21 +18,20 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 import static com.team9.questgame.exception.CardAreaException.CardAreaExceptionReasonCodes.GAMEPHASE_NOT_REGISTERED;
-import static com.team9.questgame.exception.CardAreaException.CardAreaExceptionReasonCodes.STAGE_PLAY_AREA_NOT_SET;
 import static com.team9.questgame.exception.IllegalGamePhaseStateException.GamePhaseExceptionReasonCodes.NULL_ACTIVE_PHASE;
 
 @JsonIdentityInfo(
         generator = ObjectIdGenerators.PropertyGenerator.class,
         property="id"
 )
-public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
+public class PlayerPlayAreas implements PlayAreas<AdventureCards>, EffectObserver<AdventureCards> {
 
     private long id;
     @JsonIgnore
     private final Players player;
     @JsonIgnore
     @Getter
-    private GamePhaseControllers phaseController;
+    private GamePhases phaseController;
     @JsonIgnore
     private Logger LOG;
     @Getter
@@ -363,7 +363,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
      * This will enable certain features.
      * @param activePhase The active game phase to be set
      */
-    public void registerGamePhase(GamePhaseControllers activePhase) {
+    public void registerGamePhase(GamePhases activePhase) {
         if(activePhase==null)
         {
             throw new IllegalGamePhaseStateException(null,NULL_ACTIVE_PHASE);
@@ -381,9 +381,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
 
         for(CardWithEffect card : cardsWithActiveEffects) {
             if(card.getCardID()==cardId) {
-                card.activate(player);
-                card.discardCard();
-                cardsWithActiveEffects.remove(card);
+                card.activate(this,player);
                 return true;
             }
         }
@@ -617,5 +615,20 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards> {
      */
     private void notifyPlayAreaChanged() {
         OutboundService.getService().broadcastPlayAreaChanged(player,getPlayAreaData(),getObfuscatedPlayAreaData());
+    }
+
+    @Override
+    public void onEffectResolved(CardWithEffect resolvedCard) {
+        if(cardsWithActiveEffects.contains(resolvedCard)) {
+            removeCard((AdventureCards)resolvedCard);
+        }
+        else {
+            LOG.warn("PlayerPlayAreas::onEffectResolved returned a CardWithEffect that was not in the play area!, "+resolvedCard.getCardCode());
+        }
+    }
+
+    @Override
+    public void onEffectResolvedWithDelayedTrigger(CardWithEffect resolvedCard) {
+        //Not used
     }
 }

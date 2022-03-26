@@ -28,10 +28,6 @@ public class TournamentPhaseController implements GamePhases<StoryCards> {
 
     }
 
-    @Override
-    public PlayerRewardData getRewards() {
-        return null;
-    }
 
     @Override
     public void startPhase(PlayerTurnService playerTurnService) {

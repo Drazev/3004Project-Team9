@@ -1,9 +1,8 @@
 package com.team9.questgame.Entities.Effects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.team9.questgame.ApplicationContextHolder;
 import com.team9.questgame.Entities.Players;
-import com.team9.questgame.Entities.cards.Cards;
+import com.team9.questgame.Entities.cards.CardWithEffect;
 import com.team9.questgame.exception.IllegalEffectStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +26,11 @@ import java.util.ArrayList;
  */
 public abstract class Effects {
     protected final ArrayList<TargetSelector> targetSelectors;
-    protected Cards source;
+    protected CardWithEffect source;
     protected Players activatedBy;
     protected ArrayList<Players> possibleTargerts;
     protected EffectState state;
+    protected EffectObserver observer;
     @JsonIgnore
     static protected Logger LOG= LoggerFactory.getLogger(Effects.class);
 
@@ -46,11 +46,11 @@ public abstract class Effects {
     }
 
 
-    public Cards getSource() {
+    public CardWithEffect getSource() {
         return source;
     }
 
-    public void setSource(Cards source) {
+    public void setSource(CardWithEffect source) {
         this.source = source;
     }
 
@@ -59,12 +59,17 @@ public abstract class Effects {
     /**
      * Triggers the algorithm that will run the entire effect.
      */
-    public void activate(Players activatedBy) throws IllegalEffectStateException {
-        if(activatedBy==null) {
-            LOG.error(source.getCardName()+" has been activated but source cannot be null!");
+    public void activate(EffectObserver observer,Players activatedBy) throws IllegalEffectStateException {
+        if(activatedBy==null || observer==null) {
+            LOG.error(source.getCardName()+" has been activated but source or EffectObserver cannot be null!");
             throw new IllegalEffectStateException("An effect cannot be activated without a player source.",this,source);
         }
+        else if(this.state!=EffectState.INACTIVE) { //Handle duplicate requests
+            LOG.warn(source.getCardName()+" activation request received but effect is active and in the "+state+" state.");
+            return;
+        }
         this.activatedBy = activatedBy;
+        this.observer = observer;
         LOG.info(source.getCardName()+" has been activated by "+activatedBy.getName());
 
         nextState();
@@ -74,10 +79,22 @@ public abstract class Effects {
      * Reactivate effects that waiting for a trigger before resolving
      */
     public void trigger(ArrayList<Players> targetedPlayers) throws IllegalEffectStateException {
-        if(state!=EffectState.TARGET_SELECTION_ON_TRIGGER) {
+        if(state!=EffectState.TRIGGER_TARGET_SELECTION) {
+            reset();
             throw new IllegalEffectStateException("Effect must be waiting on a trigger to be triggered. This effect was in the state: "+state,this,source);
         }
         this.possibleTargerts=new ArrayList<>(targetedPlayers);
+        nextState();
+    }
+
+    /**
+     * Reactivate effects that waiting for a trigger before resolving
+     */
+    public void trigger() throws IllegalEffectStateException {
+        if(state!=EffectState.EFFECT_RESOLUTION_PLAYER_RESPONSE) {
+            reset();
+            throw new IllegalEffectStateException("Effect must be waiting on a trigger to be triggered. This effect was in the state: "+state,this,source);
+        }
         nextState();
     }
 
@@ -86,8 +103,10 @@ public abstract class Effects {
      */
     public void reset() {
         activatedBy=null;
+        observer=null;
         EffectResolverService.getService().unregisterEffectTriggeredOnQuestCompleted(this);
         this.state=EffectState.INACTIVE;
+        LOG.info("Effect "+source.getCardCode()+" was REST to status "+state);
     }
 
     /**
@@ -106,47 +125,52 @@ public abstract class Effects {
                 LOG.info(source.getCardName()+" state changed to "+this.state+" by "+activatedBy.getName());
                 onTargetSelection();
             }
-            case TARGET_SELECTION_ON_TRIGGER -> {
-                this.state=EffectState.TRIGGERED;
+            case TRIGGER_TARGET_SELECTION -> {
+                this.state=EffectState.TRIGGER_EFFECT_RESOLUTION;
                 LOG.info(source.getCardName()+" state changed to "+this.state+" by "+activatedBy.getName());
-                onTriggered();
+                onEffectResolution();
             }
-            case TARGET_SELECTION,TRIGGERED -> {
+            case TARGET_SELECTION -> {
                 this.state=EffectState.EFFECT_RESOLUTION;
                 LOG.info(source.getCardName()+" state changed to "+this.state+" by "+activatedBy.getName());
                 onEffectResolution();
             }
-            case EFFECT_RESOLUTION -> {
+            case EFFECT_RESOLUTION,EFFECT_RESOLUTION_PLAYER_RESPONSE -> {
                 this.state=EffectState.RESOLVED;
                 LOG.info(source.getCardName()+" state changed to "+this.state+" by "+activatedBy.getName());
                 onResolved();
             }
+            case TRIGGER_EFFECT_RESOLUTION -> {
+                this.state = EffectState.TRIGGER_RESOLVED;
+                LOG.info(source.getCardName()+" state changed to "+this.state+" by "+activatedBy.getName());
+                onTriggerResolved();
+            }
         }
     }
 
-    protected void waitForTrigger() {
+    protected void waitForTargetTrigger() {
         if(this.state!=EffectState.ACTIVATED) {
             throw new IllegalEffectStateException("Effect must be in state "+EffectState.ACTIVATED+" to wait for trigger, but was in "+this.state,this,source);
         }
-        this.state=EffectState.TARGET_SELECTION_ON_TRIGGER;
+        this.state=EffectState.TRIGGER_TARGET_SELECTION;
         LOG.info(source.getCardName()+" state changed to "+this.state+" by "+activatedBy.getName());
         EffectResolverService.getService().registerEffectTriggeredOnQuestCompleted(this);
+
+        observer.onEffectResolvedWithDelayedTrigger(source);
+    }
+
+    protected void waitForResolutionTrigger() {
+        if(this.state!=EffectState.EFFECT_RESOLUTION) {
+            throw new IllegalEffectStateException("Effect must be in state "+EffectState.TRIGGER_TARGET_SELECTION+" to wait for resolution trigger, but was in "+this.state,this,source);
+        }
+        this.state=EffectState.EFFECT_RESOLUTION_PLAYER_RESPONSE;
+        LOG.info(source.getCardName()+" state changed to "+this.state+" by "+activatedBy.getName());
     }
 
     /**
      * Setup stage for effect
      */
     abstract protected void onActivated();
-
-    /**
-     * If effect was on delayed trigger, do this
-     * after the trigger but before the effect selects targets
-     *
-     * Overriding this is optional
-     */
-    protected void onTriggered(){
-        nextState();
-    }
 
     /**
      * Automatically gather possible targets from the EffectResolverService
@@ -169,6 +193,15 @@ public abstract class Effects {
      */
     protected void onResolved() {
         LOG.info(source.getCardName()+" has been resolved by "+activatedBy.getName());
+        observer.onEffectResolved(source);
+        reset();
+    }
+
+    /**
+     * Cleanup and prepare for the next time card is used.
+     */
+    protected void onTriggerResolved() {
+        LOG.info(source.getCardName()+" has had it's trigger resolved by "+activatedBy.getName());
         reset();
     }
 

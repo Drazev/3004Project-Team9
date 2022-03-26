@@ -65,6 +65,17 @@ public class OutboundService implements ApplicationContextAware {
 
     }
 
+    public void broadcastEventPhaseStart(){
+
+        this.sendToAllPlayers("/topic/event/start", new EmptyJsonReponse());
+    }
+
+    public void broadcastEventPhaseEnded(){
+
+        this.sendToAllPlayers("/topic/event/end", new EmptyJsonReponse());
+    }
+
+
     public void broadcastPlayerDataChanged(Players player,PlayerData playerData) {
         LOG.info(String.format("Broadcasting \"player-update\" for player: %s",player.getName()));
         this.sendToAllPlayers("/topic/player/player-update", playerData);

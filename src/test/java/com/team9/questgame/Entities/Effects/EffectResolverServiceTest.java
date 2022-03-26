@@ -10,6 +10,7 @@ import com.team9.questgame.Entities.Players;
 import com.team9.questgame.Entities.cards.*;
 import com.team9.questgame.game_phases.GeneralGameController;
 import com.team9.questgame.game_phases.GeneralStateE;
+import com.team9.questgame.game_phases.event.EventPhaseController;
 import com.team9.questgame.game_phases.quest.QuestPhaseController;
 import com.team9.questgame.gamemanager.service.SessionService;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,6 +34,10 @@ class EffectResolverServiceTest {
 
     @Autowired
     GeneralGameController game;
+
+    @Autowired
+    EventPhaseController ePhase;
+
     @Autowired
     SessionService session;
     @Autowired
@@ -45,6 +50,8 @@ class EffectResolverServiceTest {
     ArrayList<PlayerPlayAreas> pPlayAreas;
 
     QuestPhaseController testPhaseController;
+
+
     TestPlayArea testStage;
 
     Logger LOG;
@@ -59,6 +66,7 @@ class EffectResolverServiceTest {
         LOG = LoggerFactory.getLogger(EffectResolverServiceTest.class);
         objMap = ApplicationContextHolder.getContext().getBean(ObjectMapper.class);
         aDeck = game.getADeck();
+        sDeck = game.getSDeck();
         testPhaseController = new QuestPhaseController();
         testStage = new TestPlayArea();
         session.registerPlayer("Player 1");
@@ -75,7 +83,6 @@ class EffectResolverServiceTest {
             hands.add(players.get(i).getHand());
             pPlayAreas.add(players.get(i).getPlayArea());
         }
-        players.addAll(session.getPlayerMap().values());
         objMap.setVisibility(objMap.getSerializationConfig().getDefaultVisibilityChecker()
                 .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
                 .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
@@ -318,46 +325,48 @@ class EffectResolverServiceTest {
     @Test
     void testChivalrousDeedCard() {
         CardFactory cf = CardFactory.getInstance();
-        CardWithEffect card = (EventCards)cf.createCard(sDeck,StoryDeckCards.CHIVALROUS_DEED);
+        EventCards card = (EventCards)cf.createCard(sDeck,StoryDeckCards.CHIVALROUS_DEED);
         HashMap<Players,Integer> shieldRewards = new HashMap<>();
         shieldRewards.put(players.get(0),5);//Knight
         shieldRewards.put(players.get(1),12);//Champion Knight
         shieldRewards.put(players.get(2),2);//squire, but now lowest
         effectResolverService.playerAwardedShields(shieldRewards);
-        card.activate(players.get(0));;
+        card.playCard(ePhase);
+        ePhase.startPhase(game.getPlayerTurnService());
         assert(players.get(3).getShields()==3);
-        card.activate(players.get(1));
+        card.activate(ePhase,players.get(1));
         assert(players.get(2).getShields()==0);
         assert(players.get(2).getRank()==PlayerRanks.KNIGHT);
     }
 
     @Test
     void testQueensFavorCard() {
-        GeneralStateE currentState = game.getStateMachine().getCurrentState();
         CardFactory cf = CardFactory.getInstance();
-        CardWithEffect card = (EventCards)cf.createCard(sDeck,StoryDeckCards.QUEENS_FAVOR);
+        EventCards card = (EventCards)cf.createCard(sDeck,StoryDeckCards.QUEENS_FAVOR);
         HashMap<Players,Integer> shieldRewards = new HashMap<>();
         shieldRewards.put(players.get(0),5);//Knight
         shieldRewards.put(players.get(1),12);//Champion Knight
         shieldRewards.put(players.get(2),2);//squire, but now lowest
         effectResolverService.playerAwardedShields(shieldRewards);
-        card.activate(players.get(0));;
+        card.playCard(ePhase);
+        ePhase.startPhase(game.getPlayerTurnService());
         assert(players.get(2).getHand().getHandSize()==14); //Was squire
         assert(players.get(3).getHand().getHandSize()==14); //Was squire
     }
 
     @Test
     void testPoxCard() {
-        GeneralStateE currentState = game.getStateMachine().getCurrentState();
         CardFactory cf = CardFactory.getInstance();
-        CardWithEffect card = (EventCards)cf.createCard(sDeck,StoryDeckCards.POX);
+        EventCards card = (EventCards)cf.createCard(sDeck,StoryDeckCards.POX);
         HashMap<Players,Integer> shieldRewards = new HashMap<>();
         shieldRewards.put(players.get(0),5);//Knight
         shieldRewards.put(players.get(1),15);//Champion Knight
         shieldRewards.put(players.get(2),2);//squire, but now lowest
         shieldRewards.put(players.get(3),4);//squire, but now lowest
         effectResolverService.playerAwardedShields(shieldRewards);
-        card.activate(players.get(3)); //Player 4 drew card
+        card.playCard(ePhase);
+        game.getPlayerTurnService().setPlayerTurn(players.get(3));
+        ePhase.startPhase(game.getPlayerTurnService());
         assert(players.get(0).getShields()==0);
         assert(players.get(1).getShields()==2);
         assert(players.get(2).getShields()==1);
@@ -366,18 +375,22 @@ class EffectResolverServiceTest {
 
     @Test
     void testPlagueCard() {
-        GeneralStateE currentState = game.getStateMachine().getCurrentState();
         CardFactory cf = CardFactory.getInstance();
-        CardWithEffect card = (EventCards)cf.createCard(sDeck,StoryDeckCards.PLAGUE);
+        EventCards card = (EventCards)cf.createCard(sDeck,StoryDeckCards.PLAGUE);
         HashMap<Players,Integer> shieldRewards = new HashMap<>();
         shieldRewards.put(players.get(0),6);//Knight
         shieldRewards.put(players.get(1),15);//Champion Knight
         shieldRewards.put(players.get(2),2);//squire, but now lowest
         shieldRewards.put(players.get(3),4);//squire, but now lowest
         effectResolverService.playerAwardedShields(shieldRewards);
-        card.activate(players.get(3));
+        card.playCard(ePhase);
+        game.getPlayerTurnService().setPlayerTurn(players.get(3));
+        ePhase.startPhase(game.getPlayerTurnService());
         assert(players.get(3).getShields()==2);
-        card.activate(players.get(2));
+        ePhase.onGameReset();
+        card.playCard(ePhase);
+        game.getPlayerTurnService().setPlayerTurn(players.get(2));
+        ePhase.startPhase(game.getPlayerTurnService());
         assert(players.get(2).getShields()==0);
         assert(players.get(0).getShields()==1);
         assert(players.get(1).getShields()==3);
@@ -385,15 +398,16 @@ class EffectResolverServiceTest {
 
     @Test
     void testProsperityThroughtTheRelmCard() {
-        GeneralStateE currentState = game.getStateMachine().getCurrentState();
         CardFactory cf = CardFactory.getInstance();
-        CardWithEffect card = (EventCards)cf.createCard(sDeck,StoryDeckCards.PROSPERITY_THROUGHOUT_THE_REALM);
+        EventCards card = (EventCards)cf.createCard(sDeck,StoryDeckCards.PROSPERITY_THROUGHOUT_THE_REALM);
         HashMap<Players,Integer> shieldRewards = new HashMap<>();
         shieldRewards.put(players.get(0),5);//Knight
         shieldRewards.put(players.get(1),12);//Champion Knight
         shieldRewards.put(players.get(2),2);//squire, but now lowest
         effectResolverService.playerAwardedShields(shieldRewards);
-        card.activate(players.get(0));;
+        card.playCard(ePhase);
+        game.getPlayerTurnService().setPlayerTurn(players.get(3));
+        ePhase.startPhase(game.getPlayerTurnService());
         assert(players.get(0).getHand().getHandSize()==14); //Was squire
         assert(players.get(1).getHand().getHandSize()==14); //Was squire
         assert(players.get(2).getHand().getHandSize()==14); //Was squire
@@ -404,7 +418,7 @@ class EffectResolverServiceTest {
     void testCourtCalledToCamelot() {
         HashMap<AdventureDeckCards,Integer> deckList = new HashMap<>();
         CardFactory cf = CardFactory.getInstance();
-        CardWithEffect card = (EventCards)cf.createCard(sDeck,StoryDeckCards.COURT_CALLED_TO_CAMELOT);
+        EventCards card = (EventCards)cf.createCard(sDeck,StoryDeckCards.COURT_CALLED_TO_CAMELOT);
         deckList.put(AdventureDeckCards.EXCALIBUR,2);
         deckList.put(AdventureDeckCards.LANCE,6);
         deckList.put(AdventureDeckCards.BATTLE_AX,8);
@@ -454,8 +468,9 @@ class EffectResolverServiceTest {
                map.put(p,list.size());
            }
        }
-
-       card.activate(players.get(0));
+        card.playCard(ePhase);
+        game.getPlayerTurnService().setPlayerTurn(players.get(0));
+        ePhase.startPhase(game.getPlayerTurnService());
         for(Players p : players) {
             HashSet<AdventureCards> list = p.getPlayArea().getCardTypeMap().get(CardTypes.ALLY);
             if(list!=null && map.get(p)>0) {
@@ -470,7 +485,7 @@ class EffectResolverServiceTest {
     @Test
     void testKingsRecognitionCard() {
         CardFactory cf = CardFactory.getInstance();
-        CardWithEffect card = (EventCards)cf.createCard(sDeck,StoryDeckCards.KINGS_RECOGNITION);
+        EventCards card = (EventCards)cf.createCard(sDeck,StoryDeckCards.KINGS_RECOGNITION);
         HashMap<Players,Integer> shieldRewards = new HashMap<>();
         shieldRewards.put(players.get(0),6);//Knight
         shieldRewards.put(players.get(1),15);//Champion Knight
@@ -479,7 +494,9 @@ class EffectResolverServiceTest {
         HashMap<Players,Integer> playersCompletedQuest = new HashMap<>();
         playersCompletedQuest.put(players.get(0),0);
         playersCompletedQuest.put(players.get(2),0);
-        card.activate(players.get(1));
+        card.playCard(ePhase);
+        game.getPlayerTurnService().setPlayerTurn(players.get(1));
+        ePhase.startPhase(game.getPlayerTurnService());
         assert(players.get(0).getShields()==1);
         assert(players.get(1).getShields()==3);
         assert(players.get(2).getShields()==4);
@@ -490,5 +507,221 @@ class EffectResolverServiceTest {
         assert(players.get(2).getShields()==1); //+2 shields, rank up\
         assert(players.get(2).getRank()==PlayerRanks.KNIGHT);
         assert(players.get(3).getShields()==0);
+    }
+
+    @Test
+    void testKingsCallToArmsCard() {
+        HashMap<AdventureDeckCards,Integer> deckList = new HashMap<>();
+        CardFactory cf = CardFactory.getInstance();
+        EventCards card = (EventCards)cf.createCard(sDeck,StoryDeckCards.KINGS_CALL_TO_ARMS);
+        HashMap<CardTypes,Integer> p1TestVals = new HashMap<>();
+        HashMap<CardTypes,Integer> p2TestVals = new HashMap<>();
+        HashMap<CardTypes,Integer> p3TestVals = new HashMap<>();
+        HashMap<CardTypes,Integer> p4TestVals = new HashMap<>();
+        aDeck.testRebuildDeckWithList(deckList);
+        TestPlayArea test = new TestPlayArea();
+        for(Players p : players) {
+            p.onGameReset();
+            p.getPlayArea().registerGamePhase(ePhase);
+            p.getPlayArea().setPlayerTurn(true);
+        }
+        aDeck.onGameReset();
+        aDeck.createDeck();
+
+
+        for(int i=0;i<Hand.MAX_HAND_SIZE;++i) {
+            for(Players p : players) {
+                aDeck.drawCard(p.getHand());
+            }
+        }
+        //Player 1 has neither Foes or Weapons in hand
+        for(CardData cd : players.get(0).getHand().generateCardData()) {
+            switch(cd.subType()) {
+                case FOE,WEAPON -> players.get(0).actionDiscardCard(cd.cardID());
+            }
+        }
+        p1TestVals.put(CardTypes.FOE,0);
+        p1TestVals.put(CardTypes.WEAPON,0);
+
+        //Player 2 has both Foes and Weapons in hand
+        HashMap<CardTypes,HashMap<AllCardCodes,Integer>> p2List = players.get(1).getHand().getNumberOfEachCardCodeBySubType();
+        HashMap<AllCardCodes,Integer> p2Weapons = p2List.get(CardTypes.WEAPON);
+        HashMap<AllCardCodes,Integer> p2Foes = p2List.get(CardTypes.FOE);
+        int p2W=0;
+        int p2F=0;
+        if(p2Weapons!=null) {
+            p2W=p2Weapons.size();
+        }
+        if(p2Foes!=null) {
+            p2F=p2Foes.size();
+        }
+        while(p2W<1 && p2F<2) {
+            ArrayList<CardData> p2Cd = players.get(1).getHand().generateCardData();
+            for(int i=0;i<p2Cd.size();++i) {
+                if(p2Cd.get(i).subType()!=CardTypes.WEAPON || p2Cd.get(i).subType()!=CardTypes.FOE) {
+                    players.get(1).getHand().discardCard(p2Cd.get(i).cardID());
+                    break;
+                }
+                else if(p2Cd.get(i).subType()!=CardTypes.WEAPON && p2W>1) {
+                    players.get(1).getHand().discardCard(p2Cd.get(i).cardID());
+                    --p2W;
+                    break;
+                }
+                else if(p2Cd.get(i).subType()!=CardTypes.FOE && p2F>2) {
+                    players.get(1).getHand().discardCard(p2Cd.get(i).cardID());
+                    --p2F;
+                    break;
+                }
+            }
+            AdventureCards c = aDeck.drawCard(players.get(1).getHand());
+            switch(c.getSubType()) {
+                case WEAPON ->++p2W;
+                case FOE -> ++p2F;
+            }
+        }
+        p2List = players.get(1).getHand().getNumberOfEachCardCodeBySubType();
+        p2Weapons = p2List.get(CardTypes.WEAPON);
+        p2Foes = p2List.get(CardTypes.FOE);
+        int p2w=0;
+        int p2f=0;
+        if(p2List.containsKey(CardTypes.WEAPON)) {
+            for(Integer i : p2List.get(CardTypes.WEAPON).values()) {
+                p2w+=i;
+            }
+        }
+        if(p2List.containsKey(CardTypes.FOE)) {
+            for(Integer i : p2List.get(CardTypes.FOE).values()) {
+                p2f+=i;
+            }
+        }
+        p2TestVals.put(CardTypes.FOE,p2f);
+        p2TestVals.put(CardTypes.WEAPON,p2w);
+
+        //Player 3 has Weapons but no Foes
+        HashMap<CardTypes,HashMap<AllCardCodes,Integer>> p3List = players.get(2).getHand().getNumberOfEachCardCodeBySubType();
+        HashMap<AllCardCodes,Integer> p3Weapons = p3List.get(CardTypes.WEAPON);
+        int p3W=0;
+        if(p3Weapons!=null) {
+            for(Integer i : p3Weapons.values()) {
+                p3W+=i;
+            }
+        }
+        //Discard all Foes
+        for(CardData cd : players.get(2).getHand().generateCardData()) {
+            switch(cd.subType()) {
+                case FOE -> players.get(2).actionDiscardCard(cd.cardID());
+            }
+        }
+
+        while(p3W<1) {
+            ArrayList<CardData> p3Cd = players.get(2).getHand().generateCardData();
+            for(int i=0;i<p3Cd.size();++i) {
+                if(p3Cd.get(i).subType()!=CardTypes.WEAPON) {
+                    players.get(2).getHand().discardCard(p3Cd.get(i).cardID());
+                    break;
+                }
+            }
+            AdventureCards c = aDeck.drawCard(players.get(2).getHand());
+            switch(c.getSubType()) {
+                case WEAPON ->++p3W;
+            }
+        }
+        p3List = players.get(2).getHand().getNumberOfEachCardCodeBySubType();
+        p3Weapons = p3List.get(CardTypes.WEAPON);
+        p3W=0;
+        for(Integer i : p3Weapons.values()) {
+            p3W+=i;
+        }
+        assert(!p3List.containsKey(CardTypes.FOE) || p3List.get(CardTypes.FOE).size()<1);
+        p3TestVals.put(CardTypes.FOE,0);
+        p3TestVals.put(CardTypes.WEAPON,p3W);
+
+
+        //Player 4 has Foes but no Weapons
+        HashMap<CardTypes,HashMap<AllCardCodes,Integer>> p4List = players.get(3).getHand().getNumberOfEachCardCodeBySubType();
+        HashMap<AllCardCodes,Integer> p4Foes = p4List.get(CardTypes.FOE);
+        int p4F=0;
+        if(p4Foes!=null) {
+            for(Integer i : p4Foes.values()) {
+                p4F+=i;
+            }
+        }
+        //Discard all Weapons
+        for(CardData cd : players.get(3).getHand().generateCardData()) {
+            switch(cd.subType()) {
+                case WEAPON -> players.get(3).actionDiscardCard(cd.cardID());
+            }
+        }
+
+        while(p4F<2) {
+            ArrayList<CardData> p4Cd = players.get(3).getHand().generateCardData();
+            for(int i=0;i<p4Cd.size();++i) {
+                if(p4Cd.get(i).subType()!=CardTypes.FOE) {
+                    players.get(3).getHand().discardCard(p4Cd.get(i).cardID());
+                    break;
+                }
+            }
+            AdventureCards c = aDeck.drawCard(players.get(3).getHand());
+            switch(c.getSubType()) {
+                case FOE ->++p4F;
+            }
+        }
+        p4List = players.get(3).getHand().getNumberOfEachCardCodeBySubType();
+        p4Foes = p4List.get(CardTypes.FOE);
+        p4F=0;
+        for(Integer i : p4Foes.values()) {
+            p4F+=i;
+        }
+        assert(!p4List.containsKey(CardTypes.WEAPON) || p4List.get(CardTypes.WEAPON).size()<1);
+        p4TestVals.put(CardTypes.FOE,p4F);
+        p4TestVals.put(CardTypes.WEAPON,0);
+        HashMap<Players,Integer> shieldRewards = new HashMap<>();
+
+        //Make P3 and P4 highest rank
+        shieldRewards.put(players.get(2),5);//Knight
+        shieldRewards.put(players.get(3),5);//Knight
+        EffectResolverService.getService().playerAwardedShields(shieldRewards);
+        shieldRewards.clear();
+        assert(players.get(2).getRank()==PlayerRanks.KNIGHT);
+        assert(players.get(3).getRank()==PlayerRanks.KNIGHT);
+        card.playCard(ePhase);
+        game.getPlayerTurnService().setPlayerTurn(players.get(0));
+        ePhase.startPhase(game.getPlayerTurnService());
+        //Discard a single weapon card
+        for(CardData cd : players.get(2).getHand().generateCardData()) {
+            if(cd.subType()==CardTypes.WEAPON) {
+                players.get(2).actionDiscardCard(cd.cardID());
+                break;
+            }
+        }
+        //Must discard 2 foes
+        int p4discarded=0;
+        for(CardData cd : players.get(3).getHand().generateCardData()) {
+            if(cd.subType()==CardTypes.FOE) {
+                players.get(3).actionDiscardCard(cd.cardID());
+                ++p4discarded;
+                if(p4discarded>1) {
+                    break;
+                }
+            }
+        }
+        HashMap<AllCardCodes,Integer> p3Weap = players.get(2).getHand().getNumberOfEachCardCodeBySubType().get(CardTypes.WEAPON);
+        HashMap<AllCardCodes,Integer> p4Foe = players.get(3).getHand().getNumberOfEachCardCodeBySubType().get(CardTypes.FOE);
+        int p3TotWeap=0;
+        int p4TotFoe=0;
+        for(Integer i : p3Weap.values()) {
+            p3TotWeap+=i;
+        }
+        for(Integer i : p4Foe.values()) {
+            p4TotFoe+=i;
+        }
+        assert((p3TestVals.get(CardTypes.WEAPON)==p3TotWeap+1) || p3TotWeap==0);
+        assert((p4TestVals.get(CardTypes.FOE)==p4TotFoe+2) || p4TotFoe==0);
+
+        //Make P1 Highest rank
+
+        //Make P2 Highest Rank
+
+
     }
 }

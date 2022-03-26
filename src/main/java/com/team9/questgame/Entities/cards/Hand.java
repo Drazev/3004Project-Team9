@@ -5,6 +5,10 @@ import com.team9.questgame.ApplicationContextHolder;
 import com.team9.questgame.Data.CardData;
 import com.team9.questgame.Data.HandData;
 import com.team9.questgame.Data.HandOversizeData;
+import com.team9.questgame.Entities.Effects.DiscardObserver;
+import com.team9.questgame.Entities.Effects.DiscardSubject;
+import com.team9.questgame.Entities.Effects.EffectObserver;
+import com.team9.questgame.Entities.Effects.EffectResolverService;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.exception.BadRequestException;
 import com.team9.questgame.exception.CardAreaException;
@@ -24,7 +28,7 @@ import java.util.HashSet;
         generator = ObjectIdGenerators.PropertyGenerator.class,
         property="id"
 )
-public class Hand implements CardArea<AdventureCards> {
+public class Hand implements CardArea<AdventureCards>, EffectObserver<AdventureCards>, DiscardSubject {
     @JsonIgnore
     private Logger LOG;
     private long id;
@@ -39,6 +43,7 @@ public class Hand implements CardArea<AdventureCards> {
     @Getter
     private HashSet<AdventureCards> hand;
     private HashSet<CardWithEffect> activatableCards;
+    private HashSet<DiscardObserver> discardObservers;
 
     private HashMap<Long,AdventureCards> cardIdMap;
 
@@ -54,6 +59,7 @@ public class Hand implements CardArea<AdventureCards> {
         hand = new HashSet<>();
         activatableCards = new HashSet<>();
         cardIdMap = new HashMap<>();
+        discardObservers = new HashSet<>();
     }
 
     public boolean isHandOversize() {
@@ -134,6 +140,7 @@ public class Hand implements CardArea<AdventureCards> {
     public void discardCard(long cardId) throws BadRequestException,IllegalCardStateException {
         AdventureCards card = findCardFromCardId(cardId);
         discardCard(card);
+        notifyDiscardObservers(card);
     }
 
 
@@ -169,9 +176,7 @@ public class Hand implements CardArea<AdventureCards> {
         else {
             for(CardWithEffect card : activatableCards) {
                 if(card.getCardID()==cardId) {
-                    card.activate(player);
-                    card.discardCard();
-                    activatableCards.remove(card);
+                    card.activate(this,player);
                     rc=true;
                 }
             }
@@ -184,6 +189,7 @@ public class Hand implements CardArea<AdventureCards> {
         hand.clear();
         cardIdMap.clear();
         activatableCards.clear();
+        discardObservers.clear();
         isHandOversize=false;
         notifyHandUpdated();
     }
@@ -251,4 +257,37 @@ public class Hand implements CardArea<AdventureCards> {
         OutboundService.getService().broadcastHandUpdate(player,generateHandData(),generateObfuscatedHandData());
     }
 
+    @Override
+    public void onEffectResolved(CardWithEffect resolvedCard) {
+        if(hand.contains(resolvedCard)) {
+            AdventureCards card = (AdventureCards) resolvedCard;
+            card.discardCard();
+            activatableCards.remove(card);
+        }
+        else {
+            LOG.warn("Hand::onEffectResolved returned a CardWithEffect that was not in the play area!, "+resolvedCard.getCardCode());
+        }
+    }
+
+    @Override
+    public void onEffectResolvedWithDelayedTrigger(CardWithEffect resolvedCard) {
+        //Not used
+    }
+
+    @Override
+    public void registerDiscardObserver(DiscardObserver observer) {
+        discardObservers.add(observer);
+    }
+
+    @Override
+    public void unregisterDiscardObserver(DiscardObserver observer) {
+        discardObservers.remove(observer);
+    }
+
+    @Override
+    public void notifyDiscardObservers(Cards card) {
+        for(DiscardObserver o : discardObservers) {
+            o.notifyCardDiscarded(card);
+        }
+    }
 }

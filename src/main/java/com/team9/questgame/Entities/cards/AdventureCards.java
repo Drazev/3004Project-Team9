@@ -76,7 +76,7 @@ public abstract class AdventureCards extends Cards {
      * @param playArea The PlayerPlayArea where the card now resides
      * @return True if the card was accepted into the hand, False otherwise
      */
-    boolean playCard(PlayAreas playArea) {
+    public boolean playCard(PlayAreas playArea) {
         boolean rc=super.playCard(playArea);
         //Based on card attributes, register with PlayArea
         if(rc) {
@@ -92,7 +92,7 @@ public abstract class AdventureCards extends Cards {
      * @param hand The hand where the card now resides
      * @return True if the card was accepted into the hand, False otherwise
      */
-    boolean playCard(Hand hand) {
+    public boolean playCard(Hand hand) {
         boolean rc=super.playCard(hand);
         if(rc) {
             registerWithHand(hand);
