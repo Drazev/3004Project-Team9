@@ -3,11 +3,6 @@ import create from 'zustand';
 const useStore = create((set) => ({
     notificationDelay: 3000,
     maxNotifications: 5,
-    // notifyStageStart: false,
-    // notifyStageEnd: false,
-    // notifyQuestEnd: false,
-    // notifyHandOversize: false,
-    // notifyHandNotOversize: false,
     notificationQueue: [
         // { id: 0, "type": "BAD", "body": { "title": "This is a bad notification", "message": "You suk", "imgSrc": "", "action": "" } },
         // { id: 1, "type": "GOOD", "body": { "title": "This is a good notification", "message": "You suk", "imgSrc": "", "action": "" } },

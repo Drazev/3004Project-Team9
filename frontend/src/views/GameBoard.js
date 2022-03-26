@@ -3,7 +3,7 @@ import QuestDisplay from "./quest/QuestDisplay";
 import CardImages from "../assets/images/index";
 import Popup from "../components/popups/Popup";
 import { drawCard, setupComplete, participantSetupComplete } from "../services/clientSocket";
-import { useName, usePlayerHands, useTurn, useSponsorRequest, useActivePlayers, useIsSponsoring, useSetIsSponsoring, useJoinRequest, useFoeStageStart, useStoryCard, useSetFoeStageStart} from "../stores/generalStore";
+import { useName, usePlayerHands, useTurn, useSponsorRequest, useIsSponsoring, useSetIsSponsoring, useJoinRequest, useFoeStageStart } from "../stores/generalStore";
 import { usePlayerPlayAreas, useStageAreas } from "../stores/playAreaStore";
 import { Button } from "react-bootstrap";
 import React, { useState } from "react";
@@ -19,21 +19,8 @@ function GameBoard(props) {
     const isSponsoring = useIsSponsoring();
     const setIsSponsoring = useSetIsSponsoring();
     const joinRequest = useJoinRequest();
-    const activePlayers = useActivePlayers();
-    const storyCard = useStoryCard();
     const [popup, setPopup] = useState(true);
-    // const [partSetupButton, setPartSetupButton] = useState(false);
-    // const [hasSetup, setHasSetup] = useState(false);
-    const [foeStageStart, setFoeStageStart] = [useFoeStageStart(), useSetFoeStageStart()];
-
-    // if(notifyStageEnd){
-    //     setHasSetup(false);
-    // }
-
-    // if(name !== sponsorRequest && foeStageStart && hasSetup == false){
-    //     setPartSetupButton(true);
-    //     setHasSetup(true);
-    // }
+    const foeStageStart = useFoeStageStart();
 
     let myHandArr = [false, false, false, false];
     let myPlayerID = -1;
