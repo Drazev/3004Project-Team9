@@ -4,7 +4,7 @@ function BigCard(props){
     return (
         <div 
             id="CardSection"
-            style={{position:"absolute",height:68,width:73,marginBottom:10,marginLeft:40}}
+            style={{position:"absolute",height:68,width:73,marginBottom:10,marginLeft:40,float:"left"}}
         >
             {(props.numCards >= 0) &&
               <p style={{
