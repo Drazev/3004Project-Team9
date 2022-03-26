@@ -5,7 +5,6 @@ import com.team9.questgame.Entities.cards.*;
 import com.team9.questgame.exception.*;
 import com.team9.questgame.game_phases.GeneralGameController;
 import com.team9.questgame.game_phases.GeneralStateE;
-import com.team9.questgame.game_phases.quest.QuestPhaseStatesE;
 import com.team9.questgame.game_phases.utils.PlayerTurnService;
 import com.team9.questgame.gamemanager.service.InboundService;
 import com.team9.questgame.gamemanager.service.QuestPhaseInboundService;
@@ -19,7 +18,6 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -250,7 +248,7 @@ class QuestPhaseControllerTest {
     }
 
     @Test
-    void endPhase2(){
+    void questCompletion(){
         ArrayList<QuestCards> questCards = getQuestCards();
         QuestCards qcard = questCards.get(0);
         controller.receiveCard(qcard);
