@@ -82,7 +82,9 @@ public class TestCards <T extends Enum<T> & AllCardCodes> extends AdventureCards
 
     @Override
     protected void registerwithNewPlayArea(PlayAreas playArea) {
+
         playArea.registerBoostableCard(this);
+        playArea.registerMinBid(this);
     }
 
     @Override

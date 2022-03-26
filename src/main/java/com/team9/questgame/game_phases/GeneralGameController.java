@@ -152,6 +152,7 @@ public class GeneralGameController implements CardArea<StoryCards> {
      */
     public void drawStoryCard(Players player) {
         if (stateMachine.getCurrentState() != GeneralStateE.DRAW_STORY_CARD) {
+            LOG.error(String.format("general state: %s   quest state: %s", stateMachine.getCurrentState(), questPhaseController.getStateMachine().getCurrentState()));
             throw new IllegalGameStateException("Story card can only be drawn during DRAW_STORY_CARD state");
         } else if (stateMachine.isBlocked()) {
             throw new IllegalGameRequest("Cannot proceed when the game is blocked", player);

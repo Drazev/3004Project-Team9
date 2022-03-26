@@ -1,15 +1,17 @@
 import { connect } from "../../services/clientSocket";
 
+import "./ConnectForm.css";
+
 import * as generalStore from "../../stores/generalStore";
-import * as playAreaStore from "../../stores/playAreaStore"
-import * as notificationStore from "../../stores/notificationStore"
+import * as playAreaStore from "../../stores/playAreaStore";
+import * as notificationStore from "../../stores/notificationStore";
 
 const ConnectForm = () => {
 
   const connectFunctions = {
     name: generalStore.useName(),
 
-    addNewPlayer: generalStore.useAddNewPlayer(),
+    // addNewPlayer: generalStore.useAddNewPlayer(),
     setConnected: generalStore.useSetConnected(),
     setPlayers: generalStore.useSetPlayers(),
     setGameStarted: generalStore.useSetGameStarted(),
@@ -28,11 +30,13 @@ const ConnectForm = () => {
 
     notifySponsorRequest: generalStore.useSetSponsorRequest(),
 
-    setNotifyStageStart: notificationStore.useSetNotifyStageStart(),
-    setNotifyStageEnd: notificationStore.useSetNotifyStageEnd(),
-    setNotifyQuestEnd: notificationStore.useSetNotifyQuestEnd(),
-    setNotifyHandOversize: notificationStore.useSetNotifyHandNotOversize(),
-    setNotifyHandNotOversize: notificationStore.useSetNotifyHandNotOversize(),
+    // setNotifyStageStart: notificationStore.useSetNotifyStageStart(),
+    // setNotifyStageEnd: notificationStore.useSetNotifyStageEnd(),
+    // setNotifyQuestEnd: notificationStore.useSetNotifyQuestEnd(),
+    // setNotifyHandOversize: notificationStore.useSetNotifyHandNotOversize(),
+    // setNotifyHandNotOversize: notificationStore.useSetNotifyHandNotOversize(),
+  
+    pushNotification: notificationStore.usePushNotification(),
   }
 
   const setName = generalStore.useSetName();

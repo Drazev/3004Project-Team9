@@ -1,29 +1,4 @@
-p {
-    font-size: 10px;
-    text-align: left;
-    color: white;
-}
-
-h1 {
-    color: white;
-}
-
-h2 {
-    color: white;
-}
-
-h3 {
-    color: white;
-}
-
-h4 {
-    color: white;
-}
-
-li {
-    color: white;
-    font-size: 20px;
-}
+@import url("../App.css");
 
 .decks {
     position: absolute;
@@ -49,8 +24,9 @@ li {
 }
 
 .questDisplay {
-    top: 10px;
-    left: 10px;
+    position: "fixed";
+    top: 60px;
+    left: 1050px;
     width: 10px;
     height: 10px;
 }

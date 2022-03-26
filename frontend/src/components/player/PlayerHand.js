@@ -1,6 +1,8 @@
 import Card from "../cards/Card";
 import CardImages from "../../assets/images/index";
-import { useHandOversize } from "../../stores/generalStore"
+import { useHandOversize } from "../../stores/generalStore";
+
+import "./PlayerHand.css";
 
 function PlayerHand(props){
     const handOversize = useHandOversize();
@@ -39,8 +41,8 @@ function PlayerHand(props){
                         position: "absolute"
                     }}
                 />     
-                <p style={{position:"absolute",top:10,left:85,fontSize:13}}>{"x" + props.numShields}</p> 
-                <p style={{position:"absolute",top:43,left:65,fontSize:13}}>{props.playerName}</p>           
+                <p style={{position:"absolute",top:0,left:93}}>{"x  " + props.numShields}</p> 
+                <p style={{position:"absolute",top:32,left:68}}>{props.playerName}</p>           
             </div>
 
             <div

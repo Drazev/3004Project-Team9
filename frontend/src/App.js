@@ -4,6 +4,7 @@ import ConnectForm from "./components/forms/ConnectForm";
 import GameBoard from "./views/GameBoard";
 import { useConnected, useGameStarted } from "./stores/generalStore";
 import WaitingRoom from "./views/waitingroom/WaitingRoom";
+import Notifications from "./components/notifications/Notifications";
 
 const App = () => {
   const connected = useConnected();
@@ -22,6 +23,7 @@ const App = () => {
               )}
          </>
       }
+      <Notifications/>
     </div>
   );
 };

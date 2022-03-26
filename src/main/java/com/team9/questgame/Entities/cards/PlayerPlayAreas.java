@@ -408,6 +408,11 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards>, EffectObserve
         boostableCards.add(card);
     }
 
+    @Override
+    public void registerMinBid(TestCards card){
+
+    }
+
     /**
      * Can be called to return the player play area so a new game can be played
      */

@@ -16,7 +16,7 @@ const useStore = create((set) => ({
   handOversize: false,
   foeStageStart: false,
   storyCard: null,
-  activePlayers: [],
+  activePlayers: {},
   loadPlayers: async () => {
     await handleLoadPlayers(set);
   },
