@@ -3,19 +3,17 @@ package com.team9.questgame.Entities.cards;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.team9.questgame.ApplicationContextHolder;
 import com.team9.questgame.Data.CardData;
-import com.team9.questgame.Data.PlayAreaData;
-import com.team9.questgame.Data.PlayAreaDataSources;
 import com.team9.questgame.Data.StageAreaData;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.exception.BadRequestException;
 import com.team9.questgame.exception.CardAreaException;
 import com.team9.questgame.exception.IllegalCardStateException;
 import com.team9.questgame.game_phases.quest.QuestPhaseController;
-import com.team9.questgame.gamemanager.service.OutboundService;
 import com.team9.questgame.gamemanager.service.QuestPhaseOutboundService;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,8 +24,10 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
     @JsonIgnore
     private final QuestPhaseOutboundService outboundService;
     private Players sponsor;
+    @Getter
     private int stageNum;
-    private long id;
+    @Getter
+    private long stageID;
     private int battlePoints;
     private int bids;
     @JsonIgnore
@@ -35,7 +35,9 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
     @Getter
     private HashMap<AllCardCodes, AdventureCards> allCards;
     private QuestCards questCard;
+
     private QuestPhaseController phaseController;
+
     private HashMap<AllCardCodes,HashSet<BoostableCard>> cardBoostDependencies;
     private HashSet<BattlePointContributor> cardsWithBattleValue;
     private HashSet<BoostableCard> boostableCards;
@@ -54,12 +56,13 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
 
     static private int nextid = 0;
 
-    public StagePlayAreas(QuestCards questCard, Players sponsor, int stageNum){
-        this.id = nextid++;
+    public StagePlayAreas(QuestPhaseController phaseController,QuestCards questCard, Players sponsor, int stageNum){
+        this.stageID = nextid++;
         this.questCard = questCard;
         this.sponsor = sponsor;
         this.stageNum = stageNum;
         this.stageCard = null;
+        this.phaseController = phaseController;
         allCards = new HashMap<>();
         battlePoints = 0;
         bids = 0;
@@ -250,7 +253,6 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
     public void onGameReset(){
         allCards.clear();
         cardBoostDependencies.clear();
-        phaseController = null;
         cardsWithBattleValue.clear();
         boostableCards.clear();
         bids=0;
@@ -319,13 +321,35 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
         allowedTypes.add(CardTypes.FOE);
         allowedTypes.add(CardTypes.WEAPON);
         StageAreaData data = new StageAreaData(
-                id,
+                stageID,
                 stageNum,
                 bids,
                 battlePoints,
                 allowedTypes,
                 stageCardData,
                 getCardData()
+        );
+        return data;
+    }
+
+    public StageAreaData getObfuscatedStageAreaData() {
+        HashSet<CardTypes> allowedTypes = new HashSet<>();
+        CardData stageCardData = null;
+
+        if (this.stageCard != null) {
+            stageCardData = this.stageCard.generateObfuscatedCardData();
+        }
+
+        allowedTypes.add(CardTypes.FOE);
+        allowedTypes.add(CardTypes.WEAPON);
+        StageAreaData data = new StageAreaData(
+                stageID,
+                stageNum,
+                0,
+                0,
+                allowedTypes,
+                stageCardData,
+                getObfuscatedCardData()
         );
         return data;
     }
@@ -340,11 +364,21 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
         return handCards;
     }
 
+    public ArrayList<CardData> getObfuscatedCardData() {
+        ArrayList<CardData> handCards = new ArrayList<>();
+        for(Cards card : allCards.values()) {
+            if(this.stageCard == null || card.cardCode != stageCard.cardCode){
+                handCards.add(card.generateObfuscatedCardData());
+            }
+        }
+        return handCards;
+    }
+
     /**
      * Updates the clients about a stage area being changed, sending the new state.
      */
     private void notifyStageAreaChanged() {
-        outboundService.broadcastStageChanged(getStageAreaData());
+        phaseController.notifyStageAreaChanged(this,getStageAreaData(),getObfuscatedStageAreaData());
     }
 }
 

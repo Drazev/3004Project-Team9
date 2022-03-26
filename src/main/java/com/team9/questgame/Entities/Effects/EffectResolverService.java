@@ -4,6 +4,7 @@ import com.team9.questgame.Data.TargetSelectionRequest;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.Entities.cards.CardTypes;
 import com.team9.questgame.game_phases.GeneralGameController;
+import com.team9.questgame.game_phases.quest.QuestPhaseController;
 import com.team9.questgame.gamemanager.record.socket.CardTargetSelectionResponse;
 import com.team9.questgame.gamemanager.record.socket.StageTargetSelectionResponse;
 import com.team9.questgame.gamemanager.service.OutboundService;
@@ -24,6 +25,9 @@ import java.util.Map;
 public class EffectResolverService implements ApplicationContextAware {
     @Autowired
     GeneralGameController gameController;
+
+    @Autowired
+    QuestPhaseController questController;
 
     static long nextRequestID=0;
 
@@ -196,7 +200,7 @@ public class EffectResolverService implements ApplicationContextAware {
             return false;
         }
 
-       boolean rc = false; //TODO: QuestController method to toggle stage reveal
+       boolean rc = questController.makeStageVisibleToPlayer(data.targetStageID(),effect.getActivatedBy(),effect.source.getCardID());
 
         if(rc) {
             targetSelectionRequestIdToEffects.remove(data.requestID());

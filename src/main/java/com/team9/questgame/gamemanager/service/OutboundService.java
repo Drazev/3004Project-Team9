@@ -58,13 +58,6 @@ public class OutboundService implements ApplicationContextAware {
         this.sendToAllPlayers("/topic/general/next-turn", new PlayerNextTurnOutbound(player.getPlayerId(), player.getName()));
     }
 
-    public void broadcastHandUpdate( Players sourcePlayer, HandData toUser, HandData toOthers) {
-        final String topic = "/topic/player/hand-update";
-        sendToPlayer(topic,sourcePlayer,toUser);
-        sendToAllExceptPlayer(topic,toOthers,sourcePlayer);
-
-    }
-
     public void broadcastEventPhaseStart(){
 
         this.sendToAllPlayers("/topic/event/start", new EmptyJsonReponse());
@@ -75,6 +68,12 @@ public class OutboundService implements ApplicationContextAware {
         this.sendToAllPlayers("/topic/event/end", new EmptyJsonReponse());
     }
 
+    public void broadcastHandUpdate( Players sourcePlayer, HandData toUser, HandData toOthers) {
+        final String topic = "/topic/player/hand-update";
+        sendToPlayer(topic,sourcePlayer,toUser);
+        sendToAllExceptPlayer(topic,toOthers,sourcePlayer);
+
+    }
 
     public void broadcastPlayerDataChanged(Players player,PlayerData playerData) {
         LOG.info(String.format("Broadcasting \"player-update\" for player: %s",player.getName()));

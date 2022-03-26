@@ -15,6 +15,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Map;
 
 @AllArgsConstructor
@@ -57,9 +58,21 @@ public class QuestPhaseOutboundService {
         LOG.info(String.format("Broadcast sponsor setting up stage"));
         this.sendToAllPlayers("/topic/quest/sponsor-setup", playerData);
     }
-    public void broadcastStageChanged(StageAreaData stageAreaData) {
-        LOG.info(String.format("Broadcast Stage Data: %s", stageAreaData));
-        this.sendToAllPlayers("/topic/quest/stage-area-changed", stageAreaData);
+
+    public void broadcastStageChanged(HashSet<Players> fullVisibilityList,StageAreaData fullData, StageAreaData obfuscatedData) {
+        LOG.info(String.format("Broadcast Stage Data: %s", fullData));
+        String topic="/topic/quest/stage-area-changed";
+        if(fullVisibilityList==null) {
+            fullVisibilityList=new HashSet<>();
+        }
+        for(Map.Entry<Players,String> e : sessionService.getPlayerToSessionIdMap().entrySet()) {
+            if(fullVisibilityList.contains(e.getKey())) {
+                messenger.convertAndSendToUser(e.getValue(),topic,fullData);
+            }
+            else {
+                messenger.convertAndSendToUser(e.getValue(),topic,obfuscatedData);
+            }
+        }
     }
 
     public void broadcastFoeStageStart(RemainingQuestorsOutbound remainingQuestorsOutbound){
