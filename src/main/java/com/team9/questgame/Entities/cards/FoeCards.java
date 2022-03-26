@@ -1,13 +1,22 @@
 package com.team9.questgame.Entities.cards;
 
 import com.team9.questgame.Data.CardData;
+import com.team9.questgame.Entities.Effects.EffectObserver;
 import com.team9.questgame.Entities.Effects.Effects;
+import com.team9.questgame.Entities.Players;
 
-public class FoeCards extends AdventureCards implements BoostableCard, BattlePointContributor {
+public class FoeCards extends AdventureCards implements BoostableCard, BattlePointContributor, CardWithEffect {
     private final int bpValue;
     private final int boostedBpValue;
     private boolean isBoosted;
-    private Effects activeEffect; //TODO: Modify for Effect implementation
+    private Effects activeEffect;
+
+    public FoeCards(Decks assignedDeck, String activeAbilityDescription, String cardName, CardTypes subType, String fileName, AdventureDeckCards cardCode, int bpValue, int boostedBpValue, Effects activeEffect) {
+        super(assignedDeck, activeAbilityDescription, cardName, subType, fileName, cardCode);
+        this.bpValue = bpValue;
+        this.boostedBpValue = boostedBpValue;
+        this.activeEffect = activeEffect;
+    }
 
     @Override
     public String toString() {
@@ -81,5 +90,14 @@ public class FoeCards extends AdventureCards implements BoostableCard, BattlePoi
     public void discardCard() {
         isBoosted=false;
         super.discardCard();
+    }
+
+    @Override
+    public void activate(EffectObserver observer, Players activatingPlayer) {
+        if(activeEffect==null) {
+            LOG.error("Player "+ activatingPlayer.getName()+ " activated "+this.cardCode+", but it has no Effect to activate!");
+            return;
+        }
+        activeEffect.activate(observer,activatingPlayer);
     }
 }

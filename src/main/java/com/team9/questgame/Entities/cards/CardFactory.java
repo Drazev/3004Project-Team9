@@ -295,6 +295,7 @@ public class CardFactory {
                 yield card;
             }
             case MERLIN -> {
+                effect = new MerlinEffect();
                 AllyCards card = new AllyCards(
                         assignedDeck,
                         "Player may preview any one stage per quest",
@@ -303,13 +304,18 @@ public class CardFactory {
                         "Ally - Merlin.png",
                         cardEnumId,
                         0,
-                        0
+                        0,
+                        0,
+                        0,
+                        null,
+                        effect
                 );
-                //TODO: Add Merlin Effect
+                effect.setSource(card);
                 yield card;
             }
             case AMOUR -> new AmourCards(assignedDeck, "Amour.png");
             case MORDRED-> {
+                effect = new MordredEffect();
                 FoeCards card = new FoeCards(
                         assignedDeck,
                         "Use as a Foe or sacrifice at any time to remove any player's Ally from play",
@@ -317,9 +323,11 @@ public class CardFactory {
                         cardEnumId.getSubType(),
                         "Foe - Mordred.png",
                         cardEnumId,
-                        30
+                        30,
+                        0,
+                        effect
                 );
-                //TODO: Add Mordred Effect
+                effect.setSource(card);
                 yield card;
             }
             case GIANT -> {
