@@ -3,8 +3,7 @@ import QuestDisplay from "./quest/QuestDisplay";
 import CardImages from "../assets/images/index";
 import Popup from "../components/popups/Popup";
 import { drawCard, setupComplete, participantSetupComplete } from "../services/clientSocket";
-import { useName, usePlayerHands, useTurn, useSponsorRequest, useActivePlayers, useIsSponsoring, useSetIsSponsoring, useJoinRequest, useFoeStageStart, useStoryCard, useSetFoeStageStart} from "../stores/generalStore";
-import { useNotifyStageStart, useNotifyStageEnd, useNotifyQuestEnd, useSetNotifyStageStart, useSetNotifyStageEnd, useSetNotifyQuestEnd, useNotifyHandOversize, useSetNotifyHandOversize, useNotifyHandNotOversize, useSetNotifyHandNotOversize } from "../stores/notificationStore";
+import { useName, usePlayerHands, useTurn, useSponsorRequest, useIsSponsoring, useSetIsSponsoring, useJoinRequest, useFoeStageStart } from "../stores/generalStore";
 import { usePlayerPlayAreas, useStageAreas } from "../stores/playAreaStore";
 import { Button } from "react-bootstrap";
 import React, { useState } from "react";
@@ -20,26 +19,8 @@ function GameBoard(props) {
     const isSponsoring = useIsSponsoring();
     const setIsSponsoring = useSetIsSponsoring();
     const joinRequest = useJoinRequest();
-    const activePlayers = useActivePlayers();
-    const storyCard = useStoryCard();
     const [popup, setPopup] = useState(true);
-    // const [partSetupButton, setPartSetupButton] = useState(false);
-    // const [hasSetup, setHasSetup] = useState(false);
-    const [foeStageStart, setFoeStageStart] = [useFoeStageStart(), useSetFoeStageStart()];
-    const [notifyStageStart, setNotifyStageStart] = [useNotifyStageStart(), useSetNotifyStageStart()];
-    const [notifyStageEnd, setNotifyStageEnd] = [useNotifyStageEnd(), useSetNotifyStageEnd()];
-    const [notifyQuestEnd, setNotifyQuestEnd] = [useNotifyQuestEnd(), useSetNotifyQuestEnd()];
-    const [notifyHandOversize, setNotifyHandOversize] = [useNotifyHandOversize(), useSetNotifyHandOversize()];
-    const [notifyHandNotOverSize, setNotifyHandNotOversize] = [useNotifyHandNotOversize(), useSetNotifyHandNotOversize()];
-
-    // if(notifyStageEnd){
-    //     setHasSetup(false);
-    // }
-
-    // if(name !== sponsorRequest && foeStageStart && hasSetup == false){
-    //     setPartSetupButton(true);
-    //     setHasSetup(true);
-    // }
+    const foeStageStart = useFoeStageStart();
 
     let myHandArr = [false, false, false, false];
     let myPlayerID = -1;
@@ -135,32 +116,6 @@ function GameBoard(props) {
                     </Button>
                 </div>)
             }
-            {(notifyStageStart) &&
-                <div id="foe-stage-start-popup">
-                    <Popup popupType="FOESTAGESTART" setPopup={setNotifyStageStart}></Popup>
-                </div>
-            }
-            {(notifyStageEnd) &&
-                <div id="foe-stage-end-popup">
-                    <Popup popupType="FOESTAGEEND" setPopup={setNotifyStageEnd}></Popup>
-                </div>
-            }
-            {(notifyQuestEnd) &&
-                <div id="quest-end-popup">
-                    <Popup popupType="QUESTEND" setPopup={setNotifyQuestEnd}></Popup>
-                </div>
-            }
-            {(notifyHandOversize) &&
-                <div id="hand-oversize-popup">
-                    <Popup popupType="HANDOVERSIZE" setPopup={setNotifyHandOversize}></Popup>
-                </div>
-            }
-            {(notifyHandNotOverSize) &&
-                <div id="hand-not-oversize-popup">
-                    <Popup popupType="HANDNOTOVERSIZE" setPopup={setNotifyHandNotOversize}></Popup>
-                </div>
-            }
-
         </div>
     );
 }
