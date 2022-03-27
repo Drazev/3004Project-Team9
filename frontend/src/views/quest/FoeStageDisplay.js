@@ -45,7 +45,7 @@ function FoeStageDisplay(props){
     activePlayers.forEach(player => {
       hands.forEach(hand => {
         if(hand.playerName === player.name) {
-          render.push(<h4 key={hand.playerName} style={{textAlign: "left",width:600}}>{hand.playerName} Current BP: {getBP(hand.playerId)}</h4>)
+          render.push(<h4 key={hand.playerName} className={"bpdisplay"}>{hand.playerName} Current BP: {getBP(hand.playerId)}</h4>)
         }
       });
     });
@@ -63,11 +63,11 @@ function FoeStageDisplay(props){
       <div style={{position: "absolute", width:240, top:245, left:150}}>
         <h4 style={{color: "white"}}>Foe Battle Points: {totalBP}</h4>
       </div>
-      <div style={{position: "absolute"}}>
-        {/* {props.currentStage.stageCard.isBoosted && (
+      {/* <div style={{position: "absolute"}}>
+        {props.currentStage.stageCard.isBoosted && (
           <h4 style={{color: "white"}}>Foe is Boosted</h4>
-        )} */}
-      </div>
+        )}
+      </div> */}
       <div style={{position: "absolute", top:430, left:50}}>
         {RenderPlayerCurrentBP()}
       </div>

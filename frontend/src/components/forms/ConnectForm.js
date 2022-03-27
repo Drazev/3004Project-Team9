@@ -31,6 +31,11 @@ const ConnectForm = () => {
     setSponsorName: generalStore.useSetSponsorName(),
 
     pushNotification: notificationStore.usePushNotification(),
+
+    setTestStageStart: generalStore.useSetTestStageStart(),
+    setMaxBid: generalStore.useSetMaxBid(),
+    setMaxBidPlayer: generalStore.useSetMaxBidPlayer(),
+    setCurrentBidder: generalStore.useSetCurrentBidder(),
   }
 
   const setName = generalStore.useSetName();
