@@ -10,13 +10,13 @@ const useStore = create((set) => ({
   events: "",
   popupType: "",
   turn: "",
-  sponsorRequest: "",
+  sponsorName: "",
   isSponsoring: false,
   joinRequest: false,
   handOversize: false,
   foeStageStart: false,
   storyCard: null,
-  activePlayers: {},
+  activePlayers: [],
   loadPlayers: async () => {
     await handleLoadPlayers(set);
   },
@@ -24,8 +24,7 @@ const useStore = create((set) => ({
   setName: (name) => set(() => ({ name: name })),
   setTurn: (name) => set(() => ({ turn: name })),
   setIsSponsoring: (x) => set(() => ({isSponsoring: x})),
-  setPopupType: (type) => set(() => ({ popupType: type })),
-  setSponsorRequest: (name) => set(() => ({ sponsorRequest: name })),
+  setSponsorName: (name) => set(() => ({ sponsorRequest: name })),
   setGameStarted: (gameStarted) => set(() => ({ gameStarted: gameStarted })),
   setPlayers: (players) => set(() => ({ players: players })),
   setJoinRequest: (status) => set(() => ({joinRequest: status})),
@@ -107,6 +106,7 @@ export const useHandOversize = () => useStore((state) => state.handOversize);
 export const useActivePlayers = () => useStore((state) => state.activePlayers);
 export const useFoeStageStart = () => useStore((state) => state.foeStageStart);
 export const useStoryCard = () => useStore((state) => state.storyCard);
+export const useIsSponsoring = () => useStore((state) => state.isSponsoring);
 
 export const useSetConnected = () => useStore((state) => state.setConnected);
 export const useSetGameStarted = () => useStore((state) => state.setGameStarted);
@@ -116,12 +116,10 @@ export const useUpdateHand = () => useStore((state) => state.updateHand);
 export const useUpdatePlayer = () => useStore((state) => state.updatePlayer);
 export const useSetPlayers = () => useStore((state) => state.setPlayers);
 export const useSetIsSponsoring = () => useStore((state) => state.setIsSponsoring);
-export const useIsSponsoring = () => useStore((state) => state.isSponsoring);
 export const useLoadPlayers = () => useStore((state) => state.loadPlayers);
 export const useSetTurn = () => useStore((state) => state.setTurn);
-export const useSetSponsorRequest = () => useStore((state) => state.setSponsorRequest);
+export const useSetSponsorName = () => useStore((state) => state.setSponsorName);
 export const usePopupType = () => useStore((state) => state.popupType);
-export const useSetPopupType = () => useStore((state) => state.setPopupType);
 export const useSetJoinRequest = () => useStore((state) => state.setJoinRequest);
 export const useSetHandOversize = () => useStore((state) => state.setHandOversize);
 export const useSetActivePlayers = () => useStore((state) => state.setActivePlayers);

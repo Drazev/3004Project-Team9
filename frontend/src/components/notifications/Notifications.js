@@ -1,6 +1,7 @@
 import { ToastContainer } from 'react-bootstrap';
 import { useNotificationQueue, useMaxNotifications } from '../../stores/notificationStore';
 import Notification from './Notification';
+import "./Notifications.css";
 
 const Notifications = () => {
     const notificationQueue = useNotificationQueue();

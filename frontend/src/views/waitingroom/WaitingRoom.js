@@ -37,7 +37,7 @@ const WaitingRoom = () => {
                     <p>There Are Enough Players to Begin: {players.length}/4</p>
                     <button
                         onClick={test}
-                        className="btn btn-primary"
+                        className="ReadyButton"
                     >Ready</button>
                 </>
             ) : (
@@ -46,18 +46,16 @@ const WaitingRoom = () => {
                     <button
                         disabled={true}
                         onClick={test}
-                        className="btn btn-primary"
+                        className="NotReadyButton"
                     >Ready</button>
                 </>
             )}
             <h3>Players in lobby</h3>
-            <ul className="list-players">
                 {players.map((player, index) => (
-                    <li key={index}>
+                    <p className="PlayerName" key={index}>
                         {player}
-                    </li>
+                    </p>
                 ))}
-            </ul>
 
         </div>
     );
