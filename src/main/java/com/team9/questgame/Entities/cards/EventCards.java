@@ -3,7 +3,6 @@ package com.team9.questgame.Entities.cards;
 import com.team9.questgame.Entities.Effects.EffectObserver;
 import com.team9.questgame.Entities.Effects.Effects;
 import com.team9.questgame.Entities.Players;
-import com.team9.questgame.game_phases.event.EventPhaseController;
 
 /**
  * Entity representing Event Cards
@@ -12,7 +11,7 @@ import com.team9.questgame.game_phases.event.EventPhaseController;
  * Some effects are delayed and this is handled by the Effects class and it's
  * subclasses.
  */
-public class EventCards extends StoryCards implements CardWithEffect {
+public class EventCards extends StoryCards implements CardWithEffect<EventCards> {
     private final Effects activeEffect;
 
     /**
@@ -44,6 +43,10 @@ public class EventCards extends StoryCards implements CardWithEffect {
     }
 
 
+    @Override
+    public EventCards getCard() {
+        return this;
+    }
 
     @Override
     public void activate(EffectObserver observer, Players activatingPlayer) {

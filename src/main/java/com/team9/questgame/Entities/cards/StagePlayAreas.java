@@ -377,7 +377,7 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
     /**
      * Updates the clients about a stage area being changed, sending the new state.
      */
-    private void notifyStageAreaChanged() {
+    public void notifyStageAreaChanged() {
         phaseController.notifyStageAreaChanged(this,getStageAreaData(),getObfuscatedStageAreaData());
     }
 }

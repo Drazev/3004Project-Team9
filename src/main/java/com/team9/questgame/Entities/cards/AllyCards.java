@@ -13,7 +13,7 @@ import com.team9.questgame.Entities.Players;
  * ally being in the owing players play area.
  * @param <T> This is an enumeration type representing the card that triggers the boost.
  */
-public class AllyCards <T extends Enum<T> & AllCardCodes> extends AdventureCards implements BoostableCard, BattlePointContributor,BidContributor,CardWithEffect {
+public class AllyCards <T extends Enum<T> & AllCardCodes> extends AdventureCards implements BoostableCard, BattlePointContributor,BidContributor,CardWithEffect<AllyCards> {
     private final int bonusBp; //Battle Points
     private final int bids;
     private final int boostBonusBp;
@@ -159,6 +159,11 @@ public class AllyCards <T extends Enum<T> & AllCardCodes> extends AdventureCards
         if(activeEffect!=null) {
             hand.registerCardWithEffect(this);
         }
+    }
+
+    @Override
+    public AllyCards getCard() {
+        return this;
     }
 
     @Override
