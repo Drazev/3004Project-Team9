@@ -182,7 +182,7 @@ export async function connect(connectFunctions) {
             connectFunctions.updatePlayerPlayArea(body);
         });
 
-        client.subscribe("/topic/quest/stage-area-changed", (data) => {
+        client.subscribe("/user/topic/quest/stage-area-changed", (data) => {
             /**
              * This represents cards in play. It could be player play areas, or game stages
              */

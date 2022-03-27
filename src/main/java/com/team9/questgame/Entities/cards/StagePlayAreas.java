@@ -79,7 +79,7 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
 
         LOG = LoggerFactory.getLogger(StagePlayAreas.class);
 
-        notifyStageAreaChanged();
+//        notifyStageAreaChanged();
     }
 
     @Override
