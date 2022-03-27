@@ -16,7 +16,7 @@ export const handleGoodNotification = (body, utilities) => {
      * Server is notifying clients of a good notification
      */
     console.log("/user/topic/notification: " + JSON.stringify(body));
-    utilities.pushNotification({id: lastNotificationId++, type: "GOOD", body})
+    utilities.pushNotification({id: lastNotificationId++, show: true, type: "GOOD", body})
 }
 
 export const handleBadNotification = (body, utilities) => {
@@ -24,7 +24,7 @@ export const handleBadNotification = (body, utilities) => {
      * Server is notifying clients of a bad notification
      */
     console.log("/user/topic/notification: " + JSON.stringify(body));
-    utilities.pushNotification({ id: lastNotificationId++, type: "BAD", body})
+    utilities.pushNotification({ id: lastNotificationId++, show: true, type: "BAD", body})
 }
 
 export const handleInfoNotification = (body, utilities) => {
@@ -32,7 +32,7 @@ export const handleInfoNotification = (body, utilities) => {
      * Server is notifying clients of a info notification
      */
     console.log("/user/topic/notification: " + JSON.stringify(body));
-    utilities.pushNotification({ id: lastNotificationId++, type: "INFO", body})
+    utilities.pushNotification({ id: lastNotificationId++, show: true, type: "INFO", body})
 }
 
 export const handleWarningNotification = (body, utilities) => {
@@ -40,7 +40,7 @@ export const handleWarningNotification = (body, utilities) => {
      * Server is notifying clients of a warning notification
      */
     console.log("/user/topic/notification: " + JSON.stringify(body));
-    utilities.pushNotification({ id: lastNotificationId++, type: "WARNING", body })
+    utilities.pushNotification({ id: lastNotificationId++, show: true, type: "WARNING", body })
 }
 
 export const handleDebugNotification = (body, utilities) => {
@@ -49,6 +49,6 @@ export const handleDebugNotification = (body, utilities) => {
      */
     if (DEBUG) {
         console.log("/user/topic/notification: " + JSON.stringify(body));
-        utilities.pushNotification({ id:lastNotificationId++, type: "DEBUG", body });
+        utilities.pushNotification({ id:lastNotificationId++, show: true, type: "DEBUG", body });
     }
 }

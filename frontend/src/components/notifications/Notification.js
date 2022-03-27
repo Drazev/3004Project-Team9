@@ -2,15 +2,20 @@ import { useState, useEffect } from "react";
 import Toast from 'react-bootstrap/Toast';
 import ToastHeader from 'react-bootstrap/ToastHeader';
 import ToastBody from 'react-bootstrap/ToastBody';
-import { useRemoveNotification, useNotificationDelay } from "../../stores/notificationStore";
+import { useRemoveNotification, useNotificationDelay, useHideNotification } from "../../stores/notificationStore";
+import "./Notifications.css";
 
 const Notification = ({ notification }) => {
+    console.log(`Notification ${notification.id} rerendered`);
     const [bgColor, setBgColor] = useState(null);
     const removeNotification = useRemoveNotification();
     const delay = useNotificationDelay();
+    const hideNotification = useHideNotification();
 
     const onClose = () => {
-        removeNotification(notification.id);
+        // removeNotification(notification.id);
+        hideNotification(notification.id);
+        console.log(`Notification ${notification.id} removed`);
     }
 
     useEffect(() => {
@@ -63,7 +68,7 @@ const Notification = ({ notification }) => {
     }
 
     return (
-        <Toast bg={bgColor} animation={true} autohide={true} delay={delay} onClose={onClose} >
+        <Toast bg={bgColor} animation={true} autohide={true} delay={delay} onClose={onClose} show={notification.show}>
             <ToastHeader closeButton={true}>{renderToastHeader()}</ToastHeader>
             <ToastBody> {renderToastBody()} </ToastBody>
         </Toast>

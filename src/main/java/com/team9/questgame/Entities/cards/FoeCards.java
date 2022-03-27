@@ -5,7 +5,7 @@ import com.team9.questgame.Entities.Effects.EffectObserver;
 import com.team9.questgame.Entities.Effects.Effects;
 import com.team9.questgame.Entities.Players;
 
-public class FoeCards extends AdventureCards implements BoostableCard, BattlePointContributor, CardWithEffect {
+public class FoeCards extends AdventureCards implements BoostableCard, BattlePointContributor, CardWithEffect<FoeCards> {
     private final int bpValue;
     private final int boostedBpValue;
     private boolean isBoosted;
@@ -84,6 +84,11 @@ public class FoeCards extends AdventureCards implements BoostableCard, BattlePoi
     protected void registerwithNewPlayArea(PlayAreas stage) {
         stage.registerBoostableCard(this);
         stage.registerBattlePointContributor(this);
+    }
+
+    @Override
+    public FoeCards getCard() {
+        return this;
     }
 
     @Override

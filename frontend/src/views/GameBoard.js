@@ -9,7 +9,7 @@ import { Button } from "react-bootstrap";
 import React, { useState } from "react";
 import "./GameBoard.css";
 
-function GameBoard(props) {
+function GameBoard({}) {
     const name = useName();
     const hands = usePlayerHands();
     const active = usePlayerPlayAreas();
@@ -55,6 +55,7 @@ function GameBoard(props) {
             allHands.push(
                 <div style={{position:"fixed",top:curTop,left:10}}>
                     <PlayerHand
+                        key={hands[i].playerName}
                         playerName={hands[i].playerName}
                         playerID={hands[i].playerId}
                         isTurn={(hands[0].playerName === turn)}
@@ -87,12 +88,17 @@ function GameBoard(props) {
                 <QuestDisplay></QuestDisplay>
             </div>
 
-            {(popup && name === sponsorRequest) &&
+            {popup && name === sponsorRequest &&
                 <div id="sponsor-popup">
                     <Popup popupType="SPONSORQUEST" setPopup={setPopup}></Popup>
                 </div>
             }
-            {(name === sponsorRequest) && isSponsoring &&
+            {popup && joinRequest && !isSponsoring &&
+                <div id="join-popup">
+                    <Popup popupType="JOINQUEST" setPopup={setPopup}></Popup>
+                </div>
+            }
+            {isSponsoring &&
                 (<div id="finish-setup">
                     <Button
                         onClick={() => {
@@ -101,12 +107,7 @@ function GameBoard(props) {
                     </Button>
                 </div>)
             }
-            {(popup && joinRequest && name !== sponsorRequest) &&
-                <div id="join-popup">
-                    <Popup popupType="JOINQUEST" setPopup={setPopup}></Popup>
-                </div>
-            }
-            {(name !== sponsorRequest && foeStageStart /*&& partSetupButton*/) &&
+            {foeStageStart && !isSponsoring &&
                 (<div id="finish-setup">
                     <Button
                         onClick={() => {

@@ -96,8 +96,7 @@ export async function connect(connectFunctions) {
              * the card(s) until their hand has <= 12 cards to proceed
              */
             let body = JSON.parse(message.body);
-            console.log("Player Hand Oversize: ");
-            console.log(body);
+            console.log("/topic/player/hand-oversize: " + JSON.stringify(body));
             notification.handleBadNotification({
                 title: "Hand Oversize",
                 message: `A player has oversized hand. Please discard or play the card(s) until their hand has <= 12 cards to proceed.`
@@ -109,10 +108,8 @@ export async function connect(connectFunctions) {
              * Server informs that no player has oversized hand (more than 12 cards)
              */
             let body = JSON.parse(message.body);
+            console.log("/topic/player/hand-not-oversize: " + JSON.stringify(body));
             connectFunctions.setHandOversize(false);
-            // connectFunctions.setNotifyHandNotOversize(true);
-            console.log("Player Hand Not Oversize: ");
-            console.log(body);
             notification.handleGoodNotification({
                 title: "Hand Not Oversize",
                 message: "No player has oversized hand."
@@ -140,10 +137,10 @@ export async function connect(connectFunctions) {
 
         });
 
-        client.subscribe("/topic/quest/foe-stage-start", (playersJ) => {
-            let players = JSON.parse(playersJ.body);
-            console.log("Active players: " + players);
-            connectFunctions.setActivePlayers(players);
+        client.subscribe("/topic/quest/foe-stage-start", (message) => {
+            let body = JSON.parse(message.body);
+            console.log("Foe stage started " + JSON.stringify(body));
+            connectFunctions.setActivePlayers(body.remainingPlayers);
             connectFunctions.setFoeStageStart(true);
             notification.handleInfoNotification({
                 title: "Foe Stage Start",
@@ -151,10 +148,10 @@ export async function connect(connectFunctions) {
             }, connectFunctions)
         });
 
-        client.subscribe("/topic/quest/stage-end", (playersJ) => {
-            let players = JSON.parse(playersJ.body);
-            console.log("Stage ended: " + players);
-            connectFunctions.setActivePlayers(players);
+        client.subscribe("/topic/quest/stage-end", (message) => {
+            let body = JSON.parse(message.body);
+            console.log("Stage ended: " + JSON.stringify(body));
+            connectFunctions.setActivePlayers(body.remainingPlayers);
             connectFunctions.setFoeStageStart(false);
             notification.handleInfoNotification({
                 title: "Stage ended",
@@ -162,10 +159,14 @@ export async function connect(connectFunctions) {
             }, connectFunctions)
         });
 
-        client.subscribe("/topic/quest/end", (playersJ) => {
-            let players = JSON.parse(playersJ.body);
-            console.log("Quest ended: " + players);
+        client.subscribe("/topic/quest/end", (message) => {
+            let body = JSON.parse(message.body);
+            console.log("Quest ended: " + JSON.stringify(body.winners));
             connectFunctions.setFoeStageStart(false);
+            connectFunctions.setStoryCard(null);
+            connectFunctions.setIsSponsoring(false);
+            connectFunctions.setSponsorName("");
+            connectFunctions.setActivePlayers([]);
             notification.handleInfoNotification({
                 title: "Quest ended",
                 message: "The quest has ended."
@@ -181,7 +182,7 @@ export async function connect(connectFunctions) {
             connectFunctions.updatePlayerPlayArea(body);
         });
 
-        client.subscribe("/topic/quest/stage-area-changed", (data) => {
+        client.subscribe("/user/topic/quest/stage-area-changed", (data) => {
             /**
              * This represents cards in play. It could be player play areas, or game stages
              */
@@ -198,9 +199,16 @@ export async function connect(connectFunctions) {
              * This happens right after a player drawn a quest card which started the quest
              * phase
              */
-            console.log("Sponsor Search: " + message);
             let body = JSON.parse(message.body);
-            connectFunctions.notifySponsorRequest(body.name);
+            console.log("Sponsor Search: " + JSON.stringify(body));
+            connectFunctions.setSponsorName(body.name);
+        });
+
+        client.subscribe("/topic/quest/sponsor-found", (message) => {
+            /**
+             * Server is notifying that a sponsor has been found
+             */
+
         });
 
 

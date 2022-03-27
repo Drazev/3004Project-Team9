@@ -6,7 +6,7 @@ import Card from "../../components/cards/Card";
 import "./FoeStageDisplay.css";
 
 function FoeStageDisplay(props){
-  const activePlayers = useActivePlayers().remainingPlayers;
+  const activePlayers = useActivePlayers();
   const hands = usePlayerHands();
   const playerPlayAreas = usePlayerPlayAreas();
 

@@ -204,10 +204,14 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
 
         //make as many stages as are stages in the quest and add them to the array
         this.sponsor.getPlayArea().setSponsorMode(true);
-        for(int i = 0; i < questCard.getStages(); i++){
-            stages.add(new StagePlayAreas(this,questCard, sponsor,i));
-        }
         this.stageVisibleToPlayersList.clear();
+        for(int i = 0; i < questCard.getStages(); i++) {
+            stages.add(new StagePlayAreas(this, questCard, sponsor, i));
+            stages.get(i).notifyStageAreaChanged();
+            HashSet<Players> temp = new HashSet<>();
+            temp.add(this.sponsor);
+            stageVisibleToPlayersList.put(stages.get(i),temp);
+        }
         this.cardIDUsedToRevealStage.clear();
         stateMachine.update();
 
@@ -401,6 +405,16 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
     }
 
     private void resolveStage(int stageNum){
+        StagePlayAreas currStage = stages.get(curStageIndex);
+        if(currStage==null) {
+            throw new IllegalQuestPhaseStateException(String.format("Quest stage index %d could not be found for stage %d!",curStageIndex,curStageIndex+1));
+        }
+        HashSet<Players> pList=stageVisibleToPlayersList.get(currStage);
+        if(pList==null) {
+            throw new IllegalQuestPhaseStateException(String.format("Player visibility list couldn't find stage %d.",curStageIndex+1));
+        }
+        pList.addAll(playerTurnService.getPlayers()); //Make stage visible to all players on resolution
+        currStage.notifyStageAreaChanged();
         for(Players player:questingPlayers){
             player.getPlayArea().setPlayerTurn(false);
             if(player.getPlayArea().getBattlePoints() < stages.get(stageNum).getBattlePoints()){
@@ -580,6 +594,7 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
                     stageVisibleToPlayersList.put(s,playerVisibilityList);
                 }
                 playerVisibilityList.add(player);
+                s.notifyStageAreaChanged();
                 LOG.info(String.format("Quest Phase has made stageID %d visible to playerID %d (Name: %s).",stageID,player.getPlayerId(),player.getName()));
                 return true;
             }

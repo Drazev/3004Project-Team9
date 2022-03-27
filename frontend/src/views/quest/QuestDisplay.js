@@ -3,7 +3,7 @@ import FoeStageDisplay from "./FoeStageDisplay";
 import CardImages from "../../assets/images/index";
 import BigCard from "../../components/cards/BigCard";
 import "./QuestDisplay.css";
-import { useIsSponsoring, useFoeStageStart, useStoryCard, useActivePlayers } from "../../stores/generalStore";
+import { useIsSponsoring, useFoeStageStart, useStoryCard } from "../../stores/generalStore";
 import { useStageAreas, useCurrentStage } from "../../stores/playAreaStore";
 
 const QuestDisplay = (props) => {

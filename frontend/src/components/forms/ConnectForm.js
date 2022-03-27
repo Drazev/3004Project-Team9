@@ -28,14 +28,8 @@ const ConnectForm = () => {
     setActivePlayers: generalStore.useSetActivePlayers(),
     setFoeStageStart: generalStore.useSetFoeStageStart(),
 
-    notifySponsorRequest: generalStore.useSetSponsorRequest(),
+    setSponsorName: generalStore.useSetSponsorName(),
 
-    // setNotifyStageStart: notificationStore.useSetNotifyStageStart(),
-    // setNotifyStageEnd: notificationStore.useSetNotifyStageEnd(),
-    // setNotifyQuestEnd: notificationStore.useSetNotifyQuestEnd(),
-    // setNotifyHandOversize: notificationStore.useSetNotifyHandNotOversize(),
-    // setNotifyHandNotOversize: notificationStore.useSetNotifyHandNotOversize(),
-  
     pushNotification: notificationStore.usePushNotification(),
   }
 
@@ -53,11 +47,11 @@ const ConnectForm = () => {
   };
 
   return (
-    <form className="m-3" onSubmit={handleSubmit}>
-      <div className="input-group mb-2 mt-4">
+    <form className="ConnectForm" onSubmit={handleSubmit}>
+      <div>
         <input
           type="text"
-          className="form-control"
+          className="NameInput"
           placeholder="Enter your name"
           value={connectFunctions.name}
           onChange={(e) => {
@@ -65,7 +59,7 @@ const ConnectForm = () => {
           }}
         />
       </div>
-      <button type="submit" className="btn btn-primary">
+      <button type="submit" className="ConnectButton">
         Connect
       </button>
     </form>
