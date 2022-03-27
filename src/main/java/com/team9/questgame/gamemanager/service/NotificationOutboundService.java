@@ -11,12 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
 /**
  * Send outbound notifications to clients
  */
+@Service
 public class NotificationOutboundService implements ApplicationContextAware {
 
     private Logger LOG;
@@ -74,6 +76,10 @@ public class NotificationOutboundService implements ApplicationContextAware {
     }
 
     private void sendToAllExceptPlayer(String topic, Players excludedPlayer, Object payload) {
+        if(payload==null) {
+            LOG.info(String.format("Selective Broadcast to all players REJECTED due to null payload. Request: {name: "+excludedPlayer.getName()+", PlayerID: "+excludedPlayer.getPlayerId()+"}, Topic: "+topic+" Payload: "+payload));
+            return;
+        }
         LOG.info(String.format("Selective Broadcast to all players except {name: "+excludedPlayer.getName()+", PlayerID: "+excludedPlayer.getPlayerId()+"}, Topic: "+topic+" Payload: "+payload));
         for(Map.Entry<Players,String> e : sessionService.getPlayerToSessionIdMap().entrySet()) {
             if(e.getKey()!=excludedPlayer) {

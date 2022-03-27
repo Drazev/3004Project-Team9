@@ -374,6 +374,16 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
     }
 
     private void resolveStage(int stageNum){
+        StagePlayAreas currStage = stages.get(curStageIndex);
+        if(currStage==null) {
+            throw new IllegalQuestPhaseStateException(String.format("Quest stage index %d could not be found for stage %d!",curStageIndex,curStageIndex+1));
+        }
+        HashSet<Players> pList=stageVisibleToPlayersList.get(currStage);
+        if(pList==null) {
+            throw new IllegalQuestPhaseStateException(String.format("Player visibility list couldn't find stage %d.",curStageIndex+1));
+        }
+        pList.addAll(playerTurnService.getPlayers()); //Make stage visible to all players on resolution
+        currStage.notifyStageAreaChanged();
         for(Players player:questingPlayers){
             player.getPlayArea().setPlayerTurn(false);
             if(player.getPlayArea().getBattlePoints() < stages.get(stageNum).getBattlePoints()){
@@ -553,6 +563,7 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
                     stageVisibleToPlayersList.put(s,playerVisibilityList);
                 }
                 playerVisibilityList.add(player);
+                s.notifyStageAreaChanged();
                 LOG.info(String.format("Quest Phase has made stageID %d visible to playerID %d (Name: %s).",stageID,player.getPlayerId(),player.getName()));
                 return true;
             }
