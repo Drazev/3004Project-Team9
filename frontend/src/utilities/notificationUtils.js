@@ -15,7 +15,7 @@ export const handleGoodNotification = (body, utilities) => {
     /**
      * Server is notifying clients of a good notification
      */
-    console.log("/user/topic/notification: " + JSON.stringify(body));
+    console.log("/user/topic/notification/good: " + JSON.stringify(body));
     utilities.pushNotification({id: lastNotificationId++, show: true, type: "GOOD", body})
 }
 
@@ -23,7 +23,7 @@ export const handleBadNotification = (body, utilities) => {
     /**
      * Server is notifying clients of a bad notification
      */
-    console.log("/user/topic/notification: " + JSON.stringify(body));
+    console.log("/user/topic/notification/bad: " + JSON.stringify(body));
     utilities.pushNotification({ id: lastNotificationId++, show: true, type: "BAD", body})
 }
 
@@ -31,7 +31,7 @@ export const handleInfoNotification = (body, utilities) => {
     /**
      * Server is notifying clients of a info notification
      */
-    console.log("/user/topic/notification: " + JSON.stringify(body));
+    console.log("/user/topic/notification/info: " + JSON.stringify(body));
     utilities.pushNotification({ id: lastNotificationId++, show: true, type: "INFO", body})
 }
 
@@ -39,7 +39,7 @@ export const handleWarningNotification = (body, utilities) => {
     /**
      * Server is notifying clients of a warning notification
      */
-    console.log("/user/topic/notification: " + JSON.stringify(body));
+    console.log("/user/topic/notification/warning: " + JSON.stringify(body));
     utilities.pushNotification({ id: lastNotificationId++, show: true, type: "WARNING", body })
 }
 
@@ -48,7 +48,7 @@ export const handleDebugNotification = (body, utilities) => {
      * Server is notifying clients of a debug notification
      */
     if (DEBUG) {
-        console.log("/user/topic/notification: " + JSON.stringify(body));
+        console.log("/user/topic/notification/debug: " + JSON.stringify(body));
         utilities.pushNotification({ id:lastNotificationId++, show: true, type: "DEBUG", body });
     }
 }

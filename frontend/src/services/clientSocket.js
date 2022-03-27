@@ -1,6 +1,7 @@
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import * as notification from "../utilities/notificationUtils"
+import * as serverRequestDispatcher from "../utilities/serverRequestDispatcher"
 
 export let client;
 
@@ -235,9 +236,10 @@ export async function connect(connectFunctions) {
              * This happens right after a player drawn a quest card which started the quest
              * phase
              */
-            let body = JSON.parse(message.body);
-            console.log("Sponsor Search: " + JSON.stringify(body));
-            connectFunctions.setSponsorName(body.name);
+            serverRequestDispatcher.handleSponsorSearchRequest(
+                JSON.parse(message.body),
+                { setSponsorName: connectFunctions.setSponsorName }
+            );
         });
 
         client.subscribe("/topic/quest/sponsor-found", (message) => {
@@ -247,14 +249,15 @@ export async function connect(connectFunctions) {
 
         });
 
-
         client.subscribe("/topic/quest/join-request", (message) => {
             /**
              * Server is querying for players to join quest
              * This happens after the quest has been setup and a quest stage has started
              */
-            console.log("/topic/quest/join-request: " + message);
-            connectFunctions.setJoinRequest(true);
+            serverRequestDispatcher.handleQuestJoinRequest(
+                JSON.parse(message.body), 
+                { setJoinRequest: connectFunctions.setJoinRequest }
+            );
         });
 
         client.subscribe("/user/topic/notification/good", (message) => {
