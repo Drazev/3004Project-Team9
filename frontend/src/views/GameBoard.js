@@ -55,6 +55,7 @@ function GameBoard({}) {
             allHands.push(
                 <div style={{position:"fixed",top:curTop,left:10}}>
                     <PlayerHand
+                        key={hands[i].playerName}
                         playerName={hands[i].playerName}
                         playerID={hands[i].playerId}
                         isTurn={(hands[0].playerName === turn)}
