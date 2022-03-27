@@ -5,37 +5,42 @@ import "./ConnectForm.css";
 import * as generalStore from "../../stores/generalStore";
 import * as playAreaStore from "../../stores/playAreaStore";
 import * as notificationStore from "../../stores/notificationStore";
+import * as questRequestStore from "../../stores/questRequestStore";
+import * as eventRequestStore from "../../stores/eventRequestStore";
 
 const ConnectForm = () => {
 
   const connectFunctions = {
+    // generalStore
     name: generalStore.useName(),
-
-    // addNewPlayer: generalStore.useAddNewPlayer(),
     setConnected: generalStore.useSetConnected(),
     setPlayers: generalStore.useSetPlayers(),
     setGameStarted: generalStore.useSetGameStarted(),
     setTurn: generalStore.useSetTurn(),
     setJoinRequest: generalStore.useSetJoinRequest(),
-
     updateHand: generalStore.useUpdateHand(),
     updatePlayer: generalStore.useUpdatePlayer(),
     updateStageArea: playAreaStore.useUpdateStageArea(),
     updatePlayerPlayArea: playAreaStore.useUpdatePlayerPlayArea(),
-
     setHandOversize: generalStore.useSetHandOversize(),
     setStoryCard: generalStore.useSetStoryCard(),
     setActivePlayers: generalStore.useSetActivePlayers(),
     setFoeStageStart: generalStore.useSetFoeStageStart(),
-
     setSponsorName: generalStore.useSetSponsorName(),
 
+    // notificationStore
     pushNotification: notificationStore.usePushNotification(),
 
     setTestStageStart: generalStore.useSetTestStageStart(),
     setMaxBid: generalStore.useSetMaxBid(),
     setMaxBidPlayer: generalStore.useSetMaxBidPlayer(),
     setCurrentBidder: generalStore.useSetCurrentBidder(),
+    // questRequestStore
+    setSponsorSearchRequest: questRequestStore.useSetSponsorSearchRequest(),
+    setQuestJoinRequest: questRequestStore.useSetQuestJoinRequest(),
+
+    // eventRequestStore
+    setTargetSelectionRequest: eventRequestStore.useSetTargetSelectionRequest(),
   }
 
   const setName = generalStore.useSetName();

@@ -11,7 +11,7 @@
 const DEBUG = true;
 let lastNotificationId = 0;
 
-export const handleGoodNotification = (body, utilities) => {
+export const dispatchGoodNotification = (body, utilities) => {
     /**
      * Server is notifying clients of a good notification
      */
@@ -19,7 +19,7 @@ export const handleGoodNotification = (body, utilities) => {
     utilities.pushNotification({id: lastNotificationId++, show: true, type: "GOOD", body})
 }
 
-export const handleBadNotification = (body, utilities) => {
+export const dispatchBadNotification = (body, utilities) => {
     /**
      * Server is notifying clients of a bad notification
      */
@@ -27,7 +27,7 @@ export const handleBadNotification = (body, utilities) => {
     utilities.pushNotification({ id: lastNotificationId++, show: true, type: "BAD", body})
 }
 
-export const handleInfoNotification = (body, utilities) => {
+export const dispatchInfoNotification = (body, utilities) => {
     /**
      * Server is notifying clients of a info notification
      */
@@ -35,7 +35,7 @@ export const handleInfoNotification = (body, utilities) => {
     utilities.pushNotification({ id: lastNotificationId++, show: true, type: "INFO", body})
 }
 
-export const handleWarningNotification = (body, utilities) => {
+export const dispatchWarningNotification = (body, utilities) => {
     /**
      * Server is notifying clients of a warning notification
      */
@@ -43,7 +43,7 @@ export const handleWarningNotification = (body, utilities) => {
     utilities.pushNotification({ id: lastNotificationId++, show: true, type: "WARNING", body })
 }
 
-export const handleDebugNotification = (body, utilities) => {
+export const dispatchDebugNotification = (body, utilities) => {
     /**
      * Server is notifying clients of a debug notification
      */

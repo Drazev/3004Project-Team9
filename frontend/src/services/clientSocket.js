@@ -1,9 +1,9 @@
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import * as notification from "../utilities/notificationUtils"
-import * as serverRequestDispatcher from "../utilities/serverRequestDispatcher"
+import * as notificationDispatcher from "../utilities/notificationDispatcher";
+import * as questDispatcher from "../utilities/questDispatcher";
 
-export let client;
+export let client = null;
 
 const REGISTRATION_URL = "http://localhost:8080/api/register"
 const SOCK_SERVER = "http://localhost:8080/quest-game-websocket"
@@ -98,7 +98,7 @@ export async function connect(connectFunctions) {
              */
             let body = JSON.parse(message.body);
             console.log("/topic/player/hand-oversize: " + JSON.stringify(body));
-            notification.handleBadNotification({
+            notificationDispatcher.dispatchBadNotification({
                 title: "Hand Oversize",
                 message: `A player has oversized hand. Please discard or play the card(s) until their hand has <= 12 cards to proceed.`
             }, connectFunctions)
@@ -111,11 +111,10 @@ export async function connect(connectFunctions) {
             let body = JSON.parse(message.body);
             console.log("/topic/player/hand-not-oversize: " + JSON.stringify(body));
             connectFunctions.setHandOversize(false);
-            notification.handleGoodNotification({
+            notificationDispatcher.dispatchGoodNotification({
                 title: "Hand Not Oversize",
                 message: "No player has oversized hand."
             }, connectFunctions)
-
         })
 
         client.subscribe("/topic/player/player-update", (message) => {
@@ -142,11 +141,8 @@ export async function connect(connectFunctions) {
             /**
              * A foe stage has begun
              */
-            let body = JSON.parse(message.body);
-            console.log("Foe stage started " + JSON.stringify(body));
-            connectFunctions.setActivePlayers(body.remainingPlayers);
-            connectFunctions.setFoeStageStart(true);
-            notification.handleInfoNotification({
+            questDispatcher.dispatchFoeStageStart(JSON.parse(message.body));
+            notificationDispatcher.dispatchInfoNotification({
                 title: "Foe Stage Start",
                 message: "Foe stage has started."
             }, connectFunctions)
@@ -156,55 +152,28 @@ export async function connect(connectFunctions) {
             /**
              * A test stage has begun
              */
-            let body = JSON.parse(message.body);
-            console.log("Test stage started " + JSON.stringify(body));
-            connectFunctions.setActivePlayers(body.remainingPlayers);
-            connectFunctions.setTestStageStart(true);
-            notification.handleInfoNotification({
+            questDispatcher.dispatchFoeStageStart(JSON.parse(message.body));
+            notificationDispatcher.dispatchInfoNotification({
                 title: "Test Stage Start",
                 message: "Test stage has started."
             }, connectFunctions)
         });
 
         client.subscribe("/topic/quest/stage-end", (message) => {
-            /**
-             * The current quest stage has ended
-             */
-            let body = JSON.parse(message.body);
-            console.log("Stage ended: " + JSON.stringify(body));
-            connectFunctions.setActivePlayers(body.remainingPlayers);
-            connectFunctions.setFoeStageStart(false);
-            connectFunctions.setTestStageStart(false);
-            notification.handleInfoNotification({
+            questDispatcher.dispatchStageEnd(JSON.parse(message.body));
+            notificationDispatcher.dispatchInfoNotification({
                 title: "Stage ended",
                 message: "Current stage has ended."
             }, connectFunctions)
         });
 
         client.subscribe("/topic/quest/request-bid", (message) => {
-            /**
-             * The server is requesting the client to place a bid
-             */
-            let body = JSON.parse(message.body);
-            console.log("Bid Request: " + JSON.stringify(body));
-            connectFunctions.setCurrentBidder(body.player);
-            connectFunctions.setMaxBid(body.maxBid);
-            connectFunctions.setMaxBidPlayer(body.setMaxBidPlayer);
+            questDispatcher.dispatchBidRequest(JSON.parse(message.body));
         });
 
         client.subscribe("/topic/quest/end", (message) => {
-            /**
-             * The current quest stage has ended
-             */
-            let body = JSON.parse(message.body);
-            console.log("Quest ended: " + JSON.stringify(body.winners));
-            connectFunctions.setFoeStageStart(false);
-            connectFunctions.setTestStageStart(false);
-            connectFunctions.setStoryCard(null);
-            connectFunctions.setIsSponsoring(false);
-            connectFunctions.setSponsorName("");
-            connectFunctions.setActivePlayers([]);
-            notification.handleInfoNotification({
+            questDispatcher.dispatchQuestEnd(JSON.parse(message.body));
+            notificationDispatcher.dispatchInfoNotification({
                 title: "Quest ended",
                 message: "The quest has ended."
             }, connectFunctions)
@@ -229,55 +198,36 @@ export async function connect(connectFunctions) {
         });
 
 
-
         client.subscribe("/topic/quest/sponsor-search", (message) => {
-            /**
-             * Server is querrying for sponsor
-             * This happens right after a player drawn a quest card which started the quest
-             * phase
-             */
-            serverRequestDispatcher.handleSponsorSearchRequest(
-                JSON.parse(message.body),
-                { setSponsorName: connectFunctions.setSponsorName }
-            );
+            questDispatcher.dispatchSponsorSearchRequest(JSON.parse(message.body));
         });
 
         client.subscribe("/topic/quest/sponsor-found", (message) => {
-            /**
-             * Server is notifying that a sponsor has been found
-             */
-
+            questDispatcher.dispatchSponsorFound(JSON.parse(message.body));
         });
 
         client.subscribe("/topic/quest/join-request", (message) => {
-            /**
-             * Server is querying for players to join quest
-             * This happens after the quest has been setup and a quest stage has started
-             */
-            serverRequestDispatcher.handleQuestJoinRequest(
-                JSON.parse(message.body), 
-                { setJoinRequest: connectFunctions.setJoinRequest }
-            );
+            questDispatcher.dispatchQuestJoinRequest(JSON.parse(message.body));
         });
 
         client.subscribe("/user/topic/notification/good", (message) => {
-            notification.handleGoodNotification(JSON.parse(message.body), connectFunctions)
+            notificationDispatcher.dispatchGoodNotification(JSON.parse(message.body), connectFunctions)
         });
 
         client.subscribe("/user/topic/notification/warning", (message) => {
-            notification.handleWarningNotification(JSON.parse(message.body), connectFunctions)
+            notificationDispatcher.dispatchWarningNotification(JSON.parse(message.body), connectFunctions)
         });
 
         client.subscribe("/user/topic/notification/bad", (message) => {
-            notification.handleBadNotification(JSON.parse(message.body), connectFunctions)
+            notificationDispatcher.dispatchBadNotification(JSON.parse(message.body), connectFunctions)
         });
 
         client.subscribe("/user/topic/notification/info", (message) => {
-            notification.handleInfoNotification(JSON.parse(message.body), connectFunctions)
+            notificationDispatcher.dispatchInfoNotification(JSON.parse(message.body), connectFunctions)
         });
 
         client.subscribe("/user/topic/notification/debug", (message) => {
-            notification.handleDebugNotification(JSON.parse(message.body), connectFunctions)
+            notificationDispatcher.dispatchDebugNotification(JSON.parse(message.body), connectFunctions)
         });
     };
 
@@ -449,5 +399,4 @@ export function startGame() {
                 "Content-Type": "application/json"
             }
         });
-    //setGameStarted(true);
 }
