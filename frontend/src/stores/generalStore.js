@@ -17,6 +17,10 @@ const useStore = create((set) => ({
   foeStageStart: false,
   storyCard: null,
   activePlayers: [],
+  testStageStart: false,
+  maxBid: 0,
+  maxBidPlayer: {},
+  currentBidder: {},
   loadPlayers: async () => {
     await handleLoadPlayers(set);
   },
@@ -32,6 +36,10 @@ const useStore = create((set) => ({
   setActivePlayers: (players) => set(() => ({activePlayers: players})),
   setFoeStageStart: (status) => set(() => ({foeStageStart: status})),
   setStoryCard: (storyCard) => set(() => ({storyCard: storyCard})),
+  setTestStageStart: (testStageStart) => set(() => ({testStageStart: testStageStart})),
+  setMaxBid: (maxBid) => set(() => ({maxBid: maxBid})),
+  setCurrentBidder: (currentBidder) => set(() => ({currentBidder: currentBidder})),
+  setMaxBidPlayer: (maxBidPlayer) => set(() => ({maxBidPlayer: maxBidPlayer})),
   updatePlayer: (player) => set((current) => ({
     players: (() => {
       let playerExist = false;
@@ -105,6 +113,10 @@ export const useJoinRequest = () => useStore((state) => state.joinRequest);
 export const useHandOversize = () => useStore((state) => state.handOversize);
 export const useActivePlayers = () => useStore((state) => state.activePlayers);
 export const useFoeStageStart = () => useStore((state) => state.foeStageStart);
+export const useTestStageStart = () => useStore((state) => state.testStageStart);
+export const useMaxBid = () => useStore((state) => state.maxBid);
+export const useMaxBidPlayer = () => useStore((state) => state.maxBidPlayer);
+export const useCurrentBidder = () => useStore((state) => state.currentBidder);
 export const useStoryCard = () => useStore((state) => state.storyCard);
 export const useIsSponsoring = () => useStore((state) => state.isSponsoring);
 
@@ -124,6 +136,10 @@ export const useSetJoinRequest = () => useStore((state) => state.setJoinRequest)
 export const useSetHandOversize = () => useStore((state) => state.setHandOversize);
 export const useSetActivePlayers = () => useStore((state) => state.setActivePlayers);
 export const useSetFoeStageStart= () => useStore((state) => state.setFoeStageStart);
+export const useSetTestStageStart = () => useStore((state) => state.setTestStageStart);
+export const useSetMaxBid = () => useStore((state) => state.setMaxBid);
+export const useSetMaxBidPlayer = () => useStore((state) => state.setMaxBidPlayer);
+export const useSetCurrentBidder = () => useStore((state) => state.setCurrentBidder);
 export const useSetStoryCard = () => useStore((state) => state.setStoryCard)
 
 export default useStore;
