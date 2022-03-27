@@ -201,10 +201,14 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
 
         //make as many stages as are stages in the quest and add them to the array
         this.sponsor.getPlayArea().setSponsorMode(true);
-        for(int i = 0; i < questCard.getStages(); i++){
-            stages.add(new StagePlayAreas(this,questCard, sponsor,i));
-        }
         this.stageVisibleToPlayersList.clear();
+        for(int i = 0; i < questCard.getStages(); i++) {
+            stages.add(new StagePlayAreas(this, questCard, sponsor, i));
+            stages.get(i).notifyStageAreaChanged();
+            HashSet<Players> temp = new HashSet<>();
+            temp.add(this.sponsor);
+            stageVisibleToPlayersList.put(stages.get(i),temp);
+        }
         this.cardIDUsedToRevealStage.clear();
         stateMachine.update();
 
