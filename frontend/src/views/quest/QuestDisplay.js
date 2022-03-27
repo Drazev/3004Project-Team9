@@ -2,6 +2,7 @@ import React from "react";
 import FoeStageDisplay from "./FoeStageDisplay";
 import TestStageDisplay from "./TestStageDisplay";
 import BigCard from "../../components/cards/BigCard";
+import Popup from "../../components/popups/Popup";
 import "./QuestDisplay.css";
 import { useIsSponsoring, useFoeStageStart, useTestStageStart, useStoryCard } from "../../stores/generalStore";
 import { useStageAreas, useCurrentStage } from "../../stores/playAreaStore";
@@ -62,6 +63,7 @@ const QuestDisplay = (props) => {
             {(currentStageObject && foeStageStart == true) && <FoeStageDisplay currentStage={currentStageObject}></FoeStageDisplay>}
             {(currentStageObject && testStageStart == true) && <TestStageDisplay currentStage={currentStageObject}></TestStageDisplay>}
         </div>
+        {/* <Popup popupType="BIDREQUEST" setPop={null}></Popup> */}
     </div>
   );
 };

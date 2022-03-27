@@ -117,7 +117,6 @@ function GameBoard({}) {
                     </Button>
                 </div>)
             }
-            {/* <Popup popupType="BIDREQUEST" setPop={setPopup}></Popup> */}
         </div>
     );
 }
