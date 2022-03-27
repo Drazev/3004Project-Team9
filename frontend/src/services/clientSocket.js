@@ -146,8 +146,8 @@ export async function connect(connectFunctions) {
             connectFunctions.setActivePlayers(body.remainingPlayers);
             connectFunctions.setFoeStageStart(true);
             notification.handleInfoNotification({
-                title: "Test Stage Start",
-                message: "Test stage has started."
+                title: "Foe Stage Start",
+                message: "Foe stage has started."
             }, connectFunctions)
         });
 
@@ -160,8 +160,8 @@ export async function connect(connectFunctions) {
             connectFunctions.setActivePlayers(body.remainingPlayers);
             connectFunctions.setTestStageStart(true);
             notification.handleInfoNotification({
-                title: "Foe Stage Start",
-                message: "Foe stage has started."
+                title: "Test Stage Start",
+                message: "Test stage has started."
             }, connectFunctions)
         });
 

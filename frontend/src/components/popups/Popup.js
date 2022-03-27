@@ -1,11 +1,13 @@
 import React from "react";
-import {Button} from "react-bootstrap";
+import NumericInput from 'react-numeric-input';
+import {Button, InputGroup} from "react-bootstrap";
 import { sponsorRespond, joinRespond } from "../../services/clientSocket";
-import { useName, useSetIsSponsoring, useSetJoinRequest } from "../../stores/generalStore";
+import { useName, useSetIsSponsoring, useSetJoinRequest, useMaxBid } from "../../stores/generalStore";
 import "./Popup.css"
  
 const Popup = props => {
   let name = useName();
+  const maxBid = useMaxBid();
   const setIsSponsoring = useSetIsSponsoring();
   const setJoinRequest = useSetJoinRequest();
   const handleYes = () => {
@@ -15,7 +17,6 @@ const Popup = props => {
     } else if (props.popupType === "SPONSORQUEST") {
       sponsorRespond(name, true);
       setIsSponsoring(true);
-    } else if (props.popupType === "HANDOVERFLOW") {
     }
     props.setPopup(false);
   }
@@ -24,8 +25,6 @@ const Popup = props => {
       joinRespond(name, false)
     } else if (props.popupType === "SPONSORQUEST") {
       sponsorRespond(name, false);
-    } else if (props.popupType === "HANDOVERFLOW") {
-
     }
     props.setPopup(false);
   }
@@ -44,6 +43,50 @@ const Popup = props => {
                 <h4>Will you sponsor this quest?</h4>
                 <Button onClick={handleYes} style={{backgroundColor: "green", marginRight: "10px"}}>Aye</Button>
                 <Button onClick={handleNo} style={{backgroundColor: "red", marginLeft: "10px"}}>Nay</Button>
+            </div>
+          }
+          {props.popupType === "BIDREQUEST" &&
+            <div>
+              <h6>Place your bid!</h6>
+              <p>Current highest bid: {maxBid}</p>
+              <NumericInput
+                className="form-control"
+                value="0" 
+                min={ -1 } 
+                max={ 25 } 
+                step={ 1 } 
+                precision={ 0 } 
+                size={ 6 } 
+                maxLength={ 2 } 
+                mobile
+                inputmode="numeric" 
+                strict
+                style={{
+                  wrap: {
+                    background: '#E2E2E2',
+                    boxShadow: '0 0 1px 1px #fff inset, 1px 1px 5px -1px #000',
+                    padding: '0.5px',
+                    borderRadius: '6px 3px 3px 6px',
+                    fontSize: 23,
+                    width: 170,
+                    left: "27%",
+                  },
+                  input: {
+                    borderRadius: '4px 2px 2px 4px',
+                    color: '#988869',
+                    padding: '0.1ex',
+                    border: '1px solid #ccc',
+                    fontWeight: 100,
+                  },
+                  arrowUp: {
+                    borderBottomColor: 'rgba(66, 54, 0, 0.63)'
+                  },
+                  arrowDown: {
+                    borderTopColor: 'rgba(66, 54, 0, 0.63)'
+                  }
+                }}
+              ></NumericInput>
+              <button type="submit" className="SubmitBidButton">Place Bid</button>
             </div>
           }
       </div>
