@@ -56,6 +56,9 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
     private ArrayList<StagePlayAreas> stages;
     private StagePlayAreas newStage;
     private HashMap<StagePlayAreas,HashSet<Players>> stageVisibleToPlayersList;
+    private Players testWinner;
+    private int maxBid;
+    private int bidCount;
     private HashSet<Long> cardIDUsedToRevealStage;
 
     @Getter
@@ -328,6 +331,11 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
                 // Do nothing since the broadcast already sent to all players
             } case IN_TEST -> {
                 //TODO: Broadcast Test start... maybe just go into participant setup
+                dealAdventureCard();
+                while(playerTurnService.getPlayerTurn().getPlayerId() == sponsor.getPlayerId() || !questingPlayers.contains(playerTurnService.getPlayerTurn())){
+                    playerTurnService.nextPlayer();
+                }
+                outboundService.broadcastTestStageStart(playerTurnService.getPlayerTurn().generatePlayerData());
             } case PARTICIPANT_SETUP -> {
                 participantSetup();
                 //resolveStage(0);
@@ -339,9 +347,28 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
         }
     }
 
+    private void checkTestBidResult(Players player, int bid){
+        if(stateMachine.getCurrentState() != QuestPhaseStatesE.IN_TEST){
+            throw new IllegalQuestPhaseStateException("you can only bid when the game is in the IN_TEST state");
+        }
+        if(player.getPlayerId() != playerTurnService.getPlayerTurn().getPlayerId()){
+            throw new IllegalGameRequest("It must be the players turn for them to bid", player);
+        }
+
+        //maybe set minimum bid on test card reveal as current max and anyone with less than that is kicked
+        if(bid < stages.get(curStageIndex).getBids()){
+            questingPlayers.remove(player);
+        }else if (bid > player.getHand().getHandSize()+player.getPlayArea().getBids()){
+            //TODO notify player bid more than possible
+        }
+        testWinner = player;
+        maxBid = bid;
+        //TODO: MADE IT HERE
+        stateMachine.update();
+    }
+
     private void participantSetup(){
         dealAdventureCard();
-        //TODO: for all players allow them to play cards via player.getPlayerArea().onPhaseNextPlayerTurn(player)
         LOG.info(String.format("STARTING A NEW STAGE: STAGE %d", curStageIndex+1));
         for(Players player : playerTurnService.getPlayers()){
             player.getPlayArea().setPlayerTurn(questingPlayers.contains(player));

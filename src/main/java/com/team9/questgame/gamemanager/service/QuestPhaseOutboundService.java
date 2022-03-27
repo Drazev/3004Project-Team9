@@ -79,6 +79,11 @@ public class QuestPhaseOutboundService {
         this.sendToAllPlayers("/topic/quest/foe-stage-start", remainingQuestorsOutbound);
     }
 
+    public void broadcastTestStageStart(PlayerData playerData){
+        LOG.info(String.format("Broadcast test bid requested to %s", playerData.name()));
+        this.sendToAllPlayers("/topic/quest/test-bid-request");
+    }
+
     public void broadcastStageResult(RemainingQuestorsOutbound remainingQuestorsOutbound){
         this.sendToAllPlayers("/topic/quest/stage-end", remainingQuestorsOutbound);
     }
