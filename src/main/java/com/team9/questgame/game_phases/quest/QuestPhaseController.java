@@ -213,6 +213,11 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         // TODO: pass in an array of new StagesPlayArea to the validateStageSetup function
         if (!validateStageSetup(stages)) {
             LOG.info("Stage Validation failed");
+            for (StagePlayAreas stage : stages) {
+                if (!stage.returnAllToHand()) {
+                    throw new RuntimeException("Failed to return cards to sponsor hand");
+                }
+            }
             return false;
         }
         stagesAreValid = true;

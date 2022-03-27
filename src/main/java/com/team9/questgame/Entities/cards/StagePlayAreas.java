@@ -162,6 +162,19 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>, EffectObserver
 
     }
 
+    public boolean returnAllToHand(){
+        boolean rc = true;
+        for(AdventureCards card : allCards.values()){
+            rc = returnToHand(card.getCardID());
+        }
+        bids=0;
+        battlePoints=0;
+        stageCard=null;
+        targetPlayArea=null;
+        updateBattlePoints();
+        return rc;
+    }
+
     /**
      * Helper method to find the associated adventure card to the cardId within the stage
      * @param cardId The cardID we want to find
