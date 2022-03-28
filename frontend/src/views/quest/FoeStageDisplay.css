@@ -1,1 +1,8 @@
 @import url("../../App.css");
+
+.bpdisplay {
+    text-align: left;
+    overflow: hidden;
+    white-space: nowrap;
+    color: white;
+}

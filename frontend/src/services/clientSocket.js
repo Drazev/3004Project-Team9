@@ -138,6 +138,9 @@ export async function connect(connectFunctions) {
         });
 
         client.subscribe("/topic/quest/foe-stage-start", (message) => {
+            /**
+             * A foe stage has begun
+             */
             let body = JSON.parse(message.body);
             console.log("Foe stage started " + JSON.stringify(body));
             connectFunctions.setActivePlayers(body.remainingPlayers);
@@ -148,21 +151,54 @@ export async function connect(connectFunctions) {
             }, connectFunctions)
         });
 
+        client.subscribe("topic/quest/test-stage-start", (message) => {
+            /**
+             * A test stage has begun
+             */
+            let body = JSON.parse(message.body);
+            console.log("Test stage started " + JSON.stringify(body));
+            connectFunctions.setActivePlayers(body.remainingPlayers);
+            connectFunctions.setTestStageStart(true);
+            notification.handleInfoNotification({
+                title: "Test Stage Start",
+                message: "Test stage has started."
+            }, connectFunctions)
+        });
+
         client.subscribe("/topic/quest/stage-end", (message) => {
+            /**
+             * The current quest stage has ended
+             */
             let body = JSON.parse(message.body);
             console.log("Stage ended: " + JSON.stringify(body));
             connectFunctions.setActivePlayers(body.remainingPlayers);
             connectFunctions.setFoeStageStart(false);
+            connectFunctions.setTestStageStart(false);
             notification.handleInfoNotification({
                 title: "Stage ended",
                 message: "Current stage has ended."
             }, connectFunctions)
         });
 
+        client.subscribe("/topic/quest/request-bid", (message) => {
+            /**
+             * The server is requesting the client to place a bid
+             */
+            let body = JSON.parse(message.body);
+            console.log("Bid Request: " + JSON.stringify(body));
+            connectFunctions.setCurrentBidder(body.player);
+            connectFunctions.setMaxBid(body.maxBid);
+            connectFunctions.setMaxBidPlayer(body.setMaxBidPlayer);
+        });
+
         client.subscribe("/topic/quest/end", (message) => {
+            /**
+             * The current quest stage has ended
+             */
             let body = JSON.parse(message.body);
             console.log("Quest ended: " + JSON.stringify(body.winners));
             connectFunctions.setFoeStageStart(false);
+            connectFunctions.setTestStageStart(false);
             connectFunctions.setStoryCard(null);
             connectFunctions.setIsSponsoring(false);
             connectFunctions.setSponsorName("");
@@ -258,6 +294,9 @@ export async function connect(connectFunctions) {
 }
 
 export function drawCard(name, playerID) {
+    /**
+     * Sends a request to draw a card to the server
+     */
     console.log("Draw Story Card: \nName: " + name + "\nPlayerID: " + playerID);
     client.publish({
         destination: "/app/general/player-draw-card",
@@ -269,6 +308,9 @@ export function drawCard(name, playerID) {
 }
 
 export function discardCard(name, cardId) {
+    /**
+     * Function that sends a discard card request to the server
+     */
     console.log("Discard Card: \nName: " + name + "\nCardID: " + cardId);
     client.publish({
         destination: "/app/general/player-discard-card",
@@ -280,6 +322,9 @@ export function discardCard(name, cardId) {
 }
 
 export function playCard(name, playerID, cardId, src, dst) {
+    /**
+     * Function that sends a request to play a card from a dst to src
+     */
     console.log("Play Card: \nName: " + name + "\nCardID: " + cardId + "\nPlayerID: " + JSON.stringify(playerID) + "\nsrc: " + src + "\ndst: " + dst + "\n");
     if (src === -1 && dst === -1) {
         client.publish({
@@ -314,6 +359,21 @@ export function sponsorRespond(name, sponsorDecision) {
         body: JSON.stringify({
             name: name,
             found: sponsorDecision
+        })
+    });
+}
+
+export function bidResponse(name, playerID, bidAmount) {
+    /**
+     * Response to a bid response request from the server
+     */
+    console.log(`Player name=${name} has decided to place a bid of ${bidAmount}`);
+    client.publish({
+        destination: "/app/quest/test-bid-response",
+        body: JSON.stringify({
+            name: name,
+            playerID: playerID,
+            bidAmount: bidAmount
         })
     });
 }
@@ -358,6 +418,9 @@ export async function setupComplete(name, playerID, setIsSponsoring) {
 }
 
 export function participantSetupComplete(name, playerID) {
+    /**
+     * Inform the server that the participant has completed it's setup
+     */
     console.log(`participantSetupComplete name=${name} playerID=${playerID}`);
     client.publish({
         destination: "/app/quest/participant-setup-complete",
@@ -373,6 +436,9 @@ export function disconnect() {
 }
 
 export function startGame() {
+    /**
+     * send a start game request to the server
+     */
     fetch(START_URL,
         {
             method: "POST",
