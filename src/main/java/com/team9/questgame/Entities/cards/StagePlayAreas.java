@@ -103,7 +103,7 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
         }if(hasFoe && card.getSubType() == CardTypes.FOE){
             LOG.error("RULE: A stage cannot have two cards of the same type");
             throw new CardAreaException(CardAreaException.CardAreaExceptionReasonCodes.RULE_STAGE_CANNOT_HAVE_MORE_THAN_ONE_FOE);
-        }if(card.getSubType()==CardTypes.TEST &&(!(allCards.isEmpty()) || hasTest)){
+        }if(/*card.getSubType()==CardTypes.TEST &&(!(allCards.isEmpty()) || */hasTest){
             LOG.error("RULE: A test card must be the only card in the stage");
             throw new CardAreaException(CardAreaException.CardAreaExceptionReasonCodes.RULE_TEST_MUST_BE_ONLY_CARD_IN_STAGE);
         }

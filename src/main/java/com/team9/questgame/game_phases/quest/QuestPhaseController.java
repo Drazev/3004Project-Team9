@@ -311,6 +311,10 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
     }
 
     private void checkForTest(){
+        if(curStageIndex > questCard.getStages()){
+            nextStageTest = false;
+            return;
+        }
         if(stages.get(curStageIndex).getStageCard().getSubType() == CardTypes.TEST){
             nextStageTest = true;
         }else{
@@ -390,6 +394,7 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
 
         if(questingPlayers.size() == 1){
             outboundService.broadcastStageResult(new RemainingQuestorsOutbound(generateQuestorData(), curStageIndex));
+            //TODO:make maxBidPlayer discard maxBid-maxBidPlayer.getPlayerPlayArea().getBattlePoints() cards
             curStageIndex++;
         }else{
             while(playerTurnService.getPlayerTurn().getPlayerId() == sponsor.getPlayerId() || !questingPlayers.contains(playerTurnService.getPlayerTurn())){
