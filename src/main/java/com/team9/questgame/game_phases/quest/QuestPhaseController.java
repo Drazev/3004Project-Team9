@@ -241,6 +241,7 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
 
         // TODO: pass in an array of new StagesPlayArea to the validateStageSetup function
         if (!validateStageSetup(stages)) {
+            LOG.info("Stage Validation failed");
             return false;
         }
         stagesAreValid = true;
@@ -274,7 +275,7 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
         // Check if subsequent stages have increasing battlePoint
         int minBattlePoint = 0;
         for (StagePlayAreas stage: newStages) {
-            if (stage.getBattlePoints() <= minBattlePoint) {
+            if (stage.getBattlePoints() <= minBattlePoint && stage.getStageCard().getSubType() != CardTypes.TEST) {
                 return false;
             }
             minBattlePoint = stage.getBattlePoints();
@@ -284,6 +285,7 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
         for (StagePlayAreas stage: newStages) {
             ArrayList<FoeCards> foeCards = new ArrayList<>();
             ArrayList<WeaponCards> weaponCards = new ArrayList<>();
+            ArrayList<TestCards> testCards = new ArrayList<>();
 
             HashMap<AllCardCodes, AdventureCards> allCards = stage.getAllCards();
             for (AdventureCards card: allCards.values()) {
@@ -291,12 +293,16 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
                     foeCards.add((FoeCards) card);
                 } else if (card.getSubType() == CardTypes.QUEST) {
                     weaponCards.add((WeaponCards) card);
+                }else if(card.getSubType() == CardTypes.TEST){
+                    testCards.add((TestCards) card);
                 }
             }
-            if (foeCards.size() != 1) {
-                // There must be exactly 1 foe in the stage
+            if (foeCards.size() != 1 && testCards.size() != 1) {
+                // There must be exactly 1 foe in the stage or 1 test stage
                 return false;
-            } else {
+            }else if(foeCards.size() > 0 && testCards.size() > 0){
+                return false;
+            }else {
                 // All weapon cards must be unique
                 for (WeaponCards thisCard: weaponCards) {
                     for (WeaponCards otherCard: weaponCards) {
@@ -311,7 +317,7 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
     }
 
     private void checkForTest(){
-        if(curStageIndex > questCard.getStages()){
+        if(curStageIndex >= questCard.getStages()){
             nextStageTest = false;
             return;
         }
@@ -342,6 +348,7 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
             questingPlayers.add(player);
         }
 
+        checkForTest();
         stateMachine.update();
         switch (stateMachine.getCurrentState()) {
             case QUEST_JOIN -> {
@@ -534,6 +541,15 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
             stage.onGameReset();
         }
         this.stages.clear();
+        playerTurnService = null;
+        sponsor = null;
+        sponsorAttempts = 0;
+        joinAttempts = 0;
+        numParticipants = 0;
+        stagesAreValid = false;
+        nextStageTest = false;
+        maxBidPlayer = null;
+        maxBid=0;
         this.stageVisibleToPlayersList.clear();
         this.cardIDUsedToRevealStage.clear();
         stateMachine.setPhaseReset(true);
