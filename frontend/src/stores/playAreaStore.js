@@ -4,7 +4,7 @@ const useStore = create((set) => ({
     playerPlayAreas: [],
     stageAreas: [],
     currentStage: 0,
-    updatePlayerArea: (playAreaData) => set((current) => ({
+    updatePlayerPlayArea: (playAreaData) => set((current) => ({
         playerPlayAreas: (() => {
             let playerExist = false;
             for (let i in current.playerPlayAreas) {
@@ -49,9 +49,11 @@ const useStore = create((set) => ({
     })),
 }));
 
+export const playAreaStore = () => useStore.getState();
+
 export const usePlayerPlayAreas = () => useStore((state) => state.playerPlayAreas);
 
-export const useUpdatePlayerPlayArea = () => useStore((state) => state.updatePlayerArea)
+export const useUpdatePlayerPlayArea = () => useStore((state) => state.updatePlayerPlayArea)
 
 export const useStageAreas = () => useStore((state) => state.stageAreas);
 

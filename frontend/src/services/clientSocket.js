@@ -2,6 +2,8 @@ import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import * as notificationDispatcher from "../utilities/notificationDispatcher";
 import * as questDispatcher from "../utilities/questDispatcher";
+import { generalStore } from "../stores/generalStore";
+import { playAreaStore } from "../stores/playAreaStore";
 
 export let client = null;
 
@@ -9,14 +11,14 @@ const REGISTRATION_URL = "http://localhost:8080/api/register"
 const SOCK_SERVER = "http://localhost:8080/quest-game-websocket"
 const START_URL = "http://localhost:8080/api/start"
 
-export async function connect(connectFunctions) {
+export async function connect() {
     console.log("Attempt connection");
 
     // Register player name
     let response = await fetch(REGISTRATION_URL, {
         method: "POST",
         body: JSON.stringify({
-            name: connectFunctions.name
+            name: generalStore().name
         }),
         headers: {
             "Content-Type": "application/json"
@@ -24,7 +26,7 @@ export async function connect(connectFunctions) {
     })
 
     let body = await response.json();
-    if (!body.confirmed || body.name !== connectFunctions.name) {
+    if (!body.confirmed || body.name !== generalStore().name) {
         console.log("Connection declined or unmatch name");
         return false;
     }
@@ -32,7 +34,7 @@ export async function connect(connectFunctions) {
     // Perform handshake with the registered name
     client = new Client({
         webSocketFactory: () => {
-            return new SockJS(`${SOCK_SERVER}?name=${connectFunctions.name}`);
+            return new SockJS(`${SOCK_SERVER}?name=${generalStore().name}`);
         },
         reconnectDelay: 50000,
         heartbeatIncoming: 4000,
@@ -41,13 +43,13 @@ export async function connect(connectFunctions) {
 
     client.onConnect = (frame) => {
         console.log("Connection successful");
-        connectFunctions.setConnected(true);
+        generalStore().setConnected(true);
 
 
         client.subscribe("/user/topic/player/hand-update", (message) => {
             let newHand = JSON.parse(message.body);
             console.log("Received hand update: " + newHand);
-            connectFunctions.updateHand(newHand);
+            generalStore().updateHand(newHand);
         });
 
 
@@ -56,13 +58,13 @@ export async function connect(connectFunctions) {
             console.log("clientsocket players.body: " + players.body);
             const bodyKeys = Object.keys(body);
             console.log(bodyKeys);
-            connectFunctions.setPlayers(bodyKeys);
+            generalStore().setPlayers(bodyKeys);
         });
 
 
         client.subscribe("/topic/general/game-start", () => {
             console.log("setting game started true");
-            connectFunctions.setGameStarted(true);
+            generalStore().setGameStarted(true);
         });
 
 
@@ -76,7 +78,7 @@ export async function connect(connectFunctions) {
 
             let body = JSON.parse(message.body)
             console.log("Received player-next-turn " + body.name);
-            connectFunctions.setTurn(body.name);
+            generalStore().setTurn(body.name);
         });
 
         client.subscribe("/topic/general/player-draw-card", (message) => {
@@ -86,7 +88,7 @@ export async function connect(connectFunctions) {
             let body = JSON.parse(message.body)
             console.log("Received from /topic/general/player-draw-card:")
             console.log(body)
-            connectFunctions.setStoryCard(body);
+            generalStore().setStoryCard(body);
         });
 
         client.subscribe("/topic/player/hand-oversize", (message) => {
@@ -109,7 +111,7 @@ export async function connect(connectFunctions) {
              */
             let body = JSON.parse(message.body);
             console.log("/topic/player/hand-not-oversize: " + JSON.stringify(body));
-            connectFunctions.setHandOversize(false);
+            generalStore().setHandOversize(false);
             notificationDispatcher.dispatchGoodNotification({
                 title: "Hand Not Oversize",
                 message: "No player has oversized hand."
@@ -122,7 +124,7 @@ export async function connect(connectFunctions) {
              * rankBattlePoint and the number of shield
              */
             let body = JSON.parse(message.body);
-            connectFunctions.updatePlayer(body);
+            generalStore().updatePlayer(body);
         });
 
 
@@ -181,7 +183,7 @@ export async function connect(connectFunctions) {
              */
             let body = JSON.parse(data.body);
             console.log("Play Area Update recieved: " + JSON.stringify(body));
-            connectFunctions.updatePlayerPlayArea(body);
+            playAreaStore().updatePlayerPlayArea(body);
         });
 
         client.subscribe("/user/topic/quest/stage-area-changed", (data) => {
@@ -190,7 +192,7 @@ export async function connect(connectFunctions) {
              */
             let body = JSON.parse(data.body);
             console.log("Stage Area Update recieved: " + JSON.stringify(body));
-            connectFunctions.updateStageArea(body);
+            playAreaStore().updateStageArea(body);
         });
 
 
@@ -229,7 +231,7 @@ export async function connect(connectFunctions) {
 
     client.onDisconnect = () => {
         disconnect();
-        connectFunctions.setConnected(false);
+        generalStore().setConnected(false);
     };
 
     client.onStompError = function (frame) {

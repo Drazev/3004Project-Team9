@@ -10,6 +10,7 @@ import { notificationStore } from "../stores/notificationStore";
  *     "action": string           // (optional - TBD) the action that server wants the client to do
  * }
  */
+
 const DEBUG = true;
 let lastNotificationId = 0;
 
