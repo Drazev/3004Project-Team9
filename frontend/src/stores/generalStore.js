@@ -1,6 +1,6 @@
 import create from "zustand";
 
-const useStore = create((set) => ({
+export const useStore = create((set) => ({
   title: "Quest Game",
   connected: false,
   gameStarted: false,
@@ -28,7 +28,7 @@ const useStore = create((set) => ({
   setName: (name) => set(() => ({ name: name })),
   setTurn: (name) => set(() => ({ turn: name })),
   setIsSponsoring: (x) => set(() => ({isSponsoring: x})),
-  setSponsorName: (name) => set(() => ({ sponsorRequest: name })),
+  setSponsorName: (name) => set(() => ({ sponsorName: name })),
   setGameStarted: (gameStarted) => set(() => ({ gameStarted: gameStarted })),
   setPlayers: (players) => set(() => ({ players: players })),
   setJoinRequest: (status) => set(() => ({joinRequest: status})),
@@ -99,6 +99,14 @@ const handleLoadPlayers = async (setPlayers) => {
     });
 };
 
+/**
+ * Getter for non-component use
+ */
+export const generalStore = () => useStore.getState();
+
+/**
+ * Getters
+ */
 export const useTitle = () => useStore((state) => state.title);
 export const useConnected = () => useStore((state) => state.connected);
 export const useName = () => useStore((state) => state.name);
@@ -120,6 +128,9 @@ export const useCurrentBidder = () => useStore((state) => state.currentBidder);
 export const useStoryCard = () => useStore((state) => state.storyCard);
 export const useIsSponsoring = () => useStore((state) => state.isSponsoring);
 
+/**
+ * Setters
+ */
 export const useSetConnected = () => useStore((state) => state.setConnected);
 export const useSetGameStarted = () => useStore((state) => state.setGameStarted);
 export const useSetName = () => useStore((state) => state.setName);

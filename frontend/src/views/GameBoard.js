@@ -5,6 +5,7 @@ import Popup from "../components/popups/Popup";
 import { drawCard, setupComplete, participantSetupComplete } from "../services/clientSocket";
 import { useName, usePlayerHands, useTurn, useSponsorRequest, useIsSponsoring, useSetIsSponsoring, useJoinRequest, useFoeStageStart, useTestStageStart } from "../stores/generalStore";
 import { usePlayerPlayAreas, useStageAreas } from "../stores/playAreaStore";
+import { useSponsorSearchRequest, useSetSponsorSearchRequest, useQuestJoinRequest, useSetQuestJoinRequest } from "../stores/questRequestStore";
 import { Button } from "react-bootstrap";
 import React, { useState } from "react";
 import "./GameBoard.css";
@@ -21,6 +22,8 @@ function GameBoard({}) {
     const joinRequest = useJoinRequest();
     const [popup, setPopup] = useState(true);
     const foeStageStart = useFoeStageStart();
+    const [sponsorSearchRequest, setSponsorSearchRequest] = [useSponsorSearchRequest(), useSetSponsorSearchRequest()];
+    const [questJoinRequest, setQuestJoinRequest] = [useQuestJoinRequest(), useSetQuestJoinRequest()];
 
     let myHandArr = [false, false, false, false];
     let myPlayerID = -1;
@@ -88,14 +91,14 @@ function GameBoard({}) {
                 <QuestDisplay></QuestDisplay>
             </div>
 
-            {popup && name === sponsorRequest &&
+            {sponsorSearchRequest &&
                 <div id="sponsor-popup">
-                    <Popup popupType="SPONSORQUEST" setPopup={setPopup}></Popup>
+                    <Popup popupType="SPONSORQUEST" setPopup={setSponsorSearchRequest}></Popup>
                 </div>
             }
-            {popup && joinRequest && !isSponsoring &&
+            {questJoinRequest &&
                 <div id="join-popup">
-                    <Popup popupType="JOINQUEST" setPopup={setPopup}></Popup>
+                    <Popup popupType="JOINQUEST" setPopup={setQuestJoinRequest}></Popup>
                 </div>
             }
             {isSponsoring &&
