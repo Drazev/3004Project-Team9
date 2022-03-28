@@ -182,7 +182,7 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
             }
 
         }
-        
+
         stateMachine.update();
         switch (stateMachine.getCurrentState()) {
             case QUEST_SPONSOR -> {
@@ -274,10 +274,10 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
         // Check if subsequent stages have increasing battlePoint
         int minBattlePoint = 0;
         for (StagePlayAreas stage: newStages) {
-            if (stage.getBattlePoints() < minBattlePoint) {
+            if (stage.getBattlePoints() <= minBattlePoint) {
                 return false;
             }
-            minBattlePoint++;
+            minBattlePoint = stage.getBattlePoints();
         }
 
         // Check if each stage contain exactly 1 foe and unique weapons
