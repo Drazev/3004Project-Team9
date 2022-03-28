@@ -152,7 +152,10 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
     }
     public boolean returnToHand(long cardID){
         AdventureCards card = findCardFromCardId(cardID);
-        boolean rc = sponsor.getHand().receiveCard(card);
+        boolean rc = card.playCard(sponsor.getHand());
+        if(card == null){
+            rc = false;
+        }
 
         if(rc){
             rc = removeCard(card);
@@ -196,6 +199,9 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
 
         if(delCard!=card) {
             return false;
+        }
+        if(stageCard != null && delCard.getCardID() == stageCard.getCardID()){
+            stageCard = null;
         }
 
         AllCardCodes cardCode = card.getCardCode();
