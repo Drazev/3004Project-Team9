@@ -39,7 +39,6 @@ export async function connect(connectFunctions) {
         heartbeatOutgoing: 4000,
     });
 
-
     client.onConnect = (frame) => {
         console.log("Connection successful");
         connectFunctions.setConnected(true);
@@ -101,7 +100,7 @@ export async function connect(connectFunctions) {
             notificationDispatcher.dispatchBadNotification({
                 title: "Hand Oversize",
                 message: `A player has oversized hand. Please discard or play the card(s) until their hand has <= 12 cards to proceed.`
-            }, connectFunctions)
+            })
         });
 
         client.subscribe("/topic/player/hand-not-oversize", (message) => {
@@ -114,7 +113,7 @@ export async function connect(connectFunctions) {
             notificationDispatcher.dispatchGoodNotification({
                 title: "Hand Not Oversize",
                 message: "No player has oversized hand."
-            }, connectFunctions)
+            })
         })
 
         client.subscribe("/topic/player/player-update", (message) => {
@@ -145,18 +144,15 @@ export async function connect(connectFunctions) {
             notificationDispatcher.dispatchInfoNotification({
                 title: "Foe Stage Start",
                 message: "Foe stage has started."
-            }, connectFunctions)
+            })
         });
 
         client.subscribe("topic/quest/test-stage-start", (message) => {
-            /**
-             * A test stage has begun
-             */
             questDispatcher.dispatchFoeStageStart(JSON.parse(message.body));
             notificationDispatcher.dispatchInfoNotification({
                 title: "Test Stage Start",
                 message: "Test stage has started."
-            }, connectFunctions)
+            })
         });
 
         client.subscribe("/topic/quest/stage-end", (message) => {
@@ -164,7 +160,7 @@ export async function connect(connectFunctions) {
             notificationDispatcher.dispatchInfoNotification({
                 title: "Stage ended",
                 message: "Current stage has ended."
-            }, connectFunctions)
+            })
         });
 
         client.subscribe("/topic/quest/request-bid", (message) => {
@@ -176,7 +172,7 @@ export async function connect(connectFunctions) {
             notificationDispatcher.dispatchInfoNotification({
                 title: "Quest ended",
                 message: "The quest has ended."
-            }, connectFunctions)
+            })
         });
 
         client.subscribe("/user/topic/play-areas/play-area-changed", (data) => {
@@ -211,23 +207,23 @@ export async function connect(connectFunctions) {
         });
 
         client.subscribe("/user/topic/notification/good", (message) => {
-            notificationDispatcher.dispatchGoodNotification(JSON.parse(message.body), connectFunctions)
+            notificationDispatcher.dispatchGoodNotification(JSON.parse(message.body))
         });
 
         client.subscribe("/user/topic/notification/warning", (message) => {
-            notificationDispatcher.dispatchWarningNotification(JSON.parse(message.body), connectFunctions)
+            notificationDispatcher.dispatchWarningNotification(JSON.parse(message.body))
         });
 
         client.subscribe("/user/topic/notification/bad", (message) => {
-            notificationDispatcher.dispatchBadNotification(JSON.parse(message.body), connectFunctions)
+            notificationDispatcher.dispatchBadNotification(JSON.parse(message.body))
         });
 
         client.subscribe("/user/topic/notification/info", (message) => {
-            notificationDispatcher.dispatchInfoNotification(JSON.parse(message.body), connectFunctions)
+            notificationDispatcher.dispatchInfoNotification(JSON.parse(message.body))
         });
 
         client.subscribe("/user/topic/notification/debug", (message) => {
-            notificationDispatcher.dispatchDebugNotification(JSON.parse(message.body), connectFunctions)
+            notificationDispatcher.dispatchDebugNotification(JSON.parse(message.body))
         });
     };
 

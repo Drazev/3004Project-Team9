@@ -34,10 +34,21 @@ const useStore = create((set) => ({
     })),
 }));
 
+/**
+ * Getter for non-component use
+ */
+export const notificationStore = () => useStore.getState();
+
+/**
+ * Getters
+ */
 export const useMaxNotifications = () => useStore((state) => state.maxNotifications);
 export const useNotificationDelay = () => useStore((state) => state.notificationDelay);
 export const useNotificationQueue = () => useStore((state) => state.notificationQueue);
 
+/**
+ * Setters
+ */
 export const usePushNotification = () => useStore((state) => state.pushNotification);
 export const useRemoveNotification = () => useStore((state) => state.removeNotification);
 export const useHideNotification = () => useStore((state) => state.hideNotification);

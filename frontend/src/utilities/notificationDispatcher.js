@@ -1,3 +1,5 @@
+import { notificationStore } from "../stores/notificationStore";
+
 /**
  * Notifications
  * Payload:
@@ -11,44 +13,44 @@
 const DEBUG = true;
 let lastNotificationId = 0;
 
-export const dispatchGoodNotification = (body, utilities) => {
+export const dispatchGoodNotification = (body) => {
     /**
      * Server is notifying clients of a good notification
      */
     console.log("/user/topic/notification/good: " + JSON.stringify(body));
-    utilities.pushNotification({id: lastNotificationId++, show: true, type: "GOOD", body})
+    notificationStore().pushNotification({id: lastNotificationId++, show: true, type: "GOOD", body})
 }
 
-export const dispatchBadNotification = (body, utilities) => {
+export const dispatchBadNotification = (body) => {
     /**
      * Server is notifying clients of a bad notification
      */
     console.log("/user/topic/notification/bad: " + JSON.stringify(body));
-    utilities.pushNotification({ id: lastNotificationId++, show: true, type: "BAD", body})
+    notificationStore().pushNotification({ id: lastNotificationId++, show: true, type: "BAD", body})
 }
 
-export const dispatchInfoNotification = (body, utilities) => {
+export const dispatchInfoNotification = (body) => {
     /**
      * Server is notifying clients of a info notification
      */
     console.log("/user/topic/notification/info: " + JSON.stringify(body));
-    utilities.pushNotification({ id: lastNotificationId++, show: true, type: "INFO", body})
+    notificationStore().pushNotification({ id: lastNotificationId++, show: true, type: "INFO", body})
 }
 
-export const dispatchWarningNotification = (body, utilities) => {
+export const dispatchWarningNotification = (body) => {
     /**
      * Server is notifying clients of a warning notification
      */
     console.log("/user/topic/notification/warning: " + JSON.stringify(body));
-    utilities.pushNotification({ id: lastNotificationId++, show: true, type: "WARNING", body })
+    notificationStore().pushNotification({ id: lastNotificationId++, show: true, type: "WARNING", body })
 }
 
-export const dispatchDebugNotification = (body, utilities) => {
+export const dispatchDebugNotification = (body) => {
     /**
      * Server is notifying clients of a debug notification
      */
     if (DEBUG) {
         console.log("/user/topic/notification/debug: " + JSON.stringify(body));
-        utilities.pushNotification({ id:lastNotificationId++, show: true, type: "DEBUG", body });
+        notificationStore().pushNotification({ id:lastNotificationId++, show: true, type: "DEBUG", body });
     }
 }
