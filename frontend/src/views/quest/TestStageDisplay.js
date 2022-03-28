@@ -2,17 +2,17 @@ import {React, useState} from "react";
 import CardImages from "../../assets/images/index";
 import BigCard from "../../components/cards/BigCard";
 import { useMaxBid, useMaxBidPlayer, useStoryCard, useCurrentBidder, useTurn } from "../../stores/generalStore";
+import { useBidRequest, useSetBidRequest } from "../../stores/questRequestStore";
 import Popup from "../../components/popups/Popup"
 import "./TestStageDisplay.css";
 
 
 function TestStageDisplay(props){
-    const [popup, setPopup] = useState(true);
-    const curTurn = useTurn();
     const maxBid = useMaxBid();
     const maxBidPlayer = useMaxBidPlayer();
     const testCard = useStoryCard();
     const currentBidder = useCurrentBidder();
+    const [bidRequest,setBidRequest] = [useBidRequest(),useSetBidRequest()];
 
     return(
         <div>
@@ -34,8 +34,8 @@ function TestStageDisplay(props){
                 alt="nonono"
             />
 
-            {popup && (currentBidder.name === curTurn) &&
-                <Popup popupType="BIDREQUEST" setPopup={setPopup}></Popup>
+            {bidRequest &&
+                <Popup popupType="BIDREQUEST" setPopup={setBidRequest}></Popup>
             }
         </div>
     )
