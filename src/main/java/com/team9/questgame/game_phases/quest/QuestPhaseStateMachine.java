@@ -202,34 +202,14 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
 
     public QuestPhaseStatesE inTestState(){
         if(!controller.isNextStageTest()){
-            //TODO:if that was the last stage go to ended, if theres more then go to participant setup
+            if(controller.getCurStageIndex() > controller.getQuestCard().getStages()){
+                return QuestPhaseStatesE.ENDED;
+            }else{
+                return QuestPhaseStatesE.PARTICIPANT_SETUP;
+            }
         }
         return QuestPhaseStatesE.IN_TEST;
     }
-
-//    public QuestPhaseStatesE stageOneState() {
-//        //TODO: on stage one complete if more stages return to participant setup state
-//        if(controller.getQuestingPlayers().size() == 0){
-//            return QuestPhaseStatesE.ENDED;
-//        }
-//        return QuestPhaseStatesE.PARTICIPANT_SETUP;
-//    }
-//
-//    public QuestPhaseStatesE stageTwoState() {
-//        if (controller.getQuestCard().getStages() < 2 || controller.getQuestingPlayers().size() == 0) {
-//            return QuestPhaseStatesE.ENDED;
-//        }
-//
-//        return QuestPhaseStatesE.PARTICIPANT_SETUP;
-//    }
-//
-//    public QuestPhaseStatesE stageThreeState() {
-//        if (controller.getQuestCard().getStages() < 3 || controller.getQuestingPlayers().size() == 0) {
-//            return QuestPhaseStatesE.ENDED;
-//        }
-//
-//        return QuestPhaseStatesE.PARTICIPANT_SETUP;
-//    }
 
     public QuestPhaseStatesE endedState() {
         if (isPhaseReset) {

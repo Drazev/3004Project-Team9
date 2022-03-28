@@ -103,7 +103,7 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
         }if(hasFoe && card.getSubType() == CardTypes.FOE){
             LOG.error("RULE: A stage cannot have two cards of the same type");
             throw new CardAreaException(CardAreaException.CardAreaExceptionReasonCodes.RULE_STAGE_CANNOT_HAVE_MORE_THAN_ONE_FOE);
-        }if(card.getSubType()==CardTypes.TEST &&(!(allCards.isEmpty()) || hasTest)){
+        }if(/*card.getSubType()==CardTypes.TEST &&(!(allCards.isEmpty()) || */hasTest){
             LOG.error("RULE: A test card must be the only card in the stage");
             throw new CardAreaException(CardAreaException.CardAreaExceptionReasonCodes.RULE_TEST_MUST_BE_ONLY_CARD_IN_STAGE);
         }
@@ -152,7 +152,10 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
     }
     public boolean returnToHand(long cardID){
         AdventureCards card = findCardFromCardId(cardID);
-        boolean rc = sponsor.getHand().receiveCard(card);
+        boolean rc = card.playCard(sponsor.getHand());
+        if(card == null){
+            rc = false;
+        }
 
         if(rc){
             rc = removeCard(card);
@@ -196,6 +199,9 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
 
         if(delCard!=card) {
             return false;
+        }
+        if(stageCard != null && delCard.getCardID() == stageCard.getCardID()){
+            stageCard = null;
         }
 
         AllCardCodes cardCode = card.getCardCode();

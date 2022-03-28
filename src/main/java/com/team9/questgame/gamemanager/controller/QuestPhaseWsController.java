@@ -44,4 +44,10 @@ public class QuestPhaseWsController {
     public void handleParticipantSetup(ParticipantSetupStage participantSetupStage) {
         inboundService.checkParticipantSetup(participantSetupStage.name());
     }
+
+    @MessageMapping("/quest/test-bid-response")
+    public void handleTestBidResponse(TestBidResponse testBidResponse){
+        LOG.info("Received from /quest/test-bid-response: " + testBidResponse);
+        inboundService.checkTestBidResponse(testBidResponse.name(), testBidResponse.bidAmount());
+    }
 }

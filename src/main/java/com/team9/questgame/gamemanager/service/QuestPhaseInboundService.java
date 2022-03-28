@@ -59,6 +59,11 @@ public class QuestPhaseInboundService {
         questController.checkJoinResult(player, joined);
     }
 
+    public synchronized  void checkTestBidResponse(String name, int bidAmount){
+        Players player = sessionService.getPlayerMap().get(name);
+        questController.checkTestBidResponse(player, bidAmount);
+    }
+
     public synchronized  void checkParticipantSetup(String name){
         Players player = sessionService.getPlayerMap().get(name);
         questController.checkParticipantSetup(player);

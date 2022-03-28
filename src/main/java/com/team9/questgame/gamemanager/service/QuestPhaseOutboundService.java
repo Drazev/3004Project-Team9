@@ -6,6 +6,7 @@ import com.team9.questgame.gamemanager.record.rest.EmptyJsonReponse;
 import com.team9.questgame.gamemanager.record.socket.HandUpdateOutbound;
 import com.team9.questgame.gamemanager.record.socket.QuestEndedOutbound;
 import com.team9.questgame.gamemanager.record.socket.RemainingQuestorsOutbound;
+import com.team9.questgame.gamemanager.record.socket.RequestBidOutbound;
 import lombok.AllArgsConstructor;
 import lombok.extern.java.Log;
 import org.slf4j.Logger;
@@ -77,6 +78,16 @@ public class QuestPhaseOutboundService {
 
     public void broadcastFoeStageStart(RemainingQuestorsOutbound remainingQuestorsOutbound){
         this.sendToAllPlayers("/topic/quest/foe-stage-start", remainingQuestorsOutbound);
+    }
+
+    public void broadcastTestStageStart(RemainingQuestorsOutbound remainingQuestorsOutbound){
+        LOG.info(String.format("Broadcasting test stage start"));
+        this.sendToAllPlayers("/topic/quest/test-stage-start", remainingQuestorsOutbound);
+    }
+
+    public void broadcastRequestBid(RequestBidOutbound requestBidOutbound){
+        LOG.info(String.format("Requesting bid from player: %s" , requestBidOutbound.player().name()));
+        this.sendToAllPlayers("/topic/quest/request-bid", requestBidOutbound);
     }
 
     public void broadcastStageResult(RemainingQuestorsOutbound remainingQuestorsOutbound){

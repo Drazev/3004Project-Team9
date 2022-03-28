@@ -278,7 +278,7 @@ class QuestPhaseControllerTest {
 
         for(int i = 0; i < qcard.getStages(); i++){
             AdventureCards card = controller.getSponsor().getHand().getHand().iterator().next();
-//            controller.getSponsor().getHand().discardCard(card);
+//          controller.getSponsor().getHand().discardCard(card);
             generalGameController.playerDiscardCard(controller.getSponsor(), card.getCardID());
         }
         assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.NOT_STARTED);

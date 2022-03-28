@@ -13,8 +13,11 @@ import com.team9.questgame.game_phases.GamePhases;
 import com.team9.questgame.game_phases.GeneralGameController;
 import com.team9.questgame.exception.IllegalQuestPhaseStateException;
 import com.team9.questgame.game_phases.utils.PlayerTurnService;
+import com.team9.questgame.gamemanager.record.socket.NotificationOutbound;
 import com.team9.questgame.gamemanager.record.socket.QuestEndedOutbound;
 import com.team9.questgame.gamemanager.record.socket.RemainingQuestorsOutbound;
+import com.team9.questgame.gamemanager.record.socket.RequestBidOutbound;
+import com.team9.questgame.gamemanager.service.NotificationOutboundService;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import com.team9.questgame.gamemanager.service.QuestPhaseOutboundService;
 import lombok.Getter;
@@ -42,6 +45,8 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
 
     @Autowired
     private QuestPhaseOutboundService outboundService;
+    @Autowired
+    private NotificationOutboundService notifyService;
 //    @Autowired
 //    private InboundService generalInboundService;
     @Autowired
@@ -51,11 +56,14 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
     private CopyOnWriteArrayList<Players> questingPlayers;
     @Getter
     private PlayerTurnService playerTurnService;
-    private PlayerTurnService joinTurnService;
+    private PlayerTurnService testTurnService;
     @Getter
     private ArrayList<StagePlayAreas> stages;
     private StagePlayAreas newStage;
     private HashMap<StagePlayAreas,HashSet<Players>> stageVisibleToPlayersList;
+    private Players maxBidPlayer;
+    private int maxBid;
+    private int bidCount;
     private HashSet<Long> cardIDUsedToRevealStage;
 
     @Getter
@@ -91,6 +99,8 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
         //minJoin = false;
         stagesAreValid = false;
         nextStageTest = false;
+        maxBidPlayer = null;
+        maxBid=0;
     }
 
     /**
@@ -301,8 +311,14 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
     }
 
     private void checkForTest(){
+        if(curStageIndex > questCard.getStages()){
+            nextStageTest = false;
+            return;
+        }
         if(stages.get(curStageIndex).getStageCard().getSubType() == CardTypes.TEST){
             nextStageTest = true;
+        }else{
+            nextStageTest = false;
         }
     }
 
@@ -331,7 +347,7 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
             case QUEST_JOIN -> {
                 // Do nothing since the broadcast already sent to all players
             } case IN_TEST -> {
-                //TODO: Broadcast Test start... maybe just go into participant setup
+                testSetup();
             } case PARTICIPANT_SETUP -> {
                 participantSetup();
                 //resolveStage(0);
@@ -343,9 +359,65 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
         }
     }
 
+    private void testSetup(){
+        dealAdventureCard();
+        while(playerTurnService.getPlayerTurn().getPlayerId() == sponsor.getPlayerId() || !questingPlayers.contains(playerTurnService.getPlayerTurn())){
+            playerTurnService.nextPlayer();
+        }
+        outboundService.broadcastTestStageStart(new RemainingQuestorsOutbound(generateQuestorData(), curStageIndex));
+        maxBid = stages.get(curStageIndex).getBids();
+        outboundService.broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, null));
+    }
+
+    public void checkTestBidResponse(Players player, int bid){
+        if(stateMachine.getCurrentState() != QuestPhaseStatesE.IN_TEST){
+            throw new IllegalQuestPhaseStateException("you can only bid when the game is in the IN_TEST state");
+        }
+        if(player.getPlayerId() != playerTurnService.getPlayerTurn().getPlayerId()){
+            throw new IllegalGameRequest("It must be the players turn for them to bid", player);
+        }
+
+        //maybe set minimum bid on test card reveal as current max and anyone with less than that is kicked
+        if(bid < maxBid){
+            questingPlayers.remove(player);
+        }else if (bid > player.getHand().getHandSize()+player.getPlayArea().getBids()){
+            notifyService.sendBadNotification(player, new NotificationOutbound("Bid too large", "you bid too high, try again","",""), null);
+            if(maxBidPlayer == null){
+                outboundService.broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, null));
+            }
+            outboundService.broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, maxBidPlayer.generatePlayerData()));
+            return;
+        }else{
+            maxBidPlayer = player;
+            maxBid = bid;
+        }
+
+        if(questingPlayers.size() == 1){
+            outboundService.broadcastStageResult(new RemainingQuestorsOutbound(generateQuestorData(), curStageIndex));
+            //TODO:make maxBidPlayer discard maxBid-maxBidPlayer.getPlayerPlayArea().getBattlePoints() cards
+            curStageIndex++;
+        }else{
+            while(playerTurnService.getPlayerTurn().getPlayerId() == sponsor.getPlayerId() || !questingPlayers.contains(playerTurnService.getPlayerTurn())){
+                playerTurnService.nextPlayer();
+            }
+        }
+        checkForTest();
+        stateMachine.update();
+        switch (stateMachine.getCurrentState()) {
+            case IN_TEST -> {
+
+            } case PARTICIPANT_SETUP -> {
+                participantSetup();
+            } case ENDED -> {
+                endPhase();
+            } default -> {
+                throw new IllegalQuestPhaseStateException("Unknown state");
+            }
+        }
+    }
+
     private void participantSetup(){
         dealAdventureCard();
-        //TODO: for all players allow them to play cards via player.getPlayerArea().onPhaseNextPlayerTurn(player)
         LOG.info(String.format("STARTING A NEW STAGE: STAGE %d", curStageIndex+1));
         for(Players player : playerTurnService.getPlayers()){
             player.getPlayArea().setPlayerTurn(questingPlayers.contains(player));
@@ -401,10 +473,13 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
 
         participantSetupResponses=0;
         curStageIndex++;
+        checkForTest();
         stateMachine.update();
         switch (stateMachine.getCurrentState()){
             case PARTICIPANT_SETUP -> {
                 participantSetup();
+            }case IN_TEST -> {
+                testSetup();
             } case ENDED -> {
                 endPhase();
             } default ->{
