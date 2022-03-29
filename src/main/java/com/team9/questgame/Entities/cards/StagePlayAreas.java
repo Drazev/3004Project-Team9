@@ -266,7 +266,7 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
         questCard=null;
         stageCard=null;
         targetPlayArea=null;
-        updateBattlePoints();
+        //updateBattlePoints();
     }
 
     @Override

@@ -93,7 +93,7 @@ const Popup = props => {
                   }
                 }}
               ></NumericInput>
-              <button type="submit" className="SubmitBidButton" onClick={() => {bidResponse(bidderName,bidderPlayerID,curBid)}}>Place Bid</button>
+              <button type="submit" className="SubmitBidButton" onClick={() => {bidResponse(bidderName,bidderPlayerID,curBid); props.setPopup(false)}}>Place Bid</button>
             </div>
           }
       </div>

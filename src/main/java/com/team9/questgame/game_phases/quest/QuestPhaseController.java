@@ -347,6 +347,13 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         QuestPhaseOutboundService.getService().broadcastTestStageStart(new RemainingQuestorsOutbound(generateQuestorData(), curStageIndex));
         maxBid = stages.get(curStageIndex).getBids();
         QuestPhaseOutboundService.getService().broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, null));
+        StagePlayAreas currStage = stages.get(curStageIndex);
+        HashSet<Players> pList=stageVisibleToPlayersList.get(currStage);
+        if(pList==null) {
+            throw new IllegalQuestPhaseStateException(String.format("Player visibility list couldn't find stage %d.",curStageIndex+1));
+        }
+        pList.addAll(playerTurnService.getPlayers()); //Make stage visible to all players on resolution
+        currStage.notifyStageAreaChanged();
     }
 
     public void checkTestBidResponse(Players player, int bid){
@@ -358,17 +365,23 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         }
 
         //maybe set minimum bid on test card reveal as current max and anyone with less than that is kicked
-        if(bid < maxBid){
+        if((bid < maxBid && maxBidPlayer == null) || (bid <= maxBid && maxBidPlayer !=null)){
             questingPlayers.remove(player);
-        }else if (bid > player.getHand().getHandSize()+player.getPlayArea().getBids()){
+            NotificationOutboundService.getService().sendBadNotification(
+                    sponsor,
+                    new NotificationOutbound("Test Stage Defeat","Your bid was deemed unworthy. Alas, you cannot continue your journey and must head home.","",null),
+                    null
+            );
+        }else if (bid > (player.getHand().getHandSize()+player.getPlayArea().getBids())){
             NotificationOutboundService.getService().sendBadNotification(player,
                     new NotificationOutbound("Bid Too Large", "You bid more cards than you can discard, try again","",null),
                     null
             );
             if(maxBidPlayer == null){
                 QuestPhaseOutboundService.getService().broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, null));
+            }else{
+                QuestPhaseOutboundService.getService().broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, maxBidPlayer.generatePlayerData()));
             }
-            QuestPhaseOutboundService.getService().broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, maxBidPlayer.generatePlayerData()));
             return;
         }else{
             maxBidPlayer = player;
@@ -380,8 +393,13 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
             //TODO:make maxBidPlayer discard maxBid-maxBidPlayer.getPlayerPlayArea().getBattlePoints() cards
             curStageIndex++;
         }else{
-            while(playerTurnService.getPlayerTurn().getPlayerId() == sponsor.getPlayerId() || !questingPlayers.contains(playerTurnService.getPlayerTurn())){
+            do{
                 playerTurnService.nextPlayer();
+            }while(playerTurnService.getPlayerTurn().getPlayerId() == sponsor.getPlayerId() || !questingPlayers.contains(playerTurnService.getPlayerTurn()));
+            if(maxBidPlayer == null){
+                QuestPhaseOutboundService.getService().broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, null));
+            }else{
+                QuestPhaseOutboundService.getService().broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, maxBidPlayer.generatePlayerData()));
             }
         }
         checkForTest();

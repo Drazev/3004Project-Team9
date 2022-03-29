@@ -79,6 +79,7 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE>,
                 break;
             case IN_TEST:
                 this.currentState = inTestState();
+                break;
             case REWARDS:
                 this.currentState = QuestPhaseStatesE.ENDED;
                 break;
@@ -249,6 +250,7 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE>,
         if(newState==GeneralStateE.PLAYER_HAND_OVERSIZE) {
             this.previousState = this.currentState;
             this.currentState = QuestPhaseStatesE.BLOCKED;
+            LOG.info(String.format("Moved from state %s to state %s", previousState, currentState));
         }
         else if(this.currentState==QuestPhaseStatesE.BLOCKED) {
             this.currentState = this.previousState;

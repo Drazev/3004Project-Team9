@@ -127,6 +127,7 @@ export const useMaxBidPlayer = () => useStore((state) => state.maxBidPlayer);
 export const useCurrentBidder = () => useStore((state) => state.currentBidder);
 export const useStoryCard = () => useStore((state) => state.storyCard);
 export const useIsSponsoring = () => useStore((state) => state.isSponsoring);
+export const useSponsorName = () => useStore((state) => state.sponsorName);
 
 /**
  * Setters

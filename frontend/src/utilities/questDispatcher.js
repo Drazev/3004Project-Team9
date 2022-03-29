@@ -3,6 +3,7 @@
  */
 import { questRequestStore } from "../stores/questRequestStore"
 import { generalStore } from "../stores/generalStore"
+import { playAreaStore } from "../stores/playAreaStore";
 
 export const dispatchSponsorSearchRequest = (body) => {
     /**
@@ -156,4 +157,6 @@ export const dispatchQuestEnd = (body) => {
     generalStore().setIsSponsoring(false);
     generalStore().setSponsorName("");
     generalStore().setActivePlayers([]);
+    playAreaStore().setStageAreas([]);
+    
 }

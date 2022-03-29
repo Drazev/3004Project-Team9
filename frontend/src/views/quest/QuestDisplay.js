@@ -60,8 +60,8 @@ const QuestDisplay = (props) => {
             {RenderStages()}
         </div>
         <div style={{position:'absolute',top:120,left:0}}>
-            {(currentStageObject && foeStageStart == true) && <FoeStageDisplay currentStage={currentStageObject}></FoeStageDisplay>}
-            {(currentStageObject && testStageStart == true) && <TestStageDisplay currentStage={currentStageObject}></TestStageDisplay>}
+            {(currentStageObject && foeStageStart == true && testStageStart == false) && <FoeStageDisplay currentStage={currentStageObject}></FoeStageDisplay>}
+            {(currentStageObject && testStageStart == true && foeStageStart == false) && <TestStageDisplay currentStage={currentStageObject}></TestStageDisplay>}
         </div>
     </div>
   );

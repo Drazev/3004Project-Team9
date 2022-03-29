@@ -6,7 +6,6 @@ import { useRemoveNotification, useNotificationDelay, useHideNotification } from
 import "./Notifications.css";
 
 const Notification = ({ notification }) => {
-    console.log(`Notification ${notification.id} rerendered`);
     const [bgColor, setBgColor] = useState(null);
     const removeNotification = useRemoveNotification();
     const delay = useNotificationDelay();
@@ -15,7 +14,6 @@ const Notification = ({ notification }) => {
     const onClose = () => {
         // removeNotification(notification.id);
         hideNotification(notification.id);
-        console.log(`Notification ${notification.id} removed`);
     }
 
     useEffect(() => {
