@@ -1,13 +1,18 @@
-import React from "react";
+import {React, useState} from "react";
+import useRef from "react";
 import NumericInput from 'react-numeric-input';
 import {Button, InputGroup} from "react-bootstrap";
-import { sponsorRespond, joinRespond } from "../../services/clientSocket";
-import { useName, useSetIsSponsoring, useSetJoinRequest, useMaxBid } from "../../stores/generalStore";
+import { sponsorRespond, joinRespond, bidResponse } from "../../services/clientSocket";
+import { useName, useSetIsSponsoring, useSetJoinRequest, useMaxBid, useCurrentBidder } from "../../stores/generalStore";
 import "./Popup.css"
  
 const Popup = props => {
+  const bidderName = useCurrentBidder().name;
+  const bidderPlayerID = useCurrentBidder().playerID;
   let name = useName();
   const maxBid = useMaxBid();
+  //const [curBid,setCurBid] = useState(0);
+  let curBid = 0;
   const setIsSponsoring = useSetIsSponsoring();
   const setJoinRequest = useSetJoinRequest();
   const handleYes = () => {
@@ -48,9 +53,11 @@ const Popup = props => {
           {props.popupType === "BIDREQUEST" &&
             <div>
               <h6>Place your bid!</h6>
-              <p>Current highest bid: {maxBid}</p>
+              <p>Minimum Next Bid: {maxBid}</p>
               <NumericInput
                 className="form-control"
+                id="test"
+                onChange={() => {curBid = test.value}}
                 value="0" 
                 min={ -1 } 
                 max={ 25 } 
@@ -86,7 +93,7 @@ const Popup = props => {
                   }
                 }}
               ></NumericInput>
-              <button type="submit" className="SubmitBidButton">Place Bid</button>
+              <button type="submit" className="SubmitBidButton" onClick={() => {bidResponse(bidderName,bidderPlayerID,curBid); props.setPopup(false)}}>Place Bid</button>
             </div>
           }
       </div>

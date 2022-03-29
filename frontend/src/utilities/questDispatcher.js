@@ -3,6 +3,7 @@
  */
 import { questRequestStore } from "../stores/questRequestStore"
 import { generalStore } from "../stores/generalStore"
+import { playAreaStore } from "../stores/playAreaStore";
 
 export const dispatchSponsorSearchRequest = (body) => {
     /**
@@ -94,11 +95,21 @@ export const dispatchTestStageStart = (body) => {
 export const dispatchBidRequest = (body) => {
     /**
      * The server is requesting the client to place a bid
+     * Payload:
+     * 
+       {
+        "player": {"playerID": string, "name": string},
+        "maxBid": Int,
+        "maxBidPlayer": {"playerID": string, "name": string}
+        }
      */
     console.log("/topic/quest/request-bid" + JSON.stringify(body));
     generalStore().setCurrentBidder(body.player);
     generalStore().setMaxBid(body.maxBid);
     generalStore().setMaxBidPlayer(body.setMaxBidPlayer);
+    if(body.player.name === generalStore().name){
+        questRequestStore().setBidRequest(true);
+    }
 }
 
 export const dispatchStageEnd = (body) => {
@@ -146,4 +157,6 @@ export const dispatchQuestEnd = (body) => {
     generalStore().setIsSponsoring(false);
     generalStore().setSponsorName("");
     generalStore().setActivePlayers([]);
+    playAreaStore().setStageAreas([]);
+    
 }

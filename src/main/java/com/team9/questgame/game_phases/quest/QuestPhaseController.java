@@ -1,5 +1,7 @@
 package com.team9.questgame.game_phases.quest;
 
+import com.team9.questgame.ApplicationContextHolder;
+import com.team9.questgame.Data.PlayAreaData;
 import com.team9.questgame.Data.PlayerData;
 import com.team9.questgame.Data.StageAreaData;
 import com.team9.questgame.Entities.Effects.EffectResolverService;
@@ -17,6 +19,9 @@ import com.team9.questgame.gamemanager.record.socket.QuestEndedOutbound;
 import com.team9.questgame.gamemanager.record.socket.RemainingQuestorsOutbound;
 import com.team9.questgame.gamemanager.service.NotificationOutboundService;
 import com.team9.questgame.gamemanager.service.QuestPhaseInboundService;
+import com.team9.questgame.gamemanager.record.socket.RequestBidOutbound;
+import com.team9.questgame.gamemanager.service.NotificationOutboundService;
+import com.team9.questgame.gamemanager.service.OutboundService;
 import com.team9.questgame.gamemanager.service.QuestPhaseOutboundService;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -44,6 +49,9 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
     private ArrayList<StagePlayAreas> stages;
 //    private StagePlayAreas newStage;
     private HashMap<StagePlayAreas,HashSet<Players>> stageVisibleToPlayersList;
+    private Players maxBidPlayer;
+    private int maxBid;
+    private int bidCount;
     private HashSet<Long> cardIDUsedToRevealStage;
 
     @Getter
@@ -82,6 +90,8 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         //minJoin = false;
         stagesAreValid = false;
         nextStageTest = false;
+        maxBidPlayer = null;
+        maxBid=0;
         QuestPhaseInboundService.getService().setQuestController(this);
     }
 
@@ -144,7 +154,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         else {
             playerTurnService.nextPlayer();
         }
-       
+
         stateMachine.update();
 //        switch (stateMachine.getCurrentState()) {
 //            case QUEST_SPONSOR -> {
@@ -204,6 +214,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
 
         // TODO: pass in an array of new StagesPlayArea to the validateStageSetup function
         if (!validateStageSetup(stages)) {
+            LOG.info("Stage Validation failed");
             return false;
         }
         stagesAreValid = true;
@@ -237,7 +248,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         // Check if subsequent stages have increasing battlePoint
         int minBattlePoint = 0;
         for (StagePlayAreas stage: newStages) {
-            if (stage.getBattlePoints() <= minBattlePoint) {
+            if (stage.getBattlePoints() <= minBattlePoint && stage.getStageCard().getSubType() != CardTypes.TEST) {
                 return false;
             }
             minBattlePoint = stage.getBattlePoints();
@@ -247,6 +258,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         for (StagePlayAreas stage: newStages) {
             ArrayList<FoeCards> foeCards = new ArrayList<>();
             ArrayList<WeaponCards> weaponCards = new ArrayList<>();
+            ArrayList<TestCards> testCards = new ArrayList<>();
 
             HashMap<AllCardCodes, AdventureCards> allCards = stage.getAllCards();
             for (AdventureCards card: allCards.values()) {
@@ -254,12 +266,16 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
                     foeCards.add((FoeCards) card);
                 } else if (card.getSubType() == CardTypes.QUEST) {
                     weaponCards.add((WeaponCards) card);
+                }else if(card.getSubType() == CardTypes.TEST){
+                    testCards.add((TestCards) card);
                 }
             }
-            if (foeCards.size() != 1) {
-                // There must be exactly 1 foe in the stage
+            if (foeCards.size() != 1 && testCards.size() != 1) {
+                // There must be exactly 1 foe in the stage or 1 test stage
                 return false;
-            } else {
+            }else if(foeCards.size() > 0 && testCards.size() > 0){
+                return false;
+            }else {
                 // All weapon cards must be unique
                 for (WeaponCards thisCard: weaponCards) {
                     for (WeaponCards otherCard: weaponCards) {
@@ -274,8 +290,14 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
     }
 
     private void checkForTest(){
+        if(curStageIndex >= questCard.getStages()){
+            nextStageTest = false;
+            return;
+        }
         if(stages.get(curStageIndex).getStageCard().getSubType() == CardTypes.TEST){
             nextStageTest = true;
+        }else{
+            nextStageTest = false;
         }
     }
 
@@ -299,15 +321,94 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
             questingPlayers.add(player);
         }
 
+        checkForTest();
         stateMachine.update();
 //        switch (stateMachine.getCurrentState()) {
 //            case QUEST_JOIN -> {
 //                // Do nothing since the broadcast already sent to all players
 //            } case IN_TEST -> {
-//                //TODO: Broadcast Test start... maybe just go into participant setup
-//            } case DRAW_CARD -> {
-//                dealAdventureCard();
+//                testSetup();
+//            } case PARTICIPANT_SETUP -> {
+//                participantSetup();
 //                //resolveStage(0);
+//            } case ENDED -> {
+//                endPhase();
+//            } default -> {
+//                throw new IllegalQuestPhaseStateException("Unknown state");
+//            }
+//        }
+    }
+
+    private void testSetup(){
+        dealAdventureCard();
+        while(playerTurnService.getPlayerTurn().getPlayerId() == sponsor.getPlayerId() || !questingPlayers.contains(playerTurnService.getPlayerTurn())){
+            playerTurnService.nextPlayer();
+        }
+        QuestPhaseOutboundService.getService().broadcastTestStageStart(new RemainingQuestorsOutbound(generateQuestorData(), curStageIndex));
+        maxBid = stages.get(curStageIndex).getBids();
+        QuestPhaseOutboundService.getService().broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, null));
+        StagePlayAreas currStage = stages.get(curStageIndex);
+        HashSet<Players> pList=stageVisibleToPlayersList.get(currStage);
+        if(pList==null) {
+            throw new IllegalQuestPhaseStateException(String.format("Player visibility list couldn't find stage %d.",curStageIndex+1));
+        }
+        pList.addAll(playerTurnService.getPlayers()); //Make stage visible to all players on resolution
+        currStage.notifyStageAreaChanged();
+    }
+
+    public void checkTestBidResponse(Players player, int bid){
+        if(stateMachine.getCurrentState() != QuestPhaseStatesE.IN_TEST){
+            throw new IllegalQuestPhaseStateException("you can only bid when the game is in the IN_TEST state");
+        }
+        if(player.getPlayerId() != playerTurnService.getPlayerTurn().getPlayerId()){
+            throw new IllegalGameRequest("It must be the players turn for them to bid", player);
+        }
+
+        //maybe set minimum bid on test card reveal as current max and anyone with less than that is kicked
+        if((bid < maxBid && maxBidPlayer == null) || (bid <= maxBid && maxBidPlayer !=null)){
+            questingPlayers.remove(player);
+            NotificationOutboundService.getService().sendBadNotification(
+                    sponsor,
+                    new NotificationOutbound("Test Stage Defeat","Your bid was deemed unworthy. Alas, you cannot continue your journey and must head home.","",null),
+                    null
+            );
+        }else if (bid > (player.getHand().getHandSize()+player.getPlayArea().getBids())){
+            NotificationOutboundService.getService().sendBadNotification(player,
+                    new NotificationOutbound("Bid Too Large", "You bid more cards than you can discard, try again","",null),
+                    null
+            );
+            if(maxBidPlayer == null){
+                QuestPhaseOutboundService.getService().broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, null));
+            }else{
+                QuestPhaseOutboundService.getService().broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, maxBidPlayer.generatePlayerData()));
+            }
+            return;
+        }else{
+            maxBidPlayer = player;
+            maxBid = bid;
+        }
+
+        if(questingPlayers.size() == 1){
+            QuestPhaseOutboundService.getService().broadcastStageResult(new RemainingQuestorsOutbound(generateQuestorData(), curStageIndex));
+            //TODO:make maxBidPlayer discard maxBid-maxBidPlayer.getPlayerPlayArea().getBattlePoints() cards
+            curStageIndex++;
+        }else{
+            do{
+                playerTurnService.nextPlayer();
+            }while(playerTurnService.getPlayerTurn().getPlayerId() == sponsor.getPlayerId() || !questingPlayers.contains(playerTurnService.getPlayerTurn()));
+            if(maxBidPlayer == null){
+                QuestPhaseOutboundService.getService().broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, null));
+            }else{
+                QuestPhaseOutboundService.getService().broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, maxBidPlayer.generatePlayerData()));
+            }
+        }
+        checkForTest();
+        stateMachine.update();
+//        switch (stateMachine.getCurrentState()) {
+//            case IN_TEST -> {
+//
+//            } case PARTICIPANT_SETUP -> {
+//                participantSetup();
 //            } case ENDED -> {
 //                endPhase();
 //            } default -> {
@@ -363,7 +464,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         currStage.notifyStageAreaChanged();
         for(Players player:questingPlayers){
             player.getPlayArea().setPlayerTurn(false);
-            if(player.getPlayArea().getBattlePoints() <= stages.get(stageNum).getBattlePoints()){
+            if(player.getPlayArea().getBattlePoints()+1 < stages.get(stageNum).getBattlePoints()){
                 NotificationOutboundService.getService().sendBadNotification(
                         sponsor,
                         new NotificationOutbound("Quest Stage Defeat","You have failed this stage of the quest. Alas, you cannot continue your journey and must head home.","",null),
@@ -378,6 +479,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
 
         participantSetupResponses=0;
         curStageIndex++;
+        checkForTest();
         stateMachine.update();
 //        switch (stateMachine.getCurrentState()){
 //            case PARTICIPANT_SETUP -> {
@@ -429,6 +531,16 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
             stage.onGameReset();
         }
         this.stages.clear();
+        //cleanup stuff, uncomment if not done elsewhere
+//        playerTurnService = null;
+//        sponsor = null;
+//        sponsorAttempts = 0;
+//        joinAttempts = 0;
+//        numParticipants = 0;
+//        stagesAreValid = false;
+//        nextStageTest = false;
+//        maxBidPlayer = null;
+//        maxBid=0;
         this.stageVisibleToPlayersList.clear();
         this.cardIDUsedToRevealStage.clear();
         stateMachine.setPhaseReset(true);
@@ -580,6 +692,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
             case IN_STAGE -> resolveStage(curStageIndex);
             case IN_TEST -> {
                 //TODO: Broadcast Test start... maybe just go into participant setup
+                testSetup();
             }
             case DRAW_CARD -> dealAdventureCard();
             case REWARDS -> distributeRewards();

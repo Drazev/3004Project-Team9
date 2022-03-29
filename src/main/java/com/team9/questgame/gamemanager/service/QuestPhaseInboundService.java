@@ -72,6 +72,11 @@ public class QuestPhaseInboundService implements ApplicationContextAware {
         questController.checkJoinResult(player, joined);
     }
 
+    public synchronized  void checkTestBidResponse(String name, int bidAmount){
+        Players player = sessionService.getPlayerMap().get(name);
+        questController.checkTestBidResponse(player, bidAmount);
+    }
+
     public synchronized  void checkParticipantSetup(String name){
         if(questController==null) {
             throw new RuntimeException("No active quest Phase set on QuestPhaseInboundService");

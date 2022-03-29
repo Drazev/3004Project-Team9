@@ -3,7 +3,7 @@ import QuestDisplay from "./quest/QuestDisplay";
 import CardImages from "../assets/images/index";
 import Popup from "../components/popups/Popup";
 import { drawCard, setupComplete, participantSetupComplete } from "../services/clientSocket";
-import { useName, usePlayerHands, useTurn, useSponsorRequest, useIsSponsoring, useSetIsSponsoring, useJoinRequest, useFoeStageStart, useTestStageStart } from "../stores/generalStore";
+import { useName, usePlayerHands, useTurn, useSponsorRequest, useIsSponsoring, useSetIsSponsoring, useJoinRequest, useFoeStageStart, useTestStageStart, usePlayers, useActivePlayers, useHandOversize } from "../stores/generalStore";
 import { usePlayerPlayAreas, useStageAreas } from "../stores/playAreaStore";
 import { useSponsorSearchRequest, useSetSponsorSearchRequest, useQuestJoinRequest, useSetQuestJoinRequest } from "../stores/questRequestStore";
 import { Button } from "react-bootstrap";
@@ -11,6 +11,8 @@ import React, { useState } from "react";
 import "./GameBoard.css";
 
 function GameBoard({}) {
+    const handOversize = useHandOversize()
+    const activePlayers = useActivePlayers();
     const name = useName();
     const hands = usePlayerHands();
     const active = usePlayerPlayAreas();
@@ -20,10 +22,21 @@ function GameBoard({}) {
     const isSponsoring = useIsSponsoring();
     const setIsSponsoring = useSetIsSponsoring();
     const joinRequest = useJoinRequest();
-    const [popup, setPopup] = useState(true);
+    const [isActive, setIsActive] = useState(false);
     const foeStageStart = useFoeStageStart();
     const [sponsorSearchRequest, setSponsorSearchRequest] = [useSponsorSearchRequest(), useSetSponsorSearchRequest()];
     const [questJoinRequest, setQuestJoinRequest] = [useQuestJoinRequest(), useSetQuestJoinRequest()];
+
+    for(var i = 0; i < activePlayers.length; i++){
+        const player = activePlayers[i];
+        console.log(JSON.stringify(player) + " " + name);
+        if(player.name === name && isActive == false){
+            setIsActive(true);
+        }
+    }
+    
+
+    const players = usePlayers();
 
     let myHandArr = [false, false, false, false];
     let myPlayerID = -1;
@@ -54,6 +67,13 @@ function GameBoard({}) {
         const jump = 240;
         var allHands = [];
         for (var i = 0; i < hands.length; i++){
+            // var curPlayer = null;
+            // for(var player in players){
+            //     console.log(JSON.stringify(player));
+            //     if (player === hands[i].playerName){
+            //         curPlayer = player;
+            //     }
+            // }
             var curTop = init+jump*i;
             allHands.push(
                 <div style={{position:"fixed",top:curTop,left:10}}>
@@ -66,7 +86,7 @@ function GameBoard({}) {
                         cardsInHand={hands[i].hand}
                         activeCards={getActiveCard(hands[i].playerId)}
                         rank={CardImages.Rank_Squire/*hands[0].rank*/}
-                        numShields={5/*hands[0].shields*/}
+                        numShields={5/*curPlayer.shields*/}
                         shield={CardImages.Shield_3}
                         numStages={stageAreas.length}
                     ></PlayerHand>
@@ -110,7 +130,7 @@ function GameBoard({}) {
                     </Button>
                 </div>)
             }
-            {foeStageStart && !isSponsoring &&
+            {foeStageStart && isActive && !handOversize &&
                 (<div id="finish-setup">
                     <Button
                         onClick={() => {

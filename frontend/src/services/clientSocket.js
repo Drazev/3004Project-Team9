@@ -99,6 +99,7 @@ export async function connect() {
              */
             let body = JSON.parse(message.body);
             console.log("/topic/player/hand-oversize: " + JSON.stringify(body));
+            generalStore().setHandOversize(true);
             notificationDispatcher.dispatchBadNotification({
                 title: "Hand Oversize",
                 message: `A player has oversized hand. Please discard or play the card(s) until their hand has <= 12 cards to proceed.`
@@ -149,8 +150,8 @@ export async function connect() {
             })
         });
 
-        client.subscribe("topic/quest/test-stage-start", (message) => {
-            questDispatcher.dispatchFoeStageStart(JSON.parse(message.body));
+        client.subscribe("/topic/quest/test-stage-start", (message) => {
+            questDispatcher.dispatchTestStageStart(JSON.parse(message.body));
             notificationDispatcher.dispatchInfoNotification({
                 title: "Test Stage Start",
                 message: "Test stage has started."

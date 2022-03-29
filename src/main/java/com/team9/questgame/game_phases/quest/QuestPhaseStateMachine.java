@@ -7,12 +7,14 @@ import com.team9.questgame.game_phases.StateMachineI;
 import com.team9.questgame.game_phases.utils.StateMachineObserver;
 import lombok.Getter;
 import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE>, StateMachineObserver<GeneralStateE> {
-
+    Logger LOG;
     @Getter
     @Setter
     private QuestPhaseStatesE currentState;
@@ -42,6 +44,7 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE>,
     private boolean isUnblockRequested;
 
     public QuestPhaseStateMachine(QuestPhaseController phase) {
+        LOG = LoggerFactory.getLogger(QuestPhaseController.class);
         previousState = null;
         this.controller = phase;
         currentState = QuestPhaseStatesE.NOT_STARTED;
@@ -76,6 +79,7 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE>,
                 break;
             case IN_TEST:
                 this.currentState = inTestState();
+                break;
             case REWARDS:
                 this.currentState = QuestPhaseStatesE.ENDED;
                 break;
@@ -90,8 +94,9 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE>,
         }
 
 
-        if (tempState != currentState) {
+        if (tempState != currentState || currentState == QuestPhaseStatesE.QUEST_SPONSOR) {
             // Stage changed, update previousState
+            LOG.info(String.format("Moved from state %s to state %s", previousState, currentState));
             this.previousState = tempState;
             controller.executeNextAction();
         }
@@ -204,34 +209,14 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE>,
 
     public QuestPhaseStatesE inTestState(){
         if(!controller.isNextStageTest()){
-            //TODO:if that was the last stage go to ended, if theres more then go to participant setup
+            if(controller.getCurStageIndex() > controller.getCard().getStages()){
+                return QuestPhaseStatesE.ENDED;
+            }else{
+                return QuestPhaseStatesE.PARTICIPANT_SETUP;
+            }
         }
         return QuestPhaseStatesE.IN_TEST;
     }
-
-//    public QuestPhaseStatesE stageOneState() {
-//        //TODO: on stage one complete if more stages return to participant setup state
-//        if(controller.getQuestingPlayers().size() == 0){
-//            return QuestPhaseStatesE.ENDED;
-//        }
-//        return QuestPhaseStatesE.PARTICIPANT_SETUP;
-//    }
-//
-//    public QuestPhaseStatesE stageTwoState() {
-//        if (controller.getQuestCard().getStages() < 2 || controller.getQuestingPlayers().size() == 0) {
-//            return QuestPhaseStatesE.ENDED;
-//        }
-//
-//        return QuestPhaseStatesE.PARTICIPANT_SETUP;
-//    }
-//
-//    public QuestPhaseStatesE stageThreeState() {
-//        if (controller.getQuestCard().getStages() < 3 || controller.getQuestingPlayers().size() == 0) {
-//            return QuestPhaseStatesE.ENDED;
-//        }
-//
-//        return QuestPhaseStatesE.PARTICIPANT_SETUP;
-//    }
 
     public QuestPhaseStatesE endedState() {
         if (isPhaseReset) {
@@ -265,6 +250,7 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE>,
         if(newState==GeneralStateE.PLAYER_HAND_OVERSIZE) {
             this.previousState = this.currentState;
             this.currentState = QuestPhaseStatesE.BLOCKED;
+            LOG.info(String.format("Moved from state %s to state %s", previousState, currentState));
         }
         else if(this.currentState==QuestPhaseStatesE.BLOCKED) {
             this.currentState = this.previousState;
