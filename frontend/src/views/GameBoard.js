@@ -3,7 +3,7 @@ import QuestDisplay from "./quest/QuestDisplay";
 import CardImages from "../assets/images/index";
 import Popup from "../components/popups/Popup";
 import { drawCard, setupComplete, participantSetupComplete } from "../services/clientSocket";
-import { useName, usePlayerHands, useTurn, useSponsorRequest, useIsSponsoring, useSetIsSponsoring, useJoinRequest, useFoeStageStart, useTestStageStart, usePlayers } from "../stores/generalStore";
+import { useName, usePlayerHands, useTurn, useSponsorRequest, useIsSponsoring, useSetIsSponsoring, useJoinRequest, useFoeStageStart, useTestStageStart, usePlayers, useActivePlayers, useHandOversize } from "../stores/generalStore";
 import { usePlayerPlayAreas, useStageAreas } from "../stores/playAreaStore";
 import { useSponsorSearchRequest, useSetSponsorSearchRequest, useQuestJoinRequest, useSetQuestJoinRequest } from "../stores/questRequestStore";
 import { Button } from "react-bootstrap";
@@ -11,6 +11,8 @@ import React, { useState } from "react";
 import "./GameBoard.css";
 
 function GameBoard({}) {
+    const handOversize = useHandOversize()
+    const activePlayers = useActivePlayers();
     const name = useName();
     const hands = usePlayerHands();
     const active = usePlayerPlayAreas();
@@ -20,11 +22,20 @@ function GameBoard({}) {
     const isSponsoring = useIsSponsoring();
     const setIsSponsoring = useSetIsSponsoring();
     const joinRequest = useJoinRequest();
-    const [popup, setPopup] = useState(true);
+    const [isActive, setIsActive] = useState(false);
     const foeStageStart = useFoeStageStart();
     const [sponsorSearchRequest, setSponsorSearchRequest] = [useSponsorSearchRequest(), useSetSponsorSearchRequest()];
     const [questJoinRequest, setQuestJoinRequest] = [useQuestJoinRequest(), useSetQuestJoinRequest()];
+
+    for(var i = 0; i < activePlayers.length; i++){
+        const player = activePlayers[i];
+        console.log(JSON.stringify(player) + " " + name);
+        if(player.name === name && isActive == false){
+            setIsActive(true);
+        }
+    }
     
+
     const players = usePlayers();
 
     let myHandArr = [false, false, false, false];
@@ -119,7 +130,7 @@ function GameBoard({}) {
                     </Button>
                 </div>)
             }
-            {foeStageStart && !isSponsoring &&
+            {foeStageStart && isActive && !handOversize &&
                 (<div id="finish-setup">
                     <Button
                         onClick={() => {
