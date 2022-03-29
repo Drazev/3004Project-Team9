@@ -469,7 +469,7 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
         currStage.notifyStageAreaChanged();
         for(Players player:questingPlayers){
             player.getPlayArea().setPlayerTurn(false);
-            if(player.getPlayArea().getBattlePoints() < stages.get(stageNum).getBattlePoints()){
+            if(player.getPlayArea().getBattlePoints() <= stages.get(stageNum).getBattlePoints()){
                 questingPlayers.remove(player);
 
             }

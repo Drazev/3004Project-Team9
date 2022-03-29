@@ -63,7 +63,6 @@ const QuestDisplay = (props) => {
             {(currentStageObject && foeStageStart == true) && <FoeStageDisplay currentStage={currentStageObject}></FoeStageDisplay>}
             {(currentStageObject && testStageStart == true) && <TestStageDisplay currentStage={currentStageObject}></TestStageDisplay>}
         </div>
-        {/* <Popup popupType="BIDREQUEST" setPop={null}></Popup> */}
     </div>
   );
 };
