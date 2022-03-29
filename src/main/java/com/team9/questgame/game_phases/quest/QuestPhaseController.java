@@ -327,10 +327,9 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
 //            case QUEST_JOIN -> {
 //                // Do nothing since the broadcast already sent to all players
 //            } case IN_TEST -> {
-//                //TODO: Broadcast Test start... maybe just go into participant setup
-//                  testSetup();
-//            } case DRAW_CARD -> {
-//                dealAdventureCard();
+//                testSetup();
+//            } case PARTICIPANT_SETUP -> {
+//                participantSetup();
 //                //resolveStage(0);
 //            } case ENDED -> {
 //                endPhase();
@@ -338,20 +337,6 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
 //                throw new IllegalQuestPhaseStateException("Unknown state");
 //            }
 //        }
-        switch (stateMachine.getCurrentState()) {
-            case QUEST_JOIN -> {
-                // Do nothing since the broadcast already sent to all players
-            } case IN_TEST -> {
-                testSetup();
-            } case PARTICIPANT_SETUP -> {
-                participantSetup();
-                //resolveStage(0);
-            } case ENDED -> {
-                endPhase();
-            } default -> {
-                throw new IllegalQuestPhaseStateException("Unknown state");
-            }
-        }
     }
 
     private void testSetup(){
@@ -359,9 +344,9 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         while(playerTurnService.getPlayerTurn().getPlayerId() == sponsor.getPlayerId() || !questingPlayers.contains(playerTurnService.getPlayerTurn())){
             playerTurnService.nextPlayer();
         }
-        outboundService.broadcastTestStageStart(new RemainingQuestorsOutbound(generateQuestorData(), curStageIndex));
+        QuestPhaseOutboundService.getService().broadcastTestStageStart(new RemainingQuestorsOutbound(generateQuestorData(), curStageIndex));
         maxBid = stages.get(curStageIndex).getBids();
-        outboundService.broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, null));
+        QuestPhaseOutboundService.getService().broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, null));
     }
 
     public void checkTestBidResponse(Players player, int bid){
@@ -376,11 +361,14 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         if(bid < maxBid){
             questingPlayers.remove(player);
         }else if (bid > player.getHand().getHandSize()+player.getPlayArea().getBids()){
-            notifyService.sendBadNotification(player, new NotificationOutbound("Bid too large", "you bid too high, try again","",""), null);
+            NotificationOutboundService.getService().sendBadNotification(player,
+                    new NotificationOutbound("Bid Too Large", "You bid more cards than you can discard, try again","",null),
+                    null
+            );
             if(maxBidPlayer == null){
-                outboundService.broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, null));
+                QuestPhaseOutboundService.getService().broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, null));
             }
-            outboundService.broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, maxBidPlayer.generatePlayerData()));
+            QuestPhaseOutboundService.getService().broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, maxBidPlayer.generatePlayerData()));
             return;
         }else{
             maxBidPlayer = player;
@@ -388,7 +376,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         }
 
         if(questingPlayers.size() == 1){
-            outboundService.broadcastStageResult(new RemainingQuestorsOutbound(generateQuestorData(), curStageIndex));
+            QuestPhaseOutboundService.getService().broadcastStageResult(new RemainingQuestorsOutbound(generateQuestorData(), curStageIndex));
             //TODO:make maxBidPlayer discard maxBid-maxBidPlayer.getPlayerPlayArea().getBattlePoints() cards
             curStageIndex++;
         }else{
@@ -398,17 +386,17 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         }
         checkForTest();
         stateMachine.update();
-        switch (stateMachine.getCurrentState()) {
-            case IN_TEST -> {
-
-            } case PARTICIPANT_SETUP -> {
-                participantSetup();
-            } case ENDED -> {
-                endPhase();
-            } default -> {
-                throw new IllegalQuestPhaseStateException("Unknown state");
-            }
-        }
+//        switch (stateMachine.getCurrentState()) {
+//            case IN_TEST -> {
+//
+//            } case PARTICIPANT_SETUP -> {
+//                participantSetup();
+//            } case ENDED -> {
+//                endPhase();
+//            } default -> {
+//                throw new IllegalQuestPhaseStateException("Unknown state");
+//            }
+//        }
     }
 
     private void participantSetup(){
@@ -458,7 +446,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         currStage.notifyStageAreaChanged();
         for(Players player:questingPlayers){
             player.getPlayArea().setPlayerTurn(false);
-            if(player.getPlayArea().getBattlePoints() <= stages.get(stageNum).getBattlePoints()){
+            if(player.getPlayArea().getBattlePoints() < stages.get(stageNum).getBattlePoints()){
                 NotificationOutboundService.getService().sendBadNotification(
                         sponsor,
                         new NotificationOutbound("Quest Stage Defeat","You have failed this stage of the quest. Alas, you cannot continue your journey and must head home.","",null),
@@ -686,6 +674,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
             case IN_STAGE -> resolveStage(curStageIndex);
             case IN_TEST -> {
                 //TODO: Broadcast Test start... maybe just go into participant setup
+                testSetup();
             }
             case DRAW_CARD -> dealAdventureCard();
             case REWARDS -> distributeRewards();

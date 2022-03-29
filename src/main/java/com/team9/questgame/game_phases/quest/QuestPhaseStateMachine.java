@@ -7,12 +7,14 @@ import com.team9.questgame.game_phases.StateMachineI;
 import com.team9.questgame.game_phases.utils.StateMachineObserver;
 import lombok.Getter;
 import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE>, StateMachineObserver<GeneralStateE> {
-
+    Logger LOG;
     @Getter
     @Setter
     private QuestPhaseStatesE currentState;
@@ -42,6 +44,7 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE>,
     private boolean isUnblockRequested;
 
     public QuestPhaseStateMachine(QuestPhaseController phase) {
+        LOG = LoggerFactory.getLogger(QuestPhaseController.class);
         previousState = null;
         this.controller = phase;
         currentState = QuestPhaseStatesE.NOT_STARTED;
@@ -90,8 +93,9 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE>,
         }
 
 
-        if (tempState != currentState) {
+        if (tempState != currentState || currentState == QuestPhaseStatesE.QUEST_SPONSOR) {
             // Stage changed, update previousState
+            LOG.info(String.format("Moved from state %s to state %s", previousState, currentState));
             this.previousState = tempState;
             controller.executeNextAction();
         }
@@ -204,7 +208,7 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE>,
 
     public QuestPhaseStatesE inTestState(){
         if(!controller.isNextStageTest()){
-            if(controller.getCurStageIndex() > controller.getQuestCard().getStages()){
+            if(controller.getCurStageIndex() > controller.getCard().getStages()){
                 return QuestPhaseStatesE.ENDED;
             }else{
                 return QuestPhaseStatesE.PARTICIPANT_SETUP;

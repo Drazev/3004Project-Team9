@@ -3,7 +3,7 @@ import QuestDisplay from "./quest/QuestDisplay";
 import CardImages from "../assets/images/index";
 import Popup from "../components/popups/Popup";
 import { drawCard, setupComplete, participantSetupComplete } from "../services/clientSocket";
-import { useName, usePlayerHands, useTurn, useSponsorRequest, useIsSponsoring, useSetIsSponsoring, useJoinRequest, useFoeStageStart, useTestStageStart } from "../stores/generalStore";
+import { useName, usePlayerHands, useTurn, useSponsorRequest, useIsSponsoring, useSetIsSponsoring, useJoinRequest, useFoeStageStart, useTestStageStart, usePlayers } from "../stores/generalStore";
 import { usePlayerPlayAreas, useStageAreas } from "../stores/playAreaStore";
 import { useSponsorSearchRequest, useSetSponsorSearchRequest, useQuestJoinRequest, useSetQuestJoinRequest } from "../stores/questRequestStore";
 import { Button } from "react-bootstrap";
@@ -24,6 +24,8 @@ function GameBoard({}) {
     const foeStageStart = useFoeStageStart();
     const [sponsorSearchRequest, setSponsorSearchRequest] = [useSponsorSearchRequest(), useSetSponsorSearchRequest()];
     const [questJoinRequest, setQuestJoinRequest] = [useQuestJoinRequest(), useSetQuestJoinRequest()];
+    
+    const players = usePlayers();
 
     let myHandArr = [false, false, false, false];
     let myPlayerID = -1;
@@ -54,6 +56,13 @@ function GameBoard({}) {
         const jump = 240;
         var allHands = [];
         for (var i = 0; i < hands.length; i++){
+            // var curPlayer = null;
+            // for(var player in players){
+            //     console.log(JSON.stringify(player));
+            //     if (player === hands[i].playerName){
+            //         curPlayer = player;
+            //     }
+            // }
             var curTop = init+jump*i;
             allHands.push(
                 <div style={{position:"fixed",top:curTop,left:10}}>
@@ -66,7 +75,7 @@ function GameBoard({}) {
                         cardsInHand={hands[i].hand}
                         activeCards={getActiveCard(hands[i].playerId)}
                         rank={CardImages.Rank_Squire/*hands[0].rank*/}
-                        numShields={5/*hands[0].shields*/}
+                        numShields={5/*curPlayer.shields*/}
                         shield={CardImages.Shield_3}
                         numStages={stageAreas.length}
                     ></PlayerHand>
