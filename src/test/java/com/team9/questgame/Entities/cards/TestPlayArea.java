@@ -2,21 +2,21 @@ package com.team9.questgame.Entities.cards;
 
 import java.io.Serializable;
 
-public class TestPlayArea implements PlayAreas<AdventureCards>, Serializable {
+public class TestPlayArea implements PlayAreas<Cards>, Serializable {
     int bids=0;
     int bp=0;
     @Override
-    public boolean receiveCard(AdventureCards card) {
+    public boolean receiveCard(Cards card) {
         return false;
     }
 
     @Override
-    public void discardCard(AdventureCards card) {
+    public void discardCard(Cards card) {
 
     }
 
     @Override
-    public boolean playCard(AdventureCards card) {
+    public boolean playCard(Cards card) {
         return false;
     }
 

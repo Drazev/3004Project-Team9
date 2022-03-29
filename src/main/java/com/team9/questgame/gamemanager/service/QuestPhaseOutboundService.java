@@ -6,11 +6,15 @@ import com.team9.questgame.gamemanager.record.rest.EmptyJsonReponse;
 import com.team9.questgame.gamemanager.record.socket.HandUpdateOutbound;
 import com.team9.questgame.gamemanager.record.socket.QuestEndedOutbound;
 import com.team9.questgame.gamemanager.record.socket.RemainingQuestorsOutbound;
+import com.team9.questgame.gamemanager.record.socket.RequestBidOutbound;
 import lombok.AllArgsConstructor;
 import lombok.extern.java.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +24,7 @@ import java.util.Map;
 
 @AllArgsConstructor
 @Service
-public class QuestPhaseOutboundService {
+public class QuestPhaseOutboundService implements ApplicationContextAware {
 
     private Logger LOG;
 
@@ -29,6 +33,8 @@ public class QuestPhaseOutboundService {
 
     @Autowired
     private SessionService sessionService;
+
+    static private ApplicationContext context;
 
     public QuestPhaseOutboundService() {
         this.LOG = LoggerFactory.getLogger(QuestPhaseOutboundService.class);
@@ -79,6 +85,16 @@ public class QuestPhaseOutboundService {
         this.sendToAllPlayers("/topic/quest/foe-stage-start", remainingQuestorsOutbound);
     }
 
+    public void broadcastTestStageStart(RemainingQuestorsOutbound remainingQuestorsOutbound){
+        LOG.info(String.format("Broadcasting test stage start"));
+        this.sendToAllPlayers("/topic/quest/test-stage-start", remainingQuestorsOutbound);
+    }
+
+    public void broadcastRequestBid(RequestBidOutbound requestBidOutbound){
+        LOG.info(String.format("Requesting bid from player: %s" , requestBidOutbound.player().name()));
+        this.sendToAllPlayers("/topic/quest/request-bid", requestBidOutbound);
+    }
+
     public void broadcastStageResult(RemainingQuestorsOutbound remainingQuestorsOutbound){
         this.sendToAllPlayers("/topic/quest/stage-end", remainingQuestorsOutbound);
     }
@@ -96,5 +112,14 @@ public class QuestPhaseOutboundService {
     public void broadcastJoinRequest(){
         LOG.info(String.format("Broadcast join request"));
         this.sendToAllPlayers("/topic/quest/join-request");
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        context=applicationContext;
+    }
+
+    static public QuestPhaseOutboundService getService() {
+        return context.getBean(QuestPhaseOutboundService.class);
     }
 }

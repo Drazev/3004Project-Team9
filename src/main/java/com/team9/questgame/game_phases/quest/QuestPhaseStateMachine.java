@@ -1,25 +1,29 @@
 package com.team9.questgame.game_phases.quest;
 
 import com.team9.questgame.exception.IllegalQuestPhaseStateException;
+import com.team9.questgame.game_phases.GeneralStateE;
+import com.team9.questgame.game_phases.GeneralStateMachine;
 import com.team9.questgame.game_phases.StateMachineI;
+import com.team9.questgame.game_phases.utils.StateMachineObserver;
 import lombok.Getter;
 import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
-@Component
-public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> {
-
+public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE>, StateMachineObserver<GeneralStateE> {
+    Logger LOG;
     @Getter
     @Setter
     private QuestPhaseStatesE currentState;
     @Getter
     private QuestPhaseStatesE previousState;
 
-    @Autowired
-    @Lazy
-    private QuestPhaseController controller;
+    private final QuestPhaseController controller;
+
+    private GeneralStateE generalGameState;
 
     @Setter
     private boolean isPhaseStartRequested;
@@ -39,63 +43,62 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
     @Setter
     private boolean isUnblockRequested;
 
-    public QuestPhaseStateMachine() {
+    public QuestPhaseStateMachine(QuestPhaseController phase) {
+        LOG = LoggerFactory.getLogger(QuestPhaseController.class);
         previousState = null;
+        this.controller = phase;
         currentState = QuestPhaseStatesE.NOT_STARTED;
         isPhaseStartRequested = false;
+        generalGameState = GeneralStateMachine.getService().getCurrentState();
     }
 
     @Override
     public void update() {
         QuestPhaseStatesE tempState = this.currentState;
-        if (isBlockRequested) {
-            // BLOCKED can be transitioned to from every stage
-            this.currentState = QuestPhaseStatesE.BLOCKED;
-        } else {
-            switch (currentState) {
-                case NOT_STARTED:
-                    this.currentState = notStartedState();
-                    break;
-                case QUEST_SPONSOR:
-                    this.currentState = questSponsorState();
-                    break;
-                case QUEST_SETUP:
-                    this.currentState = questSetupState();
-                    break;
-                case QUEST_JOIN:
-                    this.currentState = questJoinState();
-                    break;
-                case PARTICIPANT_SETUP:
-                    this.currentState = participantSetupState();
-                    break;
-                case IN_STAGE:
-                    this.currentState = inStageState();
-                    break;
-                case IN_TEST:
-                    this.currentState = inTestState();
-//                case STAGE_ONE:
-//                    this.currentState = stageOneState();
-//                    break;
-//                case STAGE_TWO:
-//                    this.currentState = stageTwoState();
-//                    break;
-//                case STAGE_THREE:
-//                    this.currentState = stageThreeState();
-//                    break;
-                case ENDED:
-                    this.currentState = endedState();
-                    break;
-                case BLOCKED:
-                    this.currentState = blockStage();
-                    break;
-                default:
-                    throw new IllegalStateException("Unknown state: " + currentState);
-            }
+        switch (currentState) {
+            case NOT_STARTED:
+                this.currentState = notStartedState();
+                break;
+            case QUEST_SPONSOR:
+                this.currentState = questSponsorState();
+                break;
+            case QUEST_SETUP:
+                this.currentState = questSetupState();
+                break;
+            case QUEST_JOIN:
+                this.currentState = questJoinState();
+                break;
+            case DRAW_CARD:
+                this.currentState = drawCardState();
+                break;
+            case PARTICIPANT_SETUP:
+                this.currentState = participantSetupState();
+                break;
+            case IN_STAGE:
+                this.currentState = inStageState();
+                break;
+            case IN_TEST:
+                this.currentState = inTestState();
+                break;
+            case REWARDS:
+                this.currentState = QuestPhaseStatesE.ENDED;
+                break;
+            case ENDED:
+                this.currentState = endedState();
+                break;
+            case BLOCKED:
+                this.currentState = blockStage();
+                break;
+            default:
+                throw new IllegalStateException("Unknown state: " + currentState);
         }
 
-        if (tempState != currentState) {
+
+        if (tempState != currentState || currentState == QuestPhaseStatesE.QUEST_SPONSOR) {
             // Stage changed, update previousState
+            LOG.info(String.format("Moved from state %s to state %s", previousState, currentState));
             this.previousState = tempState;
+            controller.executeNextAction();
         }
 
         resetAllRequest();
@@ -121,7 +124,7 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
     private QuestPhaseStatesE notStartedState() {
         QuestPhaseStatesE nextState;
         setPhaseReset(false);
-        if (isPhaseStartRequested && controller.getQuestCard() != null) {
+        if (isPhaseStartRequested && controller.getCard() != null) {
             nextState = QuestPhaseStatesE.QUEST_SPONSOR;
         } else {
             nextState = QuestPhaseStatesE.NOT_STARTED;
@@ -162,7 +165,7 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
     public QuestPhaseStatesE questJoinState() {
         if (controller.getJoinAttempts() >= controller.getPlayerTurnService().getPlayers().size() - 1) {
             if (controller.getQuestingPlayers().size() == 0) {
-                return QuestPhaseStatesE.ENDED;
+                return QuestPhaseStatesE.REWARDS;
             }
             if(controller.isNextStageTest()){
                 return QuestPhaseStatesE.IN_TEST;
@@ -172,10 +175,14 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
         return QuestPhaseStatesE.QUEST_JOIN;
     }
 
+    public QuestPhaseStatesE drawCardState() {
+        return QuestPhaseStatesE.PARTICIPANT_SETUP; //We go to Participant setup. This will be blocked if drawing p
+    }
+
     public QuestPhaseStatesE participantSetupState(){
         if(controller.getParticipantSetupResponses() >= controller.getQuestingPlayers().size()){
             if(controller.getQuestingPlayers().size() == 0){
-                return QuestPhaseStatesE.ENDED;
+                return QuestPhaseStatesE.REWARDS;
             }
             return QuestPhaseStatesE.IN_STAGE;
 //            switch(controller.getCurStageIndex()){
@@ -194,42 +201,22 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
     }
 
     public QuestPhaseStatesE inStageState() {
-        if(controller.getCurStageIndex() >= controller.getQuestCard().getStages() || controller.getQuestingPlayers().size() == 0){
-            return QuestPhaseStatesE.ENDED;
+        if(controller.getCurStageIndex() >= controller.getCard().getStages() || controller.getQuestingPlayers().size() == 0){
+            return QuestPhaseStatesE.REWARDS;
         }
-        return QuestPhaseStatesE.PARTICIPANT_SETUP;
+        return QuestPhaseStatesE.DRAW_CARD;
     }
 
     public QuestPhaseStatesE inTestState(){
         if(!controller.isNextStageTest()){
-            //TODO:if that was the last stage go to ended, if theres more then go to participant setup
+            if(controller.getCurStageIndex() > controller.getCard().getStages()){
+                return QuestPhaseStatesE.ENDED;
+            }else{
+                return QuestPhaseStatesE.PARTICIPANT_SETUP;
+            }
         }
         return QuestPhaseStatesE.IN_TEST;
     }
-
-//    public QuestPhaseStatesE stageOneState() {
-//        //TODO: on stage one complete if more stages return to participant setup state
-//        if(controller.getQuestingPlayers().size() == 0){
-//            return QuestPhaseStatesE.ENDED;
-//        }
-//        return QuestPhaseStatesE.PARTICIPANT_SETUP;
-//    }
-//
-//    public QuestPhaseStatesE stageTwoState() {
-//        if (controller.getQuestCard().getStages() < 2 || controller.getQuestingPlayers().size() == 0) {
-//            return QuestPhaseStatesE.ENDED;
-//        }
-//
-//        return QuestPhaseStatesE.PARTICIPANT_SETUP;
-//    }
-//
-//    public QuestPhaseStatesE stageThreeState() {
-//        if (controller.getQuestCard().getStages() < 3 || controller.getQuestingPlayers().size() == 0) {
-//            return QuestPhaseStatesE.ENDED;
-//        }
-//
-//        return QuestPhaseStatesE.PARTICIPANT_SETUP;
-//    }
 
     public QuestPhaseStatesE endedState() {
         if (isPhaseReset) {
@@ -256,5 +243,19 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE> 
         //setPhaseReset(false);
         setBlockRequested(false);
         setUnblockRequested(false);
+    }
+
+    @Override
+    public void observerStateChanged(GeneralStateE newState) {
+        if(newState==GeneralStateE.PLAYER_HAND_OVERSIZE) {
+            this.previousState = this.currentState;
+            this.currentState = QuestPhaseStatesE.BLOCKED;
+            LOG.info(String.format("Moved from state %s to state %s", previousState, currentState));
+        }
+        else if(this.currentState==QuestPhaseStatesE.BLOCKED) {
+            this.currentState = this.previousState;
+            this.previousState = QuestPhaseStatesE.BLOCKED;
+            update();
+        }
     }
 }

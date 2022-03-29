@@ -1,9 +1,10 @@
 import React from "react";
 import FoeStageDisplay from "./FoeStageDisplay";
-import CardImages from "../../assets/images/index";
+import TestStageDisplay from "./TestStageDisplay";
 import BigCard from "../../components/cards/BigCard";
+import Popup from "../../components/popups/Popup";
 import "./QuestDisplay.css";
-import { useIsSponsoring, useFoeStageStart, useStoryCard } from "../../stores/generalStore";
+import { useIsSponsoring, useFoeStageStart, useTestStageStart, useStoryCard } from "../../stores/generalStore";
 import { useStageAreas, useCurrentStage } from "../../stores/playAreaStore";
 
 const QuestDisplay = (props) => {
@@ -11,6 +12,7 @@ const QuestDisplay = (props) => {
     const isSponsoring = useIsSponsoring();
     const foeStageStart = useFoeStageStart();
     const stages = useStageAreas();
+    const testStageStart = useTestStageStart();
     const numStages = stages.length-1;
     const currentStageNum = useCurrentStage();
     const currentStageObject = stages.find(obj => obj.stageNum === currentStageNum);
@@ -36,19 +38,11 @@ const QuestDisplay = (props) => {
         for(var x = 0; x <= numStages; x++){
             if (stage[x] != null && stage[x].stageCard != null){
                 curLeft += jump;
-                if((currentStageNum >= stage[x].stageNum && foeStageStart == true) || (isSponsoring == true)){
-                    rendered.push(
-                        <div style={{left:curLeft,position:'absolute'}}>
-                            <BigCard cardId={stage[x].stageCard.cardID} key={stage[x].stageCard.cardID} cardImage={stage[x].stageCard.imgSrc} numCards={stage[x].activeCards.length}></BigCard>
-                        </div>
-                    )
-                }else{
-                    rendered.push(
-                        <div style={{left:curLeft,position:'absolute'}}>
-                            <BigCard cardId={stage[x].stageCard.cardID} key={stage[x].stageCard.cardID} cardImage={CardImages.Back_Adventure} numCards={stage[x].activeCards.length}></BigCard>
-                        </div>
-                    )
-                }
+                rendered.push(
+                    <div style={{left:curLeft,position:'absolute'}}>
+                        <BigCard cardId={stage[x].stageCard.cardID} key={stage[x].stageCard.cardID} cardImage={stage[x].stageCard.imgSrc} numCards={stage[x].activeCards.length}></BigCard>
+                    </div>
+                )
             }
         }
         return <div>{rendered}</div>
@@ -66,7 +60,8 @@ const QuestDisplay = (props) => {
             {RenderStages()}
         </div>
         <div style={{position:'absolute',top:120,left:0}}>
-            {(currentStageObject && foeStageStart == true) && <FoeStageDisplay currentStage={currentStageObject}></FoeStageDisplay>}
+            {(currentStageObject && foeStageStart == true && testStageStart == false) && <FoeStageDisplay currentStage={currentStageObject}></FoeStageDisplay>}
+            {(currentStageObject && testStageStart == true && foeStageStart == false) && <TestStageDisplay currentStage={currentStageObject}></TestStageDisplay>}
         </div>
     </div>
   );

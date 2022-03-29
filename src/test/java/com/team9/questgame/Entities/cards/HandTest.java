@@ -62,7 +62,12 @@ class HandTest {
         aDeck = game.getADeck();
         sDeck = game.getSDeck();
         testStage = new TestPlayArea();
-        testPhaseController = new QuestPhaseController();
+        StoryCards sCard = sDeck.drawCard(testStage);
+        while(sCard.getSubType()!=CardTypes.QUEST) {
+            sCard.discardCard();
+            sCard = sDeck.drawCard(testStage);
+        }
+        testPhaseController = new QuestPhaseController(game,(QuestCards) sCard);
         session.registerPlayer("Player 1");
         session.registerPlayer("Player 2");
         session.registerPlayer("Player 3");
@@ -125,7 +130,13 @@ class HandTest {
         Hand hand =  player.getHand();
         setupPlayerPlayAreasToPlayCards();
         PlayerPlayAreas pa = player.getPlayArea();
-        QuestPhaseController testPhaseController = new QuestPhaseController();
+        StoryCards sCard = sDeck.drawCard(testStage);
+        while(sCard.getSubType()!=CardTypes.QUEST) {
+            sCard.discardCard();
+            sCard = sDeck.drawCard(testStage);
+        }
+        testPhaseController = new QuestPhaseController(game,(QuestCards) sCard);
+        QuestPhaseController testPhaseController = new QuestPhaseController(game,(QuestCards) sCard);
         TestPlayArea testStage = new TestPlayArea();
         pa.registerGamePhase(testPhaseController);
         pa.onStageChanged(testStage);

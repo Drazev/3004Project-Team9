@@ -1,33 +1,25 @@
 package com.team9.questgame.game_phases.tournament;
 
-import com.team9.questgame.Data.PlayerRewardData;
 import com.team9.questgame.Entities.cards.StoryCards;
+import com.team9.questgame.Entities.cards.TournamentCards;
 import com.team9.questgame.game_phases.GamePhases;
+import com.team9.questgame.game_phases.GeneralGameController;
 import com.team9.questgame.game_phases.utils.PlayerTurnService;
-import org.springframework.stereotype.Component;
 
-@Component
-public class TournamentPhaseController implements GamePhases<StoryCards> {
-    @Override
-    public boolean receiveCard(StoryCards card) {
-        return false;
+public class TournamentPhaseController implements GamePhases<TournamentCards,TournamentPhaseStatesE> {
+    private final GeneralGameController gameController;
+    private final TournamentCards card;
+
+    public TournamentPhaseController(GeneralGameController gameController, TournamentCards card) {
+        this.gameController = gameController;
+        this.card=card;
     }
 
-    @Override
-    public void discardCard(StoryCards card) {
-
-    }
 
     @Override
-    public boolean playCard(StoryCards card) {
-        return false;
+    public TournamentPhaseStatesE getCurrState() {
+        return null;
     }
-
-    @Override
-    public void onGameReset() {
-
-    }
-
 
     @Override
     public void startPhase(PlayerTurnService playerTurnService) {
@@ -37,5 +29,10 @@ public class TournamentPhaseController implements GamePhases<StoryCards> {
     @Override
     public void endPhase() {
 
+    }
+
+    @Override
+    public TournamentCards getCard() {
+        return card;
     }
 }
