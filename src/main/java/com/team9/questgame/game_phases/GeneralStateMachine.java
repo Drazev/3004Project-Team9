@@ -3,26 +3,34 @@ package com.team9.questgame.game_phases;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.Entities.cards.CardTypes;
 import com.team9.questgame.game_phases.quest.QuestPhaseStateMachine;
+import com.team9.questgame.game_phases.utils.StateMachineObserver;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+
+import java.util.HashSet;
 
 /**
  * Handle state switch for GeneralGameController
  */
 @Component
-public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
+public class GeneralStateMachine implements StateMachineI<GeneralStateE>, ApplicationContextAware {
 
     @Autowired
     @Lazy
     private GeneralGameController controller;
 
-    @Getter
-    @Autowired
-    private QuestPhaseStateMachine questStateMachine;
+    static private ApplicationContext context;
+//    @Getter
+//    @Autowired
+//    private QuestPhaseStateMachine questStateMachine;
+    private HashSet<StateMachineObserver<GeneralStateE>> observers;
 
     @Autowired
     private OutboundService outboundService;
@@ -54,6 +62,7 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
         previousState = null;
         currentState = GeneralStateE.SETUP;
         isGameStartRequested = false;
+        observers = new HashSet<>();
     }
 
     /**
@@ -110,9 +119,17 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
         if (tempState != currentState) {
             // State changed, update previousState
             this.previousState = tempState;
+            notifyObserversStateChanged();
         }
 
         resetAllRequest();
+    }
+
+    private void notifyObserversStateChanged() {
+        HashSet<StateMachineObserver<GeneralStateE>> list = new HashSet<>(this.observers);
+        for(StateMachineObserver<GeneralStateE> ob : list) {
+            ob.observerStateChanged(this.currentState);
+        }
     }
 
     /**
@@ -213,8 +230,8 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
         if (isAllHandNotOversize()) {
             // Request to unblock the quest state machine
             // TODO: Do this for tournament as well
-            questStateMachine.setUnblockRequested(true);
-            questStateMachine.update();
+//            questStateMachine.setUnblockRequested(true);
+//            questStateMachine.update();
 
             // Let client know and go back to whatever state that was blocked by HAND_OVERSIZE
             outboundService.broadcastHandNotOversize();
@@ -226,8 +243,8 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
         } else {
             // Request to block the quest state machine
             // TODO: Do this for tournament as well
-            questStateMachine.setBlockRequested(true);
-            questStateMachine.update();
+//            questStateMachine.setBlockRequested(true);
+//            questStateMachine.update();
             nextState = GeneralStateE.PLAYER_HAND_OVERSIZE;
         }
 
@@ -269,5 +286,22 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE> {
         setGamePhaseRequested(false);
         setGameStartRequested(false);
         //setPhaseEndRequested(false);
+    }
+
+    public void registerObserver(StateMachineObserver<GeneralStateE> observer) {
+        observers.add(observer);
+    }
+
+    public void unregisterObserver(StateMachineObserver<GeneralStateE> observer) {
+        observers.remove(observer);
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        context = applicationContext;
+    }
+
+    static public GeneralStateMachine getService() {
+        return context.getBean(GeneralStateMachine.class);
     }
 }
