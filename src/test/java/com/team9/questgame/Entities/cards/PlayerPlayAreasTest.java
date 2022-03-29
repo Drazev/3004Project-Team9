@@ -30,6 +30,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class PlayerPlayAreasTest {
 
+    StoryDecks sDeck;
     AdventureDecks aDeck;
     @Autowired
     GeneralGameController game;
@@ -56,8 +57,16 @@ class PlayerPlayAreasTest {
         LOG = LoggerFactory.getLogger(PlayerPlayAreasTest.class);
         objMap = ApplicationContextHolder.getContext().getBean(ObjectMapper.class);
         aDeck = game.getADeck();
-        testPhaseController = new QuestPhaseController();
-        testStage = new TestPlayArea();
+        sDeck = game.getSDeck();
+//        StoryCards sCard = sDeck.drawCard(testStage);
+//        testStage = new TestPlayArea();
+//        while(sCard.getSubType()!=CardTypes.QUEST) {
+//            sCard.discardCard();
+//            sCard = sDeck.drawCard(testStage);
+//        }
+        game.getAllowedStoryCardTypes().clear();
+        game.getAllowedStoryCardTypes().add(CardTypes.QUEST);
+
         session.registerPlayer("Player 1");
         session.registerPlayer("Player 2");
         session.registerPlayer("Player 3");
@@ -68,6 +77,7 @@ class PlayerPlayAreasTest {
         }
         game.startGame();
         game.drawStoryCard(players.get(0));
+        testPhaseController = (QuestPhaseController) game.getCurrPhase();
         for(int i=0;i<players.size();++i) {
             hands.add(players.get(i).getHand());
             pPlayAreas.add(players.get(i).getPlayArea());
