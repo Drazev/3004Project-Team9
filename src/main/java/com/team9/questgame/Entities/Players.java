@@ -9,6 +9,7 @@ import com.team9.questgame.Entities.cards.*;
 import com.team9.questgame.exception.BadRequestException;
 import com.team9.questgame.exception.CardAreaException;
 import com.team9.questgame.exception.IllegalCardStateException;
+import com.team9.questgame.gamemanager.record.socket.NotificationOutbound;
 import com.team9.questgame.gamemanager.service.InboundService;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import lombok.Getter;
@@ -110,6 +111,7 @@ public class Players {
         else {
             shields-=shieldsLost;
         }
+        notifyPlayerDataChanged();
         return true;
     }
 

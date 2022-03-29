@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.team9.questgame.ApplicationContextHolder;
 import com.team9.questgame.Data.CardData;
 import com.team9.questgame.Data.StageAreaData;
+import com.team9.questgame.Entities.Effects.EffectObserver;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.exception.BadRequestException;
 import com.team9.questgame.exception.CardAreaException;
@@ -19,7 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public class StagePlayAreas implements PlayAreas<AdventureCards>{
+public class StagePlayAreas implements PlayAreas<AdventureCards>, EffectObserver<AdventureCards> {
 
     @JsonIgnore
     private final QuestPhaseOutboundService outboundService;
@@ -385,6 +386,16 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>{
      */
     public void notifyStageAreaChanged() {
         phaseController.notifyStageAreaChanged(this,getStageAreaData(),getObfuscatedStageAreaData());
+    }
+
+    @Override
+    public void onEffectResolved(CardWithEffect resolvedCard) {
+        phaseController.testResolved();
+    }
+
+    @Override
+    public void onEffectResolvedWithDelayedTrigger(CardWithEffect resolvedCard) {
+        //not used
     }
 }
 

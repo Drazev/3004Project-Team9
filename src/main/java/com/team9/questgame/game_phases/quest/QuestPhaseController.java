@@ -4,7 +4,10 @@ import com.team9.questgame.ApplicationContextHolder;
 import com.team9.questgame.Data.PlayAreaData;
 import com.team9.questgame.Data.PlayerData;
 import com.team9.questgame.Data.StageAreaData;
+import com.team9.questgame.Entities.Effects.CardEffects.TestEndEffect;
+import com.team9.questgame.Entities.Effects.EffectObserver;
 import com.team9.questgame.Entities.Effects.EffectResolverService;
+import com.team9.questgame.Entities.Effects.Effects;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.Entities.cards.*;
 import com.team9.questgame.exception.IllegalGameRequest;
@@ -289,16 +292,12 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         return true;
     }
 
-    private void checkForTest(){
+    public boolean checkForTest(){
         if(curStageIndex >= questCard.getStages()){
-            nextStageTest = false;
-            return;
+            return false;
         }
-        if(stages.get(curStageIndex).getStageCard().getSubType() == CardTypes.TEST){
-            nextStageTest = true;
-        }else{
-            nextStageTest = false;
-        }
+        return (stages.get(curStageIndex).getStageCard().getSubType() == CardTypes.TEST);
+
     }
 
     /**
@@ -340,7 +339,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
     }
 
     private void testSetup(){
-        dealAdventureCard();
+        //dealAdventureCard();
         while(playerTurnService.getPlayerTurn().getPlayerId() == sponsor.getPlayerId() || !questingPlayers.contains(playerTurnService.getPlayerTurn())){
             playerTurnService.nextPlayer();
         }
@@ -391,6 +390,10 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         if(questingPlayers.size() == 1){
             QuestPhaseOutboundService.getService().broadcastStageResult(new RemainingQuestorsOutbound(generateQuestorData(), curStageIndex));
             //TODO:make maxBidPlayer discard maxBid-maxBidPlayer.getPlayerPlayArea().getBattlePoints() cards
+            Effects testEnd = new TestEndEffect(maxBidPlayer, maxBid);
+            testEnd.setSource((CardWithEffect) stages.get(curStageIndex).getStageCard());
+            testEnd.activate(stages.get(curStageIndex), maxBidPlayer);
+            //EffectResolverService.getService().forcePlayerDiscards(null, maxBidPlayer,maxBid-maxBidPlayer.getPlayArea().getBids());
             curStageIndex++;
         }else{
             do{
@@ -402,8 +405,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
                 QuestPhaseOutboundService.getService().broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, maxBidPlayer.generatePlayerData()));
             }
         }
-        checkForTest();
-        stateMachine.update();
+
 //        switch (stateMachine.getCurrentState()) {
 //            case IN_TEST -> {
 //
@@ -415,6 +417,11 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
 //                throw new IllegalQuestPhaseStateException("Unknown state");
 //            }
 //        }
+    }
+
+    public void testResolved(){
+        checkForTest();
+        stateMachine.update();
     }
 
     private void participantSetup(){
@@ -704,5 +711,6 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
             }
         }
     }
+
 
 }

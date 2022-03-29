@@ -1,12 +1,17 @@
 package com.team9.questgame.Entities.cards;
 
 import com.team9.questgame.Data.CardData;
+import com.team9.questgame.Entities.Effects.CardEffects.TestEndEffect;
+import com.team9.questgame.Entities.Effects.EffectObserver;
+import com.team9.questgame.Entities.Effects.Effects;
+import com.team9.questgame.Entities.Players;
 
-public class TestCards <T extends Enum<T> & AllCardCodes> extends AdventureCards implements BoostableCard {
+public class TestCards <T extends Enum<T> & AllCardCodes> extends AdventureCards implements BoostableCard, CardWithEffect<TestCards> {
     private final int minimumBids;
     private final int boostedMinBids;
     private boolean isBoosted;
     private final T boostConditionCardCode;
+    private TestEndEffect testEndEffect;
 
     public TestCards(Decks assignedDeck,String activeAbilityDescription, String cardName, CardTypes subType, String fileName, AdventureDeckCards cardCode, int minimumBids) {
         this(assignedDeck,activeAbilityDescription, cardName, subType, fileName, cardCode,minimumBids,0,null);
@@ -87,10 +92,24 @@ public class TestCards <T extends Enum<T> & AllCardCodes> extends AdventureCards
         playArea.registerMinBid(this);
     }
 
+    public void setEffect(TestEndEffect effect){
+        this.testEndEffect = effect;
+    }
+
+    @Override
+    public TestCards getCard() {
+        return this;
+    }
+
     @Override
     public void discardCard() {
         isBoosted=false;
         super.discardCard();
+    }
+
+    @Override
+    public void activate(EffectObserver observer, Players activatingPlayer) {
+        testEndEffect.activate(observer, activatingPlayer);
     }
 
 }

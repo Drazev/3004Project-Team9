@@ -78,7 +78,7 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
         this.playerTurnService = new PlayerTurnService(this.players);
         allowedStoryCardTypes = new HashSet<>();
         allowedStoryCardTypes.add(CardTypes.QUEST);
-//        allowedStoryCardTypes.add(CardTypes.EVENT);
+        allowedStoryCardTypes.add(CardTypes.EVENT);
 //        allowedStoryCardTypes.add(CardTypes.TOURNAMENT); //TODO: Enable once tournaments are live
     }
 
@@ -133,7 +133,7 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
         } else if (stateMachine.isBlocked()) {
             throw new RuntimeException("The game should not be blocked before started");
         }
-
+        onGameReset();
         for (int i = 0; i < Hand.MAX_HAND_SIZE; ++i) {
             for (Players p : players) {
                 aDeck.drawCard(p.getHand());
@@ -324,12 +324,12 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
         }
 
         Collections.shuffle(players);
+        this.playerTurnService = new PlayerTurnService(this.players);
         winners.clear();
 
         storyCard = null;
 
-
-        stateMachine.update();
+        stateMachine.setCurrentState(GeneralStateE.SETUP);
     }
 
     public Players findPlayerWithID(long playerID) {

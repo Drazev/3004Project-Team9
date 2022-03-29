@@ -25,7 +25,7 @@ public class EventPhaseController implements GamePhases<EventCards,EventPhaseSta
         LOG = LoggerFactory.getLogger(EventPhaseController.class);
         this.generalController = generalController;
         this.card=card;
-        this.state = EventPhaseStatesE.NOT_STARTED;
+        this.state = EventPhaseStatesE.READY;
     }
 
 
@@ -57,7 +57,7 @@ public class EventPhaseController implements GamePhases<EventCards,EventPhaseSta
 
     @Override
     public void onGameReset() {
-        this.state=EventPhaseStatesE.NOT_STARTED;
+        this.state=EventPhaseStatesE.READY;
         if(card!=null) {
             discardCard(card);
         }
@@ -97,11 +97,6 @@ public class EventPhaseController implements GamePhases<EventCards,EventPhaseSta
     //Simple state machine
     public void nextState() {
         switch(state) {
-            case NOT_STARTED -> {
-                this.state = EventPhaseStatesE.READY;
-                LOG.info("EventPhase Started for player "+turnService.getPlayerTurn().getName()+", State: "+state);
-                //Wait for startPhase() call
-            }
             case READY -> {
                 this.state = EventPhaseStatesE.CARD_ACTIVATION;
                 LOG.info("EventPhase Card Activation for player "+turnService.getPlayerTurn().getName()+", State: "+state);
