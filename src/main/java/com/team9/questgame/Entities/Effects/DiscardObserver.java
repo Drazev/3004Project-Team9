@@ -40,7 +40,7 @@ public class DiscardObserver {
         this.numDiscarded=0;
     }
 
-    public DiscardObserver(Effects effect,Players targetPlayer,int numCardsToDiscard) {
+    public DiscardObserver(Effects effect, Players targetPlayer,int numCardsToDiscard) {
         this.effect=effect;
         this.targetPlayer=targetPlayer;
         this.originalList = null;
@@ -70,7 +70,7 @@ public class DiscardObserver {
     }
 
     private void updateDiscardedList(Cards card) {
-        if(discardList.containsKey(card.getSubType())) {
+        if(discardList!=null && discardList.containsKey(card.getSubType())) {
             int c = discardList.get(card.getSubType());
             --c;
             if(c<1) {

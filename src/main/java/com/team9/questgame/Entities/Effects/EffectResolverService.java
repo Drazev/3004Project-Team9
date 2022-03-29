@@ -127,6 +127,7 @@ public class EffectResolverService implements ApplicationContextAware {
         }
         DiscardObserver ob = new DiscardObserver(effect,targetPlayer,numCards);
         HashSet<DiscardObserver> obList = activeDiscardObservers.get(effect);
+        targetPlayer.getHand().registerDiscardObserver(ob);
         if(obList==null) {
             obList = new HashSet<>();
             activeDiscardObservers.put(effect,obList);

@@ -170,12 +170,15 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE>,
             if(controller.isNextStageTest()){
                 return QuestPhaseStatesE.IN_TEST;
             }
-            return QuestPhaseStatesE.PARTICIPANT_SETUP;
+            return QuestPhaseStatesE.DRAW_CARD;
         }
         return QuestPhaseStatesE.QUEST_JOIN;
     }
 
     public QuestPhaseStatesE drawCardState() {
+        if(controller.checkForTest()){
+            return QuestPhaseStatesE.IN_TEST;
+        }
         return QuestPhaseStatesE.PARTICIPANT_SETUP; //We go to Participant setup. This will be blocked if drawing p
     }
 

@@ -124,7 +124,9 @@ export async function connect() {
              * Server informs about changes in player's state including their rank,
              * rankBattlePoint and the number of shield
              */
+            
             let body = JSON.parse(message.body);
+            console.log("/topic/player/player-update" + JSON.stringify(body));
             generalStore().updatePlayer(body);
         });
 

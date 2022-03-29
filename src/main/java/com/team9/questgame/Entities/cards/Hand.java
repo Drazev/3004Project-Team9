@@ -124,7 +124,7 @@ public class Hand implements CardArea<AdventureCards>, EffectObserver<AdventureC
 
     @Override
     public void discardCard(AdventureCards card) throws CardAreaException {
-        if(!playArea.isPlayersTurn() && !isHandOversize) {
+        if(!playArea.isPlayersTurn() && !isHandOversize && discardObservers.isEmpty()) {
             throw new CardAreaException("Card {"+card.getCardCode()+","+card.getSubType()+"} cannot be DISCARDED at this time.", CardAreaException.CardAreaExceptionReasonCodes.RULE_VIOLATION_CANNOT_PLAY_OR_DISCARD_OUT_OF_TURN);
         }
         card.discardCard();
