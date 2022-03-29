@@ -149,8 +149,8 @@ export async function connect() {
             })
         });
 
-        client.subscribe("topic/quest/test-stage-start", (message) => {
-            questDispatcher.dispatchFoeStageStart(JSON.parse(message.body));
+        client.subscribe("/topic/quest/test-stage-start", (message) => {
+            questDispatcher.dispatchTestStageStart(JSON.parse(message.body));
             notificationDispatcher.dispatchInfoNotification({
                 title: "Test Stage Start",
                 message: "Test stage has started."

@@ -17,7 +17,7 @@ function TestStageDisplay(props){
     return(
         <div>
             
-            {(maxBidPlayer === {}) ? (
+            {(maxBidPlayer === undefined) ? (
                 <p>"Minumum bid amount: ${testCard.bids}"</p>
             ) : (
                 <p>"${maxBidPlayer.name} has the highest bid of ${maxBid}"</p>
