@@ -1,7 +1,5 @@
 package com.team9.questgame.game_phases.quest;
 
-import com.team9.questgame.ApplicationContextHolder;
-import com.team9.questgame.Data.PlayAreaData;
 import com.team9.questgame.Data.PlayerData;
 import com.team9.questgame.Data.StageAreaData;
 import com.team9.questgame.Entities.Effects.EffectResolverService;
@@ -12,49 +10,39 @@ import com.team9.questgame.exception.SponsorAlreadyExistsException;
 import com.team9.questgame.game_phases.GamePhases;
 import com.team9.questgame.game_phases.GeneralGameController;
 import com.team9.questgame.exception.IllegalQuestPhaseStateException;
+import com.team9.questgame.game_phases.GeneralStateMachine;
 import com.team9.questgame.game_phases.utils.PlayerTurnService;
+import com.team9.questgame.gamemanager.record.socket.NotificationOutbound;
 import com.team9.questgame.gamemanager.record.socket.QuestEndedOutbound;
 import com.team9.questgame.gamemanager.record.socket.RemainingQuestorsOutbound;
-import com.team9.questgame.gamemanager.service.OutboundService;
+import com.team9.questgame.gamemanager.service.NotificationOutboundService;
+import com.team9.questgame.gamemanager.service.QuestPhaseInboundService;
 import com.team9.questgame.gamemanager.service.QuestPhaseOutboundService;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-@Component
-public class QuestPhaseController implements GamePhases<QuestCards> {
+public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseStatesE> {
     Logger LOG;
-    @Getter
-    @Autowired
-    private QuestPhaseStateMachine stateMachine;
-    @Getter
-    private QuestCards questCard;
 
-    @Autowired
-    @Lazy
+    @Getter
+    private final QuestPhaseStateMachine stateMachine;
+
+    private final QuestCards questCard;
+
     private GeneralGameController generalController;
 
-    @Autowired
-    private QuestPhaseOutboundService outboundService;
-//    @Autowired
-//    private InboundService generalInboundService;
-    @Autowired
-    @Lazy
-    private EffectResolverService effectResolverService;
     @Getter
     private CopyOnWriteArrayList<Players> questingPlayers;
     @Getter
     private PlayerTurnService playerTurnService;
-    private PlayerTurnService joinTurnService;
+//    private PlayerTurnService joinTurnService;
     @Getter
     private ArrayList<StagePlayAreas> stages;
-    private StagePlayAreas newStage;
+//    private StagePlayAreas newStage;
     private HashMap<StagePlayAreas,HashSet<Players>> stageVisibleToPlayersList;
     private HashSet<Long> cardIDUsedToRevealStage;
 
@@ -77,8 +65,12 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
     private boolean stagesAreValid;
 
 
-    public QuestPhaseController() {
+    public QuestPhaseController(GeneralGameController gameController, QuestCards card) {
         LOG = LoggerFactory.getLogger(QuestPhaseController.class);
+        this.generalController = gameController;
+        this.questCard = card;
+        stateMachine = new QuestPhaseStateMachine(this);
+        GeneralStateMachine.getService().registerObserver(stateMachine);
         this.questingPlayers = new CopyOnWriteArrayList<>();
         this.stages = new ArrayList<>();
         stageVisibleToPlayersList = new HashMap<>();
@@ -86,40 +78,16 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
         playerTurnService = null;
         sponsor = null;
         sponsorAttempts = 0;
-        this.outboundService = ApplicationContextHolder.getContext().getBean(QuestPhaseOutboundService.class);
         numParticipants = 0;
         //minJoin = false;
         stagesAreValid = false;
         nextStageTest = false;
-    }
-
-    /**
-     * Receive the QuestCard from the GeneralGameController
-     * @param card
-     * @return
-     */
-    public boolean receiveCard(QuestCards card) {
-        if(stateMachine.getCurrentState() != QuestPhaseStatesE.NOT_STARTED){
-            // Quest can only receive questCard if no quest is currently in progress
-            return false;
-        } else if (stateMachine.isBlocked()) {
-            return false;
-        }
-
-        questCard = card;
-
-        stateMachine.update();
-        return true;
+        QuestPhaseInboundService.getService().setQuestController(this);
     }
 
     @Override
-    public void discardCard(QuestCards card) {
-        //Not Used
-    }
-
-    @Override
-    public boolean playCard(QuestCards card) {
-        return false; //Not Used
+    public QuestPhaseStatesE getCurrState() {
+        return stateMachine.getCurrentState();
     }
 
     /**
@@ -136,15 +104,15 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
         } else if (stateMachine.isBlocked()) {
             throw new IllegalGameRequest("Cannot start phase when the game is blocked", playerTurnService.getPlayerTurn());
         }
-
+        else if (playerTurnService==null) {
+            throw new IllegalQuestPhaseStateException("Quest Phase recieved a null playerTurnService and cannot start");
+        }
+        LOG.info("Quest phase started");
+        this.playerTurnService = playerTurnService;
+        registerPlayerPlayAreas(questCard);
+        QuestPhaseOutboundService.getService().broadcastSponsorSearch(playerTurnService.getPlayerTurn().generatePlayerData());
         stateMachine.setPhaseStartRequested(true);
         stateMachine.update();
-        if (stateMachine.getCurrentState() == QuestPhaseStatesE.QUEST_SPONSOR) {
-            LOG.info("Quest phase started");
-            this.playerTurnService = playerTurnService;
-            registerPlayerPlayAreas(questCard);
-            outboundService.broadcastSponsorSearch(playerTurnService.getPlayerTurn().generatePlayerData());
-        }
     }
 
     /**
@@ -173,21 +141,25 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
 
         }
 
-        stateMachine.update();
-        switch (stateMachine.getCurrentState()) {
-            case QUEST_SPONSOR -> {
-                // Attempts sponsor search on the next player
-                playerTurnService.nextPlayer();
-                outboundService.broadcastSponsorSearch(playerTurnService.getPlayerTurn().generatePlayerData());
-            } case QUEST_SETUP -> {
-                outboundService.broadcastSponsorFound(sponsor.generatePlayerData());
-                this.setupStage();
-            } case ENDED -> {
-                this.endPhase();
-            } default -> {
-                throw new IllegalQuestPhaseStateException("Unknown state");
-            }
+        else {
+            playerTurnService.nextPlayer();
         }
+       
+        stateMachine.update();
+//        switch (stateMachine.getCurrentState()) {
+//            case QUEST_SPONSOR -> {
+//                // Attempts sponsor search on the next player
+//                playerTurnService.nextPlayer();
+//                QuestPhaseOutboundService.getService().broadcastSponsorSearch(playerTurnService.getPlayerTurn().generatePlayerData());
+//            } case QUEST_SETUP -> {
+//                QuestPhaseOutboundService.getService().broadcastSponsorFound(sponsor.generatePlayerData());
+//                this.setupStage();
+//            } case ENDED -> {
+//                this.endPhase();
+//            } default -> {
+//                throw new IllegalQuestPhaseStateException("Unknown state");
+//            }
+//        }
     }
 
     /**
@@ -197,7 +169,7 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
         //old way
 //        newStage = new StagePlayAreas(questCard, sponsor, stages.size());
 //        sponsor.getPlayArea().onPlayAreaChanged(newStage);
-//        outboundService.broadcastSponsorSetup(sponsor.generatePlayerData());
+//        QuestPhaseOutboundService.getService().broadcastSponsorSetup(sponsor.generatePlayerData());
 
         //make as many stages as are stages in the quest and add them to the array
         this.sponsor.getPlayArea().setSponsorMode(true);
@@ -209,6 +181,7 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
             temp.add(this.sponsor);
             stageVisibleToPlayersList.put(stages.get(i),temp);
         }
+        EffectResolverService.getService().onQuestPhaseStarted(this);
         this.cardIDUsedToRevealStage.clear();
         stateMachine.update();
 
@@ -241,16 +214,16 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
 
         stateMachine.update();
 
-        switch (stateMachine.getCurrentState()) {
-            case QUEST_SETUP -> {
-                outboundService.broadcastSponsorFound(sponsor.generatePlayerData());
-                this.setupStage();
-            } case QUEST_JOIN -> {
-                outboundService.broadcastJoinRequest();
-            } default -> {
-                throw new IllegalQuestPhaseStateException("Unknown state");
-            }
-        }
+//        switch (stateMachine.getCurrentState()) {
+//            case QUEST_SETUP -> {
+//                QuestPhaseOutboundService.getService().broadcastSponsorFound(sponsor.generatePlayerData());
+//                this.setupStage();
+//            } case QUEST_JOIN -> {
+//                QuestPhaseOutboundService.getService().broadcastJoinRequest();
+//            } default -> {
+//                throw new IllegalQuestPhaseStateException("Unknown state");
+//            }
+//        }
         return true;
     }
 
@@ -327,30 +300,30 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
         }
 
         stateMachine.update();
-        switch (stateMachine.getCurrentState()) {
-            case QUEST_JOIN -> {
-                // Do nothing since the broadcast already sent to all players
-            } case IN_TEST -> {
-                //TODO: Broadcast Test start... maybe just go into participant setup
-            } case PARTICIPANT_SETUP -> {
-                participantSetup();
-                //resolveStage(0);
-            } case ENDED -> {
-                endPhase();
-            } default -> {
-                throw new IllegalQuestPhaseStateException("Unknown state");
-            }
-        }
+//        switch (stateMachine.getCurrentState()) {
+//            case QUEST_JOIN -> {
+//                // Do nothing since the broadcast already sent to all players
+//            } case IN_TEST -> {
+//                //TODO: Broadcast Test start... maybe just go into participant setup
+//            } case DRAW_CARD -> {
+//                dealAdventureCard();
+//                //resolveStage(0);
+//            } case ENDED -> {
+//                endPhase();
+//            } default -> {
+//                throw new IllegalQuestPhaseStateException("Unknown state");
+//            }
+//        }
     }
 
     private void participantSetup(){
-        dealAdventureCard();
+//        dealAdventureCard();
         //TODO: for all players allow them to play cards via player.getPlayerArea().onPhaseNextPlayerTurn(player)
         LOG.info(String.format("STARTING A NEW STAGE: STAGE %d", curStageIndex+1));
         for(Players player : playerTurnService.getPlayers()){
             player.getPlayArea().setPlayerTurn(questingPlayers.contains(player));
         }
-        outboundService.broadcastFoeStageStart(new RemainingQuestorsOutbound(generateQuestorData(), curStageIndex));
+        QuestPhaseOutboundService.getService().broadcastFoeStageStart(new RemainingQuestorsOutbound(generateQuestorData(), curStageIndex));
     }
 
     /**
@@ -364,17 +337,17 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
         participantSetupResponses++;
         player.getPlayArea(). setPlayerTurn(false);
         stateMachine.update();
-        switch (stateMachine.getCurrentState()){
-            case PARTICIPANT_SETUP -> {
-                return;
-            } case IN_STAGE -> {
-                resolveStage(curStageIndex);
-            } case ENDED -> {
-                endPhase();
-            } default -> {
-                throw new IllegalQuestPhaseStateException("Unknown state");
-            }
-        }
+//        switch (stateMachine.getCurrentState()){
+//            case PARTICIPANT_SETUP -> {
+//                return;
+//            } case IN_STAGE -> {
+//                resolveStage(curStageIndex);
+//            } case ENDED -> {
+//                endPhase();
+//            } default -> {
+//                throw new IllegalQuestPhaseStateException("Unknown state");
+//            }
+//        }
     }
 
     private void resolveStage(int stageNum){
@@ -390,27 +363,31 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
         currStage.notifyStageAreaChanged();
         for(Players player:questingPlayers){
             player.getPlayArea().setPlayerTurn(false);
-            if(player.getPlayArea().getBattlePoints() < stages.get(stageNum).getBattlePoints()){
+            if(player.getPlayArea().getBattlePoints() <= stages.get(stageNum).getBattlePoints()){
+                NotificationOutboundService.getService().sendBadNotification(
+                        sponsor,
+                        new NotificationOutbound("Quest Stage Defeat","You have failed this stage of the quest. Alas, you cannot continue your journey and must head home.","",null),
+                        null
+                );
                 questingPlayers.remove(player);
-
             }
             player.getPlayArea().discardAllWeapons();
         }
 
-        outboundService.broadcastStageResult(new RemainingQuestorsOutbound(generateQuestorData(), curStageIndex));
+        QuestPhaseOutboundService.getService().broadcastStageResult(new RemainingQuestorsOutbound(generateQuestorData(), curStageIndex));
 
         participantSetupResponses=0;
         curStageIndex++;
         stateMachine.update();
-        switch (stateMachine.getCurrentState()){
-            case PARTICIPANT_SETUP -> {
-                participantSetup();
-            } case ENDED -> {
-                endPhase();
-            } default ->{
-                throw new IllegalQuestPhaseStateException("Unknown state");
-            }
-        }
+//        switch (stateMachine.getCurrentState()){
+//            case PARTICIPANT_SETUP -> {
+//                participantSetup();
+//            } case ENDED -> {
+//                endPhase();
+//            } default ->{
+//                throw new IllegalQuestPhaseStateException("Unknown state");
+//            }
+//        }
     }
 
     /**
@@ -434,27 +411,20 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
 
 //        if(questingPlayers.size() > 0 ||(sponsor != null && minJoin)){
 //            distributeRewards();
-//            outboundService.broadcastQuestEnded(new QuestEndedOutbound(generateQuestorData()));
+//            QuestPhaseOutboundService.getService().broadcastQuestEnded(new QuestEndedOutbound(generateQuestorData()));
 //        } else if(sponsor != null && !minJoin){
 //            distributeRewards();
 //            // TODO: broadcast no one joined quest, so quest ended
-//            outboundService.broadcastQuestEnded(new QuestEndedOutbound(generateQuestorData()));
+//            QuestPhaseOutboundService.getService().broadcastQuestEnded(new QuestEndedOutbound(generateQuestorData()));
 //        }else {
 //            //TODO: broadcast no sponsor found
 //        }
-        if(sponsor != null){
-            distributeRewards();
-        }
-
-
-        outboundService.broadcastQuestEnded(new QuestEndedOutbound(generateQuestorData()));
+        QuestPhaseOutboundService.getService().broadcastQuestEnded(new QuestEndedOutbound(generateQuestorData()));
 
 //        effectResolverService.onQuestCompleted(questingPlayers);
         for(Players p : this.playerTurnService.getPlayers()) {
             p.getPlayArea().onGamePhaseEnded();
         }
-        this.questCard.discardCard();
-        this.questCard = null;
         for(StagePlayAreas stage : stages){
             stage.onGameReset();
         }
@@ -462,16 +432,14 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
         this.stageVisibleToPlayersList.clear();
         this.cardIDUsedToRevealStage.clear();
         stateMachine.setPhaseReset(true);
-        stateMachine.update();
+        GeneralStateMachine.getService().unregisterObserver(stateMachine);
+        QuestPhaseInboundService.getService().setQuestController(null);
         generalController.requestPhaseEnd();
-
     }
 
-    /**
-     * Reset the game
-     */
-    public void onGameReset() {
-
+    @Override
+    public QuestCards getCard() {
+        return questCard;
     }
 
     private void registerPlayerPlayAreas(QuestCards card){
@@ -487,7 +455,7 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
         for(Players player : questingPlayers){
             participantRewards.put(player, questCard.getStages());
         }
-        effectResolverService.onQuestCompleted(participantRewards);
+        EffectResolverService.getService().onQuestCompleted(participantRewards);
         int sumCards = 0;
         HashMap<Players, Integer> sponsorRewards = new HashMap<>();
 
@@ -495,13 +463,18 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
             sumCards += stage.size();
         }
         sponsorRewards.put(sponsor, sumCards+questCard.getStages());
-        effectResolverService.drawAdventureCards(sponsorRewards);
+        EffectResolverService.getService().drawAdventureCards(sponsorRewards);
+        stateMachine.update();
     }
 
     private void dealAdventureCard(){
         for(Players player : questingPlayers){
             generalController.dealCard(player);
         }
+        stateMachine.update();
+//        switch(stateMachine.getCurrentState()) {
+//            case PARTICIPANT_SETUP -> participantSetup();
+//        }
     }
 
     public void sponsorPlayCard(Players player, long cardId, int src, int dst){
@@ -586,8 +559,37 @@ public class QuestPhaseController implements GamePhases<QuestCards> {
         if(visibleList==null) {
             visibleList = new HashSet<>();
         }
-        outboundService.broadcastStageChanged(visibleList,fullData,obfsucatedData);
+        QuestPhaseOutboundService.getService().broadcastStageChanged(visibleList,fullData,obfsucatedData);
         return true;
+    }
+
+    /**
+     * Called by State Machine when there is a new state.
+     * It will not be called if updating the state resulted in the same state.
+     */
+    public void executeNextAction() {
+        switch(stateMachine.getCurrentState()) {
+            case QUEST_SPONSOR -> {
+                // Attempts sponsor search on the next player
+                QuestPhaseOutboundService.getService().broadcastSponsorSearch(playerTurnService.getPlayerTurn().generatePlayerData());
+            }
+            case QUEST_SETUP -> {
+                QuestPhaseOutboundService.getService().broadcastSponsorFound(sponsor.generatePlayerData());
+                setupStage();
+            }
+            case IN_STAGE -> resolveStage(curStageIndex);
+            case IN_TEST -> {
+                //TODO: Broadcast Test start... maybe just go into participant setup
+            }
+            case DRAW_CARD -> dealAdventureCard();
+            case REWARDS -> distributeRewards();
+            case ENDED -> endPhase();
+            case QUEST_JOIN -> QuestPhaseOutboundService.getService().broadcastJoinRequest();
+            case PARTICIPANT_SETUP -> participantSetup();
+            default -> {
+                throw new IllegalQuestPhaseStateException("Unknown state");
+            }
+        }
     }
 
 }

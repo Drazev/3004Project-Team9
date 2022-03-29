@@ -86,9 +86,8 @@ class GeneralGameControllerTest {
         ArrayList<StoryCards> questCards = getQuestCards();
         gameController.receiveCard(questCards.get(0));
         gameController.playCard(gameController.getStoryCard());
-        assertThat(gameController.getQuestPhaseController().getQuestCard()).isNotNull();
-        assertThat(gameController.getQuestPhaseController().getQuestCard()).isEqualTo(gameController.getStoryCard());
-        assertThat(gameController.getQuestPhaseController().getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SPONSOR);
+        assertThat(gameController.getCurrPhase().getCard()).isNotNull();
+//        assertThat(gameController.getCurrPhase().get.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SPONSOR);
 
         // TODO: Fix Hand's playerPlayCard behaviour
 //        Players player = gameController.getPlayers().get(0);
@@ -140,7 +139,7 @@ class GeneralGameControllerTest {
         // Make a hand go oversize
         Players player = gameController.getPlayers().get(0);
         GeneralStateE previousState = gameController.getStateMachine().getCurrentState();
-        QuestPhaseStatesE previousQuestState = gameController.getStateMachine().getQuestStateMachine().getCurrentState();
+        Enum previousQuestState = gameController.getCurrPhase().getCurrState();
         AdventureCards lastDrawnCard = null;
         while (player.getHand().getHandSize() <= Hand.MAX_HAND_SIZE) {
             lastDrawnCard = gameController.getADeck().drawCard(player.getHand());
@@ -151,13 +150,13 @@ class GeneralGameControllerTest {
         // TODO: Check if tournament is blocked as well
         gameController.getStateMachine().update();
         assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.PLAYER_HAND_OVERSIZE);
-        assertThat(gameController.getStateMachine().getQuestStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.BLOCKED);
+        assertThat(gameController.getCurrPhase().getCurrState()==QuestPhaseStatesE.BLOCKED);
         assertThat(player.getHand().getHandSize()).isEqualTo(Hand.MAX_HAND_SIZE + 1);
 
         // Discard a card, the state should be reset to what was before
         gameController.playerDiscardCard(player, lastDrawnCard.getCardID());
         assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(previousState);
-        assertThat(gameController.getStateMachine().getQuestStateMachine().getCurrentState()).isEqualTo(previousQuestState);
+        assertThat(gameController.getCurrPhase().getCurrState()==previousQuestState);
     }
 
     @Test
@@ -168,9 +167,9 @@ class GeneralGameControllerTest {
         ArrayList<StoryCards> questCards = getQuestCards();
         gameController.receiveCard(questCards.get(0));
         gameController.playCard(gameController.getStoryCard());
-        assertThat(gameController.getQuestPhaseController().getQuestCard()).isNotNull();
-        assertThat(gameController.getQuestPhaseController().getQuestCard()).isEqualTo(gameController.getStoryCard());
-        assertThat(gameController.getQuestPhaseController().getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SPONSOR);
+        assertThat(gameController.getCurrPhase().getCard()).isNotNull();
+        assertThat(gameController.getCurrPhase().getCard().equals(gameController.getStoryCard()));
+        assertThat(gameController.getCurrPhase().getCurrState()==QuestPhaseStatesE.QUEST_SPONSOR);
 
     }
 

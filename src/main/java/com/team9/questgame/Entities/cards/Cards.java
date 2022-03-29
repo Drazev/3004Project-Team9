@@ -100,7 +100,7 @@ public abstract class Cards {
 
 
     public boolean playCard(CardArea cardArea) {
-        if(location==cardArea)
+        if(location!=null && location==cardArea)
         {
             throw new IllegalCardStateException("Card cannot be played into the same area.");
         }

@@ -3,6 +3,7 @@ package com.team9.questgame.Entities.Effects;
 import com.team9.questgame.Data.TargetSelectionRequest;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.Entities.cards.CardTypes;
+import com.team9.questgame.exception.IllegalEffectStateException;
 import com.team9.questgame.game_phases.GeneralGameController;
 import com.team9.questgame.game_phases.quest.QuestPhaseController;
 import com.team9.questgame.gamemanager.record.socket.CardTargetSelectionResponse;
@@ -28,7 +29,6 @@ public class EffectResolverService implements ApplicationContextAware {
     @Autowired
     GeneralGameController gameController;
 
-    @Autowired
     QuestPhaseController questController;
 
     @Autowired
@@ -249,6 +249,10 @@ public class EffectResolverService implements ApplicationContextAware {
         if(effect==null) {
             return -1;
         }
+        else if(type==TargetSelectionRequestTypes.STAGE_TARGET_SELECTION && questController==null)
+        {
+            throw new IllegalEffectStateException("targetSelection cannot occur without an active quest phase.",effect,effect.getSource());
+        }
         long requestID = nextRequestID++;
         TargetSelectionRequest msg = new TargetSelectionRequest(
           requestID,
@@ -269,6 +273,14 @@ public class EffectResolverService implements ApplicationContextAware {
     }
 
     /**
+     * Must be called when quest phase is initiated to enable
+     * @param questController
+     */
+    public void onQuestPhaseStarted(QuestPhaseController questController) {
+        this.questController = questController;
+    }
+
+    /**
      * Receives a list of quest victors mapped to the shields to be rewarded for the associated player.
      * This player list is then forwarded to any effects that are waiting on the next quest completion
      * so they can be resolved.
@@ -276,6 +288,9 @@ public class EffectResolverService implements ApplicationContextAware {
      * @param targetedPlayers A map of players who have completed the quest with their associated shield rewards.
      */
     public void onQuestCompleted(HashMap<Players, Integer> targetedPlayers) {
+        if(targetedPlayers==null || targetedPlayers.isEmpty()) {
+            return;
+        }
         LOG.info("onQuestCompleted triggered");
         playerAwardedShields(targetedPlayers);
         ArrayList<Players> questVictors = new ArrayList<>(targetedPlayers.keySet());
@@ -313,6 +328,9 @@ public class EffectResolverService implements ApplicationContextAware {
      * @return True if successful, False if the stage was not revealed either because the stageID was not found, or the source card had already been used during this quest (Max once per quest phase)
      */
     public boolean handleStageTargetSelectionResponse(StageTargetSelectionResponse data) {
+        if(questController==null) {
+            throw new RuntimeException("handleStageTargetSelectionResponse cannot be called when there is no current quest stage set.");
+        }
         Effects effect = targetSelectionRequestIdToEffects.get(data.requestID());
         if(effect==null) {
             LOG.warn(String.format("StageTargetSelectionResponse received an unrecognized requestID %d and was rejected.",data.requestID()));
