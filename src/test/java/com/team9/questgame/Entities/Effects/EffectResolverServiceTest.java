@@ -35,7 +35,6 @@ class EffectResolverServiceTest {
     @Autowired
     GeneralGameController game;
 
-    @Autowired
     EventPhaseController ePhase;
 
     @Autowired
@@ -67,8 +66,15 @@ class EffectResolverServiceTest {
         objMap = ApplicationContextHolder.getContext().getBean(ObjectMapper.class);
         aDeck = game.getADeck();
         sDeck = game.getSDeck();
-        testPhaseController = new QuestPhaseController();
-        testStage = new TestPlayArea();
+//        StoryCards sCard = sDeck.drawCard(testStage);
+//        while(sCard.getSubType()!=CardTypes.QUEST) {
+//            sCard.discardCard();
+//            sCard = sDeck.drawCard(testStage);
+//        }
+        ePhase = new EventPhaseController(game);
+        game.getAllowedStoryCardTypes().clear();
+        game.getAllowedStoryCardTypes().add(CardTypes.QUEST);
+
         session.registerPlayer("Player 1");
         session.registerPlayer("Player 2");
         session.registerPlayer("Player 3");
@@ -79,6 +85,9 @@ class EffectResolverServiceTest {
         }
         game.startGame();
         game.drawStoryCard(players.get(0));
+        testPhaseController = (QuestPhaseController) game.getCurrPhase();
+//        testPhaseController = new QuestPhaseController(game,(QuestCards) sCard);
+        testStage = new TestPlayArea();
         for(int i=0;i<players.size();++i) {
             hands.add(players.get(i).getHand());
             pPlayAreas.add(players.get(i).getPlayArea());

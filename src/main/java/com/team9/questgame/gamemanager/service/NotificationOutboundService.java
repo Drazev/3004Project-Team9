@@ -92,4 +92,8 @@ public class NotificationOutboundService implements ApplicationContextAware {
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         context = applicationContext;
     }
+
+    static public NotificationOutboundService getService() {
+        return context.getBean(NotificationOutboundService.class);
+    }
 }

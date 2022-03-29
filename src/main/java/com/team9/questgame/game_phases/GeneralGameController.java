@@ -15,16 +15,20 @@ import com.team9.questgame.gamemanager.service.OutboundService;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 
 @Service
-public class GeneralGameController implements CardArea<StoryCards> {
-
+public class GeneralGameController implements CardArea<StoryCards>, ApplicationContextAware {
+    private ApplicationContext context;
     public static final int MAX_PLAYERS = 4;
     public static final int MIN_PLAYERS = 2;
     @Getter
@@ -37,8 +41,11 @@ public class GeneralGameController implements CardArea<StoryCards> {
     private final AdventureDecks aDeck;
     @Getter
     private final StoryDecks sDeck;
-    private Players activePlayer;
-    private Iterator<Players> turnSequence;
+
+    @Getter
+    private HashSet<CardTypes> allowedStoryCardTypes;
+//    private Players activePlayer;
+//    private Iterator<Players> turnSequence;
 
     @Getter
     private StoryCards storyCard;
@@ -54,16 +61,7 @@ public class GeneralGameController implements CardArea<StoryCards> {
     private PlayerTurnService playerTurnService;
 
     @Getter
-    @Autowired
-    private QuestPhaseController questPhaseController;
-
-    @Getter
-    @Autowired
-    private TournamentPhaseController tournamentPhaseController;
-
-    @Getter
-    @Autowired
-    private EventPhaseController eventPhaseController;
+    private GamePhases currPhase;
 
     public GeneralGameController() {
         this(PlayerRanks.KNIGHT_OF_ROUND_TABLE);
@@ -74,9 +72,14 @@ public class GeneralGameController implements CardArea<StoryCards> {
         this.players = new ArrayList<>();
         this.victoryCondtion = victoryRank;
         this.winners = new ArrayList<>();
+        this.currPhase=null;
         aDeck = new AdventureDecks();
         sDeck = new StoryDecks();
-        playerTurnService = new PlayerTurnService(players);
+        this.playerTurnService = new PlayerTurnService(this.players);
+        allowedStoryCardTypes = new HashSet<>();
+        allowedStoryCardTypes.add(CardTypes.QUEST);
+//        allowedStoryCardTypes.add(CardTypes.EVENT);
+//        allowedStoryCardTypes.add(CardTypes.TOURNAMENT); //TODO: Enable once tournaments are live
     }
 
     /**
@@ -152,7 +155,7 @@ public class GeneralGameController implements CardArea<StoryCards> {
      */
     public void drawStoryCard(Players player) {
         if (stateMachine.getCurrentState() != GeneralStateE.DRAW_STORY_CARD) {
-            LOG.error(String.format("general state: %s   quest state: %s", stateMachine.getCurrentState(), questPhaseController.getStateMachine().getCurrentState()));
+            LOG.error(String.format("general state: %s ", stateMachine.getCurrentState()));
             throw new IllegalGameStateException("Story card can only be drawn during DRAW_STORY_CARD state");
         } else if (stateMachine.isBlocked()) {
             throw new IllegalGameRequest("Cannot proceed when the game is blocked", player);
@@ -167,7 +170,7 @@ public class GeneralGameController implements CardArea<StoryCards> {
 
         // Temporarily here to only start Quest Phase
         // TODO: Remove this when all phases are implemented
-        while (this.storyCard.getSubType() != CardTypes.QUEST) {
+        while (!allowedStoryCardTypes.contains(this.storyCard.getSubType())) {
             this.discardCard(this.storyCard);
             sDeck.drawCard(this);
         }
@@ -230,7 +233,9 @@ public class GeneralGameController implements CardArea<StoryCards> {
             return false;
         }
 
-        discardCard(storyCard);
+        if(storyCard!=null) {
+            discardCard(storyCard);
+        }
         storyCard = card;
 
         stateMachine.update();
@@ -240,16 +245,11 @@ public class GeneralGameController implements CardArea<StoryCards> {
 
     /**
      * Discard the story card to the discard pile
-     * This should never be called, the GamePhase should be the one who discard the cards
-     * @param card
+     * This should occur once a game phase has ended
+     * @param card The card to be discarded
      */
     @Override
     public void discardCard(StoryCards card) {
-        if (stateMachine.getCurrentState() != GeneralStateE.DRAW_STORY_CARD) {
-            throw new IllegalGameStateException("Cannot receive card when not ");
-        } else if (stateMachine.isBlocked()) {
-            throw new RuntimeException("discardCard should not be called when the game is blocked");
-        }
 
         // Ignore if there's no story card
         if (card != null) {
@@ -274,7 +274,6 @@ public class GeneralGameController implements CardArea<StoryCards> {
             throw new NullPointerException("Story card is null");
         }
 
-        boolean status = false;
         PlayerTurnService gamePhaseTurnService = new PlayerTurnService(players);
         gamePhaseTurnService.setPlayerTurn(playerTurnService.getPlayerTurn());
 
@@ -283,25 +282,25 @@ public class GeneralGameController implements CardArea<StoryCards> {
          */
         switch (card.getSubType()) {
             case QUEST:
-                status = questPhaseController.receiveCard((QuestCards) this.storyCard);
-                questPhaseController.startPhase(gamePhaseTurnService);
+//                status = questPhaseController.receiveCard((QuestCards) this.storyCard);
+                currPhase = new QuestPhaseController(this,(QuestCards) card);
+//                currPhase.startPhase(gamePhaseTurnService);
                 break;
             case TOURNAMENT:
-                status = tournamentPhaseController.receiveCard(this.storyCard);
-                tournamentPhaseController.startPhase(gamePhaseTurnService);
+//                status = tournamentPhaseController.receiveCard(this.storyCard);
+                currPhase = new TournamentPhaseController(this,(TournamentCards) card);
+//                tournamentPhaseController.startPhase(gamePhaseTurnService);
                 break;
             case EVENT:
-                status = this.storyCard.playCard(eventPhaseController);
-                eventPhaseController.startPhase(gamePhaseTurnService);
+//                status = this.storyCard.playCard(eventPhaseController);
+//                eventPhaseController.startPhase(gamePhaseTurnService);
+                currPhase = new EventPhaseController(this,(EventCards) card);
                 break;
             default:
                 throw new RuntimeException("Unexpected card type, should be a story card");
         }
 
-        if (status == false) {
-            // GamePhase controller cannot receive the card
-            return false;
-        }
+        currPhase.startPhase(gamePhaseTurnService);
 
         stateMachine.setGamePhaseRequested(true);
         stateMachine.update();
@@ -309,6 +308,8 @@ public class GeneralGameController implements CardArea<StoryCards> {
     }
 
     public void requestPhaseEnd(){
+        discardCard(storyCard);
+        currPhase=null;
         stateMachine.setPhaseEndRequested(true);
         stateMachine.update();
     }
@@ -318,7 +319,6 @@ public class GeneralGameController implements CardArea<StoryCards> {
         aDeck.onGameReset();
         sDeck.onGameReset();
         playerTurnService.onGameReset();
-        questPhaseController.onGameReset();
         for (Players p : players) {
             p.onGameReset();
         }
@@ -346,5 +346,14 @@ public class GeneralGameController implements CardArea<StoryCards> {
     // TODO: Remove after Iteration 1 test
     public void dealCard(Players player) {
         aDeck.drawCard(player.getHand());
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        context=applicationContext;
+    }
+
+    public GeneralGameController getService() {
+        return context.getBean(GeneralGameController.class);
     }
 }

@@ -10,7 +10,10 @@ import lombok.AllArgsConstructor;
 import lombok.extern.java.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +23,7 @@ import java.util.Map;
 
 @AllArgsConstructor
 @Service
-public class QuestPhaseOutboundService {
+public class QuestPhaseOutboundService implements ApplicationContextAware {
 
     private Logger LOG;
 
@@ -29,6 +32,8 @@ public class QuestPhaseOutboundService {
 
     @Autowired
     private SessionService sessionService;
+
+    static private ApplicationContext context;
 
     public QuestPhaseOutboundService() {
         this.LOG = LoggerFactory.getLogger(QuestPhaseOutboundService.class);
@@ -96,5 +101,14 @@ public class QuestPhaseOutboundService {
     public void broadcastJoinRequest(){
         LOG.info(String.format("Broadcast join request"));
         this.sendToAllPlayers("/topic/quest/join-request");
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        context=applicationContext;
+    }
+
+    static public QuestPhaseOutboundService getService() {
+        return context.getBean(QuestPhaseOutboundService.class);
     }
 }

@@ -9,27 +9,21 @@ import com.team9.questgame.game_phases.utils.PlayerTurnService;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
 
-@Component
-public class EventPhaseController implements GamePhases<EventCards>, EffectObserver<EventCards> {
+public class EventPhaseController implements GamePhases<EventCards,EventPhaseStatesE>, EffectObserver<EventCards> {
     private final Logger LOG;
+    private final GeneralGameController generalController;
     private EventCards card;
     private PlayerTurnService turnService;
     private EventPhaseStatesE state;
 
-    @Autowired
-    @Lazy
-    private GeneralGameController generalController;
-
-    public EventPhaseController() {
-        this(null);
+    public EventPhaseController(GeneralGameController generalController) {
+        this(generalController,null);
     }
 
-    public EventPhaseController(EventCards card) {
+    public EventPhaseController(GeneralGameController generalController,EventCards card) {
         LOG = LoggerFactory.getLogger(EventPhaseController.class);
+        this.generalController = generalController;
         this.card=card;
         this.state = EventPhaseStatesE.NOT_STARTED;
     }
@@ -71,6 +65,11 @@ public class EventPhaseController implements GamePhases<EventCards>, EffectObser
     }
 
     @Override
+    public EventPhaseStatesE getCurrState() {
+        return state;
+    }
+
+    @Override
     public void startPhase(PlayerTurnService playerTurnService) {
         if(this.state!=EventPhaseStatesE.READY) {
 
@@ -88,6 +87,11 @@ public class EventPhaseController implements GamePhases<EventCards>, EffectObser
         onGameReset();
         OutboundService.getService().broadcastEventPhaseEnded();
         generalController.requestPhaseEnd();
+    }
+
+    @Override
+    public EventCards getCard() {
+        return card;
     }
 
     //Simple state machine
