@@ -2,7 +2,7 @@ import {React, useState} from "react";
 import CardImages from "../../assets/images/index";
 import BigCard from "../../components/cards/BigCard";
 import { useMaxBid, useMaxBidPlayer, useStoryCard, useCurrentBidder, useTurn, useHandOversize } from "../../stores/generalStore";
-import { useBidRequest, useSetBidRequest } from "../../stores/questRequestStore";
+import { useBidRequest, useSetBidRequest } from "../../stores/quest/questRequestStore";
 import Popup from "../../components/popups/Popup"
 import "./TestStageDisplay.css";
 

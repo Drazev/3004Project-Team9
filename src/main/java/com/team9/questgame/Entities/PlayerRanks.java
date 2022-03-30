@@ -9,13 +9,13 @@ public enum PlayerRanks {
 
     private final int battlePoints;
     private final int rankShieldCost;
-    private final String imgSrc;
+    private final String rankImgSrc;
 
 
-    PlayerRanks(int battlePoints, int rankShieldCost,String imgSrc) {
+    PlayerRanks(int battlePoints, int rankShieldCost, String rankImgSrc) {
         this.battlePoints = battlePoints;
         this.rankShieldCost = rankShieldCost;
-        this.imgSrc = imgSrc;
+        this.rankImgSrc = rankImgSrc;
     }
 
     public int getRankBattlePointValue() {
@@ -26,7 +26,9 @@ public enum PlayerRanks {
         return rankShieldCost;
     }
 
-    public String getImgSrc() { return imgSrc; }
+    public String getRankImgSrc() {
+        return rankImgSrc;
+    }
 
     public PlayerRanks getNextRank() {
             return switch(this) {

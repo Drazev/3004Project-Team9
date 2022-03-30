@@ -169,6 +169,7 @@ public class Players {
         playArea.getPlayAreaId(),
         name,
         rank,
+        rank.getRankImgSrc(),
         rank.getRankBattlePointValue(),
         shields
         );

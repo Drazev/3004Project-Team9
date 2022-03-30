@@ -4,7 +4,7 @@ import * as notificationDispatcher from "../utilities/notificationDispatcher";
 import * as questDispatcher from "../utilities/questDispatcher";
 import { generalStore } from "../stores/generalStore";
 import { playAreaStore } from "../stores/playAreaStore";
-import processPlayerUpdate from "../stores/PlayerStore";
+import { playerStore } from "../stores/playerStore";
 
 export let client = null;
 
@@ -128,8 +128,9 @@ export async function connect() {
             
             let body = JSON.parse(message.body);
             console.log("/topic/player/player-update" + JSON.stringify(body));
+
             generalStore().updatePlayer(body);
-            processPlayerUpdate(body);
+            playerStore().processPlayerUpdate(body);
         });
 
 

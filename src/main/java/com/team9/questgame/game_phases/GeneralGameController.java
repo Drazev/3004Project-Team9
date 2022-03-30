@@ -78,7 +78,7 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
         this.playerTurnService = new PlayerTurnService(this.players);
         allowedStoryCardTypes = new HashSet<>();
         allowedStoryCardTypes.add(CardTypes.QUEST);
-        allowedStoryCardTypes.add(CardTypes.EVENT);
+//        allowedStoryCardTypes.add(CardTypes.EVENT);
 //        allowedStoryCardTypes.add(CardTypes.TOURNAMENT); //TODO: Enable once tournaments are live
     }
 
@@ -188,10 +188,10 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
 
     public void handlePlayerHandOversize() {
         boolean isOversize = false;
-//        if ( !( stateMachine.isInPhases() || stateMachine.getCurrentState()==GeneralStateE.PLAYER_HAND_OVERSIZE) ) {
-//            throw new IllegalGameStateException("Player hand should only be oversize when " +
-//                    "in QUEST_PHASE, EVENT_PHASE, or TOURNAMENT_PHASE");
-//        }
+        if ( !( stateMachine.isInPhases() || stateMachine.getCurrentState()==GeneralStateE.PLAYER_HAND_OVERSIZE) ) {
+            throw new IllegalGameStateException("Player hand should only be oversize when " +
+                    "in QUEST_PHASE, EVENT_PHASE, or TOURNAMENT_PHASE");
+        }
 
         // Double check
         for (Players p: this.players) {
@@ -325,7 +325,7 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
             p.onGameReset();
         }
 
-        Collections.shuffle(players);
+//        Collections.shuffle(players);
         this.playerTurnService = new PlayerTurnService(this.players);
         winners.clear();
 
