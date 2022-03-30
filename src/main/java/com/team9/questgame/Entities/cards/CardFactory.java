@@ -537,9 +537,9 @@ public class CardFactory {
                 card = new EventCards(
                         assignedDeck,
                         "All players may immediately draw 2 Adventure Cards.",
-                        "Chivalrous Deed",
+                        "Prosperity Throughout The Realm",
                         cardEnumId.getSubType(),
-                        "Event - Chivalrous Deed.png",
+                        "Event - Prosperity Throught the Relm.png",
                         cardEnumId,
                         effect //bind event
                 );
