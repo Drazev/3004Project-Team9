@@ -1,12 +1,23 @@
 import Card from "../cards/Card";
 import CardImages from "../../assets/images/index";
 import { useHandOversize, useTurn } from "../../stores/generalStore";
+import {getPlayer,usePlayerStore} from "../../stores/PlayerStore";
 
 import "./PlayerHand.css";
 
 function PlayerHand(props){
     const handOversize = useHandOversize();
     const currentTurn = useTurn();
+    const state = usePlayerStore(state => state.pData);
+    console.log("Player state at Hand \n"+JSON.stringify(state,object =>JSON.stringify(object)));
+    // const player = usePlayerStore(state => state.pData.find(p => p.playerId===props.playerID));
+    const player = getPlayer(props.playerID);
+    if(player===undefined) {
+        console.log("player is undefined");
+    }
+    else {
+        console.log("Player Data "+player.playerId,player.shields,player.rank);
+    }
     console.log(`handOversize=${handOversize}`);
 
     const Rendercards = props.cardsInHand?.map((card) => (
