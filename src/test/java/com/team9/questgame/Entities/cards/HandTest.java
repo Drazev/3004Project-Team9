@@ -77,6 +77,7 @@ class HandTest {
         for(Players p : players) {
             game.playerJoin(p);
         }
+        game.setShuffleOn(false);
         game.startGame();
         assertThat(game.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.DRAW_STORY_CARD);
         game.drawStoryCard(player);

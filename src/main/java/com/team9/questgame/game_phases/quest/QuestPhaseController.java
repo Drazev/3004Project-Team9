@@ -251,6 +251,9 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         // Check if subsequent stages have increasing battlePoint
         int minBattlePoint = 0;
         for (StagePlayAreas stage: newStages) {
+            if(stage.getStageCard() == null){
+                return false;
+            }
             if (stage.getBattlePoints() <= minBattlePoint && stage.getStageCard().getSubType() != CardTypes.TEST) {
                 return false;
             }
@@ -293,7 +296,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
     }
 
     public boolean checkForTest(){
-        if(curStageIndex >= questCard.getStages()){
+        if(curStageIndex >= questCard.getStages() || stages.get(curStageIndex).getStageCard() == null){
             return false;
         }
         return (stages.get(curStageIndex).getStageCard().getSubType() == CardTypes.TEST);

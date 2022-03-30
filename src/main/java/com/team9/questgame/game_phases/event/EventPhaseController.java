@@ -31,7 +31,8 @@ public class EventPhaseController implements GamePhases<EventCards,EventPhaseSta
 
     @Override
     public boolean receiveCard(EventCards card) {
-        if(card==null || state!=EventPhaseStatesE.NOT_STARTED) {
+        LOG.info(String.format("ephase receiving card %s", card.toString()));
+        if(card==null || state!=EventPhaseStatesE.READY) {
             return false;
         }
         if(this.card!=null) {

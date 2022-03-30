@@ -58,14 +58,15 @@ class PlayerPlayAreasTest {
         objMap = ApplicationContextHolder.getContext().getBean(ObjectMapper.class);
         aDeck = game.getADeck();
         sDeck = game.getSDeck();
-//        StoryCards sCard = sDeck.drawCard(testStage);
-//        testStage = new TestPlayArea();
-//        while(sCard.getSubType()!=CardTypes.QUEST) {
-//            sCard.discardCard();
-//            sCard = sDeck.drawCard(testStage);
-//        }
         game.getAllowedStoryCardTypes().clear();
         game.getAllowedStoryCardTypes().add(CardTypes.QUEST);
+        testStage = new TestPlayArea();
+        StoryCards sCard = sDeck.drawCard(testStage);
+        while(sCard.getSubType()!=CardTypes.QUEST) {
+            sCard.discardCard();
+            sCard = sDeck.drawCard(testStage);
+        }
+        testPhaseController = new QuestPhaseController(game,(QuestCards) sCard);
 
         session.registerPlayer("Player 1");
         session.registerPlayer("Player 2");
@@ -75,9 +76,9 @@ class PlayerPlayAreasTest {
         for(Players p : players) {
             game.playerJoin(p);
         }
+        game.setShuffleOn(false);
         game.startGame();
         game.drawStoryCard(players.get(0));
-        testPhaseController = (QuestPhaseController) game.getCurrPhase();
         for(int i=0;i<players.size();++i) {
             hands.add(players.get(i).getHand());
             pPlayAreas.add(players.get(i).getPlayArea());

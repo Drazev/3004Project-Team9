@@ -42,6 +42,7 @@ class GeneralGameControllerTest {
         session.registerPlayer("Player 3");
         session.registerPlayer("Player 4");
         players.addAll(session.getPlayerMap().values());
+        gameController.setShuffleOn(false);
         InboundService.getService().startGame();
     }
 
@@ -124,7 +125,7 @@ class GeneralGameControllerTest {
     @Test
     void handlePlayerHandOversize() {
         assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.DRAW_STORY_CARD);
-        assertThrows(IllegalGameStateException.class, () -> gameController.handlePlayerHandOversize()); // Params doesn't matter
+        assertThrows(RuntimeException.class, () -> gameController.handlePlayerHandOversize()); // Params doesn't matter
 
         gameController.drawStoryCard(gameController.getPlayerTurnService().getPlayerTurn());
 

@@ -83,6 +83,7 @@ class EffectResolverServiceTest {
         for(Players p : players) {
             game.playerJoin(p);
         }
+        game.setShuffleOn(false);
         game.startGame();
         game.drawStoryCard(players.get(0));
         testPhaseController = (QuestPhaseController) game.getCurrPhase();
@@ -189,6 +190,7 @@ class EffectResolverServiceTest {
         drawList.put(players.get(0),2);
         drawList.put(players.get(1),0);
         GeneralStateE currentState = game.getStateMachine().getCurrentState();
+        LOG.info(String.format("The current state is: %s", currentState));
         assert(currentState == GeneralStateE.QUEST_PHASE
                 || currentState == GeneralStateE.TOURNAMENT_PHASE
                 || currentState == GeneralStateE.EVENT_PHASE);
@@ -416,7 +418,7 @@ class EffectResolverServiceTest {
         effectResolverService.playerAwardedShields(shieldRewards);
         card.playCard(ePhase);
         game.getPlayerTurnService().setPlayerTurn(players.get(3));
-        ePhase.startPhase(game.getPlayerTurnService());
+        ePhase.         startPhase(game.getPlayerTurnService());
         assert(players.get(0).getHand().getHandSize()==14); //Was squire
         assert(players.get(1).getHand().getHandSize()==14); //Was squire
         assert(players.get(2).getHand().getHandSize()==14); //Was squire

@@ -13,6 +13,7 @@ import com.team9.questgame.game_phases.tournament.TournamentPhaseController;
 import com.team9.questgame.game_phases.utils.PlayerTurnService;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import lombok.Getter;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -41,6 +42,8 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
     private final AdventureDecks aDeck;
     @Getter
     private final StoryDecks sDeck;
+    @Setter
+    private boolean shuffleOn;
 
     @Getter
     private HashSet<CardTypes> allowedStoryCardTypes;
@@ -79,6 +82,7 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
         allowedStoryCardTypes = new HashSet<>();
         allowedStoryCardTypes.add(CardTypes.QUEST);
         allowedStoryCardTypes.add(CardTypes.EVENT);
+        shuffleOn = true;
 //        allowedStoryCardTypes.add(CardTypes.TOURNAMENT); //TODO: Enable once tournaments are live
     }
 
@@ -188,10 +192,11 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
 
     public void handlePlayerHandOversize() {
         boolean isOversize = false;
-        if ( !( stateMachine.isInPhases() || stateMachine.getCurrentState()==GeneralStateE.PLAYER_HAND_OVERSIZE) ) {
-            throw new IllegalGameStateException("Player hand should only be oversize when " +
-                    "in QUEST_PHASE, EVENT_PHASE, or TOURNAMENT_PHASE");
-        }
+//        if ( !( stateMachine.isInPhases() || stateMachine.getCurrentState()==GeneralStateE.PLAYER_HAND_OVERSIZE) ) {
+//            throw new IllegalGameStateException("Player hand should only be oversize when " +
+//                    "in QUEST_PHASE, EVENT_PHASE, or TOURNAMENT_PHASE, while the current state is" +
+//                    stateMachine.getCurrentState());
+//        }
 
         // Double check
         for (Players p: this.players) {
@@ -323,7 +328,9 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
             p.onGameReset();
         }
 
-        Collections.shuffle(players);
+        if(shuffleOn){
+            Collections.shuffle(players);
+        }
         this.playerTurnService = new PlayerTurnService(this.players);
         winners.clear();
 

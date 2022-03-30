@@ -56,6 +56,7 @@ class QuestPhaseControllerTest {
         session.registerPlayer("Player 2");
         session.registerPlayer("Player 3");
         session.registerPlayer("Player 4");
+        game.setShuffleOn(false);
         InboundService.getService().startGame();
         players.addAll(session.getPlayerMap().values());
         turnService=game.getPlayerTurnService();
