@@ -155,7 +155,7 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE>, Applic
 
     private GeneralStateE drawStoryCardState() {
         GeneralStateE nextState;
-        setPhaseEndRequested(false);
+//        setPhaseEndRequested(false);
         if (!isAllHandNotOversize() || isHandOversizeRequested) {
             nextState = GeneralStateE.PLAYER_HAND_OVERSIZE;
         } else if (controller.getStoryCard() != null && isGamePhaseRequested) {
@@ -186,6 +186,7 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE>, Applic
         } else if (isWinnerFound()) {
             nextState = GeneralStateE.ENDED;
         } else if (this.isPhaseEndRequested) {
+            controller.getPlayerTurnService().nextPlayer();
             nextState = GeneralStateE.DRAW_STORY_CARD;
         } else {
             nextState = GeneralStateE.QUEST_PHASE;
@@ -200,6 +201,7 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE>, Applic
         } else if (isWinnerFound()) {
             nextState = GeneralStateE.ENDED;
         } else if (this.isPhaseEndRequested) {
+            controller.getPlayerTurnService().nextPlayer();
             nextState = GeneralStateE.DRAW_STORY_CARD;
         } else {
             nextState = GeneralStateE.EVENT_PHASE;
@@ -214,6 +216,7 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE>, Applic
         } else if (isWinnerFound()) {
             nextState = GeneralStateE.ENDED;
         } else if (this.isPhaseEndRequested) {
+            controller.getPlayerTurnService().nextPlayer();
             nextState = GeneralStateE.DRAW_STORY_CARD;
         } else {
             nextState = GeneralStateE.TOURNAMENT_PHASE;

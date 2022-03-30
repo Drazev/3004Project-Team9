@@ -188,10 +188,10 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
 
     public void handlePlayerHandOversize() {
         boolean isOversize = false;
-        if ( !( stateMachine.isInPhases() || stateMachine.getCurrentState()==GeneralStateE.PLAYER_HAND_OVERSIZE) ) {
-            throw new IllegalGameStateException("Player hand should only be oversize when " +
-                    "in QUEST_PHASE, EVENT_PHASE, or TOURNAMENT_PHASE");
-        }
+//        if ( !( stateMachine.isInPhases() || stateMachine.getCurrentState()==GeneralStateE.PLAYER_HAND_OVERSIZE) ) {
+//            throw new IllegalGameStateException("Player hand should only be oversize when " +
+//                    "in QUEST_PHASE, EVENT_PHASE, or TOURNAMENT_PHASE");
+//        }
 
         // Double check
         for (Players p: this.players) {
@@ -300,16 +300,18 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
                 throw new RuntimeException("Unexpected card type, should be a story card");
         }
 
-        currPhase.startPhase(gamePhaseTurnService);
-
         stateMachine.setGamePhaseRequested(true);
         stateMachine.update();
+
+        currPhase.startPhase(gamePhaseTurnService);
+
         return true;
     }
 
     public void requestPhaseEnd(){
         discardCard(storyCard);
         currPhase=null;
+        playerTurnService.notifyTurnChange();
         stateMachine.setPhaseEndRequested(true);
         stateMachine.update();
     }
