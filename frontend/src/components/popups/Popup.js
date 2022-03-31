@@ -2,18 +2,30 @@ import {React, useState} from "react";
 import useRef from "react";
 import NumericInput from 'react-numeric-input';
 import {Button, InputGroup} from "react-bootstrap";
-import { sponsorRespond, joinRespond, bidResponse } from "../../services/clientSocket";
-import { useName, useSetIsSponsoring, useSetJoinRequest, useMaxBid, useCurrentBidder } from "../../stores/generalStore";
+import { sponsorRespond, joinRespond, bidResponse, joinTournamentResponse } from "../../services/clientSocket";
+import { useSetTournamentJoinRequest } from "../../stores/tournamentStore";
+import { useName, useSetIsSponsoring, useSetJoinRequest, useMaxBid, useCurrentBidder, usePlayerHands } from "../../stores/generalStore";
 import "./Popup.css"
  
 const Popup = props => {
   const bidderName = useCurrentBidder().name;
   const bidderPlayerID = useCurrentBidder().playerID;
   let name = useName();
+  const hands = usePlayerHands();
+
+  let playerID;
+  for (let i = 0; i < hands.length; i++) {
+    if (hands[i].playerName === name) {
+      playerID = hands[i].playerId;
+      break;
+    }
+  }
+
   const maxBid = useMaxBid();
   //const [curBid,setCurBid] = useState(0);
   let curBid = 0;
   const setIsSponsoring = useSetIsSponsoring();
+  const setTournamentJoinRequest = useSetTournamentJoinRequest();
   const setJoinRequest = useSetJoinRequest();
   const handleYes = () => {
     if (props.popupType === "JOINQUEST") {
@@ -22,6 +34,8 @@ const Popup = props => {
     } else if (props.popupType === "SPONSORQUEST") {
       sponsorRespond(name, true);
       setIsSponsoring(true);
+    } else if (props.popupType === "JOINTOURNAMENT") {
+      joinTournamentResponse(name,playerID,true);
     }
     props.setPopup(false);
   }
@@ -30,6 +44,8 @@ const Popup = props => {
       joinRespond(name, false)
     } else if (props.popupType === "SPONSORQUEST") {
       sponsorRespond(name, false);
+    } else if (props.popupType === "JOINTOURNAMENT") {
+      joinTournamentResponse(name,playerID,false);
     }
     props.setPopup(false);
   }
@@ -39,6 +55,13 @@ const Popup = props => {
           {props.popupType === "JOINQUEST" && 
             <div>
                 <h4>Will you join this quest?</h4>
+                <Button onClick={handleYes} style={{backgroundColor: "green", marginRight: "10px"}}>Aye</Button>
+                <Button onClick={handleNo} style={{backgroundColor: "red", marginLeft: "10px"}}>Nay</Button>
+            </div>
+          }
+          {props.popupType === "JOINTOURNAMENT" && 
+            <div>
+                <h4>Will you join this tournament?</h4>
                 <Button onClick={handleYes} style={{backgroundColor: "green", marginRight: "10px"}}>Aye</Button>
                 <Button onClick={handleNo} style={{backgroundColor: "red", marginLeft: "10px"}}>Nay</Button>
             </div>
