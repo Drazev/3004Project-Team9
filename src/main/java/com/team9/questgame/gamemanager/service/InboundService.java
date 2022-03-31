@@ -1,6 +1,7 @@
 package com.team9.questgame.gamemanager.service;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.game_phases.GeneralGameController;
+import com.team9.questgame.game_phases.tournament.TournamentPhaseController;
 import com.team9.questgame.gamemanager.record.socket.PlayerPlayCardInbound;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -22,6 +23,9 @@ public class InboundService implements ApplicationContextAware {
 
     @Autowired
     private OutboundService outboundService;
+
+    @Autowired
+    private TournamentPhaseController tournamentController;
 
     @Autowired
     private GeneralGameController gameController;
@@ -94,6 +98,16 @@ public class InboundService implements ApplicationContextAware {
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         context = applicationContext;
+    }
+
+    public synchronized void tournamentJoinResponse(String name, boolean joined){
+        Players player = sessionService.getPlayerMap().get(name);
+        tournamentController.checkJoinResult(player, joined);
+    }
+
+    public synchronized void tournamentCompetitorSetup(String name){;
+        Players player = sessionService.getPlayerMap().get(name);
+        tournamentController.checkParticipantSetup(player);
     }
 
     public void setPhaseEnded(){gameController.requestPhaseEnd();}

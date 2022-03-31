@@ -1,10 +1,7 @@
 package com.team9.questgame.gamemanager.controller;
 
 import com.team9.questgame.Entities.Effects.EffectResolverService;
-import com.team9.questgame.gamemanager.record.socket.CardTargetSelectionResponse;
-import com.team9.questgame.gamemanager.record.socket.CardUpdateInbound;
-import com.team9.questgame.gamemanager.record.socket.PlayerPlayCardInbound;
-import com.team9.questgame.gamemanager.record.socket.StageTargetSelectionResponse;
+import com.team9.questgame.gamemanager.record.socket.*;
 import com.team9.questgame.gamemanager.service.InboundService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +52,18 @@ public class GameWsController {
         {
             throw new RuntimeException("Stage Target Selection data is invalid or malformed");
         }
+    }
+
+    @MessageMapping("/tournament/participant-join-response")
+    public void handleTournamentJoinResponse(JoinResponseInbound joinResponseInbound){
+        LOG.info(String.format("Competitor %s has decided to join: %s", joinResponseInbound.name(), joinResponseInbound.joined()));
+        inboundService.tournamentJoinResponse(joinResponseInbound.name(), joinResponseInbound.joined());
+    }
+
+    @MessageMapping("/tournament/participant-setup-complete")
+    public void handleTournamentCompetitorSetup(ParticipantSetupStage participantSetupStage){
+        LOG.info(String.format("Competitor %s has completed setup for tournament", participantSetupStage.name()));
+        inboundService.tournamentCompetitorSetup(participantSetupStage.name());
     }
 
 }
