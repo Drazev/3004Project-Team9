@@ -31,6 +31,7 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
     private final GeneralGameController gameController;
     private TournamentCards card;
     private TournamentPhaseStatesE state;
+    private TournamentPhaseStatesE previousState;
     private Map<Players, Integer> competitors;
     private ArrayList<Players> winners;
     private PlayerTurnService turnService;
@@ -97,7 +98,8 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
         this.joinAttempts++;
 
         if(joined){
-            competitors.put(player, player.getPlayArea().getBattlePoints() * -1);
+            competitors.put(player,
+                    (player.getPlayArea().getBattlePoints() - player.getRank().getRankBattlePointValue()) * -1);
             player.getPlayArea().setPlayerTurn(true);
         }
 
@@ -114,9 +116,11 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
      * Deal an adventure card to each competitor
      */
     private void dealAdventureCard(){
+        HashMap<Players,Integer> drawList = new HashMap<>();
         for(Players player : competitors.keySet()){
-            gameController.dealCard(player);
+            drawList.put(player,1);
         }
+        EffectResolverService.getService().drawAdventureCards(drawList);
         nextState();
     }
 
@@ -254,15 +258,15 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
     @Override
     public void observerStateChanged(GeneralStateE newState) {
         //TODO: finish handling oversized hands
-//        if(newState==GeneralStateE.PLAYER_HAND_OVERSIZE) {
-//            this.previousState = this.currentState;
-//            this.currentState = QuestPhaseStatesE.BLOCKED;
+        if(newState==GeneralStateE.PLAYER_HAND_OVERSIZE) {
+            this.previousState = this.state;
+            this.state = TournamentPhaseStatesE.BLOCKED.BLOCKED;
 //            LOG.info(String.format("Moved from state %s to state %s", previousState, currentState));
-//        }
-//        else if(this.currentState==QuestPhaseStatesE.BLOCKED) {
-//            this.currentState = this.previousState;
-//            this.previousState = QuestPhaseStatesE.BLOCKED;
-//            update();
-//        }
+        }
+        else if(this.state==TournamentPhaseStatesE.BLOCKED) {
+            this.state = this.previousState;
+            this.previousState = TournamentPhaseStatesE.BLOCKED;
+            nextState();
+        }
     }
 }
