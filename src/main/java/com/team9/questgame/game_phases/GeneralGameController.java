@@ -344,12 +344,6 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
         return player;
     }
 
-    // Only here to support backward dependency
-    // TODO: Remove after Iteration 1 test
-    public void dealCard(Players player) {
-        aDeck.drawCard(player.getHand());
-    }
-
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         context=applicationContext;

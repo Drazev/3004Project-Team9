@@ -61,24 +61,24 @@ public class NotificationOutboundService implements ApplicationContextAware {
     }
 
     private void sendToPlayer(String topic, Players player, Object payload) {
+        if(payload==null || player==null) {
+            return; //Notifications must have a payload
+        }
         LOG.info(String.format("Broadcasting to one player: topic=%s, name=%s, payload=%s", topic, player.getName(), payload));
         messenger.convertAndSendToUser(sessionService.getPlayerSessionId(player), topic, payload);
     }
 
     private void sendToAllPlayers(String topic, Object payload) {
+        if(payload==null) {
+            return; //Notifications must have a payload
+        }
         LOG.info(String.format("Broadcasting to all players: topic=%s, payload=%s", topic, payload));
         messenger.convertAndSend(topic, payload);
     }
 
-    private void sendToAllPlayers(String topic) {
-        LOG.info(String.format("Broadcasting to one players: topic=%s", topic));
-        messenger.convertAndSend(topic, new EmptyJsonReponse());
-    }
-
     private void sendToAllExceptPlayer(String topic, Players excludedPlayer, Object payload) {
         if(payload==null) {
-            LOG.info(String.format("Selective Broadcast to all players REJECTED due to null payload. Request: {name: "+excludedPlayer.getName()+", PlayerID: "+excludedPlayer.getPlayerId()+"}, Topic: "+topic+" Payload: "+payload));
-            return;
+            return; //Notifications must have a payload
         }
         LOG.info(String.format("Selective Broadcast to all players except {name: "+excludedPlayer.getName()+", PlayerID: "+excludedPlayer.getPlayerId()+"}, Topic: "+topic+" Payload: "+payload));
         for(Map.Entry<Players,String> e : sessionService.getPlayerToSessionIdMap().entrySet()) {

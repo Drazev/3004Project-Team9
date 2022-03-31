@@ -57,8 +57,8 @@ class QuestPhaseControllerTest {
         session.registerPlayer("Player 3");
         session.registerPlayer("Player 4");
         InboundService.getService().startGame();
-        players.addAll(session.getPlayerMap().values());
         turnService=game.getPlayerTurnService();
+        players.addAll(game.getPlayerTurnService().getPlayers());
         game.getAllowedStoryCardTypes().clear();
         game.getAllowedStoryCardTypes().add(CardTypes.QUEST);
         game.drawStoryCard(turnService.getPlayerTurn());
