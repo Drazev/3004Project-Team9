@@ -12,7 +12,9 @@ import com.team9.questgame.exception.BadRequestException;
 import com.team9.questgame.exception.CardAreaException;
 import com.team9.questgame.exception.IllegalCardStateException;
 import com.team9.questgame.exception.IllegalEffectStateException;
+import com.team9.questgame.gamemanager.record.socket.NotificationOutbound;
 import com.team9.questgame.gamemanager.service.InboundService;
+import com.team9.questgame.gamemanager.service.NotificationOutboundService;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -105,6 +107,8 @@ public class Hand implements CardArea<AdventureCards>, EffectObserver<AdventureC
         if(isHandOversize) {
             LOG.debug(player.getName()+": Oversize Hand State SET for "+player.getName());
             notifyHandOversize();
+            NotificationOutbound msg = new NotificationOutbound("Maximum Card Limit Exceeded",String.format("Your hand is above the maximum limit of %d cards. You must reduce the cards in your hand down to that limit. You can play ally cards, or discard cards to reduce your hand size. The game cannot continue until your complete this discard.",MAX_HAND_SIZE),"",null);
+            NotificationOutboundService.getService().sendWarningNotification(player,msg,null);
         }
         else if(prevState) {
             LOG.debug(player.getName()+": Oversize Hand State CLEARED for "+player.getName());
@@ -125,6 +129,8 @@ public class Hand implements CardArea<AdventureCards>, EffectObserver<AdventureC
     @Override
     public void discardCard(AdventureCards card) throws CardAreaException {
         if(!playArea.isPlayersTurn() && !isHandOversize && discardObservers.isEmpty()) {
+            NotificationOutbound msg = new NotificationOutbound("Cannot Discard Card",String.format("You cannot DISCARD %s at this time. Most cards can only be discarded when your hand is over-sized or you can play cards during a phase.",card.getCardName()),card.getImgSrc(),null);
+            NotificationOutboundService.getService().sendWarningNotification(player,msg,null);
             throw new CardAreaException("Card {"+card.getCardCode()+","+card.getSubType()+"} cannot be DISCARDED at this time.", CardAreaException.CardAreaExceptionReasonCodes.RULE_VIOLATION_CANNOT_PLAY_OR_DISCARD_OUT_OF_TURN);
         }
         card.discardCard();
@@ -160,6 +166,10 @@ public class Hand implements CardArea<AdventureCards>, EffectObserver<AdventureC
             validateHandSize();
             LOG.info(player.getName()+": Has PLAYED CARD "+card.getCardCode());
         }
+        else {
+            NotificationOutbound msg = new NotificationOutbound("Cannot Play Card",String.format("You cannot play %s at this time. Most cards can only be played at specific points in a phase. If your hand is sized you can play Ally cards to avoid discarding even if it's not your turn.",card.getCardName()),card.getImgSrc(),null);
+            NotificationOutboundService.getService().sendWarningNotification(player,msg,null);
+        }
 
         notifyHandUpdated();
         return rc;
@@ -185,6 +195,10 @@ public class Hand implements CardArea<AdventureCards>, EffectObserver<AdventureC
                     rc=true;
                 }
             }
+        }
+        if(!rc) {
+            NotificationOutbound msg = new NotificationOutbound("Cannot Activate Card","You cannot activate this at this time. To activate a card it must be in your hand or play area and you must have chosen a valid target if necessary.","",null);
+            NotificationOutboundService.getService().sendWarningNotification(player,msg,null);
         }
         return rc;
     }

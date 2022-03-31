@@ -105,9 +105,20 @@ public class EffectResolverService implements ApplicationContextAware {
                 obList = new HashSet<>();
                 activeDiscardObservers.put(effect,obList);
             }
+            String discardMessage="You Must Discard the following cards from your hand!\n";
+            for(Map.Entry<CardTypes,Integer> t : e.getValue().entrySet()) {
+                discardMessage += e.getKey()+" : "+e.getValue()+"\n";
+            }
+            NotificationOutbound notificationPlayer = new NotificationOutbound(effect.getSource().getCardName(),discardMessage,effect.getSource().getCard().getImgSrc(),null);
+
+            NotificationOutboundService.getService().sendBadNotification(effect.getActivatedBy(),notificationPlayer,null);
             obList.add(ob);
             rc=true;
         }
+        HashSet<Players> otherList = new HashSet<>(getPlayerList());
+        otherList.removeAll(targetedPlayers.keySet());
+        NotificationOutbound toOthers = new NotificationOutbound(effect.getSource().getCardName(),"Waiting for other players to discard cards!",effect.getSource().getCard().getImgSrc(),null);
+        NotificationOutboundService.getService().sendInfoNotification(effect.getActivatedBy(),toOthers,null);
         return rc;
     }
 
@@ -128,9 +139,18 @@ public class EffectResolverService implements ApplicationContextAware {
         DiscardObserver ob = new DiscardObserver(effect,targetPlayer,numCards);
         HashSet<DiscardObserver> obList = activeDiscardObservers.get(effect);
         targetPlayer.getHand().registerDiscardObserver(ob);
+        String discardMessage=String.format("You Must Discard %d cards from your hand!",numCards);
+        NotificationOutbound notificationPlayer = new NotificationOutbound(effect.getSource().getCardName(),discardMessage,effect.getSource().getCard().getImgSrc(),null);
+        NotificationOutboundService.getService().sendBadNotification(effect.getActivatedBy(),notificationPlayer,null);
         if(obList==null) {
             obList = new HashSet<>();
             activeDiscardObservers.put(effect,obList);
+        }
+        NotificationOutbound toOthers = new NotificationOutbound(effect.getSource().getCardName(),"Waiting for other players to discard cards!",effect.getSource().getCard().getImgSrc(),null);
+        for(Players p : getPlayerList()) {
+            if(p!=targetPlayer) {
+                NotificationOutboundService.getService().sendInfoNotification(p,toOthers,null);
+            }
         }
         obList.add(ob);
         return true;
@@ -379,8 +399,17 @@ public class EffectResolverService implements ApplicationContextAware {
         boolean rc = targetPlayer.getPlayArea().destroyAllyCard(data.targetCardID());
 
         if(rc) {
+            String msg = String.format("Mordred has cast a spell and destroyed one of %s's allies!",targetPlayer.getName());
             targetSelectionRequestIdToEffects.remove(data.requestID());
             effect.trigger(data.requestID());
+            NotificationOutbound msgOut = new NotificationOutbound(effect.getSource().getCardName(),msg,effect.getSource().getCard().getImgSrc(),null);
+            NotificationOutboundService.getService().sendGoodNotification(effect.getActivatedBy(),msgOut,null);
+            NotificationOutboundService.getService().sendBadNotification(targetPlayer,msgOut,null);
+            for(Players p : getPlayerList()) {
+                if(p!=effect.getActivatedBy() || p!=targetPlayer) {
+                    NotificationOutboundService.getService().sendInfoNotification(p,msgOut,null);
+                }
+            }
         }
         return rc;
     }

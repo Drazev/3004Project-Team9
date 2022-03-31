@@ -77,7 +77,7 @@ class PlayerPlayAreasTest {
         }
         game.startGame();
         game.drawStoryCard(players.get(0));
-        testPhaseController = (QuestPhaseController) game.getCurrPhase();
+        testPhaseController = new QuestPhaseController(game,(QuestCards) CardFactory.getInstance().createCard(sDeck,StoryDeckCards.BOAR_HUNT));
         for(int i=0;i<players.size();++i) {
             hands.add(players.get(i).getHand());
             pPlayAreas.add(players.get(i).getPlayArea());
