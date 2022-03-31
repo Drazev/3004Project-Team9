@@ -54,13 +54,13 @@ public class GameWsController {
         }
     }
 
-    @MessageMapping("/tournament/participant-join-response")
+    @MessageMapping("/tournament/join-response")
     public void handleTournamentJoinResponse(JoinResponseInbound joinResponseInbound){
         LOG.info(String.format("Competitor %s has decided to join: %s", joinResponseInbound.name(), joinResponseInbound.joined()));
         inboundService.tournamentJoinResponse(joinResponseInbound.name(), joinResponseInbound.joined());
     }
 
-    @MessageMapping("/tournament/participant-setup-complete")
+    @MessageMapping("/tournament/setup-complete")
     public void handleTournamentCompetitorSetup(ParticipantSetupStage participantSetupStage){
         LOG.info(String.format("Competitor %s has completed setup for tournament", participantSetupStage.name()));
         inboundService.tournamentCompetitorSetup(participantSetupStage.name());
