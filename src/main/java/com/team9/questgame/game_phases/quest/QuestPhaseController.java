@@ -251,7 +251,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         // Check if subsequent stages have increasing battlePoint
         int minBattlePoint = 0;
         for (StagePlayAreas stage: newStages) {
-            if (stage.getBattlePoints() <= minBattlePoint && stage.getStageCard().getSubType() != CardTypes.TEST) {
+            if (stage.getBattlePoints() <= minBattlePoint && stage.getStageCard()!=null && stage.getStageCard().getSubType() != CardTypes.TEST) {
                 return false;
             }
             minBattlePoint = stage.getBattlePoints();
@@ -293,7 +293,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
     }
 
     public boolean checkForTest(){
-        if(curStageIndex >= questCard.getStages()){
+        if(curStageIndex >= questCard.getStages() || stages.get(curStageIndex).getStageCard()==null){
             return false;
         }
         return (stages.get(curStageIndex).getStageCard().getSubType() == CardTypes.TEST);
@@ -587,9 +587,12 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
     }
 
     private void dealAdventureCard(){
+        HashMap<Players,Integer> drawList = new HashMap<>();
         for(Players player : questingPlayers){
-            generalController.dealCard(player);
+            drawList.put(player,1);
         }
+        EffectResolverService.getService().drawAdventureCards(drawList);
+
         stateMachine.update();
 //        switch(stateMachine.getCurrentState()) {
 //            case PARTICIPANT_SETUP -> participantSetup();

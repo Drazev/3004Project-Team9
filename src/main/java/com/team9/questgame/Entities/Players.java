@@ -11,6 +11,7 @@ import com.team9.questgame.exception.CardAreaException;
 import com.team9.questgame.exception.IllegalCardStateException;
 import com.team9.questgame.gamemanager.record.socket.NotificationOutbound;
 import com.team9.questgame.gamemanager.service.InboundService;
+import com.team9.questgame.gamemanager.service.NotificationOutboundService;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import lombok.Getter;
 import lombok.Setter;
@@ -152,6 +153,11 @@ public class Players {
     }
 
     private void notifyPlayerDataChanged() {
+        NotificationOutbound msg = new NotificationOutbound("Player Promoted To "+rank,String.format("You have spent %d shields and been promoted the the rank %s. You are now one step closer to becoming the newest Knight of the Round Table!",rank.getRankShieldCost(),rank),rank.getImgSrc(),null);
+        NotificationOutbound msgToOthers = new NotificationOutbound("Player Promoted",String.format("The player %s was promoted to the rank %s",name,rank),rank.getImgSrc(),null);
+        NotificationOutboundService.getService().sendGoodNotification(this,msg,null);
+        NotificationOutboundService.getService().sendInfoNotification(this,null,msgToOthers);
+
         OutboundService.getService().broadcastPlayerDataChanged(this,generatePlayerData());
     }
 

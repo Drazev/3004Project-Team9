@@ -6,6 +6,7 @@ import com.team9.questgame.exception.IllegalGameStateException;
 import com.team9.questgame.exception.PlayerJoinException;
 import com.team9.questgame.exception.PlayerNotFoundException;
 import com.team9.questgame.game_phases.quest.QuestPhaseStatesE;
+import com.team9.questgame.game_phases.utils.PlayerTurnService;
 import com.team9.questgame.gamemanager.service.InboundService;
 import com.team9.questgame.gamemanager.service.SessionService;
 import org.junit.jupiter.api.AfterEach;
@@ -32,7 +33,10 @@ class GeneralGameControllerTest {
     @Autowired
     SessionService session;
 
+
+
     private ArrayList<Players> players;
+    private PlayerTurnService pTurnService;
 
     @BeforeEach
     void setUp() {
@@ -41,13 +45,20 @@ class GeneralGameControllerTest {
         session.registerPlayer("Player 2");
         session.registerPlayer("Player 3");
         session.registerPlayer("Player 4");
-        players.addAll(session.getPlayerMap().values());
+        gameController.getAllowedStoryCardTypes().clear();
+        gameController.getAllowedStoryCardTypes().add(CardTypes.QUEST);
         InboundService.getService().startGame();
+        pTurnService=gameController.getPlayerTurnService();
+        players.addAll(pTurnService.getPlayers());
+//        gameController.drawStoryCard(players.get(0));
+
     }
 
     @AfterEach
     void tearDown() {
     }
+
+
 
     @Autowired
     void contextLoad() {
@@ -124,14 +135,8 @@ class GeneralGameControllerTest {
     @Test
     void handlePlayerHandOversize() {
         assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.DRAW_STORY_CARD);
-        assertThrows(IllegalGameStateException.class, () -> gameController.handlePlayerHandOversize()); // Params doesn't matter
 
         gameController.drawStoryCard(gameController.getPlayerTurnService().getPlayerTurn());
-
-        GeneralStateE currentState = gameController.getStateMachine().getCurrentState();
-        assert(currentState == GeneralStateE.QUEST_PHASE
-            || currentState == GeneralStateE.TOURNAMENT_PHASE
-            || currentState == GeneralStateE.EVENT_PHASE);
 
         // Try to false trigger handOversize state when no hand is oversize
         assertThrows(RuntimeException.class, () -> gameController.handlePlayerHandOversize());

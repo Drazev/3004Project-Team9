@@ -2,6 +2,8 @@ package com.team9.questgame.game_phases.utils;
 
 import com.team9.questgame.ApplicationContextHolder;
 import com.team9.questgame.Entities.Players;
+import com.team9.questgame.gamemanager.record.socket.NotificationOutbound;
+import com.team9.questgame.gamemanager.service.NotificationOutboundService;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import lombok.Getter;
 import lombok.Setter;
@@ -82,6 +84,8 @@ public class PlayerTurnService {
 
     public void notifyTurnChange() {
         // TODO: Add test for this broadcast in the OutboundServiceTest or WSControllerTest
+        NotificationOutbound msgToPlayer = new NotificationOutbound("Player Turn","It is your turn!","","");
+        NotificationOutboundService.getService().sendGoodNotification(getPlayerTurn(),msgToPlayer,null);
         outboundService.broadcastNextTurn(getPlayerTurn());
     }
 

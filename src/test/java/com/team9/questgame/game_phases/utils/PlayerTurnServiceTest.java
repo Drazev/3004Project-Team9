@@ -1,8 +1,11 @@
 package com.team9.questgame.game_phases.utils;
 
 import com.team9.questgame.Entities.Players;
+import com.team9.questgame.game_phases.GeneralGameController;
+import com.team9.questgame.gamemanager.service.SessionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.ArrayList;
@@ -15,13 +18,20 @@ class PlayerTurnServiceTest {
 
     private PlayerTurnService playerTurnService;
     private ArrayList<Players> players;
+    @Autowired
+    GeneralGameController game;
+
+    @Autowired
+    SessionService session;
 
     @BeforeEach
     void setUp() {
-        players = new ArrayList<>(Arrays.asList(new Players("A"),
-                  new Players("B"),
-                  new Players("C"),
-                  new Players("D")));
+        players = new ArrayList<>();
+        session.registerPlayer("A");
+        session.registerPlayer("B");
+        session.registerPlayer("C");
+        session.registerPlayer("D");
+        players.addAll(session.getPlayerMap().values());
         playerTurnService = new PlayerTurnService(players);
     }
 

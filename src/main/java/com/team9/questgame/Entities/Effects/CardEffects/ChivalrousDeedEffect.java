@@ -7,6 +7,8 @@ import com.team9.questgame.Entities.Effects.TargetSelectors.LeastShieldsSelector
 import com.team9.questgame.Entities.Effects.TargetSelectors.LowestRankSelector;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.exception.IllegalEffectStateException;
+import com.team9.questgame.gamemanager.record.socket.NotificationOutbound;
+import com.team9.questgame.gamemanager.service.NotificationOutboundService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,18 +38,17 @@ public class ChivalrousDeedEffect extends Effects {
 
     @Override
     protected void onEffectResolution() {
-        ArrayList<Players> targetListLowestRank = new ArrayList<>(this.possibleTargerts);
-        ArrayList<Players> targetListLeastShields = new ArrayList<>(this.possibleTargerts);
         for(int i=0;i<targetSelectors.size();++i) {
             this.possibleTargerts = targetSelectors.get(i).selectTargets(this.possibleTargerts);
         }
         if(this.possibleTargerts.size()<1) {
             throw new IllegalEffectStateException("Target selection failed, no target found",this,source);
         }
-
+        NotificationOutbound toAffected = new NotificationOutbound(source.getCardName(),"Your noble deeds haven given you great acclaim throughout the land. \n You receive 3 shields!",source.getCard().getImgSrc(),null);
         HashMap<Players,Integer> rewardList = new HashMap<>();
         for(Players p : possibleTargerts) {
             rewardList.put(p,3);
+            NotificationOutboundService.getService().sendGoodNotification(p,toAffected,null);
             LOG.info(p.getName()+" has been awarded 3 shields from "+source.getCardName()+" and now has "+p.getShields()+" shields.");
         }
         EffectResolverService.getService().playerAwardedShields(rewardList);

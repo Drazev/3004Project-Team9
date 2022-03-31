@@ -71,7 +71,7 @@ class EffectResolverServiceTest {
 //            sCard.discardCard();
 //            sCard = sDeck.drawCard(testStage);
 //        }
-        ePhase = new EventPhaseController(game);
+        ePhase = null;
         game.getAllowedStoryCardTypes().clear();
         game.getAllowedStoryCardTypes().add(CardTypes.QUEST);
 
@@ -85,7 +85,7 @@ class EffectResolverServiceTest {
         }
         game.startGame();
         game.drawStoryCard(players.get(0));
-        testPhaseController = (QuestPhaseController) game.getCurrPhase();
+        testPhaseController = new QuestPhaseController(game,(QuestCards) CardFactory.getInstance().createCard(sDeck,StoryDeckCards.BOAR_HUNT));
 //        testPhaseController = new QuestPhaseController(game,(QuestCards) sCard);
         testStage = new TestPlayArea();
         for(int i=0;i<players.size();++i) {
@@ -188,10 +188,6 @@ class EffectResolverServiceTest {
         HashMap<Players,Integer> drawList = new HashMap<>();
         drawList.put(players.get(0),2);
         drawList.put(players.get(1),0);
-        GeneralStateE currentState = game.getStateMachine().getCurrentState();
-        assert(currentState == GeneralStateE.QUEST_PHASE
-                || currentState == GeneralStateE.TOURNAMENT_PHASE
-                || currentState == GeneralStateE.EVENT_PHASE);
         effectResolverService.drawAdventureCards(drawList);
         assert(players.get(0).getHand().isHandOversize()); //Should be oversized
         assert(players.get(0).getHand().getHandSize()==14); //12+2=14 cards
@@ -335,11 +331,13 @@ class EffectResolverServiceTest {
     void testChivalrousDeedCard() {
         CardFactory cf = CardFactory.getInstance();
         EventCards card = (EventCards)cf.createCard(sDeck,StoryDeckCards.CHIVALROUS_DEED);
+        ePhase = new EventPhaseController(game,card);
         HashMap<Players,Integer> shieldRewards = new HashMap<>();
         shieldRewards.put(players.get(0),5);//Knight
         shieldRewards.put(players.get(1),12);//Champion Knight
         shieldRewards.put(players.get(2),2);//squire, but now lowest
         effectResolverService.playerAwardedShields(shieldRewards);
+        ePhase = new EventPhaseController(game,card);
         card.playCard(ePhase);
         ePhase.startPhase(game.getPlayerTurnService());
         assert(players.get(3).getShields()==3);
@@ -352,6 +350,7 @@ class EffectResolverServiceTest {
     void testQueensFavorCard() {
         CardFactory cf = CardFactory.getInstance();
         EventCards card = (EventCards)cf.createCard(sDeck,StoryDeckCards.QUEENS_FAVOR);
+        ePhase = new EventPhaseController(game,card);
         HashMap<Players,Integer> shieldRewards = new HashMap<>();
         shieldRewards.put(players.get(0),5);//Knight
         shieldRewards.put(players.get(1),12);//Champion Knight
@@ -367,6 +366,7 @@ class EffectResolverServiceTest {
     void testPoxCard() {
         CardFactory cf = CardFactory.getInstance();
         EventCards card = (EventCards)cf.createCard(sDeck,StoryDeckCards.POX);
+        ePhase = new EventPhaseController(game,card);
         HashMap<Players,Integer> shieldRewards = new HashMap<>();
         shieldRewards.put(players.get(0),5);//Knight
         shieldRewards.put(players.get(1),15);//Champion Knight
@@ -386,6 +386,7 @@ class EffectResolverServiceTest {
     void testPlagueCard() {
         CardFactory cf = CardFactory.getInstance();
         EventCards card = (EventCards)cf.createCard(sDeck,StoryDeckCards.PLAGUE);
+        ePhase = new EventPhaseController(game,card);
         HashMap<Players,Integer> shieldRewards = new HashMap<>();
         shieldRewards.put(players.get(0),6);//Knight
         shieldRewards.put(players.get(1),15);//Champion Knight
@@ -397,6 +398,7 @@ class EffectResolverServiceTest {
         ePhase.startPhase(game.getPlayerTurnService());
         assert(players.get(3).getShields()==2);
         ePhase.onGameReset();
+        ePhase = new EventPhaseController(game,card);
         card.playCard(ePhase);
         game.getPlayerTurnService().setPlayerTurn(players.get(2));
         ePhase.startPhase(game.getPlayerTurnService());
@@ -409,6 +411,7 @@ class EffectResolverServiceTest {
     void testProsperityThroughtTheRelmCard() {
         CardFactory cf = CardFactory.getInstance();
         EventCards card = (EventCards)cf.createCard(sDeck,StoryDeckCards.PROSPERITY_THROUGHOUT_THE_REALM);
+        ePhase = new EventPhaseController(game,card);
         HashMap<Players,Integer> shieldRewards = new HashMap<>();
         shieldRewards.put(players.get(0),5);//Knight
         shieldRewards.put(players.get(1),12);//Champion Knight
@@ -428,6 +431,7 @@ class EffectResolverServiceTest {
         HashMap<AdventureDeckCards,Integer> deckList = new HashMap<>();
         CardFactory cf = CardFactory.getInstance();
         EventCards card = (EventCards)cf.createCard(sDeck,StoryDeckCards.COURT_CALLED_TO_CAMELOT);
+        ePhase = new EventPhaseController(game,card);
         deckList.put(AdventureDeckCards.EXCALIBUR,2);
         deckList.put(AdventureDeckCards.LANCE,6);
         deckList.put(AdventureDeckCards.BATTLE_AX,8);
@@ -495,6 +499,7 @@ class EffectResolverServiceTest {
     void testKingsRecognitionCard() {
         CardFactory cf = CardFactory.getInstance();
         EventCards card = (EventCards)cf.createCard(sDeck,StoryDeckCards.KINGS_RECOGNITION);
+        ePhase = new EventPhaseController(game,card);
         HashMap<Players,Integer> shieldRewards = new HashMap<>();
         shieldRewards.put(players.get(0),6);//Knight
         shieldRewards.put(players.get(1),15);//Champion Knight
@@ -523,6 +528,7 @@ class EffectResolverServiceTest {
         HashMap<AdventureDeckCards,Integer> deckList = new HashMap<>();
         CardFactory cf = CardFactory.getInstance();
         EventCards card = (EventCards)cf.createCard(sDeck,StoryDeckCards.KINGS_CALL_TO_ARMS);
+        ePhase = new EventPhaseController(game,card);
         HashMap<CardTypes,Integer> p1TestVals = new HashMap<>();
         HashMap<CardTypes,Integer> p2TestVals = new HashMap<>();
         HashMap<CardTypes,Integer> p3TestVals = new HashMap<>();
