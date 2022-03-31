@@ -203,6 +203,7 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
             card.discardCard();
             this.card = null;
         }
+        GeneralStateMachine.getService().unregisterObserver(this);
         joinAttempts = 0;
         participantSetupResponses = 0;
         competitors.clear();
