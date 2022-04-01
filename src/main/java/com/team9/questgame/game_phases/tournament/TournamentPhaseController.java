@@ -193,6 +193,7 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
             participantRewards.put(player, rewards);
         }
         EffectResolverService.getService().playerAwardedShields(participantRewards);
+        nextState();
     }
 
     @Override
