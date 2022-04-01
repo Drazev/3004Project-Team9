@@ -127,7 +127,8 @@ export async function connect() {
              */
             
             let body = JSON.parse(message.body);
-            console.log("/topic/player/player-update" + JSON.stringify(body));
+            console.log("HEREHEREHREHRE " + JSON.stringify(generalStore().players))
+            console.log("/topic/player/player-update " + JSON.stringify(body));
             generalStore().updatePlayer(body);
         });
 

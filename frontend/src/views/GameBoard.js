@@ -23,6 +23,7 @@ function GameBoard({}) {
     const active = usePlayerPlayAreas();
     const stageAreas = useStageAreas();
     const turn = useTurn();
+    const players = usePlayers();
     const sponsorRequest = useSponsorRequest();
     const isSponsoring = useIsSponsoring();
     const setIsSponsoring = useSetIsSponsoring();
@@ -39,9 +40,6 @@ function GameBoard({}) {
             setIsActive(true);
         }
     }
-    
-
-    const players = usePlayers();
 
     let myHandArr = [false, false, false, false];
     let myPlayerID = -1;
@@ -72,13 +70,17 @@ function GameBoard({}) {
         const jump = 240;
         var allHands = [];
         for (var i = 0; i < hands.length; i++){
-            // var curPlayer = null;
-            // for(var player in players){
-            //     console.log(JSON.stringify(player));
-            //     if (player === hands[i].playerName){
-            //         curPlayer = player;
-            //     }
-            // }
+            var curPlayer;
+            console.log(JSON.stringify(players))
+            for(const player in players){
+                 console.log(JSON.stringify(player));
+                 if (player.name === hands[i].playerName){
+                     curPlayer = player;
+                 }
+            }
+            if (curPlayer.shields == null) {
+                curPlayer.shields = -1;
+            }
             var curTop = init+jump*i;
             allHands.push(
                 <div style={{position:"fixed",top:curTop,left:10}}>
@@ -138,7 +140,7 @@ function GameBoard({}) {
                             tournamentSetupComplete(name,myPlayerID)
                             setTournamentSetup(false)
                         }}
-                    ></Button>
+                    >Finish Tournament Setup</Button>
                 </div>
             }
             {isSponsoring &&

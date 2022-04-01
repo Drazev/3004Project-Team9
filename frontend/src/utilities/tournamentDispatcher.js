@@ -15,6 +15,7 @@
  }
 
  export const dispatchTournamentSetup = (body) => {
+     tournamentStore().setTournamentSetup(true)
      console.log("Tournament setup stage has started");
  }
  
