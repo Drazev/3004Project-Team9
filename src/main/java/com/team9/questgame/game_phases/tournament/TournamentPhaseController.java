@@ -182,6 +182,9 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
     public void distributeRewards(){
         if(winners.size() > 1 && !isTiebreaker){
             this.state = TournamentPhaseStatesE.TIEBREAKER;
+            for(Players player : competitors.keySet()){
+                player.getPlayArea().discardAllWeapons();
+            }
             nextState();
         }
         int rewards = card.getBonusShields() + competitors.size() + oldCompetitorOffset;
@@ -194,11 +197,16 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
 
     @Override
     public void endPhase() {
+        for(Players player : competitors.keySet()){
+            player.getPlayArea().discardAllWeapons();
+            player.getPlayArea().discardAllAmour();
+        }
         onGameReset();
         InboundService.getService().unregisterTournamentPhaseController();
         OutboundService.getService().broadcastTournamentPhaseEnded(
                 new TournamentPlayersOutbound(getWinnerData())
         );
+
 
     }
 
@@ -280,7 +288,6 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
 
     @Override
     public void observerStateChanged(GeneralStateE newState) {
-        //TODO: finish handling oversized hands
         if(newState==GeneralStateE.PLAYER_HAND_OVERSIZE) {
             this.previousState = this.state;
             this.state = TournamentPhaseStatesE.BLOCKED.BLOCKED;
