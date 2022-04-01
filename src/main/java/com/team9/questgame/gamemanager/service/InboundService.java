@@ -25,7 +25,6 @@ public class InboundService implements ApplicationContextAware {
     @Autowired
     private OutboundService outboundService;
 
-    @Autowired
     private TournamentPhaseController tournamentController;
 
     @Autowired
@@ -103,15 +102,35 @@ public class InboundService implements ApplicationContextAware {
 
     public synchronized void tournamentJoinResponse(String name, boolean joined){
         Players player = sessionService.getPlayerMap().get(name);
+        if (tournamentController == null) {
+            throw new RuntimeException("tournament controller has not been registered");
+        }
         tournamentController.checkJoinResult(player, joined);
     }
 
     public synchronized void tournamentCompetitorSetup(String name){;
         Players player = sessionService.getPlayerMap().get(name);
+        if (tournamentController == null) {
+            throw new RuntimeException("tournament controller has not been registered");
+        }
         tournamentController.checkParticipantSetup(player);
     }
 
     public void setPhaseEnded(){gameController.requestPhaseEnd();}
+
+    public void registerTournamentPhaseController(TournamentPhaseController c) {
+        if (tournamentController != null){
+            throw new RuntimeException("Tournament phase controller is already registered and not NULL");
+        }
+        if (c == null) {
+            throw new RuntimeException("Regestering controller is null");
+        }
+        this.tournamentController = c;
+    }
+
+    public void unregisterTournamentPhaseController() {
+        this.tournamentController = null;
+    }
 
     public static InboundService getService() {
         return context.getBean(InboundService.class);

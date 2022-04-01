@@ -16,14 +16,13 @@ import com.team9.questgame.game_phases.quest.QuestPhaseStatesE;
 import com.team9.questgame.game_phases.utils.PlayerTurnService;
 import com.team9.questgame.game_phases.utils.StateMachineObserver;
 import com.team9.questgame.gamemanager.record.socket.TournamentPlayersOutbound;
+import com.team9.questgame.gamemanager.service.InboundService;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -78,6 +77,7 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
 
     @Override
     public void startPhase(PlayerTurnService playerTurnService) {
+        InboundService.getService().registerTournamentPhaseController(this);
         if(this.state != TournamentPhaseStatesE.READY) {
             LOG.error("The Tournament Phase Controller is in state " +
                     state + "when it should be in state READY. Returning");
@@ -188,6 +188,7 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
     @Override
     public void endPhase() {
         onGameReset();
+        InboundService.getService().unregisterTournamentPhaseController();
         OutboundService.getService().broadcastTournamentPhaseEnded(
                 new TournamentPlayersOutbound(getPlayerData())
         );
