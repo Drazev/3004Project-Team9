@@ -18,17 +18,15 @@ function GameBoard({}) {
     const active = usePlayerPlayAreas();
     const stageAreas = useStageAreas();
     const turn = useTurn();
-    const sponsorRequest = useSponsorRequest();
     const isSponsoring = useIsSponsoring();
     const setIsSponsoring = useSetIsSponsoring();
-    const joinRequest = useJoinRequest();
     const [isActive, setIsActive] = useState(false);
     const foeStageStart = useFoeStageStart();
     const [sponsorSearchRequest, setSponsorSearchRequest] = [useSponsorSearchRequest(), useSetSponsorSearchRequest()];
     const [questJoinRequest, setQuestJoinRequest] = [useQuestJoinRequest(), useSetQuestJoinRequest()];
 
     for(var i = 0; i < activePlayers.length; i++){
-        const player = activePlayers[i];
+            const player = activePlayers[i];
         console.log(JSON.stringify(player) + " " + name);
         if(player.name === name && isActive == false){
             setIsActive(true);
@@ -63,13 +61,6 @@ function GameBoard({}) {
         const jump = 240;
         var allHands = [];
         for (var i = 0; i < hands.length; i++){
-            // var curPlayer = null;
-            // for(var player in players){
-            //     console.log(JSON.stringify(player));
-            //     if (player === hands[i].playerName){
-            //         curPlayer = player;
-            //     }
-            // }
             var curTop = init+jump*i;
             allHands.push(
                 <div style={{position:"fixed",top:curTop,left:10}}>

@@ -1,22 +1,26 @@
 import Card from "../cards/Card";
-// import CardImages from "../../assets/images/index";
-import { useHandOversize, useTurn } from "../../stores/generalStore";
+import { useState } from "react";
+import { useHandOversize, useTurn, useId, useIsSponsoring, useSponsorName } from "../../stores/generalStore";
 import { useGetPlayer } from "../../stores/playerStore";
+import { useGetPlayerPlayArea } from "../../stores/playAreaStore";
 
 import "./PlayerHand.css";
+import { useEffect } from "react";
 
 function PlayerHand(props){
+    const id = useId();
     const handOversize = useHandOversize();
     const currentTurn = useTurn();
     const player = useGetPlayer(props.playerID);
-    // console.log("Player state at Hand \n"+JSON.stringify(state,object =>JSON.stringify(object)));
-    // const player = usePlayerStore(state => state.pData.find(p => p.playerId===props.playerID));
+    const playerPlayArea = useGetPlayerPlayArea(props.playerID);
+    const sponsorName = useSponsorName();
+    const [newTop, setNewTop] = useState(70);
 
-    if(player===undefined) {
-        console.log("player is undefined");
-    } else {
-        console.log("Player Data "+player.playerId,player.shields,player.rank);
-    }
+    useEffect(() => {
+        if(props.activeCards.length > 0){
+            setNewTop(prevState => prevState + 70);
+        }
+    }, [props.activeCards]);
 
     const Rendercards = props.cardsInHand?.map((card) => (
         <Card playerID={props.playerID} card={card} key={card.cardID} cardImage={card.imgSrc} selectedAllowed={(props.isMyHand) || (props.isMyHand && handOversize)} canGrow={props.isMyHand} cardOwner={player.name} isActive={false}></Card>
@@ -26,17 +30,27 @@ function PlayerHand(props){
         <Card card={card} key={card.cardID} cardImage={card.imgSrc} selectedAllowed={false} canGrow={false} cardOwner={player.name} isActive={true}></Card>
     ));
 
-    const RenderName = () => {
-        if(props.playerName == currentTurn){
-            return <p style={{position:"absolute",top:32,left:68}}>{props.playerName + " (current turn)"}</p>    
-        }else{
-            return <p style={{position:"absolute",top:32,left:68}}>{props.playerName}</p>    
+    const renderName = () => {
+        let description = props.playerName;
+        if (props.playerName === currentTurn) {
+            if (sponsorName == props.playerName) {
+                description += " (sponsoring)";
+            } else {
+                description += " (current turn)";
+            }
         }
+        return <p style={{position:"absolute",top:32,left:68}}>{description}</p>    
     }
 
-    let newTop = 70;
-    if(props.activeCards.length > 0){
-        newTop += 70;
+    const renderPlayerInfo = () => {
+        if (playerPlayArea !== undefined && id === playerPlayArea.id) {
+            return (
+                <div>
+                    <p style={{position:"absolute",top:0,left:150}}>BP x {playerPlayArea.battlePoints}</p>
+                    <p style={{position:"absolute",top:0,left:250}}>Free Bids x {playerPlayArea.bids}</p>
+                </div>
+            )
+        }
     }
 
     return(
@@ -54,7 +68,8 @@ function PlayerHand(props){
                     }}
                 />     
                 <p style={{position:"absolute",top:0,left:93}}>{"x  " + player.shields}</p> 
-                {RenderName()}       
+                {renderPlayerInfo()}
+                {renderName()}       
             </div>
 
             <div
