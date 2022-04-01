@@ -19,12 +19,16 @@ import com.team9.questgame.gamemanager.record.socket.TournamentPlayersOutbound;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 
 public class TournamentPhaseController implements GamePhases<TournamentCards,TournamentPhaseStatesE>, StateMachineObserver<GeneralStateE> {
     private final Logger LOG;
@@ -51,6 +55,7 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
         participantSetupResponses = 0;
         isTiebreaker = false;
         oldCompetitorOffset = 0;
+        this.state = TournamentPhaseStatesE.READY;
     }
 
     public boolean receiveCard(TournamentCards card){

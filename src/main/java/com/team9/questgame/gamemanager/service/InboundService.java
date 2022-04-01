@@ -26,7 +26,6 @@ public class InboundService implements ApplicationContextAware {
     private OutboundService outboundService;
 
     @Autowired
-    @Lazy
     private TournamentPhaseController tournamentController;
 
     @Autowired

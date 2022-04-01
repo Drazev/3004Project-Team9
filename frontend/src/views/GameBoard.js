@@ -131,11 +131,6 @@ function GameBoard({}) {
                     <Popup popupType="JOINTOURNAMENT" setPopup={setTournamentJoinRequest}></Popup>
                 </div>
             }
-            {tournamentState &&
-                <div>
-                    <img src={"unknown"} alt="testing"></img>
-                </div>
-            }
             {tournamentSetup &&
                 <div>
                     <Button

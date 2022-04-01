@@ -199,7 +199,7 @@ export async function connect() {
             playAreaStore().updateStageArea(body);
         });
 
-        client.subscribe("topic/tournament/start", (message) => {
+        client.subscribe("/topic/tournament/start", (message) => {
             /**
              * Notify all players that the tournament phase has started
              * body should be empty
@@ -212,7 +212,7 @@ export async function connect() {
             })
         });
 
-        client.subscribe("topic/tournament/setup", (message) => {
+        client.subscribe("/topic/tournament/setup", (message) => {
             /**
              * Notify all players that the tournament setup phase has begun
              * body should be empty

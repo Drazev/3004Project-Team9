@@ -77,8 +77,8 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
         sDeck = new StoryDecks();
         this.playerTurnService = new PlayerTurnService(this.players);
         allowedStoryCardTypes = new HashSet<>();
-        allowedStoryCardTypes.add(CardTypes.QUEST);
-        allowedStoryCardTypes.add(CardTypes.EVENT);
+//        allowedStoryCardTypes.add(CardTypes.QUEST);
+//        allowedStoryCardTypes.add(CardTypes.EVENT);
         allowedStoryCardTypes.add(CardTypes.TOURNAMENT);
     }
 
