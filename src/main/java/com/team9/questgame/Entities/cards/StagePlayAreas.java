@@ -103,6 +103,7 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>, EffectObserver
             LOG.error("RULE: A test card must be the only card in the stage");
             throw new CardAreaException(CardAreaException.CardAreaExceptionReasonCodes.RULE_TEST_MUST_BE_ONLY_CARD_IN_STAGE);
         }
+
         allCards.put(card.getCardCode(),  card);
         cardIdMap.put(card.getCardID(), card);
 
@@ -295,6 +296,7 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>, EffectObserver
         boostableCards.add(card);
         if(questCard.getBoostedFoe() == card.getCardCode()){
             card.setBoosted(true);
+            updateBattlePoints();
         }
     }
 

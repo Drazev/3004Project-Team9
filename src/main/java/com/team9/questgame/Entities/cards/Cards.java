@@ -100,15 +100,17 @@ public abstract class Cards {
 
 
     public boolean playCard(CardArea cardArea) {
-        if(location!=null && location==cardArea)
-        {
-            throw new IllegalCardStateException("Card cannot be played into the same area.");
-        }
-        else if(cardArea == null) {
-            throw new IllegalCardStateException("Card cannot be played to null. Card must be played into another card area or discard.");
-        }
+        return playToAnyCardArea(cardArea);
+    }
 
-        return cardArea.receiveCard(this);
+    public boolean playCard(Hand hand) {
+        boolean rc= playToAnyCardArea(hand);
+        if(rc) {
+            location=null;
+            onLocationChanged();
+            LOG.info(String.format("Card %s was played into player %s's hand.",cardCode,hand.getPlayer().getName()));
+        }
+        return rc;
     }
 
     public boolean playCard(PlayAreas playArea) {
@@ -121,6 +123,18 @@ public abstract class Cards {
             location = playArea;
         }
         return rc;
+    }
+
+    private boolean playToAnyCardArea(CardArea cardArea) {
+        if(location!=null && location==cardArea)
+        {
+            throw new IllegalCardStateException("Card cannot be played into the same area.");
+        }
+        else if(cardArea == null) {
+            throw new IllegalCardStateException("Card cannot be played to null. Card must be played into another card area or discard.");
+        }
+
+        return cardArea.receiveCard(this);
     }
 
 
