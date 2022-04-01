@@ -202,12 +202,12 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
             player.getPlayArea().discardAllWeapons();
             player.getPlayArea().discardAllAmour();
         }
-        onGameReset();
+
         InboundService.getService().unregisterTournamentPhaseController();
         OutboundService.getService().broadcastTournamentPhaseEnded(
                 new TournamentPlayersOutbound(getWinnerData())
         );
-
+        onGameReset();
 
     }
 
