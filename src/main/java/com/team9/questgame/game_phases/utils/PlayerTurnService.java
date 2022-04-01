@@ -73,6 +73,7 @@ public class PlayerTurnService {
         int i = players.indexOf(player);
         if (i != -1) {
             currentPlayerIndex = i;
+            this.notifyTurnChange();
             return true;
         }
         return false;
