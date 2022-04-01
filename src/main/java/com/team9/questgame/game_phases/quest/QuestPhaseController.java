@@ -372,7 +372,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         if((bid < maxBid && maxBidPlayer == null) || (bid <= maxBid && maxBidPlayer !=null)){
             questingPlayers.remove(player);
             NotificationOutboundService.getService().sendBadNotification(
-                    sponsor,
+                    player,
                     new NotificationOutbound("Test Stage Defeat","Your bid was deemed unworthy. Alas, you cannot continue your journey and must head home.","",null),
                     null
             );

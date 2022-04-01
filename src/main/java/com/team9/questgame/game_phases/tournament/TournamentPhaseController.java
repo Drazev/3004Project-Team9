@@ -195,14 +195,21 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
         onGameReset();
         InboundService.getService().unregisterTournamentPhaseController();
         OutboundService.getService().broadcastTournamentPhaseEnded(
-                new TournamentPlayersOutbound(getPlayerData())
+                new TournamentPlayersOutbound(getWinnerData())
         );
 
     }
 
-    private ArrayList<PlayerData> getPlayerData(){
+    private ArrayList<PlayerData> getWinnerData(){
         ArrayList<PlayerData> winnerData = new ArrayList<>();
         for(Players player : winners){
+            winnerData.add(player.generatePlayerData());
+        }
+        return winnerData;
+    }
+    private ArrayList<PlayerData> getPlayerData(){
+        ArrayList<PlayerData> winnerData = new ArrayList<>();
+        for(Players player : competitors.keySet()){
             winnerData.add(player.generatePlayerData());
         }
         return winnerData;
@@ -236,7 +243,9 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
             }
             case DRAW_CARD -> {
                 this.state = TournamentPhaseStatesE.PLAYER_SETUP;
-                OutboundService.getService().broadcastTournamentSetup();
+                OutboundService.getService().broadcastTournamentSetup(
+                        new TournamentPlayersOutbound(getPlayerData())
+                );
             }
             case PLAYER_SETUP -> {
                 this.state = TournamentPhaseStatesE.RESOLUTION;
