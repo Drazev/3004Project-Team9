@@ -3,6 +3,7 @@ package com.team9.questgame.game_phases.tournament;
 import com.team9.questgame.Data.PlayerData;
 import com.team9.questgame.Entities.Effects.EffectResolverService;
 import com.team9.questgame.Entities.Players;
+import com.team9.questgame.Entities.cards.QuestCards;
 import com.team9.questgame.Entities.cards.StoryCards;
 import com.team9.questgame.Entities.cards.TournamentCards;
 import com.team9.questgame.exception.IllegalGameRequest;
@@ -57,17 +58,17 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
         this.state = TournamentPhaseStatesE.READY;
     }
 
-    public boolean receiveCard(TournamentCards card){
-        if(card == null || state!=TournamentPhaseStatesE.READY) {
-            return false;
-        }
-        if(this.card!=null) {
-            LOG.warn("Tournament Phase Controller already has a tournament card");
-        }
-        this.card = card;
-        nextState();
-        return true;
-    }
+//    public boolean receiveCard(TournamentCards card){
+//        if(card == null || state!=TournamentPhaseStatesE.READY) {
+//            return false;
+//        }
+//        if(this.card!=null) {
+//            LOG.warn("Tournament Phase Controller already has a tournament card");
+//        }
+//        this.card = card;
+//        nextState();
+//        return true;
+//    }
 
 
     @Override
@@ -87,6 +88,8 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
         nextState();
 
     }
+
+
     /**
      * Player's decision to join a Tournament or not
      * @param player the player who sent this request
@@ -103,6 +106,8 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
         this.joinAttempts++;
 
         if(joined){
+            player.getPlayArea().registerGamePhase(this);
+            player.getPlayArea().onQuestStarted(card);
             competitors.put(player,
                     (player.getPlayArea().getBattlePoints() - player.getRank().getRankBattlePointValue()) * -1);
             player.getPlayArea().setPlayerTurn(true);
