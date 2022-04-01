@@ -5,5 +5,6 @@ public enum EventPhaseStatesE {
     READY,
     CARD_ACTIVATION,
     PLAYER_RESPONSE,
+    BLOCKED,
     ENDED
 }

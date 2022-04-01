@@ -119,7 +119,7 @@ public class QuestPhaseOutboundService implements ApplicationContextAware {
         context=applicationContext;
     }
 
-    static public QuestPhaseOutboundService getService() {
+    public static QuestPhaseOutboundService getService() {
         return context.getBean(QuestPhaseOutboundService.class);
     }
 }

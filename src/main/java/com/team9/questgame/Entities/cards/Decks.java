@@ -22,8 +22,6 @@ public abstract class  Decks<T extends Cards,U extends AllCardCodes> {
     @Getter
     private ArrayList<T> discardPile;
     protected static final CardFactory factory = CardFactory.getInstance();
-    @JsonIgnore
-    private final OutboundService outboundService;
 
 
 
@@ -33,14 +31,12 @@ public abstract class  Decks<T extends Cards,U extends AllCardCodes> {
         this.cardsInDeck=new HashSet<>();
         this.drawDeck = new Stack<>();
         this.discardPile = new ArrayList<>();
-        this.outboundService = ApplicationContextHolder.getContext().getBean(OutboundService.class);
         init();
     }
 
     protected void init() {
         createDeck();
         shuffleDeck();
-        notifyDeckChanged();
     }
 
     abstract protected void createDeck();
@@ -139,7 +135,7 @@ public abstract class  Decks<T extends Cards,U extends AllCardCodes> {
     }
 
     protected void notifyDeckChanged() {
-        outboundService.broadcastDeckUpdate(generateDeckUpdateData());
+        OutboundService.getService().broadcastDeckUpdate(generateDeckUpdateData());
     }
 
     //TODO: Function that notifies observers or sends event to GameManager with new deck
