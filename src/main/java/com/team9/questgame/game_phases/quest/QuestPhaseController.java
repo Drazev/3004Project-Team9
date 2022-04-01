@@ -390,7 +390,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         if(questingPlayers.size() == 1){
             QuestPhaseOutboundService.getService().broadcastStageResult(new RemainingQuestorsOutbound(generateQuestorData(), curStageIndex));
             //TODO:make maxBidPlayer discard maxBid-maxBidPlayer.getPlayerPlayArea().getBattlePoints() cards
-            Effects testEnd = new TestEndEffect(maxBidPlayer, maxBid);
+            Effects testEnd = new TestEndEffect(maxBidPlayer, maxBid - maxBidPlayer.getPlayArea().getBids());
             testEnd.setSource((CardWithEffect) stages.get(curStageIndex).getStageCard());
             testEnd.activate(stages.get(curStageIndex), maxBidPlayer);
             //EffectResolverService.getService().forcePlayerDiscards(null, maxBidPlayer,maxBid-maxBidPlayer.getPlayArea().getBids());
