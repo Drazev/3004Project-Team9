@@ -70,17 +70,6 @@ function GameBoard({}) {
         const jump = 240;
         var allHands = [];
         for (var i = 0; i < hands.length; i++){
-            var curPlayer;
-            console.log(JSON.stringify(players))
-            for(const player in players){
-                 console.log(JSON.stringify(player));
-                 if (player.name === hands[i].playerName){
-                     curPlayer = player;
-                 }
-            }
-            if (curPlayer.shields == null) {
-                curPlayer.shields = -1;
-            }
             var curTop = init+jump*i;
             allHands.push(
                 <div style={{position:"fixed",top:curTop,left:10}}>
@@ -92,7 +81,6 @@ function GameBoard({}) {
                         isMyHand={myHandArr[i]}
                         cardsInHand={hands[i].hand}
                         activeCards={getActiveCard(hands[i].playerId)}
-                        numShields={5/*curPlayer.shields*/}
                         shield={CardImages.Shield_3}
                         numStages={stageAreas.length}
                     ></PlayerHand>
