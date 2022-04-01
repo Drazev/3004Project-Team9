@@ -15,8 +15,20 @@
  }
 
  export const dispatchTournamentSetup = (body) => {
-     console.log("Important " + JSON.stringify(body));
-     tournamentStore().setTournamentSetup(true);
+     /***
+      * body = {"remainingPlayers":[{"playerId":0,"handId":0,"playAreaId":0,"name":"test1","rank":"SQUIRE","rankImgSrc":"./Assets/Rank Deck (327x491)/Rank - Squire.png","rankBattlePoints":5,"shields":0},{"playerId":1,"handId":1,"playAreaId":1,"name":"test2","rank":"SQUIRE","rankImgSrc":"./Assets/Rank Deck (327x491)/Rank - Squire.png","rankBattlePoints":5,"shields":0}]}
+      */
+     console.log("body: " + JSON.stringify(body))
+     let remainingPlayers = body.remainingPlayers;
+     console.log("remaining players: " + JSON.stringify(remainingPlayers));
+     console.log(generalStore().name);
+     for(let i = 0; i < remainingPlayers.length; i++){
+         console.log(JSON.stringify(remainingPlayers[i]))
+         console.log(remainingPlayers[i].name);
+         if(remainingPlayers[i].name === generalStore().name){
+            tournamentStore().setTournamentSetup(true);
+         }
+     }
      console.log("Tournament setup stage has started");
  }
  
