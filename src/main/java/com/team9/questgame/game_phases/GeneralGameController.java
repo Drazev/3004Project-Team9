@@ -188,11 +188,11 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
 
     public void handlePlayerHandOversize() {
         boolean isOversize = false;
-        if ( !( stateMachine.isInPhases() || stateMachine.getCurrentState()==GeneralStateE.PLAYER_HAND_OVERSIZE) ) {
-            throw new IllegalGameStateException("Player hand should only be oversize when " +
-                    "in QUEST_PHASE, EVENT_PHASE, or TOURNAMENT_PHASE or already in PLAYER_HAND_OVERSIZE state.\n" +
-                    "Current state: " + stateMachine.getCurrentState());
-        }
+//        if ( !( stateMachine.isInPhases() || stateMachine.getCurrentState()==GeneralStateE.PLAYER_HAND_OVERSIZE) ) {
+//            throw new IllegalGameStateException("Player hand should only be oversize when " +
+//                    "in QUEST_PHASE, EVENT_PHASE, or TOURNAMENT_PHASE or already in PLAYER_HAND_OVERSIZE state.\n" +
+//                    "Current state: " + stateMachine.getCurrentState());
+//        }
 
         // Double check
         for (Players p: this.players) {

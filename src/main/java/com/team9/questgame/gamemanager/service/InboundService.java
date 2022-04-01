@@ -9,6 +9,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 
 @AllArgsConstructor
@@ -19,9 +20,6 @@ public class InboundService implements ApplicationContextAware {
 
     @Autowired
     private SessionService sessionService;
-
-    @Autowired
-    private OutboundService outboundService;
 
     @Autowired
     private GeneralGameController gameController;

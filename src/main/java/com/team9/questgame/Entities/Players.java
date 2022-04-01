@@ -3,7 +3,6 @@ package com.team9.questgame.Entities;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import com.team9.questgame.ApplicationContextHolder;
 import com.team9.questgame.Data.PlayerData;
 import com.team9.questgame.Entities.cards.*;
 import com.team9.questgame.exception.BadRequestException;

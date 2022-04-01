@@ -18,12 +18,9 @@ public class PlayerTurnService {
     @Getter
     private final ArrayList<Players> players;
 
-    private OutboundService outboundService;
-
     public PlayerTurnService(ArrayList<Players> players) {
         this.players = players;
         this.currentPlayerIndex = 0;
-        this.outboundService = ApplicationContextHolder.getContext().getBean(OutboundService.class);
     }
 
     public Players getPlayerTurn() {
@@ -87,7 +84,7 @@ public class PlayerTurnService {
         // TODO: Add test for this broadcast in the OutboundServiceTest or WSControllerTest
         NotificationOutbound msgToPlayer = new NotificationOutbound("Player Turn","It is your turn!","","");
         NotificationOutboundService.getService().sendGoodNotification(getPlayerTurn(),msgToPlayer,null);
-        outboundService.broadcastNextTurn(getPlayerTurn());
+        OutboundService.getService().broadcastNextTurn(getPlayerTurn());
     }
 
 }

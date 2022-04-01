@@ -1,7 +1,12 @@
 package com.team9.questgame.Entities.cards;
 
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
+
 import java.io.Serializable;
 
+@SpringBootTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class TestPlayArea implements PlayAreas<Cards>, Serializable {
     int bids=0;
     int bp=0;
