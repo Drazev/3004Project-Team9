@@ -117,6 +117,8 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
             //if only one person joined, go to resolution
             if(competitors.size() == 1){
                 this.state = TournamentPhaseStatesE.PLAYER_SETUP;
+            }else if(competitors.size() == 0){
+                this.state = TournamentPhaseStatesE.REWARDS;
             }
             nextState();
         }
@@ -180,6 +182,9 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
     public void distributeRewards(){
         if(winners.size() > 1 && !isTiebreaker){
             this.state = TournamentPhaseStatesE.TIEBREAKER;
+            for(Players player : competitors.keySet()){
+                player.getPlayArea().discardAllWeapons();
+            }
             nextState();
         }
         int rewards = card.getBonusShields() + competitors.size() + oldCompetitorOffset;
@@ -192,17 +197,29 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
 
     @Override
     public void endPhase() {
+        for(Players player : competitors.keySet()){
+            player.getPlayArea().discardAllWeapons();
+            player.getPlayArea().discardAllAmour();
+        }
         onGameReset();
         InboundService.getService().unregisterTournamentPhaseController();
         OutboundService.getService().broadcastTournamentPhaseEnded(
-                new TournamentPlayersOutbound(getPlayerData())
+                new TournamentPlayersOutbound(getWinnerData())
         );
+
 
     }
 
-    private ArrayList<PlayerData> getPlayerData(){
+    private ArrayList<PlayerData> getWinnerData(){
         ArrayList<PlayerData> winnerData = new ArrayList<>();
         for(Players player : winners){
+            winnerData.add(player.generatePlayerData());
+        }
+        return winnerData;
+    }
+    private ArrayList<PlayerData> getPlayerData(){
+        ArrayList<PlayerData> winnerData = new ArrayList<>();
+        for(Players player : competitors.keySet()){
             winnerData.add(player.generatePlayerData());
         }
         return winnerData;
@@ -236,7 +253,9 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
             }
             case DRAW_CARD -> {
                 this.state = TournamentPhaseStatesE.PLAYER_SETUP;
-                OutboundService.getService().broadcastTournamentSetup();
+                OutboundService.getService().broadcastTournamentSetup(
+                        new TournamentPlayersOutbound(getPlayerData())
+                );
             }
             case PLAYER_SETUP -> {
                 this.state = TournamentPhaseStatesE.RESOLUTION;
@@ -269,7 +288,6 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
 
     @Override
     public void observerStateChanged(GeneralStateE newState) {
-        //TODO: finish handling oversized hands
         if(newState==GeneralStateE.PLAYER_HAND_OVERSIZE) {
             this.previousState = this.state;
             this.state = TournamentPhaseStatesE.BLOCKED.BLOCKED;

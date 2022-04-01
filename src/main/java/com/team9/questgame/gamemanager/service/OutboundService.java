@@ -72,8 +72,9 @@ public class OutboundService implements ApplicationContextAware {
         this.sendToAllPlayers("/topic/tournament/start", new EmptyJsonReponse());
     }
 
-    public void broadcastTournamentSetup(){
-        this.sendToAllPlayers("/topic/tournament/setup", new EmptyJsonReponse());
+    public void broadcastTournamentSetup(TournamentPlayersOutbound tournamentPlayersOutbound){
+
+        this.sendToAllPlayers("/topic/tournament/setup",tournamentPlayersOutbound);
     }
 
     public void broadcastTournamentPhaseEnded(TournamentPlayersOutbound tournamentPlayersOutbound){
