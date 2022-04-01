@@ -4,6 +4,7 @@ import * as notificationDispatcher from "../utilities/notificationDispatcher";
 import * as questDispatcher from "../utilities/questDispatcher";
 import { generalStore } from "../stores/generalStore";
 import { playAreaStore } from "../stores/playAreaStore";
+import { playerStore } from "../stores/playerStore";
 
 export let client = null;
 
@@ -100,10 +101,10 @@ export async function connect() {
             let body = JSON.parse(message.body);
             console.log("/topic/player/hand-oversize: " + JSON.stringify(body));
             generalStore().setHandOversize(true);
-            notificationDispatcher.dispatchBadNotification({
-                title: "Hand Oversize",
-                message: `A player has oversized hand. Please discard or play the card(s) until their hand has <= 12 cards to proceed.`
-            })
+            // notificationDispatcher.dispatchBadNotification({
+            //     title: "Hand Oversize",
+            //     message: `A player has oversized hand. Please discard or play the card(s) until their hand has <= 12 cards to proceed.`
+            // })
         });
 
         client.subscribe("/topic/player/hand-not-oversize", (message) => {
@@ -127,7 +128,9 @@ export async function connect() {
             
             let body = JSON.parse(message.body);
             console.log("/topic/player/player-update" + JSON.stringify(body));
+
             generalStore().updatePlayer(body);
+            playerStore().processPlayerUpdate(body);
         });
 
 

@@ -190,7 +190,8 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
         boolean isOversize = false;
 //        if ( !( stateMachine.isInPhases() || stateMachine.getCurrentState()==GeneralStateE.PLAYER_HAND_OVERSIZE) ) {
 //            throw new IllegalGameStateException("Player hand should only be oversize when " +
-//                    "in QUEST_PHASE, EVENT_PHASE, or TOURNAMENT_PHASE");
+//                    "in QUEST_PHASE, EVENT_PHASE, or TOURNAMENT_PHASE or already in PLAYER_HAND_OVERSIZE state.\n" +
+//                    "Current state: " + stateMachine.getCurrentState());
 //        }
 
         // Double check
@@ -311,7 +312,7 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
     public void requestPhaseEnd(){
         discardCard(storyCard);
         currPhase=null;
-        playerTurnService.notifyTurnChange();
+        playerTurnService.nextPlayer();
         stateMachine.setPhaseEndRequested(true);
         stateMachine.update();
     }
@@ -325,7 +326,7 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
             p.onGameReset();
         }
 
-        Collections.shuffle(players);
+        // Collections.shuffle(players);
         this.playerTurnService = new PlayerTurnService(this.players);
         winners.clear();
 

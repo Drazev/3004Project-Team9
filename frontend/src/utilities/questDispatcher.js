@@ -1,7 +1,7 @@
 /**
  * All quest inbound broadcast from the server goes through this module.
  */
-import { questRequestStore } from "../stores/questRequestStore"
+import { questRequestStore } from "../stores/quest/questRequestStore"
 import { generalStore } from "../stores/generalStore"
 import { playAreaStore } from "../stores/playAreaStore";
 

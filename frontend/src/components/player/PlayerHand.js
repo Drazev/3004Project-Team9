@@ -1,20 +1,29 @@
 import Card from "../cards/Card";
-import CardImages from "../../assets/images/index";
+// import CardImages from "../../assets/images/index";
 import { useHandOversize, useTurn } from "../../stores/generalStore";
+import { useGetPlayer } from "../../stores/playerStore";
 
 import "./PlayerHand.css";
 
 function PlayerHand(props){
     const handOversize = useHandOversize();
     const currentTurn = useTurn();
-    console.log(`handOversize=${handOversize}`);
+    const player = useGetPlayer(props.playerID);
+    // console.log("Player state at Hand \n"+JSON.stringify(state,object =>JSON.stringify(object)));
+    // const player = usePlayerStore(state => state.pData.find(p => p.playerId===props.playerID));
+
+    if(player===undefined) {
+        console.log("player is undefined");
+    } else {
+        console.log("Player Data "+player.playerId,player.shields,player.rank);
+    }
 
     const Rendercards = props.cardsInHand?.map((card) => (
-        <Card playerID={props.playerID} card={card} key={card.cardID} cardImage={card.imgSrc} selectedAllowed={(props.isMyHand) || (props.isMyHand && handOversize)} canGrow={props.isMyHand} cardOwner={props.playerName} isActive={false}></Card>
+        <Card playerID={props.playerID} card={card} key={card.cardID} cardImage={card.imgSrc} selectedAllowed={(props.isMyHand) || (props.isMyHand && handOversize)} canGrow={props.isMyHand} cardOwner={player.name} isActive={false}></Card>
     ));
 
     const RenderActiveCards = props.activeCards?.map((card) => (
-        <Card card={card} key={card.cardID} cardImage={card.imgSrc} selectedAllowed={false} canGrow={false} cardOwner={props.playerName} isActive={true}></Card>
+        <Card card={card} key={card.cardID} cardImage={card.imgSrc} selectedAllowed={false} canGrow={false} cardOwner={player.name} isActive={true}></Card>
     ));
 
     const RenderName = () => {
@@ -33,7 +42,7 @@ function PlayerHand(props){
     return(
         <div>
             <div>
-                <Card cardImage={props.rank} selectedAllowed={false} canGrow={false} ></Card>
+                <Card cardImage={player.rankImgSrc} selectedAllowed={false} canGrow={false} ></Card>
                 <img
                     src={props.shield}
                     style={{
@@ -44,7 +53,7 @@ function PlayerHand(props){
                         position: "absolute"
                     }}
                 />     
-                <p style={{position:"absolute",top:0,left:93}}>{"x  " + props.numShields}</p> 
+                <p style={{position:"absolute",top:0,left:93}}>{"x  " + player.shields}</p> 
                 {RenderName()}       
             </div>
 

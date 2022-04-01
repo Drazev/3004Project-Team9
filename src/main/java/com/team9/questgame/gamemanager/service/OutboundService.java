@@ -13,6 +13,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.annotation.Order;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,7 @@ import java.util.Map;
 
 @AllArgsConstructor
 @Service
+//@Order(value = 1)
 public class OutboundService implements ApplicationContextAware {
     private Logger LOG;
 

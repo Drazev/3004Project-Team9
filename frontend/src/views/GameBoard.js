@@ -5,7 +5,7 @@ import Popup from "../components/popups/Popup";
 import { drawCard, setupComplete, participantSetupComplete } from "../services/clientSocket";
 import { useName, usePlayerHands, useTurn, useSponsorRequest, useIsSponsoring, useSetIsSponsoring, useJoinRequest, useFoeStageStart, useTestStageStart, usePlayers, useActivePlayers, useHandOversize } from "../stores/generalStore";
 import { usePlayerPlayAreas, useStageAreas } from "../stores/playAreaStore";
-import { useSponsorSearchRequest, useSetSponsorSearchRequest, useQuestJoinRequest, useSetQuestJoinRequest } from "../stores/questRequestStore";
+import { useSponsorSearchRequest, useSetSponsorSearchRequest, useQuestJoinRequest, useSetQuestJoinRequest } from "../stores/quest/questRequestStore";
 import { Button } from "react-bootstrap";
 import React, { useState } from "react";
 import "./GameBoard.css";
@@ -34,10 +34,6 @@ function GameBoard({}) {
             setIsActive(true);
         }
     }
-    
-
-    const players = usePlayers();
-
     let myHandArr = [false, false, false, false];
     let myPlayerID = -1;
     for (let i = 0; i < hands.length; i++) {
@@ -85,7 +81,6 @@ function GameBoard({}) {
                         isMyHand={myHandArr[i]}
                         cardsInHand={hands[i].hand}
                         activeCards={getActiveCard(hands[i].playerId)}
-                        rank={CardImages.Rank_Squire/*hands[0].rank*/}
                         numShields={5/*curPlayer.shields*/}
                         shield={CardImages.Shield_3}
                         numStages={stageAreas.length}

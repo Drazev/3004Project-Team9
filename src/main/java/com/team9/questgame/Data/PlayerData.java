@@ -11,6 +11,7 @@ public record PlayerData(
         long playAreaId,
         String name,
         PlayerRanks rank,
+        String rankImgSrc,
         int rankBattlePoints,
         int shields
 ) {}
