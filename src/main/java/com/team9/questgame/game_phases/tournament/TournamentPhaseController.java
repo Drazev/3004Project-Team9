@@ -143,6 +143,8 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
             competitors.put(player, player.getPlayArea().getBattlePoints() * -1);
             player.getPlayArea().setPlayerTurn(true);
         }
+        winners.clear();
+        participantSetupResponses = 0;
         nextState();
     }
 
@@ -186,6 +188,7 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
                 player.getPlayArea().discardAllWeapons();
             }
             nextState();
+            return;
         }
         int rewards = card.getBonusShields() + competitors.size() + oldCompetitorOffset;
         HashMap<Players, Integer> participantRewards = new HashMap<>();
@@ -208,7 +211,7 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
                 new TournamentPlayersOutbound(getWinnerData())
         );
         onGameReset();
-
+        gameController.requestPhaseEnd();
     }
 
     private ArrayList<PlayerData> getWinnerData(){
