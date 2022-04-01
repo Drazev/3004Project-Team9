@@ -6,6 +6,8 @@ import com.team9.questgame.Entities.Effects.Effects;
 import com.team9.questgame.Entities.Effects.TargetSelector;
 import com.team9.questgame.Entities.Effects.TargetSelectors.HighestRankSelector;
 import com.team9.questgame.Entities.Players;
+import com.team9.questgame.gamemanager.record.socket.NotificationOutbound;
+import com.team9.questgame.gamemanager.service.NotificationOutboundService;
 
 import java.util.ArrayList;
 

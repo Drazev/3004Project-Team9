@@ -43,6 +43,7 @@ public class Hand implements CardArea<AdventureCards>, EffectObserver<AdventureC
     @Getter
     private final HashSet<AdventureCards> hand;
     private final HashSet<CardWithEffect> activatableCards;
+    @JsonIgnore
     private final HashSet<DiscardObserver> discardObservers;
 
     private final HashMap<Long,AdventureCards> cardIdMap;
@@ -74,6 +75,8 @@ public class Hand implements CardArea<AdventureCards>, EffectObserver<AdventureC
     public long getHandId() {
         return handID;
     }
+
+    public Players getPlayer() { return player; }
 
     public HashMap<CardTypes,HashMap<AllCardCodes<AdventureDeckCards>,Integer>> getNumberOfEachCardCodeBySubType() {
         HashMap<CardTypes,HashMap<AllCardCodes<AdventureDeckCards>,Integer>> cardList = new HashMap<>();
