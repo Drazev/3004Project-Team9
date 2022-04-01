@@ -52,8 +52,9 @@ const Notification = ({ notification }) => {
         if (notification.body.imgSrc) {
             return (
                 <div>
-                    <img width="80px" height="104px" src={notification.body.imgSrc} alt="notification" />
-                    <p>{notification.body.message}</p>
+                    {notification.body.message}
+                    <br/>
+                    <img src={notification.body.imgSrc} alt="notification" className="notification-image"/>
                 </div>
             )
         } else {

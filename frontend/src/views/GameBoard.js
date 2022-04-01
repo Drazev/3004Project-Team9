@@ -6,7 +6,7 @@ import { drawCard, setupComplete, participantSetupComplete, tournamentSetupCompl
 import { useName, usePlayerHands, useTurn, useSponsorRequest, useIsSponsoring, useSetIsSponsoring, useJoinRequest, useFoeStageStart, useTestStageStart, usePlayers, useActivePlayers, useHandOversize } from "../stores/generalStore";
 import { usePlayerPlayAreas, useStageAreas } from "../stores/playAreaStore";
 import { useTournamentJoinRequest, useSetTournamentJoinRequest, useTournamentStageStart, useTournamentSetup, useSetTournamentSetup } from "../stores/tournamentStore";
-import { useSponsorSearchRequest, useSetSponsorSearchRequest, useQuestJoinRequest, useSetQuestJoinRequest } from "../stores/questRequestStore";
+import { useSponsorSearchRequest, useSetSponsorSearchRequest, useQuestJoinRequest, useSetQuestJoinRequest } from "../stores/quest/questRequestStore";
 import { Button } from "react-bootstrap";
 import React, { useState } from "react";
 import "./GameBoard.css";
@@ -70,17 +70,6 @@ function GameBoard({}) {
         const jump = 240;
         var allHands = [];
         for (var i = 0; i < hands.length; i++){
-            var curPlayer;
-            console.log(JSON.stringify(players))
-            for(const player in players){
-                 console.log(JSON.stringify(player));
-                 if (player.name === hands[i].playerName){
-                     curPlayer = player;
-                 }
-            }
-            if (curPlayer.shields == null) {
-                curPlayer.shields = -1;
-            }
             var curTop = init+jump*i;
             allHands.push(
                 <div style={{position:"fixed",top:curTop,left:10}}>
@@ -92,8 +81,6 @@ function GameBoard({}) {
                         isMyHand={myHandArr[i]}
                         cardsInHand={hands[i].hand}
                         activeCards={getActiveCard(hands[i].playerId)}
-                        rank={CardImages.Rank_Squire/*hands[0].rank*/}
-                        numShields={5/*curPlayer.shields*/}
                         shield={CardImages.Shield_3}
                         numStages={stageAreas.length}
                     ></PlayerHand>

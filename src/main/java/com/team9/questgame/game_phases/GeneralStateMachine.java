@@ -2,6 +2,7 @@ package com.team9.questgame.game_phases;
 
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.Entities.cards.CardTypes;
+import com.team9.questgame.game_phases.event.EventPhaseController;
 import com.team9.questgame.game_phases.quest.QuestPhaseStateMachine;
 import com.team9.questgame.game_phases.utils.StateMachineObserver;
 import com.team9.questgame.gamemanager.service.OutboundService;
@@ -186,7 +187,6 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE>, Applic
         } else if (isWinnerFound()) {
             nextState = GeneralStateE.ENDED;
         } else if (this.isPhaseEndRequested) {
-            controller.getPlayerTurnService().nextPlayer();
             nextState = GeneralStateE.DRAW_STORY_CARD;
         } else {
             nextState = GeneralStateE.QUEST_PHASE;
@@ -201,7 +201,6 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE>, Applic
         } else if (isWinnerFound()) {
             nextState = GeneralStateE.ENDED;
         } else if (this.isPhaseEndRequested) {
-            controller.getPlayerTurnService().nextPlayer();
             nextState = GeneralStateE.DRAW_STORY_CARD;
         } else {
             nextState = GeneralStateE.EVENT_PHASE;
@@ -216,7 +215,6 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE>, Applic
         } else if (isWinnerFound()) {
             nextState = GeneralStateE.ENDED;
         } else if (this.isPhaseEndRequested) {
-            controller.getPlayerTurnService().nextPlayer();
             nextState = GeneralStateE.DRAW_STORY_CARD;
         } else {
             nextState = GeneralStateE.TOURNAMENT_PHASE;
@@ -288,7 +286,7 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE>, Applic
         setHandOversizeRequested(false);
         setGamePhaseRequested(false);
         setGameStartRequested(false);
-        //setPhaseEndRequested(false);
+        setPhaseEndRequested(false);
     }
 
     public void registerObserver(StateMachineObserver<GeneralStateE> observer) {
@@ -307,4 +305,5 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE>, Applic
     static public GeneralStateMachine getService() {
         return context.getBean(GeneralStateMachine.class);
     }
+
 }

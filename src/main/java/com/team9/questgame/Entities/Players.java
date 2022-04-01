@@ -3,7 +3,6 @@ package com.team9.questgame.Entities;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import com.team9.questgame.ApplicationContextHolder;
 import com.team9.questgame.Data.PlayerData;
 import com.team9.questgame.Entities.cards.*;
 import com.team9.questgame.exception.BadRequestException;
@@ -153,8 +152,8 @@ public class Players {
     }
 
     private void notifyPlayerDataChanged() {
-        NotificationOutbound msg = new NotificationOutbound("Player Promoted To "+rank,String.format("You have spent %d shields and been promoted the the rank %s. You are now one step closer to becoming the newest Knight of the Round Table!",rank.getRankShieldCost(),rank),rank.getImgSrc(),null);
-        NotificationOutbound msgToOthers = new NotificationOutbound("Player Promoted",String.format("The player %s was promoted to the rank %s",name,rank),rank.getImgSrc(),null);
+        NotificationOutbound msg = new NotificationOutbound("Player Promoted To "+rank,String.format("You have spent %d shields and been promoted the the rank %s. You are now one step closer to becoming the newest Knight of the Round Table!",rank.getRankShieldCost(),rank),rank.getRankImgSrc(),null);
+        NotificationOutbound msgToOthers = new NotificationOutbound("Player Promoted",String.format("The player %s was promoted to the rank %s",name,rank),rank.getRankImgSrc(),null);
         NotificationOutboundService.getService().sendGoodNotification(this,msg,null);
         NotificationOutboundService.getService().sendInfoNotification(this,null,msgToOthers);
 
@@ -169,6 +168,7 @@ public class Players {
         playArea.getPlayAreaId(),
         name,
         rank,
+        rank.getRankImgSrc(),
         rank.getRankBattlePointValue(),
         shields
         );

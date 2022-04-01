@@ -22,8 +22,6 @@ import java.util.HashSet;
 
 public class StagePlayAreas implements PlayAreas<AdventureCards>, EffectObserver<AdventureCards> {
 
-    @JsonIgnore
-    private final QuestPhaseOutboundService outboundService;
     private Players sponsor;
     @Getter
     private int stageNum;
@@ -67,7 +65,6 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>, EffectObserver
         allCards = new HashMap<>();
         battlePoints = 0;
         bids = 0;
-        outboundService = ApplicationContextHolder.getContext().getBean(QuestPhaseOutboundService.class);
         cardBoostDependencies = new HashMap<>();
         boostableCards = new HashSet<>();
         cardIdMap = new HashMap<>();
@@ -79,8 +76,6 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>, EffectObserver
         this.targetPlayArea=null;
 
         LOG = LoggerFactory.getLogger(StagePlayAreas.class);
-
-//        notifyStageAreaChanged();
     }
 
     @Override
