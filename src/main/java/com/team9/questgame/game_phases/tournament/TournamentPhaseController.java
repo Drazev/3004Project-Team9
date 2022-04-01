@@ -117,6 +117,8 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
             //if only one person joined, go to resolution
             if(competitors.size() == 1){
                 this.state = TournamentPhaseStatesE.PLAYER_SETUP;
+            }else if(competitors.size() == 0){
+                this.state = TournamentPhaseStatesE.REWARDS;
             }
             nextState();
         }
