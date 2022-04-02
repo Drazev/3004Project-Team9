@@ -213,6 +213,16 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         // TODO: pass in an array of new StagesPlayArea to the validateStageSetup function
         if (!validateStageSetup(stages)) {
             LOG.info("Stage Validation failed");
+            NotificationOutboundService.getService().sendWarningNotification(
+                    sponsor,
+                    new NotificationOutbound(
+                            "Invalid Stage Setup",
+                            "The battle point value of each progressive foe stage must increase. There is also a limit to one test card per Quest. Please correct this by removing or adding weapons to the appropriate cards.",
+                            questCard.getImgSrc(),
+                            null
+                    ),
+                    null
+            );
             return false;
         }
         stagesAreValid = true;
@@ -405,7 +415,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
                         null
                 );
                 maxBidPlayer = player;
-                maxBid = bid;
+                maxBid = totBid;
                 player.getPlayArea().setPlayerTurn(false);
             }
 
@@ -424,7 +434,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
                 p.getPlayArea().setPlayerTurn(false);
                 p.getPlayArea().setQuestTestMode(false);
             }
-            if(maxBidPlayer!=null) {
+            if(maxBidPlayer!=null && (maxBid-maxBidPlayer.getPlayArea().getBids())>0) {
                 Effects testEnd = new TestEndEffect(maxBidPlayer, maxBid);
                 testEnd.setSource((CardWithEffect) stages.get(curStageIndex).getStageCard());
                 testEnd.activate(stages.get(curStageIndex), maxBidPlayer);

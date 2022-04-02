@@ -47,7 +47,7 @@ public class QueensFavorEffect extends Effects {
                 msg+=", and ";
             }
         }
-        msg += ". She awards them 2 shields!";
+        msg += ". She awards them 2 Adventure Cards!";
         for(Players p : possibleTargerts) {
             NotificationOutboundService.getService().sendGoodNotification(p,new NotificationOutbound(source.getCardName(),msg,source.getCard().getImgSrc(),null),null);
         }

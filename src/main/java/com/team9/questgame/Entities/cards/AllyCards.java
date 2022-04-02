@@ -181,4 +181,10 @@ public class AllyCards <T extends Enum<T> & AllCardCodes> extends AdventureCards
         }
         activeEffect.activate(observer,activatingPlayer);
     }
+
+    @Override
+    protected void onLocationChanged() {
+        super.onLocationChanged();
+        setBoosted(false);
+    }
 }
