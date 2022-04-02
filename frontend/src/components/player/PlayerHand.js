@@ -18,7 +18,9 @@ function PlayerHand(props){
 
     useEffect(() => {
         if(props.activeCards.length > 0){
-            setNewTop(prevState => prevState + 70);
+            setNewTop(140);
+        } else {
+            setNewTop(70);
         }
     }, [props.activeCards]);
 

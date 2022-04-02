@@ -8,7 +8,7 @@ import "./Card.css";
 function Card(props){
     const [isBig, setIsBig]=useState(false);
     const [isActiveSelected, setIsActiveSelected]=useState(false);
-    const [isSelected, setSelected]=useState(false);
+    const [isSelected, setSelected] = useState(false);
     const numStages = useStageAreas().length;
     const isSponsoring = useIsSponsoring();
 
@@ -25,9 +25,17 @@ function Card(props){
     //increase size of card when hovering over it and it is allowed to grow
     let size;
     if(isBig && props.canGrow){
-        size = {width: "70px", height: "94px"};
+        size = {width: "90px", height: "auto"};
     }else{
         size = {width: "50px", height: "68px"};
+    }
+
+    const renderDropdownItems = () => {
+        const dropdownItems = [];
+        for (let i=0; i<numStages; i++){
+            dropdownItems.push(<Dropdown.Item key={i} onClick={() => {playCard(props.cardOwner, props.playerID, props.card.cardID, -1, i)} }>Stage {i+1}</Dropdown.Item>);
+        }
+        return dropdownItems
     }
 
     //Actual Card component
@@ -95,11 +103,7 @@ function Card(props){
                 autoClose="inside"
                 variant="secondary">
                     <Dropdown.Item onClick={() => playCard(props.cardOwner, props.playerID, props.card.cardID, -1, -1)}>Your play area</Dropdown.Item>
-                    {(numStages >= 1) && <Dropdown.Item onClick={() => playCard(props.cardOwner, props.playerID, props.card.cardID, -1, 0)}>Stage 1</Dropdown.Item>}
-                    {(numStages >= 2) && <Dropdown.Item onClick={() => playCard(props.cardOwner, props.playerID, props.card.cardID, -1, 1)}>Stage 2</Dropdown.Item>}
-                    {(numStages >= 3) && <Dropdown.Item onClick={() => playCard(props.cardOwner, props.playerID, props.card.cardID, -1, 2)}>Stage 3</Dropdown.Item>}
-                    {(numStages >= 4) && <Dropdown.Item onClick={() => playCard(props.cardOwner, props.playerID, props.card.cardID, -1, 3)}>Stage 4</Dropdown.Item>}
-                    {(numStages >= 5) && <Dropdown.Item onClick={() => playCard(props.cardOwner, props.playerID, props.card.cardID, -1, 3)}>Stage 5</Dropdown.Item>}
+                    {renderDropdownItems()}
                 </DropdownButton>
             }
             {isActiveSelected &&

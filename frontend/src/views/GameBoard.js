@@ -5,7 +5,7 @@ import Popup from "../components/popups/Popup";
 import { drawCard, setupComplete, participantSetupComplete } from "../services/clientSocket";
 import { useName, usePlayerHands, useTurn, useSponsorRequest, useIsSponsoring, useSetIsSponsoring, useJoinRequest, useFoeStageStart, useTestStageStart, usePlayers, useActivePlayers, useHandOversize } from "../stores/generalStore";
 import { usePlayerPlayAreas, useStageAreas } from "../stores/playAreaStore";
-import { useSponsorSearchRequest, useSetSponsorSearchRequest, useQuestJoinRequest, useSetQuestJoinRequest } from "../stores/quest/questRequestStore";
+import { useSponsorSearchRequest, useSetSponsorSearchRequest, useQuestJoinRequest, useSetQuestJoinRequest, useParticipantSetupRequest, useSetParticipantSetupRequest } from "../stores/quest/questRequestStore";
 import { Button } from "react-bootstrap";
 import React, { useState } from "react";
 import "./GameBoard.css";
@@ -24,6 +24,7 @@ function GameBoard({}) {
     const foeStageStart = useFoeStageStart();
     const [sponsorSearchRequest, setSponsorSearchRequest] = [useSponsorSearchRequest(), useSetSponsorSearchRequest()];
     const [questJoinRequest, setQuestJoinRequest] = [useQuestJoinRequest(), useSetQuestJoinRequest()];
+    const [participantSetupRequest, setParticipantSetupRequest] = [useParticipantSetupRequest(), useSetParticipantSetupRequest()];
 
     for(var i = 0; i < activePlayers.length; i++){
             const player = activePlayers[i];
@@ -116,11 +117,12 @@ function GameBoard({}) {
                     </Button>
                 </div>)
             }
-            {foeStageStart && isActive && !handOversize &&
-                (<div id="finish-setup">
+            {participantSetupRequest &&
+                (<div id="participant-setup-complete">
                     <Button
                         onClick={() => {
                             participantSetupComplete(name, myPlayerID);
+                            setParticipantSetupRequest(false);
                             // setPartSetupButton(false);
                         }}>Participant Setup Complete
                     </Button>
