@@ -34,12 +34,10 @@ function PlayerHand(props){
 
     const renderName = () => {
         let description = props.playerName;
-        if (props.playerName === currentTurn) {
-            if (sponsorName == props.playerName) {
-                description += " (sponsoring)";
-            } else {
-                description += " (current turn)";
-            }
+        if (sponsorName === props.playerName) {
+            description += " (sponsoring)";
+        } else if (props.playerName === currentTurn){
+            description += " (current turn)";
         }
         return <p style={{position:"absolute",top:32,left:68}}>{description}</p>    
     }

@@ -25,7 +25,7 @@ function Card(props){
     //increase size of card when hovering over it and it is allowed to grow
     let size;
     if(isBig && props.canGrow){
-        size = {width: "90px", height: "auto"};
+        size = {width: "70px", height: "94px"};
     }else{
         size = {width: "50px", height: "68px"};
     }
