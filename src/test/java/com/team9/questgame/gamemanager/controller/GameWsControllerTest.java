@@ -49,8 +49,8 @@ class GameWsControllerTest {
 
     @BeforeEach
     public void setup() throws ExecutionException, InterruptedException, TimeoutException {
-        assertThat(sessionService.registerPlayer("A")).isTrue();
-        assertThat(sessionService.registerPlayer("B")).isTrue();
+        assertThat(sessionService.registerPlayer("A")).isNotNull();
+        assertThat(sessionService.registerPlayer("B")).isNotNull();
 
         stompClientA = new WebSocketStompClient(new SockJsClient(List.of(new WebSocketTransport(new StandardWebSocketClient()))));
         stompClientB = new WebSocketStompClient(new SockJsClient(List.of(new WebSocketTransport(new StandardWebSocketClient()))));

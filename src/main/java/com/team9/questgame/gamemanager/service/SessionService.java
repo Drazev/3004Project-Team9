@@ -37,11 +37,11 @@ public class SessionService implements ApplicationContextAware {
      * Register a new player
      *
      * @param name name of the player
-     * @return true if the name is successfully registered, false if name already exists
+     * @return a player if the player is registered successfully, null if the player already exists
      */
-    public synchronized boolean registerPlayer(String name) {
+    public synchronized Players registerPlayer(String name) {
         if (sessionMap.containsKey(name)) {
-            return false;
+            return null;
         } else {
             String randomId = UUID.randomUUID().toString();
             Players newPlayer = new Players(name);
@@ -49,8 +49,8 @@ public class SessionService implements ApplicationContextAware {
             playerMap.put(name, newPlayer);
             sessionToPlayerMap.put(randomId,newPlayer);
             playerToSessionMap.put(newPlayer,randomId);
-            //newPlayer.onGameReset(); //Reset's game state, and brodcasts
-            return true;
+            //newPlayer.onGameReset(); //Reset's game state, and broadcast
+            return newPlayer;
         }
     }
 

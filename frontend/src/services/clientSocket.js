@@ -30,6 +30,10 @@ export async function connect() {
     if (!body.confirmed || body.name !== generalStore().name) {
         console.log("Connection declined or unmatch name");
         return false;
+    } else {
+        console.log("Registration successful");
+        generalStore().setName(body.playerData.name)
+        generalStore().setId(body.playerData.playerId);
     }
 
     // Perform handshake with the registered name

@@ -79,6 +79,11 @@ export const dispatchFoeStageStart = (body) => {
 
     generalStore().setActivePlayers(body.remainingPlayers);
     generalStore().setFoeStageStart(true);
+
+    // Only the remaining participants can setup 
+    if (body.remainingPlayers.find(player => player.name === generalStore().name) !== undefined) {
+        questRequestStore().setParticipantSetupRequest(true);
+    }
 }
 
 export const dispatchTestStageStart = (body) => {

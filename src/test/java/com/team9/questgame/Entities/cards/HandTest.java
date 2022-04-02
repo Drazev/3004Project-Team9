@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team9.questgame.ApplicationContextHolder;
 import com.team9.questgame.Data.CardData;
 import com.team9.questgame.Entities.Players;
-import com.team9.questgame.exception.BadRequestException;
 import com.team9.questgame.game_phases.GeneralGameController;
 import com.team9.questgame.game_phases.GeneralStateE;
 import com.team9.questgame.game_phases.quest.QuestPhaseController;
@@ -25,6 +24,7 @@ import java.util.HashSet;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class HandTest {
@@ -151,10 +151,6 @@ class HandTest {
         assert(hand.generateCardData().size()==0);
         LOG.info("Hand Printout: \n"+objMap.writerWithDefaultPrettyPrinter().writeValueAsString(hand));
 
-    }
-
-    @Test
-    void testDiscardCard() {
     }
 
     @Test
