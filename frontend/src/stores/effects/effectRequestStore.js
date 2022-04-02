@@ -1,18 +1,18 @@
 import create from "zustand";
 
 export const useStore = create((set) => ({
-    stageTargetSelectionRequest: true,
+    stageTargetSelectionRequest: false,
     stageTargetSelectionRequestBody: {
         // requestID : 2,
         // requestPlayerID: 1,
         // requestCardCode: "MERLIN",
         // responseType:  "STAGE_TARGET_SELECTION" //Can also be CARD_TARGET_SELECTION for mordred
     },
-    cardTargetSelectionRequest: true,
+    cardTargetSelectionRequest: false,
     cardTargetSelectionRequestBody: {
         // requestID : 2,
         // requestPlayerID: 1,
-        // requestCardCode: "MERLIN",
+        // requestCardCode: "MORDRED",
         // responseType:  "CARD_TARGET_SELECTION" //Can also be CARD_TARGET_SELECTION for mordred
     },
     setStageTargetSelectionRequest: (x) => set(() => ({stageTargetSelectionRequest: x})),
