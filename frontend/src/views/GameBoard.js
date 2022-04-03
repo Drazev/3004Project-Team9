@@ -6,6 +6,7 @@ import { drawCard, setupComplete, participantSetupComplete } from "../services/c
 import { useName, usePlayerHands, useTurn, useSponsorRequest, useIsSponsoring, useSetIsSponsoring, useJoinRequest, useFoeStageStart, useTestStageStart, usePlayers, useActivePlayers, useHandOversize } from "../stores/generalStore";
 import { usePlayerPlayAreas, useStageAreas } from "../stores/playAreaStore";
 import { useSponsorSearchRequest, useSetSponsorSearchRequest, useQuestJoinRequest, useSetQuestJoinRequest, useParticipantSetupRequest, useSetParticipantSetupRequest } from "../stores/quest/questRequestStore";
+import { useCardTargetSelectionRequest, useSetCardTargetSelectionRequest, useStageTargetSelectionRequest, useSetStageTargetSelectionRequest } from "../stores/effects/effectRequestStore";
 import { Button } from "react-bootstrap";
 import React, { useState } from "react";
 import "./GameBoard.css";
