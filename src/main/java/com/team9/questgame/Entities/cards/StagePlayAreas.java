@@ -103,6 +103,7 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>, EffectObserver
             LOG.error("RULE: A test card must be the only card in the stage");
             throw new CardAreaException(CardAreaException.CardAreaExceptionReasonCodes.RULE_TEST_MUST_BE_ONLY_CARD_IN_STAGE);
         }
+
         allCards.put(card.getCardCode(),  card);
         cardIdMap.put(card.getCardID(), card);
 
@@ -293,8 +294,20 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>, EffectObserver
     @Override
     public void registerBoostableCard(BoostableCard card) {
         boostableCards.add(card);
-        if(questCard.getBoostedFoe() == card.getCardCode()){
+
+        if(questCard.getBoostedFoe()==GlobalCardTargets.ALL_FOES) {
             card.setBoosted(true);
+            updateBattlePoints();
+        }
+        else if(questCard.getBoostedFoe() == card.getCardCode()){
+            card.setBoosted(true);
+            updateBattlePoints();
+        }
+        else if(questCard.getBoostedFoe()==GlobalCardTargets.ALL_SAXONS) {
+            if(String.valueOf(card.getCardCode()).contains("SAXON")) {
+                card.setBoosted(true);
+                updateBattlePoints();
+            }
         }
     }
 

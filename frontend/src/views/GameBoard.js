@@ -6,7 +6,8 @@ import { drawCard, setupComplete, participantSetupComplete, tournamentSetupCompl
 import { useName, usePlayerHands, useTurn, useSponsorRequest, useIsSponsoring, useSetIsSponsoring, useJoinRequest, useFoeStageStart, useTestStageStart, usePlayers, useActivePlayers, useHandOversize } from "../stores/generalStore";
 import { usePlayerPlayAreas, useStageAreas } from "../stores/playAreaStore";
 import { useTournamentJoinRequest, useSetTournamentJoinRequest, useTournamentStageStart, useTournamentSetup, useSetTournamentSetup } from "../stores/tournamentStore";
-import { useSponsorSearchRequest, useSetSponsorSearchRequest, useQuestJoinRequest, useSetQuestJoinRequest } from "../stores/quest/questRequestStore";
+import { useSponsorSearchRequest, useSetSponsorSearchRequest, useQuestJoinRequest, useSetQuestJoinRequest, useParticipantSetupRequest, useSetParticipantSetupRequest } from "../stores/quest/questRequestStore";
+import { useCardTargetSelectionRequest, useSetCardTargetSelectionRequest, useStageTargetSelectionRequest, useSetStageTargetSelectionRequest } from "../stores/effects/effectRequestStore";
 import { Button } from "react-bootstrap";
 import React, { useState } from "react";
 import "./GameBoard.css";
@@ -23,18 +24,16 @@ function GameBoard({}) {
     const active = usePlayerPlayAreas();
     const stageAreas = useStageAreas();
     const turn = useTurn();
-    const players = usePlayers();
-    const sponsorRequest = useSponsorRequest();
     const isSponsoring = useIsSponsoring();
     const setIsSponsoring = useSetIsSponsoring();
-    const joinRequest = useJoinRequest();
     const [isActive, setIsActive] = useState(false);
     const foeStageStart = useFoeStageStart();
     const [sponsorSearchRequest, setSponsorSearchRequest] = [useSponsorSearchRequest(), useSetSponsorSearchRequest()];
     const [questJoinRequest, setQuestJoinRequest] = [useQuestJoinRequest(), useSetQuestJoinRequest()];
+    const [participantSetupRequest, setParticipantSetupRequest] = [useParticipantSetupRequest(), useSetParticipantSetupRequest()];
 
     for(var i = 0; i < activePlayers.length; i++){
-        const player = activePlayers[i];
+            const player = activePlayers[i];
         console.log(JSON.stringify(player) + " " + name);
         if(player.name === name && isActive == false){
             setIsActive(true);
@@ -139,11 +138,12 @@ function GameBoard({}) {
                     </Button>
                 </div>)
             }
-            {foeStageStart && isActive && !handOversize &&
-                (<div id="finish-setup">
+            {participantSetupRequest &&
+                (<div id="participant-setup-complete">
                     <Button
                         onClick={() => {
                             participantSetupComplete(name, myPlayerID);
+                            setParticipantSetupRequest(false);
                             // setPartSetupButton(false);
                         }}>Participant Setup Complete
                     </Button>

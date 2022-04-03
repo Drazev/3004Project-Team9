@@ -3,6 +3,7 @@ import SockJS from "sockjs-client";
 import * as notificationDispatcher from "../utilities/notificationDispatcher";
 import * as questDispatcher from "../utilities/questDispatcher";
 import * as tournamentDispatcher from "../utilities/tournamentDispatcher"
+import * as effectDispatcher from "../utilities/effectDispatcher";
 import { generalStore } from "../stores/generalStore";
 import { playAreaStore } from "../stores/playAreaStore";
 import { playerStore } from "../stores/playerStore";
@@ -31,6 +32,10 @@ export async function connect() {
     if (!body.confirmed || body.name !== generalStore().name) {
         console.log("Connection declined or unmatch name");
         return false;
+    } else {
+        console.log("Registration successful");
+        generalStore().setName(body.playerData.name)
+        generalStore().setId(body.playerData.playerId);
     }
 
     // Perform handshake with the registered name
@@ -254,6 +259,10 @@ export async function connect() {
             questDispatcher.dispatchQuestJoinRequest(JSON.parse(message.body));
         });
 
+        client.subscribe("/user/topic/effects/target-selection-request", (message) => {
+            effectDispatcher.dispatchTargetSelectionRequest(JSON.parse(message.body));
+        });
+
         client.subscribe("/user/topic/notification/good", (message) => {
             notificationDispatcher.dispatchGoodNotification(JSON.parse(message.body))
         });
@@ -453,6 +462,31 @@ export function participantSetupComplete(name, playerID) {
         body: JSON.stringify({
             name: name,
             playerID: playerID
+        })
+    });
+}
+
+export function cardTargetSelectionRespond(requestId, requestPlayerID, targetPlayerID, targetCardID) {
+    console.log(`cardTargetSelectionRespond requestId=${requestId} requestPlayerID=${requestPlayerID} targetPlayerID=${targetPlayerID} targetCardID=${targetCardID}`);
+    client.publish({
+        destination: "/app/effects/card-target-selection-response",
+        body: JSON.stringify({
+            requestID: requestId, //Must match original requestID
+            requestPlayerID: requestPlayerID, //Must match original request
+            targetPlayerID: targetPlayerID,
+            targetCardID: targetCardID
+        }
+    )});
+}
+
+export function stageTargetSelectionRepsonse(requestID, requestPlayerID, targetStageID) {
+    console.log(`stageTargetSelectionRepsonse requestID=${requestID} requestPlayerID=${requestPlayerID} targetStageID=${targetStageID}`);
+    client.publish({
+        destination: "/app/effects/stage-target-selection-response",
+        body: JSON.stringify({
+            requestID: requestID, //Must match original requestID
+            requestPlayerID: requestPlayerID, //Must match original request
+            targetStageID: targetStageID
         })
     });
 }

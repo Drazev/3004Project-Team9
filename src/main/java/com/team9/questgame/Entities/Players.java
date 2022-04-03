@@ -137,7 +137,7 @@ public class Players {
     private void updateRank() {
         boolean rankUp=false;
 
-        while(shields>=rank.getNextRankCost()) {
+        while(shields>0 && shields>=rank.getNextRankCost()) {
             rankUp=true;
             shields-=rank.getNextRankCost();
             rank=rank.getNextRank();
@@ -147,17 +147,20 @@ public class Players {
 
         if(rankUp) {
             playArea.update();
+            notifyPlayerRankChanged();
             notifyPlayerDataChanged();
         }
     }
 
     private void notifyPlayerDataChanged() {
+        OutboundService.getService().broadcastPlayerDataChanged(this,generatePlayerData());
+    }
+
+    private void notifyPlayerRankChanged() {
         NotificationOutbound msg = new NotificationOutbound("Player Promoted To "+rank,String.format("You have spent %d shields and been promoted the the rank %s. You are now one step closer to becoming the newest Knight of the Round Table!",rank.getRankShieldCost(),rank),rank.getRankImgSrc(),null);
         NotificationOutbound msgToOthers = new NotificationOutbound("Player Promoted",String.format("The player %s was promoted to the rank %s",name,rank),rank.getRankImgSrc(),null);
         NotificationOutboundService.getService().sendGoodNotification(this,msg,null);
         NotificationOutboundService.getService().sendInfoNotification(this,null,msgToOthers);
-
-        OutboundService.getService().broadcastPlayerDataChanged(this,generatePlayerData());
     }
 
     public PlayerData generatePlayerData() {

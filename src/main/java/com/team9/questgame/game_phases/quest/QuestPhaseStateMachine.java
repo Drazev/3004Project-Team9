@@ -201,7 +201,7 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE>,
 
     public QuestPhaseStatesE inTestState(){
         if(!controller.isNextStageTest()){
-            if(controller.getCurStageIndex() > controller.getCard().getStages()){
+            if(controller.getCurStageIndex() >= controller.getCard().getStages()){
                 return QuestPhaseStatesE.ENDED;
             }else{
                 return QuestPhaseStatesE.PARTICIPANT_SETUP;

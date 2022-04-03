@@ -210,9 +210,9 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
 
 
     public void playerPlayCard(Players player, long cardId) {
-        if (!getStateMachine().isInPhases() && !getStateMachine().isBlocked()) {
-            throw new IllegalGameStateException("Card can only be played in a Game Phases or when it's HAND_OVERSIZE");
-        }
+//        if (!getStateMachine().isInPhases() && !getStateMachine().isBlocked()) {
+//            throw new IllegalGameStateException("Card can only be played in a Game Phases or when it's HAND_OVERSIZE");
+//        }
 
 
         player.actionPlayCard(cardId);

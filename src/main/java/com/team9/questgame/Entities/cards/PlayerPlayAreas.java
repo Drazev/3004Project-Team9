@@ -39,6 +39,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards>, EffectObserve
     private int bids;
     private int battlePoints;
     private boolean isSponsorMode;
+    private boolean isQuestTestMode;
     private HashMap<CardTypes, HashSet<AdventureCards>> cardTypeMap;
     private HashMap<AllCardCodes,AdventureCards> allCards;
     @Getter
@@ -71,6 +72,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards>, EffectObserve
         targetPlayArea=null;
         isPlayersTurn =false;
         isSponsorMode=false;
+        isQuestTestMode=false;
         bids=0;
         battlePoints=0;
         LOG = LoggerFactory.getLogger(PlayerPlayAreas.class);
@@ -111,6 +113,16 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards>, EffectObserve
         }
     }
 
+    public void setQuestTestMode(boolean isQuestTestMode) {
+        if(phaseController==null) {
+            throw new CardAreaException(GAMEPHASE_NOT_REGISTERED);
+        }
+        //If this is called, then the sponsor phase is over and cards should only be played into players play area
+        targetPlayArea=null;
+        isSponsorMode=false;
+        this.isQuestTestMode=isQuestTestMode;
+    }
+
     /**
      * Sets PlayerPlayArea to sponsor mode.
      * All Weapon, Foe, and Test cards are directed to the target
@@ -123,6 +135,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards>, EffectObserve
         }
         this.isSponsorMode=isInSponsorMode;
         this.isPlayersTurn=false;
+        this.isQuestTestMode=false;
     }
 
     /**
@@ -265,7 +278,11 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards>, EffectObserve
                         rc=card.playCard(targetPlayArea);
                         break;
                     }
-                } //This should flow through to default and check non-sponsor play conditions
+                }
+                else if(isQuestTestMode) {
+                    return false; //Can't play weapons during test phase. They have no bid value
+                }
+                //This should flow through to default and check non-sponsor play conditions
             default:
                 if(isPlayersTurn) {
                     rc = addToPlayArea(card);
@@ -433,6 +450,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards>, EffectObserve
         questCard=null;
         targetPlayArea=null;
         isSponsorMode=false;
+        isQuestTestMode=false;
         update();
     }
 
@@ -491,6 +509,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards>, EffectObserve
         faceDownCards.clear();
         isPlayersTurn =false;
         isSponsorMode=false;
+        isQuestTestMode=false;
         update();
     }
 

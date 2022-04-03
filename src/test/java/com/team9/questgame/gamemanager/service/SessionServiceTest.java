@@ -30,12 +30,12 @@ class SessionServiceTest {
         //sessionService = new SessionService();
 
         for (int i = 0; i < repetitions; i++) {
-            assertTrue(sessionService.registerPlayer(Integer.toString(i)));
+            assertNotNull(sessionService.registerPlayer(Integer.toString(i)));
         }
         assertEquals(sessionService.getSessionMap().size(), repetitions);
 
         for (int i = 0; i < repetitions; i++) {
-            assertFalse(sessionService.registerPlayer(Integer.toString(i)));
+            assertNull(sessionService.registerPlayer(Integer.toString(i)));
         }
         assertEquals(sessionService.getSessionMap().size(), repetitions);
 

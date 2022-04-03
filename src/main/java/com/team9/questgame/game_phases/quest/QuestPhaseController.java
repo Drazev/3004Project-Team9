@@ -213,6 +213,16 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         // TODO: pass in an array of new StagesPlayArea to the validateStageSetup function
         if (!validateStageSetup(stages)) {
             LOG.info("Stage Validation failed");
+            NotificationOutboundService.getService().sendWarningNotification(
+                    sponsor,
+                    new NotificationOutbound(
+                            "Invalid Stage Setup",
+                            "The battle point value of each progressive foe stage must increase. There is also a limit to one test card per Quest. Please correct this by removing or adding weapons to the appropriate cards.",
+                            questCard.getImgSrc(),
+                            null
+                    ),
+                    null
+            );
             return false;
         }
         stagesAreValid = true;
@@ -344,7 +354,8 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
             playerTurnService.nextPlayer();
         }
         QuestPhaseOutboundService.getService().broadcastTestStageStart(new RemainingQuestorsOutbound(generateQuestorData(), curStageIndex));
-        maxBid =Math.max(stages.get(curStageIndex).getBids(), 3) ;
+        maxBid = stages.get(curStageIndex).getBids() > 0 ? stages.get(curStageIndex).getBids()-1 : 0; //The first player can bid the min bid value. Pretend we already have a bid of minBids-1 or zero if there is no min bid.
+        maxBidPlayer=null;
         QuestPhaseOutboundService.getService().broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, null));
         StagePlayAreas currStage = stages.get(curStageIndex);
         HashSet<Players> pList=stageVisibleToPlayersList.get(currStage);
@@ -353,6 +364,11 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         }
         pList.addAll(playerTurnService.getPlayers()); //Make stage visible to all players on resolution
         currStage.notifyStageAreaChanged();
+        for(Players p : playerTurnService.getPlayers()) {
+            p.getPlayArea().setPlayerTurn(true);
+            p.getPlayArea().setQuestTestMode(true);
+        }
+
     }
 
     public void checkTestBidResponse(Players player, int bid){
@@ -362,64 +378,100 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         if(player.getPlayerId() != playerTurnService.getPlayerTurn().getPlayerId()){
             throw new IllegalGameRequest("It must be the players turn for them to bid", player);
         }
+        else if(bid<0) {
+            if(maxBidPlayer == null){
+                QuestPhaseOutboundService.getService().broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, null));
+            }
+            else{
+                QuestPhaseOutboundService.getService().broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, maxBidPlayer.generatePlayerData()));
+            }
+        }
 
-        //maybe set minimum bid on test card reveal as current max and anyone with less than that is kicked
-        if((bid < maxBid && maxBidPlayer == null) || (bid <= maxBid && maxBidPlayer !=null)){
+        int totBid = bid+player.getPlayArea().getBids();
+
+        //Check for disqualification. Disqualified if you don't bid more than then the current bid;
+        if(totBid <= maxBid) {
             questingPlayers.remove(player);
             NotificationOutboundService.getService().sendBadNotification(
                     player,
                     new NotificationOutbound("Test Stage Defeat","Your bid was deemed unworthy. Alas, you cannot continue your journey and must head home.","",null),
                     null
             );
-        }else if (bid > (player.getHand().getHandSize()+player.getPlayArea().getBids())){
-            NotificationOutboundService.getService().sendBadNotification(player,
-                    new NotificationOutbound("Bid Too Large", "You bid more cards than you can discard, try again","",null),
-                    null
-            );
-            if(maxBidPlayer == null){
-                QuestPhaseOutboundService.getService().broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, null));
-            }else{
-                QuestPhaseOutboundService.getService().broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, maxBidPlayer.generatePlayerData()));
+        }
+        else {
+            //Check to make sure player can honor their bid (Had enough Cards in hand)
+            if(player.getHand().getHandSize() < bid) {
+                NotificationOutboundService.getService().sendBadNotification(player,
+                        new NotificationOutbound("Bid Too Large", "You bid more cards than you can discard, try again","",null),
+                        null
+                );
+                if(maxBidPlayer == null){
+                    QuestPhaseOutboundService.getService().broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, null));
+                }
+                else{
+                    QuestPhaseOutboundService.getService().broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, maxBidPlayer.generatePlayerData()));
+                }
+                return;
             }
-            return;
-        }else{
-            maxBidPlayer = player;
-            maxBid = bid;
+            else {
+                NotificationOutboundService.getService().sendGoodNotification(
+                        sponsor,
+                        new NotificationOutbound("Bid Accepted","Your bid was accepted.","",null),
+                        null
+                );
+                maxBidPlayer = player;
+                maxBid = totBid;
+                player.getPlayArea().setPlayerTurn(false);
+            }
+
         }
 
-        if(questingPlayers.size() == 1){
+        if(questingPlayers.size() <= 1){
             QuestPhaseOutboundService.getService().broadcastStageResult(new RemainingQuestorsOutbound(generateQuestorData(), curStageIndex));
             //TODO:make maxBidPlayer discard maxBid-maxBidPlayer.getPlayerPlayArea().getBattlePoints() cards
-            Effects testEnd = new TestEndEffect(maxBidPlayer, maxBid - maxBidPlayer.getPlayArea().getBids());
-            testEnd.setSource((CardWithEffect) stages.get(curStageIndex).getStageCard());
-            testEnd.activate(stages.get(curStageIndex), maxBidPlayer);
-            //EffectResolverService.getService().forcePlayerDiscards(null, maxBidPlayer,maxBid-maxBidPlayer.getPlayArea().getBids());
             curStageIndex++;
-        }else{
+            NotificationOutboundService.getService().sendInfoNotification(
+                    sponsor,
+                    new NotificationOutbound("Test Stage Bidding Closed","A winner has been chosen! They must now honor their bids by discarding the necessary cards!","",null),
+                    null
+            );
+            for(Players p : playerTurnService.getPlayers()) {
+                p.getPlayArea().setPlayerTurn(false);
+                p.getPlayArea().setQuestTestMode(false);
+            }
+            if(maxBidPlayer!=null && (maxBid-maxBidPlayer.getPlayArea().getBids())>0) {
+                Effects testEnd = new TestEndEffect(maxBidPlayer, maxBid);
+                testEnd.setSource((CardWithEffect) stages.get(curStageIndex).getStageCard());
+                testEnd.activate(stages.get(curStageIndex), maxBidPlayer);
+            }
+            else {
+                testResolved();
+            }
+        }
+        else{
             do{
                 playerTurnService.nextPlayer();
-            }while(playerTurnService.getPlayerTurn().getPlayerId() == sponsor.getPlayerId() || !questingPlayers.contains(playerTurnService.getPlayerTurn()));
+            }
+            while(playerTurnService.getPlayerTurn().getPlayerId() == sponsor.getPlayerId() || !questingPlayers.contains(playerTurnService.getPlayerTurn()));
+
+            playerTurnService.getPlayerTurn().getPlayArea().setPlayerTurn(true);
             if(maxBidPlayer == null){
                 QuestPhaseOutboundService.getService().broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, null));
             }else{
                 QuestPhaseOutboundService.getService().broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, maxBidPlayer.generatePlayerData()));
             }
         }
-
-//        switch (stateMachine.getCurrentState()) {
-//            case IN_TEST -> {
-//
-//            } case PARTICIPANT_SETUP -> {
-//                participantSetup();
-//            } case ENDED -> {
-//                endPhase();
-//            } default -> {
-//                throw new IllegalQuestPhaseStateException("Unknown state");
-//            }
-//        }
     }
 
     public void testResolved(){
+        if(maxBidPlayer!=null) {
+            NotificationOutboundService.getService().sendGoodNotification(
+                    maxBidPlayer,
+                    new NotificationOutbound("Test Stage Victory","You have successfully overcome the test!","",null),
+                    null
+            );
+            maxBidPlayer=null;
+        }
         checkForTest();
         stateMachine.update();
     }
@@ -445,17 +497,6 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         participantSetupResponses++;
         player.getPlayArea(). setPlayerTurn(false);
         stateMachine.update();
-//        switch (stateMachine.getCurrentState()){
-//            case PARTICIPANT_SETUP -> {
-//                return;
-//            } case IN_STAGE -> {
-//                resolveStage(curStageIndex);
-//            } case ENDED -> {
-//                endPhase();
-//            } default -> {
-//                throw new IllegalQuestPhaseStateException("Unknown state");
-//            }
-//        }
     }
 
     private void resolveStage(int stageNum){
@@ -488,15 +529,6 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         curStageIndex++;
         checkForTest();
         stateMachine.update();
-//        switch (stateMachine.getCurrentState()){
-//            case PARTICIPANT_SETUP -> {
-//                participantSetup();
-//            } case ENDED -> {
-//                endPhase();
-//            } default ->{
-//                throw new IllegalQuestPhaseStateException("Unknown state");
-//            }
-//        }
     }
 
     /**
@@ -517,20 +549,8 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         if (stateMachine.getCurrentState() != QuestPhaseStatesE.ENDED) {
             throw new IllegalQuestPhaseStateException("Cannot end phase when it's not in ENDED state");
         }
-
-//        if(questingPlayers.size() > 0 ||(sponsor != null && minJoin)){
-//            distributeRewards();
-//            QuestPhaseOutboundService.getService().broadcastQuestEnded(new QuestEndedOutbound(generateQuestorData()));
-//        } else if(sponsor != null && !minJoin){
-//            distributeRewards();
-//            // TODO: broadcast no one joined quest, so quest ended
-//            QuestPhaseOutboundService.getService().broadcastQuestEnded(new QuestEndedOutbound(generateQuestorData()));
-//        }else {
-//            //TODO: broadcast no sponsor found
-//        }
         QuestPhaseOutboundService.getService().broadcastQuestEnded(new QuestEndedOutbound(generateQuestorData()));
 
-//        effectResolverService.onQuestCompleted(questingPlayers);
         for(Players p : this.playerTurnService.getPlayers()) {
             p.getPlayArea().onGamePhaseEnded();
         }
@@ -538,16 +558,6 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
             stage.onGameReset();
         }
         this.stages.clear();
-        //cleanup stuff, uncomment if not done elsewhere
-//        playerTurnService = null;
-//        sponsor = null;
-//        sponsorAttempts = 0;
-//        joinAttempts = 0;
-//        numParticipants = 0;
-//        stagesAreValid = false;
-//        nextStageTest = false;
-//        maxBidPlayer = null;
-//        maxBid=0;
         this.stageVisibleToPlayersList.clear();
         this.cardIDUsedToRevealStage.clear();
         stateMachine.setPhaseReset(true);

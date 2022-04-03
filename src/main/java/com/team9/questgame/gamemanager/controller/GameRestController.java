@@ -1,6 +1,7 @@
 package com.team9.questgame.gamemanager.controller;
 
 
+import com.team9.questgame.Entities.Players;
 import com.team9.questgame.exception.BadRequestException;
 import com.team9.questgame.gamemanager.record.rest.GameStartResponse;
 import com.team9.questgame.gamemanager.record.rest.RegistrationRequest;
@@ -45,11 +46,13 @@ public class GameRestController {
     @PostMapping("/register")
     public RegistrationResponse handleRegister(@RequestBody RegistrationRequest requestBody) {
         LOG.info(String.format("POST /api/register: requestBody = %s", requestBody));
-        boolean registrationConfirmed = sessionService.registerPlayer(requestBody.name());
-        if (registrationConfirmed) {
+        Players registeredPlayer = sessionService.registerPlayer(requestBody.name());
+        if (registeredPlayer != null) {
             outboundService.broadcastPlayerConnect();
+            return new RegistrationResponse(true, requestBody.name(), registeredPlayer.generatePlayerData());
+        } else {
+            return new RegistrationResponse(false, requestBody.name(), registeredPlayer.generatePlayerData());
         }
-        return new RegistrationResponse(registrationConfirmed, requestBody.name());
     }
 
     /**
@@ -78,7 +81,7 @@ public class GameRestController {
             outboundService.broadcastPlayerDisconnect();
         }
 
-        return new RegistrationResponse(confirmed, requestName);
+        return new RegistrationResponse(confirmed, requestName, null);
     }
 
     /**

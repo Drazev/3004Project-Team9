@@ -105,4 +105,10 @@ public class FoeCards extends AdventureCards implements BoostableCard, BattlePoi
         }
         activeEffect.activate(observer,activatingPlayer);
     }
+
+    @Override
+    protected void onLocationChanged() {
+        super.onLocationChanged();
+        setBoosted(false);
+    }
 }
