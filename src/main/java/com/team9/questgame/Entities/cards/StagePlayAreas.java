@@ -294,9 +294,20 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>, EffectObserver
     @Override
     public void registerBoostableCard(BoostableCard card) {
         boostableCards.add(card);
-        if(questCard.getBoostedFoe() == card.getCardCode()){
+
+        if(questCard.getBoostedFoe()==GlobalCardTargets.ALL_FOES) {
             card.setBoosted(true);
             updateBattlePoints();
+        }
+        else if(questCard.getBoostedFoe() == card.getCardCode()){
+            card.setBoosted(true);
+            updateBattlePoints();
+        }
+        else if(questCard.getBoostedFoe()==GlobalCardTargets.ALL_SAXONS) {
+            if(String.valueOf(card.getCardCode()).contains("SAXON")) {
+                card.setBoosted(true);
+                updateBattlePoints();
+            }
         }
     }
 
