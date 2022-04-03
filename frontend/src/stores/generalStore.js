@@ -5,6 +5,7 @@ export const useStore = create((set) => ({
   connected: false,
   gameStarted: false,
   name: "",
+  id: "",
   players: [],
   hands: [],
   events: "",
@@ -26,6 +27,7 @@ export const useStore = create((set) => ({
   },
   setConnected: (connected) => set(() => ({ connected: connected })),
   setName: (name) => set(() => ({ name: name })),
+  setId: (id) => set(() => ({ id: id })),
   setTurn: (name) => set(() => ({ turn: name })),
   setIsSponsoring: (x) => set(() => ({isSponsoring: x})),
   setSponsorName: (name) => set(() => ({ sponsorName: name })),
@@ -110,6 +112,7 @@ export const generalStore = () => useStore.getState();
 export const useTitle = () => useStore((state) => state.title);
 export const useConnected = () => useStore((state) => state.connected);
 export const useName = () => useStore((state) => state.name);
+export const useId = () => useStore((state) => state.id);
 export const useMessages = () => useStore((state) => state.messages);
 export const useGameStarted = () => useStore((state) => state.gameStarted);
 export const usePlayerHands = () => useStore((state) => state.hands);
@@ -135,6 +138,7 @@ export const useSponsorName = () => useStore((state) => state.sponsorName);
 export const useSetConnected = () => useStore((state) => state.setConnected);
 export const useSetGameStarted = () => useStore((state) => state.setGameStarted);
 export const useSetName = () => useStore((state) => state.setName);
+export const useSetId = () => useStore((state) => state.setId);
 export const useAddNewMessage = () => useStore((state) => state.addNewMessage);
 export const useUpdateHand = () => useStore((state) => state.updateHand);
 export const useUpdatePlayer = () => useStore((state) => state.updatePlayer);

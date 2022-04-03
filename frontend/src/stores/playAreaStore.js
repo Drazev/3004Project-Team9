@@ -1,9 +1,10 @@
 import create from 'zustand';
 
-export const useStore = create((set) => ({
+export const useStore = create((set, get) => ({
     playerPlayAreas: [],
     stageAreas: [],
     currentStage: 0,
+    getPlayerPlayArea: (playerId) => get().playerPlayAreas.find(playArea => playArea.id === playerId),
     setStageAreas: (stageAreas) => set(() => ({ stageAreas: stageAreas })),
     updatePlayerPlayArea: (playAreaData) => set((current) => ({
         playerPlayAreas: (() => {
@@ -56,6 +57,7 @@ export const playAreaStore = () => useStore.getState();
 export const usePlayerPlayAreas = () => useStore((state) => state.playerPlayAreas);
 export const useStageAreas = () => useStore((state) => state.stageAreas);
 export const useCurrentStage = () => useStore((state) => state.currentStage);
+export const useGetPlayerPlayArea = (id) => useStore((state) => state.getPlayerPlayArea(id));
 
 export const useUpdatePlayerPlayArea = () => useStore((state) => state.updatePlayerPlayArea)
 export const useUpdateStageArea = () => useStore((state) => state.updateStageArea);
