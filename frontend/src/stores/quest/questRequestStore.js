@@ -34,4 +34,4 @@ export const useSetSponsorSearchRequest = () => useStore((state) => state.setSpo
 export const useSetQuestJoinRequest = () => useStore((state) => state.setQuestJoinRequest);
 export const useSetBidRequest = () => useStore((state) => state.setBidRequest);
 export const useSetParticipantSetupRequest = () => useStore((state) => state.setParticipantSetupRequest);
-export const useSetBidRequestSetup = () => useStore((state) => state.bidRequestSetup);
+export const useSetBidRequestSetup = () => useStore((state) => state.setBidRequestSetup);
