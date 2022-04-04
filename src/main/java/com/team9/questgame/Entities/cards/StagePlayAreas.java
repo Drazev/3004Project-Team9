@@ -171,6 +171,7 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>, EffectObserver
         battlePoints=0;
         stageCard=null;
         targetPlayArea=null;
+        hasFoe=false;
         updateBattlePoints();
         return rc;
     }
