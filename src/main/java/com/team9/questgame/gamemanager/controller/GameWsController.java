@@ -1,6 +1,10 @@
 package com.team9.questgame.gamemanager.controller;
 
 import com.team9.questgame.Entities.Effects.EffectResolverService;
+import com.team9.questgame.gamemanager.record.socket.CardTargetSelectionResponse;
+import com.team9.questgame.gamemanager.record.socket.CardUpdateInbound;
+import com.team9.questgame.gamemanager.record.socket.PlayerPlayCardInbound;
+import com.team9.questgame.gamemanager.record.socket.StageTargetSelectionResponse;
 import com.team9.questgame.gamemanager.record.socket.*;
 import com.team9.questgame.gamemanager.service.InboundService;
 import org.slf4j.Logger;
@@ -32,8 +36,12 @@ public class GameWsController {
 
     @MessageMapping("/general/player-play-card")
     public void handlePlayerPlayCard(PlayerPlayCardInbound playerPlayCardInbound) {
-        LOG.info(String.format("P"));
-        inboundService.playerPlayCard(playerPlayCardInbound);
+        inboundService.playerPlayCard(playerPlayCardInbound.playerID(), playerPlayCardInbound.cardId());
+    }
+
+    @MessageMapping("/general/player-activate-card")
+    public void handlePlayerActivateCard(PlayerPlayCardInbound playerPlayCardInbound) {
+        inboundService.playerActivateCard(playerPlayCardInbound.playerID(), playerPlayCardInbound.cardId());
     }
 
     @MessageMapping("/effects/card-target-selection-response")

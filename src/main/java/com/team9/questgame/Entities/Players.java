@@ -124,7 +124,7 @@ public class Players {
     }
 
     public void actionActivateCard(long cardId) throws BadRequestException,IllegalCardStateException {
-
+        hand.activateCard(cardId);
     }
 
     /**

@@ -72,14 +72,21 @@ public class InboundService implements ApplicationContextAware {
         gameController.drawStoryCard(player);
     }
 
-    public synchronized void playerPlayCard(PlayerPlayCardInbound playerPlayCardInbound) {
-        Players player = sessionService.getPlayerByPlayerId(playerPlayCardInbound.playerID());
-        gameController.playerPlayCard(player, playerPlayCardInbound.cardId());
+    public synchronized void playerPlayCard(long playerId, long cardId) {
+        Players player = sessionService.getPlayerByPlayerId(playerId);
+        LOG.info(String.format("Player named %s requested to play a card with id %d", player.getName(), cardId));
+        gameController.playerPlayCard(player, cardId);
     }
 
     public synchronized void playerDiscardCard(String name, long cardId) {
         LOG.info(String.format("Player named %s requested to discard a card with id %d", name, cardId));
         gameController.playerDiscardCard(sessionService.getPlayerMap().get(name), cardId);
+    }
+
+    public synchronized void playerActivateCard(long playerId, long cardId) {
+        Players player = sessionService.getPlayerByPlayerId(playerId);
+        LOG.info(String.format("Player named %s requested to activate a card with id %d", player.getName(), cardId));
+        gameController.playerActivateCard(player, cardId);
     }
 
     public synchronized void playerNotifyHandOversize() {

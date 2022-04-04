@@ -14,7 +14,7 @@ function PlayerHand(props){
     const player = useGetPlayer(props.playerID);
     const playerPlayArea = useGetPlayerPlayArea(props.playerID);
     const sponsorName = useSponsorName();
-    const [newTop, setNewTop] = useState(70);
+    const [newTop, setNewTop] = useState(140);
 
     useEffect(() => {
         if(props.activeCards.length > 0){
@@ -29,7 +29,7 @@ function PlayerHand(props){
     ));
 
     const RenderActiveCards = props.activeCards?.map((card) => (
-        <Card playerID={props.playerID} card={card} key={card.cardID} cardImage={card.imgSrc} selectedAllowed={false} canGrow={false} cardOwner={player.name} isActive={true}></Card>
+        <Card playerID={props.playerID} card={card} key={card.cardID} cardImage={card.imgSrc} selectedAllowed={true} canGrow={false} cardOwner={player.name} isActive={true}></Card>
     ));
 
     const renderName = () => {

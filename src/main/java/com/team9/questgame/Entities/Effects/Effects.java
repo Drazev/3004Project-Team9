@@ -114,7 +114,7 @@ public abstract class Effects {
             reset();
             throw new IllegalEffectStateException(String.format("Effect must be in state %s  to be triggered with a resolvedRequestID but was in state %s",EffectState.TRIGGER_TARGET_SELECTION_REQUEST_SUBMITTED,state),this,source);
         }
-        else if(resolvedRequestID==pendingRequestID) {
+        else if(resolvedRequestID!=pendingRequestID) {
             reset();
             throw new IllegalEffectStateException(String.format("Effect triggered using a different request id (%d) than the original request (%d).",resolvedRequestID,pendingRequestID),this,source);
         }

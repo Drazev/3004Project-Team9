@@ -664,7 +664,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         }
 
         for(StagePlayAreas s : stages) {
-            if(s.getStageID()==stageID) {
+            if(s.getStageNum()==stageID) {
                 cardIDUsedToRevealStage.add(cardIDUsed);
                 HashSet<Players> playerVisibilityList = stageVisibleToPlayersList.get(s);
                 if(playerVisibilityList == null) {
@@ -677,7 +677,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
                 return true;
             }
         }
-        LOG.warn(String.format("PlayerID %d attempted to make stage %d visible, but stage was not found. Rejected request!"),player.getPlayerId(),stageID);
+        LOG.warn(String.format("PlayerID %d attempted to make stage %d visible, but stage was not found. Rejected request!", player.getPlayerId(), stageID));
         return false;
     }
 

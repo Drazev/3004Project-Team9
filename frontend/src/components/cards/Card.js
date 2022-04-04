@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useStageAreas } from "../../stores/playAreaStore";
-import { useIsSponsoring, useId } from "../../stores/generalStore";
+import { useIsSponsoring, useId, useName } from "../../stores/generalStore";
 import {
     useCardTargetSelectionRequest,
     useSetCardTargetSelectionRequest,
@@ -8,7 +8,7 @@ import {
     useSetCardTargetSelectionRequestBody
 } from "../../stores/effects/effectRequestStore";
 import { Button, DropdownButton, Dropdown } from "react-bootstrap";
-import { discardCard, playCard, cardTargetSelectionRespond } from "../../services/clientSocket";
+import { activateCard, discardCard, playCard, cardTargetSelectionRespond } from "../../services/clientSocket";
 import "./Card.css";
 
 function Card(props) {
@@ -20,6 +20,7 @@ function Card(props) {
     const [cardTargetSelectionRequest, setCardTargetSelectionRequest] = [useCardTargetSelectionRequest(), useSetCardTargetSelectionRequest()];
     const [requestBody, setRequestBody] = [useCardTargetSelectionRequestBody(), useSetCardTargetSelectionRequestBody()];
     const playerId = useId();
+    const playerName = useName();
     const cardBackSrc = "./Assets/Adventure Deck (346x470)/Adventure Deck Card Back.png";
 
     //add border around card when selected
@@ -35,7 +36,7 @@ function Card(props) {
     //increase size of card when hovering over it and it is allowed to grow
     let size;
     if (isBig && props.canGrow) {
-        size = { width: "70px", height: "94px" };
+        size = { width: "70px", height: "auto" };
     } else {
         size = { width: "50px", height: "68px" };
     }
@@ -60,7 +61,7 @@ function Card(props) {
                 drop="up"
                 autoClose="inside"
                 variant="secondary">
-                <Dropdown.Item onClick={() => playCard(props.cardOwner, props.playerID, props.card.cardID, -1, -1)}>Your play area</Dropdown.Item>
+                {/* <Dropdown.Item onClick={() => playCard(props.cardOwner, props.playerID, props.card.cardID, -1, -1)}>Your play area</Dropdown.Item> */}
                 {renderDropdownItems()}
             </DropdownButton>
         } else {
@@ -82,8 +83,7 @@ function Card(props) {
                 id="PlayButton"
                 style={playButtonStyle}
                 onClick={() => playCard(props.cardOwner, props.playerID, props.card.cardID, -1, -1)}
-            >
-                Play
+            >Play
             </Button>
         }
     }
@@ -107,8 +107,16 @@ function Card(props) {
                 id="Remove"
                 style={removeButtonStyle}> Remove
             </Button>
-        } else {
-            return
+        }
+    }
+
+    const renderActivateButton = () => {
+        if (isSelected && props.card && props.card.hasActiveEffect) {
+            return <Button
+                onClick={() => activateCard(playerName, playerId, props.card.cardID)}
+                id="Activate"
+                className="activate-button"> Activate
+            </Button>
         }
     }
 
@@ -117,8 +125,13 @@ function Card(props) {
         <div
             id="CardSection"
             position="absolute"
-            style={{ height: 68, width: 73, margin: "0 auto", float: "left", marginBottom: 10, marginRight: -13 }}
-            onMouseLeave={() => { setIsBig(false); if (isSelected) setSelected(false); }}
+            style={{ height: "auto", width: 73, margin: "0 auto", float: "left", marginBottom: 10, marginRight: -13 }}
+            onMouseLeave={() => {
+                // if (!isSelected)
+                setIsBig(false);
+                if (isSelected)
+                    setSelected(false);
+            }}
         >
             <img
                 id="CardImage"
@@ -136,8 +149,9 @@ function Card(props) {
             <div style={{ marginTop: -12, }}>
                 {renderDiscardButton()}
                 {renderPlayButton()}
-                {renderDropdownButton()}
+                {renderActivateButton()}
                 {renderRemoveButton()}
+                {renderDropdownButton()}
             </div>
         </div>
     );
@@ -178,5 +192,6 @@ const discardButtonStyle = {
     backgroundColor: "#c96b6b",
     borderColor: "#c96b6b"
 }
+
 
 export default Card;
