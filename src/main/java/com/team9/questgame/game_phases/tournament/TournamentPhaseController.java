@@ -62,18 +62,6 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
         this.state = TournamentPhaseStatesE.READY;
     }
 
-//    public boolean receiveCard(TournamentCards card){
-//        if(card == null || state!=TournamentPhaseStatesE.READY) {
-//            return false;
-//        }
-//        if(this.card!=null) {
-//            LOG.warn("Tournament Phase Controller already has a tournament card");
-//        }
-//        this.card = card;
-//        nextState();
-//        return true;
-//    }
-
 
     @Override
     public TournamentPhaseStatesE getCurrState() {
@@ -101,7 +89,7 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
      */
     public void checkJoinResult(Players player, boolean joined){
         if (state != TournamentPhaseStatesE.JOIN) {
-
+            throw new IllegalStateException("Players can only join a tournament when in JOIN state");
         } else if (competitors.containsKey(player)) {
             throw new IllegalGameRequest("This player is already in the tournament", player);
         }
@@ -112,8 +100,9 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
         if(joined){
             player.getPlayArea().registerGamePhase(this);
             player.getPlayArea().onQuestStarted(card);
+            //starting bp must not include already in play allies
             competitors.put(player,
-                    (player.getPlayArea().getBattlePoints() - player.getRank().getRankBattlePointValue()) * -1);
+                    player.getRank().getRankBattlePointValue() - player.getPlayArea().getBattlePoints());
             player.getPlayArea().setPlayerTurn(true);
         }
 
@@ -140,6 +129,9 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
         nextState();
     }
 
+    /**
+     * Set up tournament for tiebreaker match
+     */
     public void tiebreakerSetup(){
         oldCompetitorOffset = competitors.size() - winners.size();
         competitors.clear();
@@ -151,7 +143,8 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
                             "", ""),
                     null
             );
-            competitors.put(player, player.getPlayArea().getBattlePoints() * -1);
+            //in play allies and amours are counted
+            competitors.put(player,0);
             player.getPlayArea().setPlayerTurn(true);
         }
         winners.clear();
@@ -165,7 +158,7 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
      */
     public void checkParticipantSetup(Players player){
         if (state != TournamentPhaseStatesE.PLAYER_SETUP) {
-
+            throw new IllegalStateException("Players can only join a tournament when in PLAYER_SETUP state");
         }
         if(!competitors.containsKey(player)){
             throw new IllegalGameRequest(

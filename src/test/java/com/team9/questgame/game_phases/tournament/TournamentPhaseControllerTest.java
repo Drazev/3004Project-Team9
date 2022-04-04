@@ -219,8 +219,16 @@ class TournamentPhaseControllerTest {
         inboundService.tournamentCompetitorSetup(players.get(0).getName());
         inboundService.tournamentCompetitorSetup(players.get(1).getName());
         assertThat(controller.getCurrState()).isEqualTo(TournamentPhaseStatesE.READY);
-        assertThat(players.get(0).getShields()).isEqualTo(rewards+2);
-        assertThat(players.get(1).getShields()).isEqualTo(rewards+2);
+
+        //if rewards + 2 = 5 then they both became knights
+        if(players.get(1).getRank() == PlayerRanks.KNIGHT) {
+            assertThat(players.get(0).getShields()).isEqualTo(0);
+            assertThat(players.get(1).getShields()).isEqualTo(0);
+        }
+        else {//otherwise they have shields = bonus shields + participants
+            assertThat(players.get(0).getShields()).isEqualTo(rewards+2);
+            assertThat(players.get(1).getShields()).isEqualTo(rewards+2);        }
+
 
 
     }
