@@ -693,7 +693,7 @@ public class CardFactory {
                         cardEnumId.getSubType(),
                         "Tournament - At Tintagel.png",
                         cardEnumId,
-                        0
+                        1
                 );
                 break;
             case TOURNAMENT_AT_YORK:
