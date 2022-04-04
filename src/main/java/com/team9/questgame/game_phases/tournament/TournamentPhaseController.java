@@ -16,8 +16,10 @@ import com.team9.questgame.game_phases.event.EventPhaseController;
 import com.team9.questgame.game_phases.quest.QuestPhaseStatesE;
 import com.team9.questgame.game_phases.utils.PlayerTurnService;
 import com.team9.questgame.game_phases.utils.StateMachineObserver;
+import com.team9.questgame.gamemanager.record.socket.NotificationOutbound;
 import com.team9.questgame.gamemanager.record.socket.TournamentPlayersOutbound;
 import com.team9.questgame.gamemanager.service.InboundService;
+import com.team9.questgame.gamemanager.service.NotificationOutboundService;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -142,6 +144,13 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
         oldCompetitorOffset = competitors.size() - winners.size();
         competitors.clear();
         for(Players player : winners){
+            NotificationOutboundService.getService().sendGoodNotification(
+                    player,
+                    new NotificationOutbound("Tournament Tie",
+                            "You met your match! Prepare for another round of combat!",
+                            "", ""),
+                    null
+            );
             competitors.put(player, player.getPlayArea().getBattlePoints() * -1);
             player.getPlayArea().setPlayerTurn(true);
         }
@@ -181,6 +190,17 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
                 winners.add(competitor);
             }
         }
+        for(Players competitor : competitors.keySet()){
+            if(!winners.contains(competitor)){
+                NotificationOutboundService.getService().sendBadNotification(
+                        competitor,
+                        new NotificationOutbound("Tournament Loss",
+                                "You proved no match for the competition!",
+                                "", ""),
+                        null
+                );
+            }
+        }
         nextState();
     }
 
@@ -200,6 +220,13 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
         HashMap<Players, Integer> participantRewards = new HashMap<>();
         for(Players player : winners){
             participantRewards.put(player, rewards);
+            NotificationOutboundService.getService().sendGoodNotification(
+                    player,
+                    new NotificationOutbound("Tournament Victory",
+                            "You proved yourself worthy and came out of the tournament victorious!",
+                            "", ""),
+            null
+            );
         }
         EffectResolverService.getService().playerAwardedShields(participantRewards);
         nextState();
