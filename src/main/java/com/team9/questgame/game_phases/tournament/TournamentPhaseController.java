@@ -19,6 +19,7 @@ import com.team9.questgame.game_phases.utils.StateMachineObserver;
 import com.team9.questgame.gamemanager.record.socket.TournamentPlayersOutbound;
 import com.team9.questgame.gamemanager.service.InboundService;
 import com.team9.questgame.gamemanager.service.OutboundService;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -41,6 +42,7 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
     private PlayerTurnService turnService;
     private int joinAttempts;
     private int participantSetupResponses;
+    @Getter
     private boolean isTiebreaker;
     private int oldCompetitorOffset;
 
@@ -98,7 +100,7 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
     public void checkJoinResult(Players player, boolean joined){
         if (state != TournamentPhaseStatesE.JOIN) {
 
-        } else if (competitors.containsValue(player)) {
+        } else if (competitors.containsKey(player)) {
             throw new IllegalGameRequest("This player is already in the tournament", player);
         }
 
@@ -155,6 +157,10 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
     public void checkParticipantSetup(Players player){
         if (state != TournamentPhaseStatesE.PLAYER_SETUP) {
 
+        }
+        if(!competitors.containsKey(player)){
+            throw new IllegalGameRequest(
+                    "A player can only complete tournament setup if they agreed to participate", player);
         }
         participantSetupResponses++;
         player.getPlayArea(). setPlayerTurn(false);
