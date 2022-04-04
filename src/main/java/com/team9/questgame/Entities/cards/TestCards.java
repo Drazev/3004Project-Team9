@@ -112,4 +112,10 @@ public class TestCards <T extends Enum<T> & AllCardCodes> extends AdventureCards
         testEndEffect.activate(observer, activatingPlayer);
     }
 
+    @Override
+    protected void onLocationChanged() {
+        super.onLocationChanged();
+        setBoosted(false);
+    }
+
 }

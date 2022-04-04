@@ -1,8 +1,9 @@
 import {React, useState} from "react";
+import { Button } from "react-bootstrap";
 import CardImages from "../../assets/images/index";
 import BigCard from "../../components/cards/BigCard";
 import { useMaxBid, useMaxBidPlayer, useStoryCard, useCurrentBidder, useTurn, useHandOversize } from "../../stores/generalStore";
-import { useBidRequest, useSetBidRequest } from "../../stores/quest/questRequestStore";
+import { useBidRequest, useSetBidRequest, useBidRequestSetup, useSetBidRequestSetup } from "../../stores/quest/questRequestStore";
 import Popup from "../../components/popups/Popup"
 import "./TestStageDisplay.css";
 
@@ -13,10 +14,16 @@ function TestStageDisplay(props){
     const maxBidPlayer = useMaxBidPlayer();
     const currentBidder = useCurrentBidder();
     const [bidRequest,setBidRequest] = [useBidRequest(),useSetBidRequest()];
+    const [bidRequestSetup,setBidRequestSetup] = [useBidRequestSetup(),useSetBidRequestSetup()];
 
-    console.log("is oversize: " + handOversize);
     return(
         <div style={{position:"absolute",left:40,top:250,width:300}}>
+            {bidRequestSetup && 
+                <div>
+                    <Button onClick={() => setBidRequestSetup(false)}>Ready to Bid!</Button>
+                </div>
+            }
+
             {(maxBidPlayer === undefined) ? (
                 <p float="left">Minumum bid amount: {maxBid}</p>
             ) : (
@@ -35,7 +42,7 @@ function TestStageDisplay(props){
                 alt="nonono"
             />
 
-            {bidRequest && !handOversize &&
+            {bidRequest && !handOversize && !bidRequestSetup &&
                 <Popup popupType="BIDREQUEST" setPopup={setBidRequest}></Popup>
             }
         </div>

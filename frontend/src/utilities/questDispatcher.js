@@ -114,6 +114,7 @@ export const dispatchBidRequest = (body) => {
     generalStore().setMaxBidPlayer(body.setMaxBidPlayer);
     if(body.player.name === generalStore().name){
         questRequestStore().setBidRequest(true);
+        questRequestStore().setBidRequestSetup(true);
     }
 }
 
