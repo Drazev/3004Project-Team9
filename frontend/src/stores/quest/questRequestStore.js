@@ -5,10 +5,12 @@ const useStore = create((set) => ({
     questJoinRequest: false,
     bidRequest: false,
     participantSetupRequest: false,
+    bidRequestSetup: false,
     setSponsorSearchRequest: (x) => set(() => ({sponsorSearchRequest: x})),
     setQuestJoinRequest: (x) => set(() => ({questJoinRequest: x})),
     setBidRequest: (x) => set(() => ({bidRequest: x})),
     setParticipantSetupRequest: (x) => set(() => ({participantSetupRequest: x})),
+    setBidRequestSetup: (x) => set(() => ({bidRequestSetup: x})),
 }));
 
 /**
@@ -23,6 +25,7 @@ export const useSponsorSearchRequest = () => useStore((state) => state.sponsorSe
 export const useQuestJoinRequest = () => useStore((state) => state.questJoinRequest);
 export const useBidRequest = () => useStore((state) => state.bidRequest);
 export const useParticipantSetupRequest = () => useStore((state) => state.participantSetupRequest);
+export const useBidRequestSetup = () => useStore((state) => state.bidRequestSetup);
 
 /**
  * Setters
@@ -31,3 +34,4 @@ export const useSetSponsorSearchRequest = () => useStore((state) => state.setSpo
 export const useSetQuestJoinRequest = () => useStore((state) => state.setQuestJoinRequest);
 export const useSetBidRequest = () => useStore((state) => state.setBidRequest);
 export const useSetParticipantSetupRequest = () => useStore((state) => state.setParticipantSetupRequest);
+export const useSetBidRequestSetup = () => useStore((state) => state.bidRequestSetup);
