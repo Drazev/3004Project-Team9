@@ -44,6 +44,7 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
     private int participantSetupResponses;
     @Getter
     private boolean isTiebreaker;
+    private boolean isWinnersTieBreaker;
     private int oldCompetitorOffset;
 
     public TournamentPhaseController(GeneralGameController gameController, TournamentCards card) {
@@ -76,6 +77,7 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
         participantSetupResponses = 0;
         isTiebreaker = true;
         oldCompetitorOffset = 0;
+        isWinnersTieBreaker = true;
         this.state = TournamentPhaseStatesE.JOIN;
     }
 
@@ -218,7 +220,9 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
      * Distribute rewards to winner(s)
      */
     public void distributeRewards(){
-        //TODO flag for if this is a winners tourney
+        if(isWinnersTieBreaker){
+            //TODO: notify game controller of winners
+        }
         if(winners.size() > 1 && !isTiebreaker){
             this.state = TournamentPhaseStatesE.TIEBREAKER;
             for(Players player : competitors.keySet()){
