@@ -512,7 +512,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards>, EffectObserve
             throw new CardAreaException(GAMEPHASE_NOT_REGISTERED);
         }
         //Unset Quest boost if quest card was set
-        if(cardBoostDependencies.containsKey(questCard.getCardCode())) {
+        if(questCard != null && cardBoostDependencies.containsKey(questCard.getCardCode())) {
             for(BoostableCard boostCard : cardBoostDependencies.get(questCard.getCardCode())) {
                 boostCard.setBoosted(false);
             }
