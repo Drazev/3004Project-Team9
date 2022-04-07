@@ -193,7 +193,8 @@ public class Hand implements CardArea<AdventureCards>, EffectObserver<AdventureC
         }
         else {
             for(CardWithEffect card : activatableCards) {
-                if(card.getCardID()==cardId) {
+                if(card.getCardID()==cardId && card.getSubType() != CardTypes.ALLY) {
+                    // Ally (Merlin) cannot be activated straight from the hand
                     card.activate(this,player);
                     rc=true;
                 }
