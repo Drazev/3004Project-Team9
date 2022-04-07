@@ -520,7 +520,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
             player.getPlayArea().setPlayerTurn(false);
             if(player.getPlayArea().getBattlePoints()+1 < stages.get(stageNum).getBattlePoints()){
                 NotificationOutboundService.getService().sendBadNotification(
-                        sponsor,
+                        player,
                         new NotificationOutbound("Quest Stage Defeat","You have failed this stage of the quest. Alas, you cannot continue your journey and must head home.","",null),
                         null
                 );
