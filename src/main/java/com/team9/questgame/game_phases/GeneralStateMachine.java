@@ -1,9 +1,6 @@
 package com.team9.questgame.game_phases;
 
 import com.team9.questgame.Entities.Players;
-import com.team9.questgame.Entities.cards.CardTypes;
-import com.team9.questgame.game_phases.event.EventPhaseController;
-import com.team9.questgame.game_phases.quest.QuestPhaseStateMachine;
 import com.team9.questgame.game_phases.utils.StateMachineObserver;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import lombok.Getter;
@@ -107,6 +104,9 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE>, Applic
             case EVENT_PHASE:
                 currentState = eventPhaseState();
                 break;
+            case DETERMINING_WINNER:
+                currentState = determiningWinnerState();
+                break;
             case ENDED:
                 currentState = endedState();
                 break;
@@ -121,9 +121,24 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE>, Applic
             // State changed, update previousState
             this.previousState = tempState;
             notifyObserversStateChanged();
+            controller.executeNextAction();
         }
 
         resetAllRequest();
+    }
+
+    private GeneralStateE determiningWinnerState() {
+        GeneralStateE nextState;
+        if (controller.getWinners().size() == 0) {
+            throw new IllegalStateException("No winner found");
+        } else if (controller.getWinners().size() == 1 || controller.isEndGameTournamentPlayed()) {
+            // Only one winner or end game tournament played
+            nextState = GeneralStateE.ENDED;
+        } else {
+            // More than one winner or end game tournament not played
+            nextState = GeneralStateE.DETERMINING_WINNER;
+        }
+        return nextState;
     }
 
     private void notifyObserversStateChanged() {
@@ -159,6 +174,8 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE>, Applic
 //        setPhaseEndRequested(false);
         if (!isAllHandNotOversize() || isHandOversizeRequested) {
             nextState = GeneralStateE.PLAYER_HAND_OVERSIZE;
+        } else if (this.isWinnerFound()) {
+            nextState = GeneralStateE.DETERMINING_WINNER;
         } else if (controller.getStoryCard() != null && isGamePhaseRequested) {
             switch (controller.getStoryCard().getSubType()) {
                 case QUEST:
@@ -184,8 +201,6 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE>, Applic
         GeneralStateE nextState;
         if (!isAllHandNotOversize() || isHandOversizeRequested) {
             nextState = GeneralStateE.PLAYER_HAND_OVERSIZE;
-        } else if (isWinnerFound()) {
-            nextState = GeneralStateE.ENDED;
         } else if (this.isPhaseEndRequested) {
             nextState = GeneralStateE.DRAW_STORY_CARD;
         } else {
@@ -198,8 +213,6 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE>, Applic
         GeneralStateE nextState;
         if (!isAllHandNotOversize() || isHandOversizeRequested) {
             nextState = GeneralStateE.PLAYER_HAND_OVERSIZE;
-        } else if (isWinnerFound()) {
-            nextState = GeneralStateE.ENDED;
         } else if (this.isPhaseEndRequested) {
             nextState = GeneralStateE.DRAW_STORY_CARD;
         } else {
@@ -212,8 +225,6 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE>, Applic
         GeneralStateE nextState;
         if (!isAllHandNotOversize() || isHandOversizeRequested) {
             nextState = GeneralStateE.PLAYER_HAND_OVERSIZE;
-        } else if (isWinnerFound()) {
-            nextState = GeneralStateE.ENDED;
         } else if (this.isPhaseEndRequested) {
             nextState = GeneralStateE.DRAW_STORY_CARD;
         } else {
@@ -256,10 +267,8 @@ public class GeneralStateMachine implements StateMachineI<GeneralStateE>, Applic
      * Private helper methods
      */
     private boolean isWinnerFound() {
-        for (Players p : controller.getPlayers()) {
-            if (p.getRank() == controller.getVictoryCondtion()) {
-                return true;
-            }
+        if (controller.getWinners().size() > 0) {
+            return true;
         }
         return false;
     }

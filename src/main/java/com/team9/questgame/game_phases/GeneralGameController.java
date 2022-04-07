@@ -11,6 +11,9 @@ import com.team9.questgame.game_phases.event.EventPhaseController;
 import com.team9.questgame.game_phases.quest.QuestPhaseController;
 import com.team9.questgame.game_phases.tournament.TournamentPhaseController;
 import com.team9.questgame.game_phases.utils.PlayerTurnService;
+import com.team9.questgame.gamemanager.record.socket.NotificationOutbound;
+import com.team9.questgame.gamemanager.service.InboundService;
+import com.team9.questgame.gamemanager.service.NotificationOutboundService;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -22,9 +25,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 
 @Service
 public class GeneralGameController implements CardArea<StoryCards>, ApplicationContextAware {
@@ -36,7 +37,9 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
     private final Logger LOG;
     @Getter
     private final ArrayList<Players> players;
+    @Getter
     private final ArrayList<Players> winners;
+
     @Getter
     private final AdventureDecks aDeck;
     @Getter
@@ -44,8 +47,6 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
 
     @Getter
     private HashSet<CardTypes> allowedStoryCardTypes;
-//    private Players activePlayer;
-//    private Iterator<Players> turnSequence;
 
     @Getter
     private StoryCards storyCard;
@@ -61,6 +62,9 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
     private PlayerTurnService playerTurnService;
 
     @Getter
+    private boolean isEndGameTournamentPlayed;
+
+    @Getter
     private GamePhases currPhase;
 
     public GeneralGameController() {
@@ -73,6 +77,7 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
         this.victoryCondtion = victoryRank;
         this.winners = new ArrayList<>();
         this.currPhase=null;
+        this.isEndGameTournamentPlayed=false;
         aDeck = new AdventureDecks();
         sDeck = new StoryDecks();
         this.playerTurnService = new PlayerTurnService(this.players);
@@ -283,18 +288,12 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
          */
         switch (card.getSubType()) {
             case QUEST:
-//                status = questPhaseController.receiveCard((QuestCards) this.storyCard);
                 currPhase = new QuestPhaseController(this,(QuestCards) card);
-//                currPhase.startPhase(gamePhaseTurnService);
                 break;
             case TOURNAMENT:
-//                status = tournamentPhaseController.receiveCard(this.storyCard);
                 currPhase = new TournamentPhaseController(this,(TournamentCards) card);
-//                tournamentPhaseController.startPhase(gamePhaseTurnService);
                 break;
             case EVENT:
-//                status = this.storyCard.playCard(eventPhaseController);
-//                eventPhaseController.startPhase(gamePhaseTurnService);
                 currPhase = new EventPhaseController(this,(EventCards) card);
                 break;
             default:
@@ -331,6 +330,7 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
         winners.clear();
 
         storyCard = null;
+        this.isEndGameTournamentPlayed = false;
 
         stateMachine.setCurrentState(GeneralStateE.SETUP);
     }
@@ -352,5 +352,115 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
 
     public GeneralGameController getService() {
         return context.getBean(GeneralGameController.class);
+    }
+
+    /**
+     * Called everytime we go back to DRAW_STORY_CARD state to check if there's a winner
+     */
+    private void checkWinCondition() {
+
+        // Update the winners array to reflect the new winners
+        for (Players p : players) {
+            if (p.getRank() == this.victoryCondtion && !winners.contains(p)) {
+                this.winners.add(p);
+            } else if (p.getRank() == this.victoryCondtion && winners.contains(p)) {
+                this.winners.remove(p);
+            }
+        }
+
+        stateMachine.update();
+    }
+
+    /**
+     * Start the winner tournament if there's more than one winner, otherwise simply update the game state
+     * to move to ENDED
+     */
+    private void startWinnerTournament() {
+        if (stateMachine.getCurrentState() != GeneralStateE.DETERMINING_WINNER) {
+            throw new IllegalGameStateException("Cannot start winner tournament in state " + stateMachine.getCurrentState());
+        } else if (this.isEndGameTournamentPlayed) {
+            throw new IllegalGameStateException("Cannot start winner tournament twice");
+        }
+
+        if (this.winners.size() == 0) {
+            throw new RuntimeException("No winners found");
+        } else if (this.winners.size() == 1) {
+            // There's no need to start the winner tournament
+        } else {
+            // TODO: Start the winner tournament
+        }
+
+        stateMachine.update();
+    }
+
+    private void endGame() {
+        if (stateMachine.getCurrentState() != GeneralStateE.ENDED) {
+            throw new IllegalGameStateException("Cannot end game in state " + stateMachine.getCurrentState());
+        } else {
+            if (this.winners.size() == 0) {
+                throw new RuntimeException("Cannot end game with no winners");
+            } else if (this.winners.size() > 1 && !this.isEndGameTournamentPlayed) {
+                throw new RuntimeException("Cannot end game with %d winners without starting the winner tournament");
+            }
+        }
+
+        if (this.winners.size() == 1) {
+            NotificationOutboundService.getService().sendGoodNotification(
+                    this.winners.get(0),
+                    new NotificationOutbound("Game Ended", "Congratulations, you won the game!", null, null),
+                    new NotificationOutbound("Game Ended", String.format("The game has ended. %s won the game!", this.winners.get(0).getName()), null, null)
+            );
+        } else {
+            for (Players p : this.winners) {
+                /**
+                 * The resulting strings should look like:
+                 * toWinnerString = "You, Bob won the game"
+                 * toOthersString = "John, Bob won the game"
+                 */
+                String toWinnerString = "";
+                String toOthersString = "";
+                for (Players w : this.winners) {
+                    if (w == p) {
+                        toWinnerString = String.format("You, %s", toWinnerString); // Add the winner to the front
+                    } else {
+                        toWinnerString = String.format("%s, %s", toWinnerString, w.getName()); // Add the other winners to the end
+                    }
+                    toOthersString = String.format("%s, %s", toOthersString, w.getName()); // Add the other winners to the end
+                }
+
+                toWinnerString = toWinnerString.substring(2); // Remove the first comma
+                toOthersString = toOthersString.substring(2); // Remove the first comma
+
+                toWinnerString = String.format("%s won the game", toWinnerString);
+                toOthersString = String.format("%s won the game", toOthersString);
+                NotificationOutboundService.getService().sendGoodNotification(
+                        p,
+                        new NotificationOutbound("Game Ended", toWinnerString, null, null),
+                        new NotificationOutbound("Game Ended", toOthersString, null, null)
+                );
+            }
+        }
+
+        stateMachine.update();
+    }
+
+    /**
+     * Called by the GeneralStateMachine to execute action when state changes
+     */
+    public void executeNextAction() {
+        switch (stateMachine.getCurrentState()) {
+            case DRAW_STORY_CARD:
+                this.checkWinCondition();
+                break;
+            case DETERMINING_WINNER:
+                this.startWinnerTournament();
+                break;
+            case ENDED:
+                this.endGame();
+                break;
+            default:
+                break;
+        }
+
     }
 }
