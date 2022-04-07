@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useStageAreas } from "../../stores/playAreaStore";
-import { useIsSponsoring, useId, useName } from "../../stores/generalStore";
+import { useIsSponsoring, useId, useName, useSponsorName, useActivePlayers } from "../../stores/generalStore";
 import {
     useCardTargetSelectionRequest,
     useSetCardTargetSelectionRequest,
@@ -16,19 +16,18 @@ function Card(props) {
     const [isActiveSelected, setIsActiveSelected] = useState(false);
     const [isSelected, setSelected] = useState(false);
     const numStages = useStageAreas().length;
-    const isSponsoring = useIsSponsoring();
+    const sponsorName = useSponsorName();
     const [cardTargetSelectionRequest, setCardTargetSelectionRequest] = [useCardTargetSelectionRequest(), useSetCardTargetSelectionRequest()];
     const [requestBody, setRequestBody] = [useCardTargetSelectionRequestBody(), useSetCardTargetSelectionRequestBody()];
     const playerId = useId();
     const playerName = useName();
+    const activePlayers = useActivePlayers();
     const cardBackSrc = "./Assets/Adventure Deck (346x470)/Adventure Deck Card Back.png";
 
     //add border around card when selected
     let borderSize;
     if (isSelected && props.selectedAllowed) {
         borderSize = "2px solid #e9eb6e";
-    } else if (props.isActive && isActiveSelected) {
-        borderSize = "2px solid red";
     } else {
         borderSize = "";
     }
@@ -53,7 +52,7 @@ function Card(props) {
     }
 
     const renderDropdownButton = () => {
-        if (isSelected && numStages !== 0 && isSponsoring) {
+        if (isSelected && numStages !== 0 && (playerName == sponsorName)) {
             return <DropdownButton
                 id="dropdown-basic-button"
                 title="Play"
@@ -78,7 +77,7 @@ function Card(props) {
     }
 
     const renderPlayButton = () => {
-        if (isSelected && (numStages === 0 || !isSponsoring)) {
+        if (isSelected && (numStages === 0 || (playerName != sponsorName))) {
             return <Button
                 id="PlayButton"
                 style={playButtonStyle}
@@ -101,7 +100,7 @@ function Card(props) {
     }
 
     const renderRemoveButton = () => {
-        if (isActiveSelected && cardTargetSelectionRequest && playerId !== props.playerID && props.card.imgSrc !== cardBackSrc) {
+        if (isActiveSelected && cardTargetSelectionRequest && playerId !== props.playerID && props.card.imgSrc !== cardBackSrc && props.card.subType == "ALLY") {
             return <Button
                 onClick={sendCardTargetSelectionRequest}
                 id="Remove"
@@ -111,7 +110,7 @@ function Card(props) {
     }
 
     const renderActivateButton = () => {
-        if (isSelected && props.card && props.card.hasActiveEffect) {
+        if ( (isSelected || isActiveSelected) && props.card && props.card.hasActiveEffect && props.cardOwner == playerName) {
             return <Button
                 onClick={() => activateCard(playerName, playerId, props.card.cardID)}
                 id="Activate"
@@ -143,7 +142,14 @@ function Card(props) {
                     borderRadius: 10,
                 }}
                 onMouseOver={() => setIsBig(true)}
-                onClick={() => { if (props.selectedAllowed) { setSelected(!isSelected); } if (props.isActive) { setIsActiveSelected(!isActiveSelected) } }}
+                onClick={() => {
+                    if (props.selectedAllowed) { 
+                        setSelected(!isSelected); 
+                    }
+                    else if (props.isActive && (playerName == props.cardOwner || cardTargetSelectionRequest)) {
+                        setIsActiveSelected(!isActiveSelected);
+                    } 
+                }}
                 alt="ohno"
             />
             <div style={{ marginTop: -12, }}>

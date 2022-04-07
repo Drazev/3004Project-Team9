@@ -29,7 +29,7 @@ function PlayerHand(props){
     ));
 
     const RenderActiveCards = props.activeCards?.map((card) => (
-        <Card playerID={props.playerID} card={card} key={card.cardID} cardImage={card.imgSrc} selectedAllowed={true} canGrow={false} cardOwner={player.name} isActive={true}></Card>
+        <Card playerID={props.playerID} card={card} key={card.cardID} cardImage={card.imgSrc} selectedAllowed={false} canGrow={false} cardOwner={player.name} isActive={true}></Card>
     ));
 
     const renderName = () => {

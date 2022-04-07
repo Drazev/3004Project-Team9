@@ -24,7 +24,7 @@
 }
 
 .questDisplay {
-    position: "fixed";
+    position: "absolute";
     top: 60px;
     left: 1050px;
     width: 10px;

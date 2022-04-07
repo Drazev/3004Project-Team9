@@ -66,13 +66,13 @@ function GameBoard({}) {
     }
 
     const renderAllHands = () => {
-        const init = 20;
-        const jump = 240;
+        const init = 5;
+        const jump = 260;
         var allHands = [];
         for (var i = 0; i < hands.length; i++){
             var curTop = init+jump*i;
             allHands.push(
-                <div style={{position:"fixed",top:curTop,left:10}}>
+                <div style={{position:"absolute",top:curTop,left:10}}>
                     <PlayerHand
                         key={hands[i].playerName}
                         playerName={hands[i].playerName}
@@ -81,7 +81,6 @@ function GameBoard({}) {
                         isMyHand={myHandArr[i]}
                         cardsInHand={hands[i].hand}
                         activeCards={getActiveCard(hands[i].playerId)}
-                        numShields={5/*curPlayer.shields*/}
                         shield={CardImages.Shield_3}
                         numStages={stageAreas.length}
                     ></PlayerHand>
@@ -102,7 +101,7 @@ function GameBoard({}) {
                 <button className="drawButton" onClick={() => drawCard(name, myPlayerID)} style={{ left: "123px" }}>Draw</button>
             </div>
 
-            <div className="questDisplay" style={{left:1150,top:100,position:"fixed"}}>
+            <div className="questDisplay" style={{left:1150,top:100,position:"absolute"}}>
                 <QuestDisplay></QuestDisplay>
             </div>
 
