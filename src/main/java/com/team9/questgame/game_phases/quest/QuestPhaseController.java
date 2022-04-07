@@ -464,7 +464,6 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
 
     private void participantSetup(){
         // dealAdventureCard();
-        //TODO: for all players allow them to play cards via player.getPlayerArea().onPhaseNextPlayerTurn(player)
         LOG.info(String.format("STARTING A NEW STAGE: STAGE %d", curStageIndex+1));
         for(Players player : playerTurnService.getPlayers()){
             player.getPlayArea().setPlayerTurn(questingPlayers.contains(player));
