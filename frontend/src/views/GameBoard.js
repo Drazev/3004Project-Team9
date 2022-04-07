@@ -6,7 +6,7 @@ import { drawCard, setupComplete, participantSetupComplete, tournamentSetupCompl
 import { useName, usePlayerHands, useTurn, useSponsorRequest, useIsSponsoring, useSetIsSponsoring, useJoinRequest, useFoeStageStart, useTestStageStart, usePlayers, useActivePlayers, useHandOversize } from "../stores/generalStore";
 import { usePlayerPlayAreas, useStageAreas } from "../stores/playAreaStore";
 import { useTournamentJoinRequest, useSetTournamentJoinRequest, useTournamentStageStart, useTournamentSetup, useSetTournamentSetup } from "../stores/tournamentStore";
-import { useSponsorSearchRequest, useSetSponsorSearchRequest, useQuestJoinRequest, useSetQuestJoinRequest, useParticipantSetupRequest, useSetParticipantSetupRequest } from "../stores/quest/questRequestStore";
+import { useSponsorSearchRequest, useSetSponsorSearchRequest, useQuestJoinRequest, useSetQuestJoinRequest, useParticipantSetupRequest, useSetParticipantSetupRequest, useBidRequestSetup, useSetBidRequestSetup } from "../stores/quest/questRequestStore";
 import { useCardTargetSelectionRequest, useSetCardTargetSelectionRequest, useStageTargetSelectionRequest, useSetStageTargetSelectionRequest } from "../stores/effects/effectRequestStore";
 import { Button } from "react-bootstrap";
 import React, { useState } from "react";
@@ -28,6 +28,7 @@ function GameBoard({}) {
     const setIsSponsoring = useSetIsSponsoring();
     const [isActive, setIsActive] = useState(false);
     const foeStageStart = useFoeStageStart();
+    const [bidRequestSetup, setBidRequestSetup] = [useBidRequestSetup(), useSetBidRequestSetup()];
     const [sponsorSearchRequest, setSponsorSearchRequest] = [useSponsorSearchRequest(), useSetSponsorSearchRequest()];
     const [questJoinRequest, setQuestJoinRequest] = [useQuestJoinRequest(), useSetQuestJoinRequest()];
     const [participantSetupRequest, setParticipantSetupRequest] = [useParticipantSetupRequest(), useSetParticipantSetupRequest()];
@@ -80,6 +81,7 @@ function GameBoard({}) {
                         isMyHand={myHandArr[i]}
                         cardsInHand={hands[i].hand}
                         activeCards={getActiveCard(hands[i].playerId)}
+                        numShields={5/*curPlayer.shields*/}
                         shield={CardImages.Shield_3}
                         numStages={stageAreas.length}
                     ></PlayerHand>

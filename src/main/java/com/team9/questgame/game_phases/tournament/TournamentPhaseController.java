@@ -118,7 +118,7 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
 
         if(joined){
             player.getPlayArea().registerGamePhase(this);
-            player.getPlayArea().onQuestStarted(card);
+            player.getPlayArea().setPlayerTurn(true);
             //starting bp must not include already in play allies
             competitors.put(player,
                     player.getRank().getRankBattlePointValue() - player.getPlayArea().getBattlePoints());
@@ -250,8 +250,8 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
     @Override
     public void endPhase() {
         for(Players player : competitors.keySet()){
-            player.getPlayArea().discardAllWeapons();
-            player.getPlayArea().discardAllAmour();
+            //discard amour and weapons
+            player.getPlayArea().onGamePhaseEnded();
         }
 
         InboundService.getService().unregisterTournamentPhaseController();

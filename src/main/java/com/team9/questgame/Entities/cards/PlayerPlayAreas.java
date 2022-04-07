@@ -328,6 +328,9 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards>, EffectObserve
      * @return
      */
     public void registerCardBoostDependency(AllCardCodes triggerCardCode, BoostableCard card) {
+        if(!allCards.containsValue(card)){
+            return;
+        }
         HashSet<BoostableCard> list = cardBoostDependencies.get(triggerCardCode);
 
         if(list==null)
@@ -363,6 +366,9 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards>, EffectObserve
      * @param card
      */
     public void registerBidContributor(BidContributor card) {
+        if(!allCards.containsValue(card)){
+            return;
+        }
         cardsWithBidValue.add(card);
         updateBids();
         notifyPlayAreaChanged();
@@ -374,9 +380,13 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards>, EffectObserve
      * @param card A card containing a battlepoint value
      */
     public void registerBattlePointContributor(BattlePointContributor card) {
+        if(!allCards.containsValue(card)){
+            return;
+        }
         cardsWithBattleValue.add(card);
         updateBattlePoints();
         notifyPlayAreaChanged();
+
     }
 
     /**
@@ -385,6 +395,9 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards>, EffectObserve
      * @return True if registered, False otherwise
      */
     public boolean registerActiveEffect(CardWithEffect card) {
+        if(!allCards.containsValue(card)){
+            return false;
+        }
         return cardsWithActiveEffects.add(card);
     }
 
@@ -422,6 +435,9 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards>, EffectObserve
 
     @Override
     public void registerBoostableCard(BoostableCard card) {
+        if(!allCards.containsValue(card)){
+            return;
+        }
         boostableCards.add(card);
     }
 
@@ -496,7 +512,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards>, EffectObserve
             throw new CardAreaException(GAMEPHASE_NOT_REGISTERED);
         }
         //Unset Quest boost if quest card was set
-        if(cardBoostDependencies.containsKey(questCard.getCardCode())) {
+        if(questCard != null && cardBoostDependencies.containsKey(questCard.getCardCode())) {
             for(BoostableCard boostCard : cardBoostDependencies.get(questCard.getCardCode())) {
                 boostCard.setBoosted(false);
             }
