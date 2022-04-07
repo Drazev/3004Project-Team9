@@ -6,6 +6,7 @@ import com.team9.questgame.Entities.cards.StoryCards;
 import com.team9.questgame.gamemanager.record.rest.EmptyJsonReponse;
 import com.team9.questgame.gamemanager.record.socket.HandUpdateOutbound;
 import com.team9.questgame.gamemanager.record.socket.PlayerNextTurnOutbound;
+import com.team9.questgame.gamemanager.record.socket.TournamentPlayersOutbound;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +69,19 @@ public class OutboundService implements ApplicationContextAware {
     public void broadcastEventPhaseEnded(){
 
         this.sendToAllPlayers("/topic/event/end", new EmptyJsonReponse());
+    }
+    public void broadcastTournamentPhaseStart(){
+        this.sendToAllPlayers("/topic/tournament/start", new EmptyJsonReponse());
+    }
+
+    public void broadcastTournamentSetup(TournamentPlayersOutbound tournamentPlayersOutbound){
+
+        this.sendToAllPlayers("/topic/tournament/setup",tournamentPlayersOutbound);
+    }
+
+    public void broadcastTournamentPhaseEnded(TournamentPlayersOutbound tournamentPlayersOutbound){
+        LOG.info("Broadcasting tournament ended with winners: " + tournamentPlayersOutbound);
+        this.sendToAllPlayers("/topic/tournament/end",tournamentPlayersOutbound);
     }
 
     public void broadcastHandUpdate( Players sourcePlayer, HandData toUser, HandData toOthers) {

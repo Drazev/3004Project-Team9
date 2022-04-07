@@ -1,6 +1,9 @@
 package com.team9.questgame.Entities.cards;
 
+import lombok.Getter;
+
 public class TournamentCards extends StoryCards {
+    @Getter
     final int bonusShields;
 
     @Override

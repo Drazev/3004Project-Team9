@@ -188,17 +188,6 @@ public class QuestPhaseStateMachine implements StateMachineI<QuestPhaseStatesE>,
                 return QuestPhaseStatesE.REWARDS;
             }
             return QuestPhaseStatesE.IN_STAGE;
-//            switch(controller.getCurStageIndex()){
-//                  case 0 -> {
-//                    return QuestPhaseStatesE.STAGE_ONE;
-//                } case 1 ->{
-//                    return QuestPhaseStatesE.STAGE_TWO;
-//                } case 2 -> {
-//                    return QuestPhaseStatesE.STAGE_THREE;
-//                } default -> {
-//                    throw new IllegalQuestPhaseStateException("CurStageIndex is out of bounds");
-//                }
-//            }
         }
         return QuestPhaseStatesE.PARTICIPANT_SETUP;
     }
