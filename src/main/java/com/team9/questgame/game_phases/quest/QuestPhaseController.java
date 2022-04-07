@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseStatesE> {
@@ -213,6 +214,11 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         // TODO: pass in an array of new StagesPlayArea to the validateStageSetup function
         if (!validateStageSetup(stages)) {
             LOG.info("Stage Validation failed");
+            for (StagePlayAreas stage : stages) {
+                if (!stage.returnAllToHand()) {
+                    throw new RuntimeException("Failed to return cards to sponsor hand");
+                }
+            }
             NotificationOutboundService.getService().sendWarningNotification(
                     sponsor,
                     new NotificationOutbound(
@@ -268,7 +274,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
             ArrayList<WeaponCards> weaponCards = new ArrayList<>();
             ArrayList<TestCards> testCards = new ArrayList<>();
 
-            HashMap<AllCardCodes, AdventureCards> allCards = stage.getAllCards();
+            ConcurrentHashMap<AllCardCodes, AdventureCards> allCards = stage.getAllCards();
             for (AdventureCards card: allCards.values()) {
                 if (card.getSubType() == CardTypes.FOE) {
                     foeCards.add((FoeCards) card);
