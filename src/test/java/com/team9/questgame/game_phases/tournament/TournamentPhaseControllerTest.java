@@ -167,7 +167,7 @@ class TournamentPhaseControllerTest {
             }
             card =  hand.next();
         }
-        inboundService.playerPlayCard(new PlayerPlayCardInbound(players.get(1).getName(), card.getCardID(), players.get(1).getPlayerId()));
+        inboundService.playerPlayCard(players.get(1).getPlayerId(), card.getCardID());
         //check that second participant completing setup leads to second player winning
         inboundService.tournamentCompetitorSetup(players.get(1).getName());
         assertThat(controller.getCurrState()).isEqualTo(TournamentPhaseStatesE.READY);
@@ -266,7 +266,7 @@ class TournamentPhaseControllerTest {
             }
             card =  hand.next();
         }
-        inboundService.playerPlayCard(new PlayerPlayCardInbound(players.get(1).getName(), card.getCardID(), players.get(1).getPlayerId()));
+        inboundService.playerPlayCard(players.get(1).getPlayerId(), card.getCardID());
         //check that second participant completing setup leads to second player winning
         inboundService.tournamentCompetitorSetup(players.get(1).getName());
         assertThat(controller.getCurrState()).isEqualTo(TournamentPhaseStatesE.READY);

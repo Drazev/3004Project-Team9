@@ -355,6 +355,18 @@ export function playCard(name, playerID, cardId, src, dst) {
     }
 }
 
+export function activateCard(name, playerId, cardId) {
+    console.log("Activate Card: \nName: " + name + "\nCardID: " + cardId + "\nPlayerID: " + playerId);
+    client.publish({
+        destination: "/app/general/player-activate-card",
+        body: JSON.stringify({
+            name: name,
+            playerID: playerId,
+            cardId: cardId,
+        }),
+    });
+}
+
 export function sponsorRespond(name, sponsorDecision) {
     /**
      * Respond to a sponsor search request from the server

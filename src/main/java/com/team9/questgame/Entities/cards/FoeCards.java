@@ -87,6 +87,14 @@ public class FoeCards extends AdventureCards implements BoostableCard, BattlePoi
     }
 
     @Override
+    protected void registerWithHand(Hand hand) {
+        if (activeEffect != null) {
+            hand.registerCardWithEffect(this);
+        }
+
+    }
+
+    @Override
     public FoeCards getCard() {
         return this;
     }
