@@ -1,6 +1,7 @@
 package com.team9.questgame.gamemanager.service;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.game_phases.GeneralGameController;
+import com.team9.questgame.game_phases.tournament.TournamentPhaseController;
 import com.team9.questgame.gamemanager.record.socket.PlayerPlayCardInbound;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -9,6 +10,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +22,11 @@ public class InboundService implements ApplicationContextAware {
 
     @Autowired
     private SessionService sessionService;
+
+    @Autowired
+    private OutboundService outboundService;
+
+    private TournamentPhaseController tournamentController;
 
     @Autowired
     private GeneralGameController gameController;
@@ -94,7 +101,37 @@ public class InboundService implements ApplicationContextAware {
         context = applicationContext;
     }
 
+    public synchronized void tournamentJoinResponse(String name, boolean joined){
+        Players player = sessionService.getPlayerMap().get(name);
+        if (tournamentController == null) {
+            throw new RuntimeException("tournament controller has not been registered");
+        }
+        tournamentController.checkJoinResult(player, joined);
+    }
+
+    public synchronized void tournamentCompetitorSetup(String name){;
+        Players player = sessionService.getPlayerMap().get(name);
+        if (tournamentController == null) {
+            throw new RuntimeException("tournament controller has not been registered");
+        }
+        tournamentController.checkParticipantSetup(player);
+    }
+
     public void setPhaseEnded(){gameController.requestPhaseEnd();}
+
+    public void registerTournamentPhaseController(TournamentPhaseController c) {
+        if (tournamentController != null){
+            throw new RuntimeException("Tournament phase controller is already registered and not NULL");
+        }
+        if (c == null) {
+            throw new RuntimeException("Regestering controller is null");
+        }
+        this.tournamentController = c;
+    }
+
+    public void unregisterTournamentPhaseController() {
+        this.tournamentController = null;
+    }
 
     public static InboundService getService() {
         return context.getBean(InboundService.class);

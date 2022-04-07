@@ -2,9 +2,10 @@ import PlayerHand from "../components/player/PlayerHand";
 import QuestDisplay from "./quest/QuestDisplay";
 import CardImages from "../assets/images/index";
 import Popup from "../components/popups/Popup";
-import { drawCard, setupComplete, participantSetupComplete } from "../services/clientSocket";
+import { drawCard, setupComplete, participantSetupComplete, tournamentSetupComplete } from "../services/clientSocket";
 import { useName, usePlayerHands, useTurn, useSponsorRequest, useIsSponsoring, useSetIsSponsoring, useJoinRequest, useFoeStageStart, useTestStageStart, usePlayers, useActivePlayers, useHandOversize } from "../stores/generalStore";
 import { usePlayerPlayAreas, useStageAreas } from "../stores/playAreaStore";
+import { useTournamentJoinRequest, useSetTournamentJoinRequest, useTournamentStageStart, useTournamentSetup, useSetTournamentSetup } from "../stores/tournamentStore";
 import { useSponsorSearchRequest, useSetSponsorSearchRequest, useQuestJoinRequest, useSetQuestJoinRequest, useParticipantSetupRequest, useSetParticipantSetupRequest, useBidRequestSetup, useSetBidRequestSetup } from "../stores/quest/questRequestStore";
 import { useCardTargetSelectionRequest, useSetCardTargetSelectionRequest, useStageTargetSelectionRequest, useSetStageTargetSelectionRequest } from "../stores/effects/effectRequestStore";
 import { Button } from "react-bootstrap";
@@ -14,7 +15,11 @@ import "./GameBoard.css";
 function GameBoard({}) {
     const handOversize = useHandOversize()
     const activePlayers = useActivePlayers();
+    const setTournamentSetup = useSetTournamentSetup();
     const name = useName();
+    const tournamentSetup = useTournamentSetup();
+    const tournamentState = useTournamentStageStart();
+    const [tournamentJoinRequest, setTournamentJoinRequest] = [useTournamentJoinRequest(),useSetTournamentJoinRequest()];
     const hands = usePlayerHands();
     const active = usePlayerPlayAreas();
     const stageAreas = useStageAreas();
@@ -35,6 +40,7 @@ function GameBoard({}) {
             setIsActive(true);
         }
     }
+
     let myHandArr = [false, false, false, false];
     let myPlayerID = -1;
     for (let i = 0; i < hands.length; i++) {
@@ -108,6 +114,21 @@ function GameBoard({}) {
             {questJoinRequest &&
                 <div id="join-popup">
                     <Popup popupType="JOINQUEST" setPopup={setQuestJoinRequest}></Popup>
+                </div>
+            }
+            {tournamentJoinRequest &&
+                <div id="join-popup">
+                    <Popup popupType="JOINTOURNAMENT" setPopup={setTournamentJoinRequest}></Popup>
+                </div>
+            }
+            {tournamentSetup &&
+                <div>
+                    <Button
+                        onClick={() => {
+                            tournamentSetupComplete(name,myPlayerID)
+                            setTournamentSetup(false)
+                        }}
+                    >Finish Tournament Setup</Button>
                 </div>
             }
             {isSponsoring &&

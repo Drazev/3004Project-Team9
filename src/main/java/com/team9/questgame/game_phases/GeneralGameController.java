@@ -79,7 +79,7 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
         allowedStoryCardTypes = new HashSet<>();
         allowedStoryCardTypes.add(CardTypes.QUEST);
         allowedStoryCardTypes.add(CardTypes.EVENT);
-//        allowedStoryCardTypes.add(CardTypes.TOURNAMENT); //TODO: Enable once tournaments are live
+        allowedStoryCardTypes.add(CardTypes.TOURNAMENT);
     }
 
     /**

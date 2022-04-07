@@ -2,6 +2,7 @@ import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import * as notificationDispatcher from "../utilities/notificationDispatcher";
 import * as questDispatcher from "../utilities/questDispatcher";
+import * as tournamentDispatcher from "../utilities/tournamentDispatcher"
 import * as effectDispatcher from "../utilities/effectDispatcher";
 import { generalStore } from "../stores/generalStore";
 import { playAreaStore } from "../stores/playAreaStore";
@@ -206,6 +207,45 @@ export async function connect() {
             playAreaStore().updateStageArea(body);
         });
 
+        client.subscribe("/topic/tournament/start", (message) => {
+            /**
+             * Notify all players that the tournament phase has started
+             * body should be empty
+             */
+            console.log("Tournament phase has begun")
+            tournamentDispatcher.dispatchTournamentStart(JSON.parse(message.body));
+            notificationDispatcher.dispatchInfoNotification({
+                title: "Tournament Stage Start",
+                message: "Tournament has started."
+            })
+        });
+
+        client.subscribe("/topic/tournament/setup", (message) => {
+            /**
+             * Notify all players that the tournament setup phase has begun
+             * body should be empty
+             */
+            console.log("Tournament setup phase")
+            tournamentDispatcher.dispatchTournamentSetup(JSON.parse(message.body));
+            notificationDispatcher.dispatchInfoNotification({
+                title: "Tournament setup phase",
+                message: "Tournament setup phase has begun"
+            })
+        });
+
+        client.subscribe("/topic/tournament/end", (message) => {
+            /**
+             * Notify all players that the tournament has ended
+             * { "remainingPlayers": [{"playerID": string, "name": string}] }
+             */
+            console.log("Tournament phase has concluded")
+            tournamentDispatcher.dispatchTournamentEnd(JSON.parse(message.body));
+            notificationDispatcher.dispatchInfoNotification({
+                title: "Tournament ended",
+                message: "The tournament has ended."
+            })
+        });
+
 
         client.subscribe("/topic/quest/sponsor-search", (message) => {
             questDispatcher.dispatchSponsorSearchRequest(JSON.parse(message.body));
@@ -354,6 +394,35 @@ export function joinRespond(name, joinDecision) {
         body: JSON.stringify({
             name: name,
             joined: joinDecision
+        })
+    });
+}
+
+export function joinTournamentResponse(name,playerID,joinDecision) {
+    /**
+     * Respond to a tournament stage join request from the server
+     */
+    console.log(`Player name=${name} decides to ${joinDecision ? 'join' : 'not join'} the the tournament stage`);
+    client.publish({
+        destination: "/app/tournament/join-response",
+        body: JSON.stringify({
+            name: name,
+            playerID: playerID,
+            joined: joinDecision
+        })
+    });
+}
+
+export function tournamentSetupComplete(name,playerID) {
+    /**
+     * Tell the server that the player is done setting up for tournament
+     */
+     console.log(`name=${name} playerID=${playerID} has finished setting up`);
+    client.publish({
+        destination: "/app/tournament/setup-complete",
+        body: JSON.stringify({
+            name: name,
+            playerID: playerID
         })
     });
 }

@@ -261,7 +261,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
             }
             minBattlePoint = stage.getBattlePoints();
         }
-
+        int numTests = 0;
         // Check if each stage contain exactly 1 foe and unique weapons
         for (StagePlayAreas stage: newStages) {
             ArrayList<FoeCards> foeCards = new ArrayList<>();
@@ -283,6 +283,8 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
                 return false;
             }else if(foeCards.size() > 0 && testCards.size() > 0){
                 return false;
+            }else if(testCards.size() == 1){
+                numTests++;
             }else {
                 // All weapon cards must be unique
                 for (WeaponCards thisCard: weaponCards) {
@@ -293,6 +295,9 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
                     }
                 }
             }
+        }
+        if(numTests > 1){
+            return false;
         }
         return true;
     }
@@ -388,7 +393,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         if(totBid <= maxBid) {
             questingPlayers.remove(player);
             NotificationOutboundService.getService().sendBadNotification(
-                    sponsor,
+                    player,
                     new NotificationOutbound("Test Stage Defeat","Your bid was deemed unworthy. Alas, you cannot continue your journey and must head home.","",null),
                     null
             );
@@ -706,7 +711,6 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
             }
             case IN_STAGE -> resolveStage(curStageIndex);
             case IN_TEST -> {
-                //TODO: Broadcast Test start... maybe just go into participant setup
                 testSetup();
             }
             case DRAW_CARD -> dealAdventureCard();
