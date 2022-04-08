@@ -357,7 +357,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
             playerTurnService.nextPlayer();
         }
         QuestPhaseOutboundService.getService().broadcastTestStageStart(new RemainingQuestorsOutbound(generateQuestorData(), curStageIndex));
-        maxBid = stages.get(curStageIndex).getBids() > 0 ? stages.get(curStageIndex).getBids()-1 : 0; //The first player can bid the min bid value. Pretend we already have a bid of minBids-1 or zero if there is no min bid.
+        maxBid = stages.get(curStageIndex).getBids() > 0 ? stages.get(curStageIndex).getBids()-1 : 2; //The first player can bid the min bid value. Pretend we already have a bid of minBids-1 or zero if there is no min bid.
         maxBidPlayer=null;
         QuestPhaseOutboundService.getService().broadcastRequestBid(new RequestBidOutbound(playerTurnService.getPlayerTurn().generatePlayerData(), maxBid, null));
         StagePlayAreas currStage = stages.get(curStageIndex);
@@ -432,7 +432,6 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         if(questingPlayers.size() <= 1){
             QuestPhaseOutboundService.getService().broadcastStageResult(new RemainingQuestorsOutbound(generateQuestorData(), curStageIndex));
             //TODO:make maxBidPlayer discard maxBid-maxBidPlayer.getPlayerPlayArea().getBattlePoints() cards
-            curStageIndex++;
             NotificationOutboundService.getService().sendInfoNotification(
                     sponsor,
                     new NotificationOutbound("Test Stage Bidding Closed","A winner has been chosen! They must now honor their bids by discarding the necessary cards!","",null),
@@ -450,6 +449,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
             else {
                 testResolved();
             }
+            curStageIndex++;
         }
         else{
             do{
