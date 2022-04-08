@@ -100,7 +100,7 @@ const Popup = props => {
                 {props.popupType === "BIDREQUEST" &&
                     <div>
                         <h6>Place your bid!</h6>
-                        <p>Minimum Next Bid: {maxBid}</p>
+                        <p>Minimum Next Bid: {maxBid+1}</p>
                         <NumericInput
                             className="form-control"
                             id="test"

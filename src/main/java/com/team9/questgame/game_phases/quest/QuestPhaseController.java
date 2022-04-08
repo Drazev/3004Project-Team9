@@ -432,6 +432,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         if(questingPlayers.size() <= 1){
             QuestPhaseOutboundService.getService().broadcastStageResult(new RemainingQuestorsOutbound(generateQuestorData(), curStageIndex));
             //TODO:make maxBidPlayer discard maxBid-maxBidPlayer.getPlayerPlayArea().getBattlePoints() cards
+            curStageIndex++;
             NotificationOutboundService.getService().sendInfoNotification(
                     sponsor,
                     new NotificationOutbound("Test Stage Bidding Closed","A winner has been chosen! They must now honor their bids by discarding the necessary cards!","",null),
@@ -442,14 +443,13 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
                 p.getPlayArea().setQuestTestMode(false);
             }
             if(maxBidPlayer!=null && (maxBid-maxBidPlayer.getPlayArea().getBids())>0) {
-                Effects testEnd = new TestEndEffect(maxBidPlayer, maxBid);
-                testEnd.setSource((CardWithEffect) stages.get(curStageIndex).getStageCard());
-                testEnd.activate(stages.get(curStageIndex), maxBidPlayer);
+                Effects testEnd = new TestEndEffect(maxBidPlayer, maxBid-maxBidPlayer.getPlayArea().getBids());
+                testEnd.setSource((CardWithEffect) stages.get(curStageIndex-1).getStageCard());
+                testEnd.activate(stages.get(curStageIndex-1), maxBidPlayer);
             }
             else {
                 testResolved();
             }
-            curStageIndex++;
         }
         else{
             do{
