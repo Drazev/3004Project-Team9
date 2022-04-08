@@ -231,6 +231,10 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
         stateMachine.update();
     }
 
+    public void trigger() {
+        stateMachine.update();
+    }
+
     @Override
     public boolean receiveCard(StoryCards card) {
         if (stateMachine.getCurrentState() != GeneralStateE.DRAW_STORY_CARD) {

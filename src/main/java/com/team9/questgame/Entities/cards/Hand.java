@@ -271,7 +271,7 @@ public class Hand implements CardArea<AdventureCards>, EffectObserver<AdventureC
     public void onEffectResolved(CardWithEffect resolvedCard) {
         if(hand.contains((AdventureCards) resolvedCard)) {
             AdventureCards card = (AdventureCards) resolvedCard;
-            card.discardCard();
+            discardCard(card);
             activatableCards.remove(card);
         }
         else {
