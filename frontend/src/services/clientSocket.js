@@ -467,7 +467,6 @@ export async function setupComplete(name, playerID, setIsSponsoring) {
     console.log(`Player name=${body.name} has finished setting up: ${body.confirmed}`);
     if (body.confirmed === true) {
         console.log("Sponsor request accepted")
-        setIsSponsoring(false);
     }
 }
 

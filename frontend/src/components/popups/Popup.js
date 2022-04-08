@@ -37,7 +37,6 @@ const Popup = props => {
             setJoinRequest(false);
         } else if (props.popupType === "SPONSORQUEST") {
             sponsorRespond(name, true);
-            setIsSponsoring(true);
         } else if (props.popupType === "JOINTOURNAMENT") {
             joinTournamentResponse(name, playerID, true);
         }

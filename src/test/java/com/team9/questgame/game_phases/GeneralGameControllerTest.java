@@ -185,7 +185,7 @@ class GeneralGameControllerTest {
      */
     @Test
     void oneWinnerFromQuest() {
-        final int NUM_SHIELD_TO_VICTORY = 5 + 7 + 10; // 5 to get to Knight, 7 to get to ChampionKnight, 10 to get to Knight Of the Round Table
+        final int NUM_SHIELD_TO_VICTORY = 5; // 5 to get to Knight, 7 to get to ChampionKnight, 10 to get to Knight Of the Round Table
 
         HashMap<Players, Integer> playerScores = new HashMap<>();
         for (Players player : players) {
@@ -219,7 +219,7 @@ class GeneralGameControllerTest {
      */
     @Test
     void multipleWinnerFromQuest() {
-        final int NUM_SHIELD_TO_VICTORY = 5 + 7 + 10; // 5 to get to Knight, 7 to get to ChampionKnight, 10 to get to Knight Of the Round Table
+        final int NUM_SHIELD_TO_VICTORY = 5; // 5 to get to Knight, 7 to get to ChampionKnight, 10 to get to Knight Of the Round Table
 
         HashMap<Players, Integer> playerScores = new HashMap<>();
         for (Players player : players) {
