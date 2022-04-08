@@ -37,8 +37,8 @@ public class AmourCards extends AdventureCards implements BattlePointContributor
                 cardName,
                 subType,
                 imgSrc,
-                0,
-                0,
+                bids,
+                bonusBp,
                 activeAbilityDescription,
                 false
         );
