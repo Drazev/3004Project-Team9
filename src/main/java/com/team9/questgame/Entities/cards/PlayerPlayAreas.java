@@ -234,6 +234,8 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards>, EffectObserve
             }
         }
         if(rc) {
+            updateBattlePoints();
+            updateBids();
             notifyPlayAreaChanged();
         }
         return rc;
