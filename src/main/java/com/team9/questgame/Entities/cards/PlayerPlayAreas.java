@@ -110,7 +110,10 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards>, EffectObserve
         isSponsorMode=false;
         isPlayersTurn=isTurn;
         if(!isPlayersTurn) {
-            faceDownCards.clear();
+            if(!faceDownCards.isEmpty()) {
+                faceDownCards.clear();
+                notifyPlayAreaChanged();
+            }
         }
     }
 
