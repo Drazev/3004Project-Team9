@@ -14,7 +14,7 @@ function PlayerHand(props){
     const player = useGetPlayer(props.playerID);
     const playerPlayArea = useGetPlayerPlayArea(props.playerID);
     const sponsorName = useSponsorName();
-    const [newTop, setNewTop] = useState(70);
+    const [newTop, setNewTop] = useState(140);
 
     useEffect(() => {
         if(props.activeCards.length > 0){

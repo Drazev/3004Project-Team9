@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class StagePlayAreas implements PlayAreas<AdventureCards>, EffectObserver<AdventureCards> {
 
@@ -32,7 +33,7 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>, EffectObserver
     @JsonIgnore
     private Logger LOG;
     @Getter
-    private HashMap<AllCardCodes, AdventureCards> allCards;
+    private ConcurrentHashMap<AllCardCodes, AdventureCards> allCards;
     private QuestCards questCard;
 
     private QuestPhaseController phaseController;
@@ -62,7 +63,7 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>, EffectObserver
         this.stageNum = stageNum;
         this.stageCard = null;
         this.phaseController = phaseController;
-        allCards = new HashMap<>();
+        allCards = new ConcurrentHashMap<>();
         battlePoints = 0;
         bids = 0;
         cardBoostDependencies = new HashMap<>();
@@ -160,6 +161,21 @@ public class StagePlayAreas implements PlayAreas<AdventureCards>, EffectObserver
         }
         return rc;
 
+    }
+
+    public boolean returnAllToHand(){
+        boolean rc = true;
+        for(AdventureCards card : allCards.values()){
+            rc = returnToHand(card.getCardID());
+        }
+        bids=0;
+        battlePoints=0;
+        stageCard=null;
+        targetPlayArea=null;
+        hasFoe=false;
+        hasTest = false;
+        updateBattlePoints();
+        return rc;
     }
 
     /**

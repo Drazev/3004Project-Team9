@@ -3,6 +3,8 @@ package com.team9.questgame.Entities.Effects.CardEffects;
 import com.team9.questgame.Entities.Effects.Effects;
 import com.team9.questgame.Entities.Effects.TargetSelectionRequestTypes;
 import com.team9.questgame.Entities.Effects.TargetSelector;
+import com.team9.questgame.exception.CardAreaException;
+import com.team9.questgame.exception.IllegalEffectStateException;
 
 import java.util.ArrayList;
 
@@ -19,6 +21,12 @@ public class MordredEffect extends Effects {
 
     @Override
     protected void onEffectResolution() {
+    }
 
+    @Override
+    protected void onResolved() {
+        // Discard the card before resolving the effect
+        this.activatedBy.actionDiscardCard(this.source.getCardID());
+        super.onResolved();
     }
 }

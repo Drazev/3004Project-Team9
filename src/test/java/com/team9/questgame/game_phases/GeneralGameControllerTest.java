@@ -93,7 +93,6 @@ class GeneralGameControllerTest {
     @Test
     void playerPlayCard() {
         assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.DRAW_STORY_CARD);
-        assertThrows(IllegalGameStateException.class, () -> gameController.playerPlayCard(null, 0)); // input param doesn't matter
 
         // Start a phase and attempt to play a card
         // TODO: Test other Game Phases other than Quest when they are implemented

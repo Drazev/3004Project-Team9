@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseStatesE> {
@@ -213,6 +214,11 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
         // TODO: pass in an array of new StagesPlayArea to the validateStageSetup function
         if (!validateStageSetup(stages)) {
             LOG.info("Stage Validation failed");
+            for (StagePlayAreas stage : stages) {
+                if (!stage.returnAllToHand()) {
+                    throw new RuntimeException("Failed to return cards to sponsor hand");
+                }
+            }
             NotificationOutboundService.getService().sendWarningNotification(
                     sponsor,
                     new NotificationOutbound(
@@ -268,7 +274,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
             ArrayList<WeaponCards> weaponCards = new ArrayList<>();
             ArrayList<TestCards> testCards = new ArrayList<>();
 
-            HashMap<AllCardCodes, AdventureCards> allCards = stage.getAllCards();
+            ConcurrentHashMap<AllCardCodes, AdventureCards> allCards = stage.getAllCards();
             for (AdventureCards card: allCards.values()) {
                 if (card.getSubType() == CardTypes.FOE) {
                     foeCards.add((FoeCards) card);
@@ -332,20 +338,6 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
 
         checkForTest();
         stateMachine.update();
-//        switch (stateMachine.getCurrentState()) {
-//            case QUEST_JOIN -> {
-//                // Do nothing since the broadcast already sent to all players
-//            } case IN_TEST -> {
-//                testSetup();
-//            } case PARTICIPANT_SETUP -> {
-//                participantSetup();
-//                //resolveStage(0);
-//            } case ENDED -> {
-//                endPhase();
-//            } default -> {
-//                throw new IllegalQuestPhaseStateException("Unknown state");
-//            }
-//        }
     }
 
     private void testSetup(){
@@ -477,8 +469,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
     }
 
     private void participantSetup(){
-//        dealAdventureCard();
-        //TODO: for all players allow them to play cards via player.getPlayerArea().onPhaseNextPlayerTurn(player)
+        // dealAdventureCard();
         LOG.info(String.format("STARTING A NEW STAGE: STAGE %d", curStageIndex+1));
         for(Players player : playerTurnService.getPlayers()){
             player.getPlayArea().setPlayerTurn(questingPlayers.contains(player));
@@ -514,7 +505,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
             player.getPlayArea().setPlayerTurn(false);
             if(player.getPlayArea().getBattlePoints()+1 < stages.get(stageNum).getBattlePoints()){
                 NotificationOutboundService.getService().sendBadNotification(
-                        sponsor,
+                        player,
                         new NotificationOutbound("Quest Stage Defeat","You have failed this stage of the quest. Alas, you cannot continue your journey and must head home.","",null),
                         null
                 );
@@ -659,12 +650,12 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
      */
     public boolean makeStageVisibleToPlayer(long stageID, Players player, long cardIDUsed) {
         if(cardIDUsedToRevealStage.contains(cardIDUsed)) {
-            LOG.warn(String.format("PlayerID %d attempted to make stage %d visible, but cardID %d has already been used! Rejected request."),player.getPlayerId(),stageID,cardIDUsed);
+            LOG.warn(String.format("PlayerID %d attempted to make stage %d visible, but cardID %d has already been used! Rejected request.",player.getPlayerId(),stageID,cardIDUsed));
             return false;
         }
 
         for(StagePlayAreas s : stages) {
-            if(s.getStageID()==stageID) {
+            if(s.getStageNum()==stageID) {
                 cardIDUsedToRevealStage.add(cardIDUsed);
                 HashSet<Players> playerVisibilityList = stageVisibleToPlayersList.get(s);
                 if(playerVisibilityList == null) {
@@ -677,7 +668,7 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
                 return true;
             }
         }
-        LOG.warn(String.format("PlayerID %d attempted to make stage %d visible, but stage was not found. Rejected request!"),player.getPlayerId(),stageID);
+        LOG.warn(String.format("PlayerID %d attempted to make stage %d visible, but stage was not found. Rejected request!", player.getPlayerId(), stageID));
         return false;
     }
 

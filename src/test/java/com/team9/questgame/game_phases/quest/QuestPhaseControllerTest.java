@@ -148,10 +148,6 @@ class QuestPhaseControllerTest {
         // Cannot call stageSetupComplete when not in SETUP stage
         assertThrows(IllegalQuestPhaseStateException.class, () -> controller.questSetupComplete(players.get(0)));
 
-        // Can call when in SETUP stage
-//        ArrayList<QuestCards> questCards = getQuestCards();
-//        controller.receiveCard(questCards.get(0));
-//        controller.startPhase(turnService);
         controller.checkSponsorResult(turnService.getPlayerTurn(), true);
         assertThat(controller.getStateMachine().getCurrentState()).isEqualTo(QuestPhaseStatesE.QUEST_SETUP);
 
