@@ -50,6 +50,7 @@ class HandTest {
 
     Logger LOG;
 
+    @Autowired
     ObjectMapper objMap;
 
     @BeforeEach
@@ -58,7 +59,7 @@ class HandTest {
         hands = new ArrayList<>();
         pPlayAreas = new ArrayList<>();
         LOG = LoggerFactory.getLogger(PlayerPlayAreasTest.class);
-        objMap = ApplicationContextHolder.getContext().getBean(ObjectMapper.class);
+//        objMap = ApplicationContextHolder.getContext().getBean(ObjectMapper.class);
         aDeck = game.getADeck();
         sDeck = game.getSDeck();
         testStage = new TestPlayArea();
