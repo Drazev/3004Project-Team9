@@ -1,5 +1,6 @@
 package com.team9.questgame.game_phases;
 
+import com.team9.questgame.Data.PlayerData;
 import com.team9.questgame.Entities.PlayerRanks;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.Entities.cards.*;
@@ -12,6 +13,7 @@ import com.team9.questgame.game_phases.quest.QuestPhaseController;
 import com.team9.questgame.game_phases.tournament.TournamentPhaseController;
 import com.team9.questgame.game_phases.utils.PlayerTurnService;
 import com.team9.questgame.gamemanager.record.socket.NotificationOutbound;
+import com.team9.questgame.gamemanager.record.socket.WinnerOutbound;
 import com.team9.questgame.gamemanager.service.InboundService;
 import com.team9.questgame.gamemanager.service.NotificationOutboundService;
 import com.team9.questgame.gamemanager.service.OutboundService;
@@ -24,6 +26,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -38,7 +41,7 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
     @Getter
     private final ArrayList<Players> players;
     @Getter
-    private final ArrayList<Players> winners;
+    private ArrayList<Players> winners;
 
     @Getter
     private final AdventureDecks aDeck;
@@ -68,7 +71,7 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
     private GamePhases currPhase;
 
     public GeneralGameController() {
-        this(PlayerRanks.KNIGHT_OF_ROUND_TABLE);
+        this(PlayerRanks.KNIGHT);
     }
 
     public GeneralGameController(PlayerRanks victoryRank) {
@@ -174,7 +177,6 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
         sDeck.drawCard(this);
 
         // Temporarily here to only start Quest Phase
-        // TODO: Remove this when all phases are implemented
         while (!allowedStoryCardTypes.contains(this.storyCard.getSubType())) {
             this.discardCard(this.storyCard);
             sDeck.drawCard(this);
@@ -387,9 +389,27 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
         } else if (this.winners.size() == 1) {
             // There's no need to start the winner tournament
         } else {
-            // TODO: Start the winner tournament
+            // Start the winner tournament
+            PlayerTurnService gamePhaseTurnService = new PlayerTurnService(players);
+            gamePhaseTurnService.setPlayerTurn(playerTurnService.getPlayerTurn());
+            currPhase = new TournamentPhaseController(this, this.winners);
+            currPhase.startPhase(gamePhaseTurnService);
+
+            NotificationOutbound notification = new NotificationOutbound(
+                    "Starting the endgame tournament",
+                    String.format("%d players have reached an impasse, a tournament will commence to determine the final victor", winners.size()),
+                    null,
+                    null);
+            NotificationOutboundService.getService().sendInfoNotification( winners.get(0), notification, notification );
+            stateMachine.update();
         }
 
+        stateMachine.update();
+    }
+
+    public void requestWinnerTournamentEnd(ArrayList<Players> tournamentWinners) {
+        this.isEndGameTournamentPlayed = true;
+        this.winners = tournamentWinners;
         stateMachine.update();
     }
 
@@ -404,42 +424,19 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
             }
         }
 
-        if (this.winners.size() == 1) {
+        for (Players winner : winners) {
             NotificationOutboundService.getService().sendGoodNotification(
-                    this.winners.get(0),
+                    winner,
                     new NotificationOutbound("Game Ended", "Congratulations, you won the game!", null, null),
-                    new NotificationOutbound("Game Ended", String.format("The game has ended. %s won the game!", this.winners.get(0).getName()), null, null)
+                    new NotificationOutbound("Game Ended", String.format("%s won the game!", this.winners.get(0).getName()), null, null)
             );
-        } else {
-            for (Players p : this.winners) {
-                /**
-                 * The resulting strings should look like:
-                 * toWinnerString = "You, Bob won the game"
-                 * toOthersString = "John, Bob won the game"
-                 */
-                String toWinnerString = "";
-                String toOthersString = "";
-                for (Players w : this.winners) {
-                    if (w == p) {
-                        toWinnerString = String.format("You, %s", toWinnerString); // Add the winner to the front
-                    } else {
-                        toWinnerString = String.format("%s, %s", toWinnerString, w.getName()); // Add the other winners to the end
-                    }
-                    toOthersString = String.format("%s, %s", toOthersString, w.getName()); // Add the other winners to the end
-                }
-
-                toWinnerString = toWinnerString.substring(2); // Remove the first comma
-                toOthersString = toOthersString.substring(2); // Remove the first comma
-
-                toWinnerString = String.format("%s won the game", toWinnerString);
-                toOthersString = String.format("%s won the game", toOthersString);
-                NotificationOutboundService.getService().sendGoodNotification(
-                        p,
-                        new NotificationOutbound("Game Ended", toWinnerString, null, null),
-                        new NotificationOutbound("Game Ended", toOthersString, null, null)
-                );
-            }
         }
+
+        ArrayList<PlayerData> winnerDatas = new ArrayList<>();
+        for (Players winner : winners) {
+            winnerDatas.add(winner.generatePlayerData());
+        }
+        OutboundService.getService().broadcastGameEnded(new WinnerOutbound(winnerDatas));
 
         stateMachine.update();
     }
