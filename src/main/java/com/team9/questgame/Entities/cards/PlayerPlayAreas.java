@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.team9.questgame.exception.CardAreaException.CardAreaExceptionReasonCodes.GAMEPHASE_NOT_REGISTERED;
 import static com.team9.questgame.exception.IllegalGamePhaseStateException.GamePhaseExceptionReasonCodes.NULL_ACTIVE_PHASE;
@@ -41,7 +42,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards>, EffectObserve
     private boolean isSponsorMode;
     private boolean isQuestTestMode;
     private HashMap<CardTypes, HashSet<AdventureCards>> cardTypeMap;
-    private HashMap<AllCardCodes,AdventureCards> allCards;
+    private ConcurrentHashMap<AllCardCodes,AdventureCards> allCards;
     @Getter
     private StoryCards questCard;
     private boolean isPlayersTurn;
@@ -60,7 +61,7 @@ public class PlayerPlayAreas implements PlayAreas<AdventureCards>, EffectObserve
         this.playAreaID = nextid++;
         this.player = player;
         cardTypeMap = new HashMap<>();
-        allCards = new HashMap<>();
+        allCards = new ConcurrentHashMap<>();
         questCard=null;
         cardBoostDependencies = new HashMap<>();
         cardsWithActiveEffects = new HashSet<>();
