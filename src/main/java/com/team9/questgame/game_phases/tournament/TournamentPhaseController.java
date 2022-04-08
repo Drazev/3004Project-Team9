@@ -3,9 +3,7 @@ package com.team9.questgame.game_phases.tournament;
 import com.team9.questgame.Data.PlayerData;
 import com.team9.questgame.Entities.Effects.EffectResolverService;
 import com.team9.questgame.Entities.Players;
-import com.team9.questgame.Entities.cards.QuestCards;
-import com.team9.questgame.Entities.cards.StoryCards;
-import com.team9.questgame.Entities.cards.TournamentCards;
+import com.team9.questgame.Entities.cards.*;
 import com.team9.questgame.exception.IllegalGameRequest;
 import com.team9.questgame.exception.IllegalQuestPhaseStateException;
 import com.team9.questgame.game_phases.GamePhases;
@@ -46,6 +44,7 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
     private int participantSetupResponses;
     @Getter
     private boolean isTiebreaker;
+    private boolean isWinnersTieBreaker;
     private int oldCompetitorOffset;
 
     public TournamentPhaseController(GeneralGameController gameController, TournamentCards card) {
@@ -62,6 +61,28 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
         this.state = TournamentPhaseStatesE.READY;
     }
 
+    public TournamentPhaseController(GeneralGameController gameController, ArrayList<Players> tiedCompetitors) {
+        LOG = LoggerFactory.getLogger(EventPhaseController.class);
+        GeneralStateMachine.getService().registerObserver(this);
+        competitors = new HashMap<>();
+        for(Players player : tiedCompetitors){
+            player.getPlayArea().registerGamePhase(this);
+            player.getPlayArea().setPlayerTurn(true);
+            competitors.put(player, player.getRank().getRankBattlePointValue() - player.getPlayArea().getBattlePoints());
+        }
+        winners = new ArrayList<>();
+        this.gameController = gameController;
+
+        CardFactory cf = CardFactory.getInstance();
+        this.card=(TournamentCards) cf.createCard(new AdventureDecks(), StoryDeckCards.TOURNAMENT_AT_YORK);
+        joinAttempts = 0;
+        participantSetupResponses = 0;
+        isTiebreaker = true;
+        oldCompetitorOffset = 0;
+        isWinnersTieBreaker = true;
+        this.state = TournamentPhaseStatesE.JOIN;
+    }
+
 
     @Override
     public TournamentPhaseStatesE getCurrState() {
@@ -71,7 +92,7 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
     @Override
     public void startPhase(PlayerTurnService playerTurnService) {
         InboundService.getService().registerTournamentPhaseController(this);
-        if(this.state != TournamentPhaseStatesE.READY) {
+        if(this.state != TournamentPhaseStatesE.READY && this.state != TournamentPhaseStatesE.JOIN) {
             LOG.error("The Tournament Phase Controller is in state " +
                     state + "when it should be in state READY. Returning");
             return;
@@ -103,7 +124,6 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
             //starting bp must not include already in play allies
             competitors.put(player,
                     player.getRank().getRankBattlePointValue() - player.getPlayArea().getBattlePoints());
-            player.getPlayArea().setPlayerTurn(true);
         }
 
         if(joinAttempts == turnService.getPlayers().size()) {
@@ -165,7 +185,7 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
                     "A player can only complete tournament setup if they agreed to participate", player);
         }
         participantSetupResponses++;
-        player.getPlayArea(). setPlayerTurn(false);
+        player.getPlayArea().setPlayerTurn(false);
         competitors.put(player,
                 competitors.get(player) + player.getPlayArea().getBattlePoints());
         if(participantSetupResponses == competitors.size()) {
@@ -201,6 +221,13 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
      * Distribute rewards to winner(s)
      */
     public void distributeRewards(){
+        if(isWinnersTieBreaker){
+            //TODO: notify game controller of winners
+            gameController.requestWinnerTournamentEnd(winners);
+            this.state = TournamentPhaseStatesE.REWARDS;
+            nextState();
+            return;
+        }
         if(winners.size() > 1 && !isTiebreaker){
             this.state = TournamentPhaseStatesE.TIEBREAKER;
             for(Players player : competitors.keySet()){
@@ -248,11 +275,11 @@ public class TournamentPhaseController implements GamePhases<TournamentCards,Tou
         return winnerData;
     }
     private ArrayList<PlayerData> getPlayerData(){
-        ArrayList<PlayerData> winnerData = new ArrayList<>();
+        ArrayList<PlayerData> playerData = new ArrayList<>();
         for(Players player : competitors.keySet()){
-            winnerData.add(player.generatePlayerData());
+            playerData.add(player.generatePlayerData());
         }
-        return winnerData;
+        return playerData;
     }
 
     public void onGameReset() {

@@ -9,6 +9,7 @@ import { useTournamentJoinRequest, useSetTournamentJoinRequest, useTournamentSta
 import { useSponsorSearchRequest, useSetSponsorSearchRequest, useQuestJoinRequest, useSetQuestJoinRequest, useParticipantSetupRequest, useSetParticipantSetupRequest, useBidRequestSetup, useSetBidRequestSetup } from "../stores/quest/questRequestStore";
 import { useCardTargetSelectionRequest, useSetCardTargetSelectionRequest, useStageTargetSelectionRequest, useSetStageTargetSelectionRequest } from "../stores/effects/effectRequestStore";
 import { Button } from "react-bootstrap";
+import { useGameEndRequest, useGameEndRequestBody, useSetGameEndRequest, useSetGameEndRequestBody } from "../stores/generalRequestStore";
 import React, { useState } from "react";
 import "./GameBoard.css";
 
@@ -32,6 +33,8 @@ function GameBoard({}) {
     const [sponsorSearchRequest, setSponsorSearchRequest] = [useSponsorSearchRequest(), useSetSponsorSearchRequest()];
     const [questJoinRequest, setQuestJoinRequest] = [useQuestJoinRequest(), useSetQuestJoinRequest()];
     const [participantSetupRequest, setParticipantSetupRequest] = [useParticipantSetupRequest(), useSetParticipantSetupRequest()];
+    const [gameEndRequest, setGameEndRequest] = [useGameEndRequest(), useSetGameEndRequest()];
+    const [gameEndRequestBody, setGameEndRequestBody] = [useGameEndRequestBody(), useSetGameEndRequestBody()];
 
     for(var i = 0; i < activePlayers.length; i++){
             const player = activePlayers[i];
@@ -149,6 +152,11 @@ function GameBoard({}) {
                         }}>Participant Setup Complete
                     </Button>
                 </div>)
+            }
+            {gameEndRequest &&
+                <div id="game-end-request">
+                    <Popup popupType="GAMEEND"/>
+                </div>
             }
         </div>
     );

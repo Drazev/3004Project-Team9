@@ -145,12 +145,23 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
             if(this.sponsor != null){
                 throw new SponsorAlreadyExistsException(player);
             } else if(validateSponsor(player)){
+                NotificationOutboundService.getService().sendInfoNotification(
+                        player,
+                        new NotificationOutbound("Sponsor found", "You will be the sponsor of this quest", null, null),
+                        new NotificationOutbound("Sponsor found", String.format("%s will be the sponsor of this quest", player.getName()), null, null)
+                );
                 this.sponsor = player;
+            } else {
+                // This sponsor doesn't have sufficient cards sponsor this quest
+                NotificationOutboundService.getService().sendInfoNotification(
+                    player,
+                    new NotificationOutbound("Cannot Sponsor", "You do not have enough cards to sponsor this quest", null, null),
+                    new NotificationOutbound("Cannot sponsor", String.format("%s does not have enough cards to sponsor this quest", player.getName()), null, null)
+                );
+                playerTurnService.nextPlayer();
             }
 
-        }
-
-        else {
+        } else {
             playerTurnService.nextPlayer();
         }
 
@@ -637,6 +648,11 @@ public class QuestPhaseController implements GamePhases<QuestCards,QuestPhaseSta
      * @return
      */
     private boolean validateSponsor(Players player){
+        // This sponsor must have enough foe cards to sponsor the quest
+        Optional<Integer> numFoeCards = player.getHand().getNumberOfEachCardCodeBySubType().get(CardTypes.FOE).values().stream().reduce((a, b) -> a + b);
+        if(!numFoeCards.isPresent() || numFoeCards.get() < questCard.getStages()){
+            return false;
+        }
         return true;
     }
 

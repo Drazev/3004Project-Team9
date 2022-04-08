@@ -5,6 +5,7 @@ import * as questDispatcher from "../utilities/questDispatcher";
 import * as tournamentDispatcher from "../utilities/tournamentDispatcher"
 import * as effectDispatcher from "../utilities/effectDispatcher";
 import { generalStore } from "../stores/generalStore";
+import { generalRequestStore } from "../stores/generalRequestStore";
 import { playAreaStore } from "../stores/playAreaStore";
 import { playerStore } from "../stores/playerStore";
 
@@ -282,6 +283,12 @@ export async function connect() {
         client.subscribe("/user/topic/notification/debug", (message) => {
             notificationDispatcher.dispatchDebugNotification(JSON.parse(message.body))
         });
+
+        client.subscribe("/topic/general/game-ended", (message) => {
+            generalRequestStore().setGameEndRequest(true);
+            generalRequestStore().setGameEndRequestBody(JSON.parse(message.body));
+        });
+
     };
 
     client.onDisconnect = () => {
@@ -460,7 +467,6 @@ export async function setupComplete(name, playerID, setIsSponsoring) {
     console.log(`Player name=${body.name} has finished setting up: ${body.confirmed}`);
     if (body.confirmed === true) {
         console.log("Sponsor request accepted")
-        setIsSponsoring(false);
     }
 }
 

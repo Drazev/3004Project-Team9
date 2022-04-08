@@ -1,5 +1,6 @@
 package com.team9.questgame.game_phases;
 
+import com.team9.questgame.Data.PlayerData;
 import com.team9.questgame.Entities.PlayerRanks;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.Entities.cards.*;
@@ -11,6 +12,10 @@ import com.team9.questgame.game_phases.event.EventPhaseController;
 import com.team9.questgame.game_phases.quest.QuestPhaseController;
 import com.team9.questgame.game_phases.tournament.TournamentPhaseController;
 import com.team9.questgame.game_phases.utils.PlayerTurnService;
+import com.team9.questgame.gamemanager.record.socket.NotificationOutbound;
+import com.team9.questgame.gamemanager.record.socket.WinnerOutbound;
+import com.team9.questgame.gamemanager.service.InboundService;
+import com.team9.questgame.gamemanager.service.NotificationOutboundService;
 import com.team9.questgame.gamemanager.service.OutboundService;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -21,10 +26,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 
 @Service
 public class GeneralGameController implements CardArea<StoryCards>, ApplicationContextAware {
@@ -36,7 +40,9 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
     private final Logger LOG;
     @Getter
     private final ArrayList<Players> players;
-    private final ArrayList<Players> winners;
+    @Getter
+    private ArrayList<Players> winners;
+
     @Getter
     private final AdventureDecks aDeck;
     @Getter
@@ -44,8 +50,6 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
 
     @Getter
     private HashSet<CardTypes> allowedStoryCardTypes;
-//    private Players activePlayer;
-//    private Iterator<Players> turnSequence;
 
     @Getter
     private StoryCards storyCard;
@@ -61,10 +65,13 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
     private PlayerTurnService playerTurnService;
 
     @Getter
+    private boolean isEndGameTournamentPlayed;
+
+    @Getter
     private GamePhases currPhase;
 
     public GeneralGameController() {
-        this(PlayerRanks.KNIGHT_OF_ROUND_TABLE);
+        this(PlayerRanks.KNIGHT);
     }
 
     public GeneralGameController(PlayerRanks victoryRank) {
@@ -73,6 +80,7 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
         this.victoryCondtion = victoryRank;
         this.winners = new ArrayList<>();
         this.currPhase=null;
+        this.isEndGameTournamentPlayed=false;
         aDeck = new AdventureDecks();
         sDeck = new StoryDecks();
         this.playerTurnService = new PlayerTurnService(this.players);
@@ -169,7 +177,6 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
         sDeck.drawCard(this);
 
         // Temporarily here to only start Quest Phase
-        // TODO: Remove this when all phases are implemented
         while (!allowedStoryCardTypes.contains(this.storyCard.getSubType())) {
             this.discardCard(this.storyCard);
             sDeck.drawCard(this);
@@ -283,18 +290,12 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
          */
         switch (card.getSubType()) {
             case QUEST:
-//                status = questPhaseController.receiveCard((QuestCards) this.storyCard);
                 currPhase = new QuestPhaseController(this,(QuestCards) card);
-//                currPhase.startPhase(gamePhaseTurnService);
                 break;
             case TOURNAMENT:
-//                status = tournamentPhaseController.receiveCard(this.storyCard);
                 currPhase = new TournamentPhaseController(this,(TournamentCards) card);
-//                tournamentPhaseController.startPhase(gamePhaseTurnService);
                 break;
             case EVENT:
-//                status = this.storyCard.playCard(eventPhaseController);
-//                eventPhaseController.startPhase(gamePhaseTurnService);
                 currPhase = new EventPhaseController(this,(EventCards) card);
                 break;
             default:
@@ -331,6 +332,7 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
         winners.clear();
 
         storyCard = null;
+        this.isEndGameTournamentPlayed = false;
 
         stateMachine.setCurrentState(GeneralStateE.SETUP);
     }
@@ -352,5 +354,110 @@ public class GeneralGameController implements CardArea<StoryCards>, ApplicationC
 
     public GeneralGameController getService() {
         return context.getBean(GeneralGameController.class);
+    }
+
+    /**
+     * Called everytime we go back to DRAW_STORY_CARD state to check if there's a winner
+     */
+    private void checkWinCondition() {
+
+        // Update the winners array to reflect the new winners
+        for (Players p : players) {
+            if (p.getRank() == this.victoryCondtion && !winners.contains(p)) {
+                this.winners.add(p);
+            } else if (p.getRank() == this.victoryCondtion && winners.contains(p)) {
+                this.winners.remove(p);
+            }
+        }
+
+        stateMachine.update();
+    }
+
+    /**
+     * Start the winner tournament if there's more than one winner, otherwise simply update the game state
+     * to move to ENDED
+     */
+    private void startWinnerTournament() {
+        if (stateMachine.getCurrentState() != GeneralStateE.DETERMINING_WINNER) {
+            throw new IllegalGameStateException("Cannot start winner tournament in state " + stateMachine.getCurrentState());
+        } else if (this.isEndGameTournamentPlayed) {
+            throw new IllegalGameStateException("Cannot start winner tournament twice");
+        }
+
+        if (this.winners.size() == 0) {
+            throw new RuntimeException("No winners found");
+        } else if (this.winners.size() == 1) {
+            // There's no need to start the winner tournament
+        } else {
+            // Start the winner tournament
+            PlayerTurnService gamePhaseTurnService = new PlayerTurnService(players);
+            gamePhaseTurnService.setPlayerTurn(playerTurnService.getPlayerTurn());
+            currPhase = new TournamentPhaseController(this, this.winners);
+            currPhase.startPhase(gamePhaseTurnService);
+
+            NotificationOutbound notification = new NotificationOutbound(
+                    "Starting the endgame tournament",
+                    String.format("%d players have reached an impasse, a tournament will commence to determine the final victor", winners.size()),
+                    null,
+                    null);
+            NotificationOutboundService.getService().sendInfoNotification( winners.get(0), notification, notification );
+            stateMachine.update();
+        }
+
+        stateMachine.update();
+    }
+
+    public void requestWinnerTournamentEnd(ArrayList<Players> tournamentWinners) {
+        this.isEndGameTournamentPlayed = true;
+        this.winners = tournamentWinners;
+        stateMachine.update();
+    }
+
+    private void endGame() {
+        if (stateMachine.getCurrentState() != GeneralStateE.ENDED) {
+            throw new IllegalGameStateException("Cannot end game in state " + stateMachine.getCurrentState());
+        } else {
+            if (this.winners.size() == 0) {
+                throw new RuntimeException("Cannot end game with no winners");
+            } else if (this.winners.size() > 1 && !this.isEndGameTournamentPlayed) {
+                throw new RuntimeException("Cannot end game with %d winners without starting the winner tournament");
+            }
+        }
+
+        for (Players winner : winners) {
+            NotificationOutboundService.getService().sendGoodNotification(
+                    winner,
+                    new NotificationOutbound("Game Ended", "Congratulations, you won the game!", null, null),
+                    new NotificationOutbound("Game Ended", String.format("%s won the game!", this.winners.get(0).getName()), null, null)
+            );
+        }
+
+        ArrayList<PlayerData> winnerDatas = new ArrayList<>();
+        for (Players winner : winners) {
+            winnerDatas.add(winner.generatePlayerData());
+        }
+        OutboundService.getService().broadcastGameEnded(new WinnerOutbound(winnerDatas));
+
+        stateMachine.update();
+    }
+
+    /**
+     * Called by the GeneralStateMachine to execute action when state changes
+     */
+    public void executeNextAction() {
+        switch (stateMachine.getCurrentState()) {
+            case DRAW_STORY_CARD:
+                this.checkWinCondition();
+                break;
+            case DETERMINING_WINNER:
+                this.startWinnerTournament();
+                break;
+            case ENDED:
+                this.endGame();
+                break;
+            default:
+                break;
+        }
+
     }
 }

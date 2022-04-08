@@ -1,11 +1,14 @@
 package com.team9.questgame.game_phases;
 
+import com.team9.questgame.Entities.Effects.EffectResolverService;
 import com.team9.questgame.Entities.Players;
 import com.team9.questgame.Entities.cards.*;
 import com.team9.questgame.exception.IllegalGameStateException;
 import com.team9.questgame.exception.PlayerJoinException;
 import com.team9.questgame.exception.PlayerNotFoundException;
+import com.team9.questgame.game_phases.quest.QuestPhaseController;
 import com.team9.questgame.game_phases.quest.QuestPhaseStatesE;
+import com.team9.questgame.game_phases.tournament.TournamentPhaseController;
 import com.team9.questgame.game_phases.utils.PlayerTurnService;
 import com.team9.questgame.gamemanager.service.InboundService;
 import com.team9.questgame.gamemanager.service.SessionService;
@@ -174,6 +177,89 @@ class GeneralGameControllerTest {
         assertThat(gameController.getCurrPhase().getCard()).isNotNull();
         assertThat(gameController.getCurrPhase().getCard().equals(gameController.getStoryCard()));
         assertThat(gameController.getCurrPhase().getCurrState()==QuestPhaseStatesE.QUEST_SPONSOR);
+
+    }
+
+    /**
+     * Test winning the game with 1 winner
+     */
+    @Test
+    void oneWinnerFromQuest() {
+        final int NUM_SHIELD_TO_VICTORY = 5; // 5 to get to Knight, 7 to get to ChampionKnight, 10 to get to Knight Of the Round Table
+
+        HashMap<Players, Integer> playerScores = new HashMap<>();
+        for (Players player : players) {
+            playerScores.put(player, NUM_SHIELD_TO_VICTORY);
+            break;
+        }
+        EffectResolverService.getService().playerAwardedShields(playerScores);
+        for (Players player : players) {
+            assertThat(player.getRank()).isEqualTo(gameController.getVictoryCondtion());
+            break;
+        }
+
+        assertThat(gameController.getWinners().size()).isEqualTo(0);
+
+        // Force start a quest
+        gameController.getAllowedStoryCardTypes().add(CardTypes.QUEST);
+        gameController.drawStoryCard(gameController.getPlayerTurnService().getPlayerTurn());
+
+        // Force end the quest
+        QuestPhaseController questController = (QuestPhaseController)gameController.getCurrPhase();
+        questController.getStateMachine().setCurrentState(QuestPhaseStatesE.ENDED);
+        gameController.getCurrPhase().endPhase();
+
+        assertThat(gameController.getWinners().size()).isEqualTo(1);
+        assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.ENDED);
+    }
+
+
+    /**
+     * Test winning the game with multiple players
+     */
+    @Test
+    void multipleWinnerFromQuest() {
+        final int NUM_SHIELD_TO_VICTORY = 5; // 5 to get to Knight, 7 to get to ChampionKnight, 10 to get to Knight Of the Round Table
+
+        HashMap<Players, Integer> playerScores = new HashMap<>();
+        for (Players player : players) {
+            playerScores.put(player, NUM_SHIELD_TO_VICTORY);
+        }
+        EffectResolverService.getService().playerAwardedShields(playerScores);
+        for (Players player : players) {
+            assertThat(player.getRank()).isEqualTo(gameController.getVictoryCondtion());
+        }
+
+        assertThat(gameController.getWinners().size()).isEqualTo(0);
+
+        // Force start a quest
+        gameController.getAllowedStoryCardTypes().add(CardTypes.QUEST);
+        gameController.drawStoryCard(gameController.getPlayerTurnService().getPlayerTurn());
+
+        // Force end the quest
+        QuestPhaseController questController = (QuestPhaseController)gameController.getCurrPhase();
+        questController.getStateMachine().setCurrentState(QuestPhaseStatesE.ENDED);
+        gameController.getCurrPhase().endPhase();
+
+        assertThat(gameController.getWinners().size()).isEqualTo(4);
+        assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.DETERMINING_WINNER);
+
+//        TournamentPhaseController tournamentController = (TournamentPhaseController)gameController.getCurrPhase();
+        InboundService.getService().tournamentCompetitorSetup(players.get(0).getName());
+        InboundService.getService().tournamentCompetitorSetup(players.get(1).getName());
+        InboundService.getService().tournamentCompetitorSetup(players.get(2).getName());
+        InboundService.getService().tournamentCompetitorSetup(players.get(3).getName());
+
+        assertThat(gameController.getStateMachine().getCurrentState()).isEqualTo(GeneralStateE.ENDED);
+
+
+    }
+
+    /**
+     * Test winning the game right after a phase
+     */
+    @Test
+    void winQuestAfterPhase() {
 
     }
 

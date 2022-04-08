@@ -2,11 +2,10 @@ package com.team9.questgame.gamemanager.service;
 
 import com.team9.questgame.Data.*;
 import com.team9.questgame.Entities.Players;
-import com.team9.questgame.Entities.cards.StoryCards;
 import com.team9.questgame.gamemanager.record.rest.EmptyJsonReponse;
-import com.team9.questgame.gamemanager.record.socket.HandUpdateOutbound;
 import com.team9.questgame.gamemanager.record.socket.PlayerNextTurnOutbound;
 import com.team9.questgame.gamemanager.record.socket.TournamentPlayersOutbound;
+import com.team9.questgame.gamemanager.record.socket.WinnerOutbound;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +13,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.core.annotation.Order;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -39,8 +37,7 @@ public class OutboundService implements ApplicationContextAware {
     }
 
     /**
-     * Broadcast player-draw-connect event
-     */
+     * Broadcast player-draw-connect event */
     public void broadcastPlayerConnect() {
         Map<String, String> players = sessionService.getPlayers();
         this.sendToAllPlayers("/topic/general/player-connect", players);
@@ -129,6 +126,10 @@ public class OutboundService implements ApplicationContextAware {
 
     public void sendTargetSelectionRequest(TargetSelectionRequest request,Players requestPlayer) {
         sendToPlayer("/topic/effects/target-selection-request",requestPlayer,request);
+    }
+
+    public void broadcastGameEnded(WinnerOutbound data) {
+        this.sendToAllPlayers("/topic/general/game-ended", data);
     }
 
     private void sendToAllPlayers(String topic, Object payload) {
