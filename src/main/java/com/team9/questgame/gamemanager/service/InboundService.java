@@ -95,6 +95,13 @@ public class InboundService implements ApplicationContextAware {
         gameController.handlePlayerHandOversize();
     }
 
+    /**
+     * Get called to update the game state
+     */
+    public synchronized void trigger() {
+        gameController.trigger();
+    }
+
     public boolean isGameStarted() {
         return gameStarted;
     }

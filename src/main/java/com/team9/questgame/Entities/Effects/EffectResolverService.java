@@ -316,7 +316,8 @@ public class EffectResolverService implements ApplicationContextAware {
         LOG.info("onQuestCompleted triggered");
         playerAwardedShields(targetedPlayers);
         ArrayList<Players> questVictors = new ArrayList<>(targetedPlayers.keySet());
-        for(Effects e : triggeredEffects) {
+        HashSet<Effects> copyOfTriggeredEffects = new HashSet<>(this.triggeredEffects);
+        for(Effects e : copyOfTriggeredEffects) {
             e.trigger(questVictors);
         }
     }
