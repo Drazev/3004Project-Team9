@@ -51,7 +51,7 @@ public class KingsCallToArms extends Effects {
             }
         }
         for(Map.Entry<Players,String> e : outboundMessages.entrySet()) {
-            NotificationOutbound toAffected = new NotificationOutbound(source.getCardName(),e.getValue(),source.getCard().getImgSrc(),null);
+            NotificationOutbound toAffected = new NotificationOutbound(source.getCardName(),e.getKey().getName(),source.getCard().getImgSrc(),null);
             NotificationOutboundService.getService().sendBadNotification(e.getKey(),toAffected,null);
         }
         EffectResolverService.getService().forcePlayerDiscards(this,discardList);
