@@ -54,7 +54,7 @@ class EffectResolverServiceTest {
     TestPlayArea testStage;
 
     Logger LOG;
-
+    @Autowired
     ObjectMapper objMap;
 
     @BeforeEach
@@ -63,7 +63,7 @@ class EffectResolverServiceTest {
         hands = new ArrayList<>();
         pPlayAreas = new ArrayList<>();
         LOG = LoggerFactory.getLogger(EffectResolverServiceTest.class);
-        objMap = ApplicationContextHolder.getContext().getBean(ObjectMapper.class);
+//        objMap = ApplicationContextHolder.getContext().getBean(ObjectMapper.class);
         aDeck = game.getADeck();
         sDeck = game.getSDeck();
 //        StoryCards sCard = sDeck.drawCard(testStage);

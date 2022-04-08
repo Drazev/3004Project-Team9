@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 
@@ -27,7 +28,7 @@ class PlayersTest {
     Players p1;
 
     Logger LOG;
-
+    @Autowired
     ObjectMapper objMap;
 
     @BeforeEach
@@ -35,7 +36,7 @@ class PlayersTest {
         p1 = new Players("Player 1");
         LOG = LoggerFactory.getLogger(PlayersTest.class);
         deck = new AdventureDecks();
-        objMap = ApplicationContextHolder.getContext().getBean(ObjectMapper.class);
+//        objMap = ApplicationContextHolder.getContext().getBean(ObjectMapper.class);
         objMap.setVisibility(objMap.getSerializationConfig().getDefaultVisibilityChecker()
                 .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
                 .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
